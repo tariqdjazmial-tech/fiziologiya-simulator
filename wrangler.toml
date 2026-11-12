@@ -1,0 +1,4 @@
+# Настройки за Cloudflare Pages: готовият сайт е в папка site, сървърните функции са в functions/
+name = "fiziologiya"
+pages_build_output_dir = "site"
+compatibility_date = "2026-11-01"

@@ -1,0 +1,2 @@
+/* публични настройки на сайта (без тайни ключове) */
+window.PHYS_CFG={"supabaseUrl": "https://rcpszdbayyjthrgineon.supabase.co", "supabaseAnon": "sb_publishable_m0UNcJ07T_CiclmfEJ8Epg_E1LGHJV8", "price": "24 €", "email": "tariqaljazmiuni@gmail.com"};
