@@ -1,7 +1,8 @@
 # Cloudflare Workers: статичният сайт е в папка site/, функциите за плащане минават през src/worker.js
-name = "fiziologiya-simulator"
+name = "fiziologiya-simulato"
 main = "src/worker.js"
 compatibility_date = "2026-11-01"
+workers_dev = true
 
 [assets]
 directory = "./site"
