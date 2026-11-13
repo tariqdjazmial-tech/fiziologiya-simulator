@@ -13,6 +13,14 @@ export default {
       if (request.method !== "POST") return json(405, { error: "method" })
       return fn({ request, env, ctx })
     }
+    // проверка на настройките: показва само дали ключовете ги има, никога самите стойности
+    if (url.pathname === "/api/health") {
+      const sk = env.STRIPE_SECRET_KEY || ""
+      return json(200, {
+        STRIPE_SECRET_KEY: sk ? (sk.startsWith("sk_live_") ? "ok (live)" : sk.startsWith("sk_test_") ? "ok (test)" : "wrong type: " + sk.slice(0, 3) + "…") : "missing",
+        PAYMENT_SECRET: env.PAYMENT_SECRET ? "ok" : "missing",
+      })
+    }
     if (url.pathname.startsWith("/api/")) return json(404, { error: "not_found" })
     return env.ASSETS.fetch(request)
   },
