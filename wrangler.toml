@@ -3,6 +3,8 @@ name = "fiziologiya-simulato"
 main = "src/worker.js"
 compatibility_date = "2026-11-01"
 workers_dev = true
+# пазим променливите, въведени в таблото на Cloudflare, при всяко качване
+keep_vars = true
 
 [assets]
 directory = "./site"
