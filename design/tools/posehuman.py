@@ -59,27 +59,54 @@ def visit(b):
     if p: visit(p)
     seen.add(b); order.append(b)
 for b in bones: visit(b)
-GR, GT = {}, {}  # глобално завъртане и преместване: x' = GR x + GT
-for b in order:
-    p = bones[b]["parent"]
-    PR, PT = (GR[p], GT[p]) if p else (np.eye(3), np.zeros(3))
-    Rl = np.eye(3)
-    if b in POSE:
-        kind, a, *r = POSE[b]
-        if kind == "rot": Rl = rot(a, r[0])
-        else:
-            rd = TL[b] - H[b]; Rl = rot_to(rd, PR.T @ np.asarray(a, float))
-            if r: Rl = Rl @ rot(rd, r[0])  # завъртане около собствената ос (пронация/супинация)
-    # M_b = M_p · T(H) · R · T(-H)
-    R = PR @ Rl; T = PR @ (H[b] - Rl @ H[b]) + PT
-    GR[b], GT[b] = R, T
+def transforms(pose):
+    GR, GT = {}, {}  # глобално завъртане и преместване: x' = GR x + GT
+    for b in order:
+        p = bones[b]["parent"]
+        PR, PT = (GR[p], GT[p]) if p else (np.eye(3), np.zeros(3))
+        Rl = np.eye(3)
+        if b in pose:
+            kind, a, *r = pose[b]
+            if kind == "rot": Rl = rot(a, r[0])
+            else:
+                rd = TL[b] - H[b]; Rl = rot_to(rd, PR.T @ np.asarray(a, float))
+                if r: Rl = Rl @ rot(rd, r[0])  # завъртане около собствената ос (пронация/супинация)
+        # M_b = M_p · T(H) · R · T(-H)
+        R = PR @ Rl; T = PR @ (H[b] - Rl @ H[b]) + PT
+        GR[b], GT[b] = R, T
+    return GR, GT
+GR, GT = transforms(POSE)
+wpos = lambda G, T_, b: G[b] @ H[b] + T_[b]
+
+# втора поза: дясната ръка почесва главата (двузвенна инверсна кинематика)
+S_ = wpos(GR, GT, "upperarm01.R"); Lu = np.linalg.norm(TL["upperarm02.R"] - H["upperarm01.R"]); Ll = np.linalg.norm(TL["lowerarm02.R"] - H["lowerarm01.R"])
+HT = GR["head"] @ TL["head"] + GT["head"]; HJ = wpos(GR, GT, "head")
+scratch = HJ + (HT - HJ) * 0.75 + np.array([-0.55, 0.35, -0.15])     # точка отстрани на темето
+Tg = scratch + np.array([-0.55, 0.85, 0.25])                          # китката е над и встрани от главата
+d = np.linalg.norm(Tg - S_); d = min(d, (Lu + Ll) * 0.98); u = (Tg - S_) / np.linalg.norm(Tg - S_); Tg = S_ + u * d
+ca = (Lu * Lu + d * d - Ll * Ll) / (2 * Lu * d); sa = np.sqrt(max(0, 1 - ca * ca))
+pole = np.array([-1.0, -0.2, -0.3]); pp = pole - u * np.dot(pole, u); pp /= np.linalg.norm(pp)
+EL = S_ + Lu * (ca * u + sa * pp)
+POSE2 = dict(POSE)
+POSE2["upperarm01.R"] = ("dir", list(EL - S_)); POSE2["lowerarm01.R"] = ("dir", list(Tg - EL), 90)
+POSE2["wrist.R"] = ("dir", list(scratch - Tg)); POSE2["clavicle.R"] = ("rot", [0, 0, 1], -12)
+GR2, GT2 = transforms(POSE2)
 
 # тегла и деформация (linear blend skinning)
-n = len(V); acc = np.zeros((n, 3)); ws = np.zeros(n); dom = {}; best = np.zeros(n)
+GROUPS = ["root", "head", "clav", "up", "lo", "hand"]
+def group(b):
+    if b.endswith(".R"):
+        if b.startswith(("clavicle", "shoulder01")): return 2
+        if b.startswith("upperarm"): return 3
+        if b.startswith("lowerarm"): return 4
+        if b.startswith(("wrist", "metacarpal", "finger")): return 5
+    if b.startswith(("neck", "head", "jaw", "eye", "levator", "oculi", "orbic", "oris", "risor", "tempor", "special", "tongue")): return 1
+    return 0
+n = len(V); acc = np.zeros((n, 3)); ws = np.zeros(n); dom = {}; best = np.zeros(n); GW = np.zeros((n, 6))
 for b, lst in W.items():
     if b not in GR: continue
     idx = np.array([i for i, _ in lst]); w = np.array([x for _, x in lst])
-    acc[idx] += w[:, None] * (V[idx] @ GR[b].T + GT[b]); ws[idx] += w
+    acc[idx] += w[:, None] * (V[idx] @ GR[b].T + GT[b]); ws[idx] += w; GW[idx, group(b)] += w
     m = w > best[idx]; best[idx[m]] = w[m]
     for i in idx[m]: dom[i] = b
 P = np.where(ws[:, None] > 0, acc / np.maximum(ws, 1e-9)[:, None], V)
@@ -95,13 +122,13 @@ hv, hd = GR["head"] @ (TL["head"] - H["head"]), GR["head"] @ H["head"] + GT["hea
 up = hv / np.linalg.norm(hv); fwd = GR["head"] @ np.array([0, 0, 1.0])
 eyes = (GR["eye.L"] @ H["eye.L"] + GT["eye.L"] + GR["eye.R"] @ H["eye.R"] + GT["eye.R"]) / 2
 side = np.cross(up, fwd); side /= np.linalg.norm(side)
+nb_ = wpos(GR, GT, "neck01"); nup = wpos(GR, GT, "head") - nb_; nup /= np.linalg.norm(nup)
 col = np.zeros((len(used), 3), np.uint8); hair = np.zeros(len(used), bool)
 for k, o in enumerate(used):
     b = dom.get(o, "spine03"); p = Pu[k]
     if b.startswith(("head", "jaw", "eye", "neck", "levator", "oculi", "orbic", "oris", "risor", "tempor", "special", "tongue")):
         rel = p - eyes; h_up = np.dot(rel, up); h_f = np.dot(rel, fwd)
-        if b.startswith("neck") and h_up < -0.9: c = COAT if np.dot(p - hd, fwd) < 0.2 else SKIN
-        else: c = SKIN
+        c = SKIN
         lat = abs(np.dot(rel, side))
         if h_up > 0.32 or (h_f < -0.62 and h_up > -0.45 and lat < 0.62) or (h_f < -0.2 and h_up > 0.05 and lat < 0.78):
             c = HAIR; hair[k] = True
@@ -109,7 +136,11 @@ for k, o in enumerate(used):
     elif b.startswith(("foot", "toe")): c = SHOE
     elif b.startswith(("lowerleg",)): c = PANTS
     elif b.startswith(("upperleg",)): c = COAT if (V[o][1] > -2.2) else PANTS
-    else: c = COAT
+    else:
+        c = COAT
+        # кожата на шията над яката: по оста на шията, близо до нея
+        rel = p - nb_; along = np.dot(rel, nup); lat = np.linalg.norm(rel - along * nup)
+        if along > -0.1 and lat < 0.5: c = SKIN
     col[k] = c
 # фина вариация на цвета (кичури коса, тъкан)
 rng = np.random.default_rng(7)
@@ -152,15 +183,30 @@ def catmull_clark(Pv, Cv, Q):
         nq.append(np.stack([Q[:, i], E[:, i], Fc, E[:, (i - 1) % 4]], 1))
     return NP, NC, np.concatenate(nq)
 
-colf = col.astype(float)
-Pu, colf, quads = catmull_clark(Pu, colf, quads)
-col = np.clip(colf, 0, 255).astype(np.uint8)
+GWu = GW[used] / np.maximum(GW[used].sum(1, keepdims=True), 1e-9); GWu[GW[used].sum(1) == 0, 0] = 1
+both = np.concatenate([col.astype(float), GWu], 1)
+Pu, both, quads = catmull_clark(Pu, both, quads)
+col = np.clip(both[:, :3], 0, 255).astype(np.uint8); GWs = both[:, 3:]
 tris = np.concatenate([quads[:, [0, 1, 2]], quads[:, [0, 2, 3]]]).astype(np.uint32)
 Pu *= 0.1  # дециметри → метри
 mn = Pu.min(0); sz = np.maximum(Pu.max(0) - mn, 1e-6)
 q = np.round((Pu - mn) / sz * 65535).astype(np.uint16)
 buf = struct.pack("<II", len(Pu), len(tris)) + struct.pack("<6f", *mn, *sz) + q.tobytes()
 buf += b"\0" * ((4 - len(buf) % 4) % 4) + tris.tobytes() + col.tobytes()
+# опростен скелет за анимацията: опора на всяка група, родител и завъртане към позата „почесване“
+REP = {"root": "root", "head": "neck01", "clav": "clavicle.R", "up": "upperarm01.R", "lo": "lowerarm01.R", "hand": "wrist.R"}
+PAR = [-1, 0, 0, 2, 3, 4]
+def quat(M):
+    w = np.sqrt(max(0, 1 + M[0, 0] + M[1, 1] + M[2, 2])) / 2; x = np.sqrt(max(0, 1 + M[0, 0] - M[1, 1] - M[2, 2])) / 2
+    y = np.sqrt(max(0, 1 - M[0, 0] + M[1, 1] - M[2, 2])) / 2; z = np.sqrt(max(0, 1 - M[0, 0] - M[1, 1] + M[2, 2])) / 2
+    x = np.copysign(x, M[2, 1] - M[1, 2]); y = np.copysign(y, M[0, 2] - M[2, 0]); z = np.copysign(z, M[1, 0] - M[0, 1]); return [x, y, z, w]
+Dg = [GR2[REP[g]] @ GR[REP[g]].T for g in GROUPS]
+buf += b"SKN1" + struct.pack("<B", len(GROUPS))
+for i, g in enumerate(GROUPS):
+    piv = wpos(GR, GT, REP[g]) * 0.1; loc = (Dg[PAR[i]].T @ Dg[i]) if PAR[i] >= 0 else Dg[i]
+    buf += struct.pack("<b3f4f", PAR[i], *piv, *quat(loc))
+order4 = np.argsort(-GWs, 1)[:, :4]; w4 = np.take_along_axis(GWs, order4, 1); w4 = w4 / np.maximum(w4.sum(1, keepdims=True), 1e-9)
+buf += order4.astype(np.uint8).tobytes() + np.round(w4 * 255).astype(np.uint8).tobytes()
 open(OUT, "w").write(base64.b64encode(buf).decode())
 hip = GR["upperleg01.L"] @ H["upperleg01.L"] + GT["upperleg01.L"]
 ht = GR["head"] @ TL["head"] + GT["head"]

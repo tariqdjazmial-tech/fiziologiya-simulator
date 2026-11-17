@@ -170,6 +170,11 @@ function decodeMesh(b64){const bin=atob(b64.trim()),u8=new Uint8Array(bin.length
   const pos=new Float32Array(nv*3);for(let i=0;i<nv*3;i++)pos[i]=mn[i%3]+q[i]/65535*sz[i%3];
   const T=window.THREE;if(!T)return {pos,idx};const g=new T.BufferGeometry();g.setAttribute("position",new T.BufferAttribute(pos,3));g.setIndex(new T.BufferAttribute(idx,1));
   const co=o+nf*12;if(u8.length>=co+nv*3){const c=new Float32Array(nv*3);for(let i=0;i<nv*3;i++){const v=u8[co+i]/255;c[i]=v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4)}g.setAttribute("color",new T.BufferAttribute(c,3))}
+  /* опростен скелет (тяло, глава, дясна ръка) за анимацията „почесване“ */
+  let k=co+nv*3;if(u8.length>k+5&&String.fromCharCode(u8[k],u8[k+1],u8[k+2],u8[k+3])==="SKN1"){k+=4;const nb=u8[k++],dv2=new DataView(u8.buffer),sk=[];
+    for(let b=0;b<nb;b++){const par=dv2.getInt8(k);k+=1;const f=[];for(let j=0;j<7;j++){f.push(dv2.getFloat32(k,true));k+=4}sk.push({par,piv:f.slice(0,3),q:f.slice(3,7)})}
+    const si=new Uint16Array(nv*4),sw=new Float32Array(nv*4);for(let i=0;i<nv*4;i++)si[i]=u8[k+i];for(let i=0;i<nv*4;i++)sw[i]=u8[k+nv*4+i]/255;
+    g.setAttribute("skinIndex",new T.Uint16BufferAttribute(si,4));g.setAttribute("skinWeight",new T.Float32BufferAttribute(sw,4));g.userData.skel=sk}
   g.computeVertexNormals();return g}
 
 /* ---------- текстури, рисувани в канвас ---------- */
@@ -190,6 +195,7 @@ function build(brainG,neuronG,docG){const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z
   R=new T.WebGLRenderer({canvas:cv,antialias:true,powerPreference:"high-performance"});R.setPixelRatio(Math.min(MOBILE?1.5:1.75,devicePixelRatio||1));
   R.outputEncoding=T.sRGBEncoding;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.0;R.shadowMap.enabled=true;R.shadowMap.type=T.PCFSoftShadowMap;
   const cam=new T.PerspectiveCamera(36,1,.005,60);
+  const sm=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t)};
   /* студийна среда за отражения */
   const envSc=new T.Scene();envSc.add(new T.Mesh(new T.SphereGeometry(20,24,16),new T.MeshBasicMaterial({color:0x2c2e33,side:T.BackSide})));
   const box=(w,h,p,c,i)=>{const m=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({color:new T.Color(c).multiplyScalar(i),side:T.DoubleSide}));m.position.set(...p);m.lookAt(0,0,0);envSc.add(m)};
@@ -258,10 +264,20 @@ function build(brainG,neuronG,docG){const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z
   const back=new T.Mesh(new T.CylinderGeometry(.25,.25,.42,48,1,true,-1.0,2.0),chairM);back.material.side=T.DoubleSide;back.scale.set(1,1,.4);back.position.set(0,.86,.98);back.rotation.set(.12,0,0);back.castShadow=true;doc.add(back);
   const seat=new T.Mesh(new T.BoxGeometry(.5,.07,.48),chairM);seat.position.set(0,.47,.78);seat.castShadow=true;seat.receiveShadow=true;doc.add(seat);
   const cpost=new T.Mesh(new T.CylinderGeometry(.025,.025,.42,16),new T.MeshStandardMaterial({color:0x2a2c31,metalness:.8,roughness:.3}));cpost.position.set(0,.22,.8);doc.add(cpost);
-  let headG,docMats=[];
+  let headG,docMats=[],docAnim=null;
   if(docG&&docG.isBufferGeometry){/* базов човек на MakeHuman (CC0), поставен седнал и оцветен по области — design/tools/posehuman.py */
     const dm=rim(new T.MeshPhysicalMaterial({vertexColors:true,roughness:.72,clearcoat:.12,clearcoatRoughness:.6,envMapIntensity:.35,transparent:true}),0xffffff,.18,3);docMats.push(dm);
-    const body=new T.Mesh(docG,dm);body.castShadow=true;body.receiveShadow=true;body.rotation.y=Math.PI;body.position.set(0,.451,.75);doc.add(body);
+    const sk=docG.userData.skel;let body;
+    if(sk){dm.skinning=true;body=new T.SkinnedMesh(docG,dm);const bl=sk.map(()=>new T.Bone());sk.forEach((b,i)=>{const p=b.par>=0?sk[b.par].piv:[0,0,0];bl[i].position.set(b.piv[0]-p[0],b.piv[1]-p[1],b.piv[2]-p[2]);(b.par>=0?bl[b.par]:body).add(bl[i])});
+      body.rotation.y=Math.PI;body.position.set(0,.451,.75);doc.add(body);doc.updateMatrixWorld(true);body.bind(new T.Skeleton(bl));
+      const Q=sk.map(b=>new T.Quaternion(b.q[0],b.q[1],b.q[2],b.q[3])),I=new T.Quaternion(),tmp=new T.Quaternion(),ax=new T.Vector3(1,0,0),az=new T.Vector3(0,0,1),ay=new T.Vector3(0,1,0);
+      /* цикъл: ръката се вдига към главата, почесва, после се връща върху лентата */
+      docAnim=t=>{const P=8.5,c=t%P,up=c<1.1?sm(0,1.1,c):c<3.0?1:c<4.1?1-sm(3.0,4.1,c):0;const scr=c>1.0&&c<3.1?Math.sin((c-1)*18)*sm(1.0,1.3,c)*(1-sm(2.8,3.1,c)):0;
+        for(let i=2;i<6;i++)bl[i].quaternion.copy(I).slerp(Q[i],up);
+        bl[5].quaternion.multiply(tmp.setFromAxisAngle(ax,scr*.22));bl[4].quaternion.multiply(tmp.setFromAxisAngle(az,scr*.05));
+        bl[1].quaternion.setFromAxisAngle(az,-.12*up).multiply(tmp.setFromAxisAngle(ay,.06*Math.sin(t*.4)))}}
+    else{body=new T.Mesh(docG,dm);body.rotation.y=Math.PI;body.position.set(0,.451,.75);doc.add(body)}
+    body.castShadow=true;body.receiveShadow=true;
     headG=new T.Group();headG.position.set(0,1.099,.395);headG.rotation.x=-.95;doc.add(headG);
     /* яка на престилката и стетоскоп около врата */
     const nk=V(0,.999,.549),ax=V(0,.07,-.088).normalize();const collar=new T.Mesh(new T.TorusGeometry(.068,.016,14,48),new T.MeshStandardMaterial({color:0xeef0f2,roughness:.85,envMapIntensity:.35}));collar.position.copy(nk).addScaledVector(ax,-.01);collar.quaternion.setFromUnitVectors(V(0,0,1),ax);collar.castShadow=true;doc.add(collar);docMats.push(collar.material);collar.material.transparent=true;
@@ -363,7 +379,7 @@ function build(brainG,neuronG,docG){const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z
   size();addEventListener("resize",size);
 
   /* ---------- камера и времева линия ---------- */
-  const ease=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2,cl=(x,a,b)=>Math.max(a,Math.min(b,x)),lerp=(a,b,t)=>a+(b-a)*t,sm=(a,b,x)=>{const t=cl((x-a)/(b-a),0,1);return t*t*(3-2*t)};
+  const ease=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2,cl=(x,a,b)=>Math.max(a,Math.min(b,x)),lerp=(a,b,t)=>a+(b-a)*t;
   const fadeEl=$(".fade");
   doc.updateMatrixWorld(true);const headW=()=>headG.getWorldPosition(V(0,0,0));
   const A={p:V(.55,2.9,1.55),l:V(0,DY,.12)},B={p:V(.32,1.95,1.05),l:V(0,DY+.08,.2)};
@@ -379,7 +395,7 @@ function build(brainG,neuronG,docG){const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z
   function frame(n){if(ended)return;raf=requestAnimationFrame(frame);const dt=Math.min(.05,(n-last)/1000);last=n;tt+=dt;
     if(spikeT>0)spikeT=Math.max(0,spikeT-dt*4);
     /* дишане и леко движение на главата */
-    const br=Math.sin(tt*1.35);doc.scale.set(1+.004*br,1+.003*br,1+.004*br);held.rotation.z=.02+.01*Math.sin(tt*.5);
+    const br=Math.sin(tt*1.35);doc.scale.set(1+.004*br,1+.003*br,1+.004*br);if(docAnim&&cur===1)docAnim(window.__nxDocT!=null?window.__nxDocT:tt+2.5);held.rotation.z=.02+.01*Math.sin(tt*.5);
     let fade=0;
     if(diveT<0){/* кабинетът отгоре */
       const u=ease(cl(tt/DUR,0,1));cam.position.copy(A.p).lerp(B.p,u);const lk=A.l.clone().lerp(B.l,u);const k=u>=1?1:0;cam.position.x+=Math.sin(tt*.3)*.02*k;cam.lookAt(lk);cur=1}
