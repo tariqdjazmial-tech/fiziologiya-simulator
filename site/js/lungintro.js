@@ -5,7 +5,8 @@
       с бронхиалното дърво; отдолу — спирограма;
    4) при следващ скрол — зареждащ екран „PhysioNova“ и началната страница.
    Модел на пациента: базов човек на MakeHuman (CC0), поставен седнал с design/tools/posehuman.py (POSE=patient) → m/patient.txt.
-   Белите дробове, бронхите, ребрата, стетоскопът и стаята са построени в кода. */
+   Органи: BodyParts3D © The Database Center for Life Science, CC BY-SA 2.1 Japan — опростени с design/tools/bp3d.py → m/bp_*.txt.
+   Стетоскопът и стаята са построени в кода. */
 (function(){"use strict";
 if(window.__introPick!=="lung")return;
 const ov=document.getElementById("hxo");if(!ov)return;window.__hxo=true;
@@ -98,7 +99,7 @@ ov.innerHTML=`<canvas class="gl" aria-hidden="true"></canvas><div class="vig"></
  <button class="hint" type="button"><em>Scroll to listen</em> <span>↓</span></button><div class="prog"><i></i></div>
  <button class="snd" type="button" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="w1" d="M16 9a4 4 0 0 1 0 6"/><path class="w2" d="M18.5 6.5a8 8 0 0 1 0 11"/></svg><span class="t">Tap to hear the breath sounds</span></button>
  <button class="skip" type="button">Skip</button>
- <div class="cr">Model: patient — <a href="http://www.makehumancommunity.org/" target="_blank" rel="noopener">MakeHuman</a> base mesh, CC0</div>`;
+ <div class="cr">Models: patient — <a href="http://www.makehumancommunity.org/" target="_blank" rel="noopener">MakeHuman</a>, CC0 · organs — <a href="https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html" target="_blank" rel="noopener">BodyParts3D</a>, © DBCLS, CC BY-SA 2.1 JP</div>`;
 const $=s=>ov.querySelector(s);
 
 const TXT={
@@ -158,7 +159,7 @@ function noGL(){if(ended||phase!=="pre")return;$(".pre").textContent="";phase="h
   let last=performance.now();(function f(n){if(ended)return;const dt=Math.min(.05,(n-last)/1000);last=n;ecDraw(dt);raf=requestAnimationFrame(f)})(last)}
 
 const getMesh=u=>fetch(u).then(r=>{if(!r.ok)throw new Error(u);return r.text()}).then(decodeMesh).catch(()=>null);
-if(RM){noGL()}else{load(THREE_URL).then(()=>getMesh("m/patient.txt")).then(p=>{if(!ended&&phase==="pre")build(p)}).catch(e=>{console.error(e);noGL()})}
+if(RM){noGL()}else{load(THREE_URL).then(()=>Promise.all(["patient","bp_lungs","bp_airway","bp_bronch","bp_heart","bp_aorta","bp_partery","bp_pvein","bp_diaph","bp_bone","bp_cart"].map(n=>getMesh("m/"+n+".txt")))).then(([p,...o])=>{if(!ended&&phase==="pre")build(p,o)}).catch(e=>{console.error(e);noGL()})}
 setTimeout(()=>{if(phase==="pre")noGL()},20000);
 
 function decodeMesh(b64){const bin=atob(b64.trim()),u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
@@ -174,7 +175,7 @@ function canvasTex(w,h,draw,rep,srgb=true){const c=document.createElement("canva
 function noiseFill(g,w,h,base,amp){g.fillStyle=base;g.fillRect(0,0,w,h);const id=g.getImageData(0,0,w,h),d=id.data;for(let i=0;i<d.length;i+=4){const n=(Math.random()-.5)*amp;d[i]+=n;d[i+1]+=n;d[i+2]+=n}g.putImageData(id,0,0)}
 
 /* ===================================================================== */
-function build(patG){const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z);
+function build(patG,ORG){const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z);
   const sm=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t)},lerp=(a,b,t)=>a+(b-a)*t,cl=(x,a,b)=>Math.max(a,Math.min(b,x));
   const cv=$("canvas.gl");
   R=new T.WebGLRenderer({canvas:cv,antialias:true,powerPreference:"high-performance"});R.setPixelRatio(Math.min(MOBILE?1.5:1.75,devicePixelRatio||1));
@@ -219,68 +220,53 @@ float strand(vec3 p){vec3 d=normalize(p-vec3(0.,.72,-.02));float th=atan(d.x,d.z
         sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\nuniform float uL;varying vec3 vOP;\n"+GL_N).replace("#include <alphatest_fragment>","#include <alphatest_fragment>\n{float n=strand(vOP);if(n<uL*.62+.3)discard;diffuseColor.rgb*=.75+.55*n;}")};
       hm.customProgramCacheKey=()=>"phair"+l;docMats.push(hm);const sh=new T.Mesh(hg,hm);sh.position.copy(body.position);sh.renderOrder=2;S.add(sh);hairShells.push(sh)}}
 
-  /* ---- вътрешността: ребра, бели дробове, бронхиално дърво, сърце ---- */
+  /* ---- вътрешността: истински органи от BodyParts3D (DBCLS, CC BY-SA 2.1 Japan), опростени с design/tools/bp3d.py ---- */
   const IN=new T.Group();IN.position.set(0,OY,0);S.add(IN);
-  const CY=.43,CZ=.03;            // център на гръдния кош (в координатите на модела)
-  /* бял дроб: деформирана сфера — тесен връх, широка вдлъбната основа, плоска медиална страна, сърдечна вдлъбнатина вляво */
-  function lungGeo(side){const g=new T.SphereGeometry(1,96,72),P=g.attributes.position;
-    for(let i=0;i<P.count;i++){let x=P.getX(i),y=P.getY(i),z=P.getZ(i);const t=(y+1)/2;let w=.62+.5*Math.pow(1-t,.7);if(t>.82)w*=1-(t-.82)*1.6;
-      x*=w;z*=w*.95;if(x*side<0)x*=.38;
-      if(y<-.45){const r2=Math.min(1,(x*x)/.4+z*z);y+=.42*(1-r2)*sm(-.45,-1,y)}
-      if(side>0&&z>.05&&x<.35&&y<.15&&y>-.85){const k=sm(.05,.6,z)*sm(.15,-.2,y)*sm(-.85,-.55,y);x+=.32*k}
-      const n=.025*Math.sin(x*9+y*7)*Math.sin(z*8+y*3);P.setXYZ(i,x*(1+n),y,z*(1+n))}
-    g.computeVertexNormals();g.scale(.075,.125,.085);g.translate(side*.072,CY-.01,CZ);return g}
-  const lungM=rim(new T.MeshPhysicalMaterial({color:0xe48f8f,roughness:.4,clearcoat:.6,clearcoatRoughness:.25,transparent:true,opacity:0,depthWrite:false,envMapIntensity:.55,sheen:new T.Color(0x803040)}),0xffd0d6,.9,2.0);
-  const lungs=[-1,1].map(sd=>{const m=new T.Mesh(lungGeo(sd),lungM);m.renderOrder=4;IN.add(m);m.userData.side=sd;return m});
-  /* бронхиално дърво */
-  const ptube=(curve,rf,seg,rad,mat)=>{const g=new T.TubeGeometry(curve,seg,1,rad,false),P=g.attributes.position;for(let i=0;i<=seg;i++){const c=curve.getPointAt(i/seg),r=rf(i/seg);for(let j=0;j<=rad;j++){const k=i*(rad+1)+j;P.setXYZ(k,c.x+(P.getX(k)-c.x)*r,c.y+(P.getY(k)-c.y)*r,c.z+(P.getZ(k)-c.z)*r)}}g.computeVertexNormals();return new T.Mesh(g,mat)};
-  const brM=rim(new T.MeshPhysicalMaterial({color:0xf1d7cf,roughness:.45,clearcoat:.5,transparent:true,opacity:0,envMapIntensity:.5}),0xffffff,.45);
-  const R2=(()=>{let s=29;return()=>(s=(s*16807)%2147483647)/2147483647})();
-  const inLung=(p,sd)=>{const q=V((p.x-sd*.072)/.075,(p.y-(CY-.01))/.125,(p.z-CZ)/.085);return q.lengthSq()<.82};
-  const paths=[],tips=[];
-  const trA=V(0,CY+.2,CZ+.02),car=V(0,CY+.075,CZ+.005);
-  IN.add(ptube(new T.CatmullRomCurve3([trA,V(0,CY+.14,CZ+.012),car]),()=>.0105,24,14,brM));
-  {const ringM=new T.MeshStandardMaterial({color:0xf6e6df,roughness:.5,transparent:true,opacity:0});brM.userData.rings=ringM;for(let k=0;k<9;k++){const r=new T.Mesh(new T.TorusGeometry(.0112,.0016,8,24,Math.PI*1.6),ringM);r.rotation.set(Math.PI/2,0,Math.PI*.7);r.position.copy(trA).lerp(car,k/9);IN.add(r)}}
-  function branch(p0,dir,L,r,depth,sd,path){const n=5,pts=[p0.clone()];let q=p0.clone(),d=dir.clone();for(let k=1;k<=n;k++){d.add(V(R2()-.5,R2()-.5,R2()-.5).multiplyScalar(.2)).normalize();let nq=q.clone().addScaledVector(d,L/n);
-      if(depth>0&&!inLung(nq,sd)){const c=V(sd*.072,CY-.04,CZ);d.lerp(c.sub(q).normalize(),.6).normalize();nq=q.clone().addScaledVector(d,L/n)}q=nq;pts.push(q)}
-    const cvv=new T.CatmullRomCurve3(pts),r1=r*.72;IN.add(ptube(cvv,t=>lerp(r,r1,t),depth<2?24:12,depth<2?10:6,brM));const np=path.concat([cvv]);
-    if(depth<5){const ax=V(R2()-.5,R2()-.5,R2()-.5).cross(d).normalize();[1,-1].forEach((sg,k)=>{const nd=d.clone().applyAxisAngle(ax,sg*(.45+R2()*.35)).add(V(sd*.12,-.12,0)).normalize();branch(q,nd,L*(.68+R2()*.12),r1*(k?.8:.92),depth+1,sd,np)})}
-    else{tips.push(q.clone());paths.push(np)}}
-  [-1,1].forEach(sd=>branch(car,V(sd*.75,-.62,-.05).normalize(),.05,.0075,0,sd,[]));
-  /* алвеоли: малки гроздове в края на бронхиолите */
-  const alvM=rim(new T.MeshPhysicalMaterial({color:0xff9aa8,roughness:.35,clearcoat:.8,transparent:true,opacity:0,emissive:0x40101a}),0xffffff,.6);
-  const AN=tips.length*6,alv=new T.InstancedMesh(new T.SphereGeometry(.0034,10,8),alvM,AN);{const M=new T.Matrix4();let k=0;tips.forEach(tp=>{for(let j=0;j<6;j++){M.makeTranslation(tp.x+(R2()-.5)*.009,tp.y+(R2()-.5)*.009,tp.z+(R2()-.5)*.009);alv.setMatrixAt(k++,M)}})}IN.add(alv);
-  /* сърце между белите дробове (полупрозрачно) */
-  const heartM=rim(new T.MeshPhysicalMaterial({color:0xb4233a,roughness:.45,clearcoat:.5,transparent:true,opacity:0,depthWrite:false}),0xff8a9a,.6);
-  {const g=new T.SphereGeometry(1,48,36),P=g.attributes.position;for(let i=0;i<P.count;i++){let x=P.getX(i),y=P.getY(i),z=P.getZ(i);if(y<0){x*=1+y*.45;z*=1+y*.45}P.setXYZ(i,x,y,z)}g.computeVertexNormals();
-    const h=new T.Mesh(g,heartM);h.scale.set(.05,.062,.045);h.position.set(.02,CY-.06,CZ+.04);h.rotation.z=.65;h.renderOrder=3;IN.add(h);IN.userData.heart=h}
-  /* ребра: полупрозрачни дъги около гърдите */
-  const ribM=new T.MeshStandardMaterial({color:0xefe8dc,roughness:.6,transparent:true,opacity:0,depthWrite:false});
-  for(let k=0;k<10;k++){const y=CY+.15-k*.03,rx=.105+.03*Math.sin(Math.min(1,k/5)*Math.PI/2)-(k>7?.01*(k-7):0),rz=.085+k*.002;[-1,1].forEach(sd=>{const pts=[];for(let j=0;j<=24;j++){const a=-Math.PI/2+j/24*Math.PI;pts.push(V(sd*rx*Math.cos(a)*.98,y-.04*Math.sin(a+Math.PI/2)*.5-(j/24)*.035,CZ+rz*Math.sin(-a)))}
-      const r=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),48,.0042,6,false),ribM);r.renderOrder=5;IN.add(r)})}
-  {const stern=new T.Mesh(new T.BoxGeometry(.022,.17,.01),ribM);stern.position.set(0,CY+.07,CZ+.088);stern.renderOrder=5;IN.add(stern)}
-  /* въздух: светещи частици по пътищата трахея → бронхиоли */
-  const dotT=canvasTex(64,64,(g,w,h)=>{const r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,"rgba(255,255,255,1)");r.addColorStop(.3,"rgba(190,220,255,.8)");r.addColorStop(1,"rgba(120,170,255,0)");g.fillStyle=r;g.fillRect(0,0,w,h)});
-  const AIR=320,aG=new T.BufferGeometry(),aP=new Float32Array(AIR*3);aG.setAttribute("position",new T.BufferAttribute(aP,3));const aM=new T.PointsMaterial({size:.012,map:dotT,transparent:true,depthWrite:false,depthTest:false,blending:T.AdditiveBlending,opacity:0});
-  const air=new T.Points(aG,aM);air.frustumCulled=false;air.renderOrder=8;IN.add(air);const airD=[];for(let i=0;i<AIR;i++)airD.push({p:Math.floor(R2()*paths.length),o:R2()});
-  const trC=new T.CatmullRomCurve3([trA.clone().add(V(0,.06,0)),trA,car]);
-  function airPos(i,u){const pp=paths[airD[i].p],segs=pp.length+1;let x=u*segs;if(x<1)return trC.getPointAt(Math.min(1,x));x-=1;const k=Math.min(pp.length-1,Math.floor(x));return pp[k].getPointAt(Math.min(1,x-k))}
-
+  const CY=.43,CZ=.03;
+  /* „тъкан“: шум в шейдъра за петна, мрежа от съдчета и влажен отблясък */
+  const NOISE=`float h3(vec3 p){p=fract(p*.3183099+.1);p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
+float vn(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.-2.*f);return mix(mix(mix(h3(i),h3(i+vec3(1,0,0)),f.x),mix(h3(i+vec3(0,1,0)),h3(i+vec3(1,1,0)),f.x),f.y),mix(mix(h3(i+vec3(0,0,1)),h3(i+vec3(1,0,1)),f.x),mix(h3(i+vec3(0,1,1)),h3(i+vec3(1,1,1)),f.x),f.y),f.z);}
+float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*vn(p);p*=2.03;a*=.5;}return s;}`;
+  const tissue=(o)=>{const m=new T.MeshPhysicalMaterial({color:new T.Color(o.c).convertSRGBToLinear(),roughness:o.r??.45,clearcoat:o.cc??.6,clearcoatRoughness:.22,transparent:true,opacity:0,envMapIntensity:o.env??.6,side:o.ds?T.DoubleSide:T.FrontSide,depthWrite:!!o.dw});
+    const rc=new T.Color(o.rim||0xffd6d6).convertSRGBToLinear(),c2=new T.Color(o.c2||o.c).convertSRGBToLinear(),sp=new T.Color(o.sp||0x000000).convertSRGBToLinear();
+    m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,{uRim:{value:rc},uRimI:{value:o.rimI??.5},uC2:{value:c2},uSp:{value:sp},uSc:{value:o.sc||60},uSpk:{value:o.spk||0},uBr:m.userData.uBr={value:0},uCar:{value:new T.Vector3(0,OY+.548-.074,.012)}});
+      sh.vertexShader=sh.vertexShader.replace("#include <common>","#include <common>\nvarying vec3 vWp;").replace("#include <worldpos_vertex>","#include <worldpos_vertex>\nvWp=(modelMatrix*vec4(transformed,1.0)).xyz;");
+      sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\nuniform vec3 uRim,uC2,uSp,uCar;uniform float uRimI,uSc,uSpk,uBr;varying vec3 vWp;\n"+NOISE)
+        .replace("#include <color_fragment>","#include <color_fragment>\n{float n=fbm(vWp*uSc);diffuseColor.rgb=mix(diffuseColor.rgb,uC2,smoothstep(.35,.75,n));float v=abs(fbm(vWp*uSc*.45+7.)-.5);diffuseColor.rgb*=1.-.22*smoothstep(.04,.0,v);float d=vn(vWp*uSc*5.);diffuseColor.rgb=mix(diffuseColor.rgb,uSp,uSpk*step(.86,d));}")
+        .replace("#include <emissivemap_fragment>","#include <emissivemap_fragment>\n{float fr=pow(1.0-clamp(abs(dot(normal,normalize(vViewPosition))),0.0,1.0),2.4);totalEmissiveRadiance+=uRim*fr*uRimI;float r=distance(vWp,uCar);totalEmissiveRadiance+=vec3(.55,.75,1.)*uBr*exp(-pow((r-uBr*.13)*40.,2.))*1.4;}")};
+    m.customProgramCacheKey=()=>"tis"+(o.k||"");return m};
+  const M={
+    lungs:tissue({k:"lu",c:0xe08a86,c2:0xb85a5e,sp:0x3a2a30,spk:.55,sc:70,r:.38,cc:.75,rim:0xffe0dc,rimI:.7,env:.7}),
+    airway:tissue({k:"aw",c:0xf0e2d4,c2:0xd9c2ae,sc:120,r:.4,cc:.5,rim:0xffffff,rimI:.35,dw:1}),
+    bronch:tissue({k:"br",c:0xf3e5d8,c2:0xe2c9b6,sc:160,r:.4,cc:.5,rim:0xffffff,rimI:.35,dw:1}),
+    heart:tissue({k:"he",c:0x9c2a2e,c2:0x6e1a20,sp:0xe8d0a0,spk:.25,sc:45,r:.32,cc:.85,rim:0xff8a90,rimI:.45,dw:1}),
+    aorta:tissue({k:"ao",c:0xc0393c,c2:0xa52a30,sc:60,r:.3,cc:.8,rim:0xff9aa0,rimI:.4,dw:1}),
+    partery:tissue({k:"pa",c:0x3f5ea8,c2:0x2e4688,sc:80,r:.32,cc:.8,rim:0x9ab8ff,rimI:.4,dw:1}),
+    pvein:tissue({k:"pv",c:0xb43a48,c2:0x8e2a36,sc:80,r:.32,cc:.8,rim:0xff9aa8,rimI:.4,dw:1}),
+    diaph:tissue({k:"di",c:0x9a4a42,c2:0x7a3630,sc:50,r:.5,cc:.4,rim:0xffb0a0,rimI:.3,ds:1}),
+    bone:tissue({k:"bo",c:0xe9dcc2,c2:0xcdbb98,sc:90,r:.62,cc:.15,rim:0xfff4e0,rimI:.35,env:.35}),
+    cart:tissue({k:"ca",c:0xd6e2e4,c2:0xbfd0d4,sc:90,r:.35,cc:.6,rim:0xffffff,rimI:.5})};
+  const NAMES=["lungs","airway","bronch","heart","aorta","partery","pvein","diaph","bone","cart"],OP={lungs:.72,airway:1,bronch:1,heart:1,aorta:1,partery:.95,pvein:.95,diaph:.5,bone:.34,cart:.22};
+  const ORD={bronch:1,airway:1,partery:2,pvein:2,heart:2,aorta:2,bone:3,diaph:4,cart:5,lungs:6};
+  const ORGS={};NAMES.forEach((n,i)=>{const g=ORG&&ORG[i];if(!g)return;const m=new T.Mesh(g,M[n]);m.renderOrder=ORD[n];IN.add(m);ORGS[n]=m});
+  /* опорни точки за дишането: белите дробове растат надолу и встрани, диафрагмата слиза */
+  const lungPiv=V(0,.47,.01);[ORGS.lungs,ORGS.bronch,ORGS.partery,ORGS.pvein].forEach(m=>{if(m){m.geometry.translate(-lungPiv.x,-lungPiv.y,-lungPiv.z);m.position.copy(lungPiv)}});
+  const heartPiv=V(.018,.42,.03);if(ORGS.heart){ORGS.heart.geometry.translate(-heartPiv.x,-heartPiv.y,-heartPiv.z);ORGS.heart.position.copy(heartPiv)}
   /* ---- стетоскоп: слушалка (диафрагма + камбанка) и тръба нагоре ---- */
   let tt=0;const steth=new T.Group();S.add(steth);
-  const chrome=new T.MeshStandardMaterial({color:0xd4d8de,metalness:1,roughness:.18,envMapIntensity:1.2,transparent:true});const tubeM=new T.MeshPhysicalMaterial({color:0x1d2026,roughness:.35,clearcoat:.8,transparent:true});
+  const chrome=new T.MeshStandardMaterial({color:0xd4d8de,metalness:1,roughness:.18,envMapIntensity:1.2,transparent:true});const tubeM=new T.MeshPhysicalMaterial({color:0x15171b,roughness:.35,clearcoat:.8,transparent:true});
   {const ring=new T.Mesh(new T.CylinderGeometry(.024,.024,.011,48),chrome);ring.rotation.x=Math.PI/2;steth.add(ring);
-    const dia=new T.Mesh(new T.CylinderGeometry(.021,.021,.002,48),new T.MeshPhysicalMaterial({color:0x111215,roughness:.25,clearcoat:1,transparent:true}));dia.rotation.x=Math.PI/2;dia.position.z=-.0058;steth.add(dia);
-    const stem=new T.Mesh(new T.CylinderGeometry(.0045,.0045,.03,16),chrome);stem.position.set(0,.022,.004);steth.add(stem);const bell=new T.Mesh(new T.SphereGeometry(.011,24,16),chrome);bell.position.set(0,.0,.012);bell.scale.set(1,1,.6);steth.add(bell)}
+    const dia=new T.Mesh(new T.CylinderGeometry(.021,.021,.002,48),new T.MeshPhysicalMaterial({color:0x111215,roughness:.25,clearcoat:1,transparent:true}));dia.rotation.x=Math.PI/2;dia.position.z=.0058;steth.add(dia);
+    const stem=new T.Mesh(new T.CylinderGeometry(.0045,.0045,.03,16),chrome);stem.position.set(0,-.022,-.004);steth.add(stem);const bell=new T.Mesh(new T.SphereGeometry(.011,24,16),chrome);bell.position.set(0,.0,-.012);bell.scale.set(1,1,.6);steth.add(bell)}
   steth.traverse(o=>{if(o.isMesh)o.castShadow=true});
   const tube=new T.Mesh(new T.BufferGeometry(),tubeM);tube.castShadow=true;S.add(tube);
   /* аускултационна точка вляво на гърдите: намира се по повърхността на модела с лъч отпред */
   let chestPt=V(.07,OY+.455,.12),chestN=V(0,0,1);
   if(body){body.updateMatrixWorld(true);const rc=new T.Raycaster(V(.07,OY+.455,1),V(0,0,-1));const h=rc.intersectObject(body,false)[0];if(h){chestPt=h.point.clone();chestN=h.face.normal.clone().transformDirection(body.matrixWorld)}}
-  const restPt=chestPt.clone().addScaledVector(chestN,.2).add(V(.035,.02,0));
-  function placeSteth(u){const e=u*u*(3-2*u);const p=restPt.clone().lerp(chestPt.clone().addScaledVector(chestN,.0062),e);p.x+=.004*Math.sin(tt*1.3)*(1-e);p.y+=.004*Math.sin(tt*1.7)*(1-e);steth.position.copy(p);
+  const restPt=chestPt.clone().addScaledVector(chestN,.09).add(V(.03,-.13,0));
+  function placeSteth(u){const e=u*u*(3-2*u);const end=chestPt.clone().addScaledVector(chestN,.0062);const p=restPt.clone().lerp(end,e);p.addScaledVector(chestN,.035*Math.sin(e*Math.PI));p.x+=.004*Math.sin(tt*1.3)*(1-e);p.y+=.004*Math.sin(tt*1.7)*(1-e);steth.position.copy(p);
     steth.lookAt(p.clone().addScaledVector(chestN,-1));
-    const top=V(.42,OY+.95,.75),a=p.clone().addScaledVector(chestN,.02).add(V(0,.02,0)),b=a.clone().lerp(top,.35).add(V(.03,-.06,.05)),c=a.clone().lerp(top,.7).add(V(.04,-.02,.03));
+    const top=V(.3,OY+.08,.62),a=p.clone().addScaledVector(chestN,.02).add(V(0,-.02,0)),b=a.clone().lerp(top,.35).add(V(.02,.02,.04)),c=a.clone().lerp(top,.7).add(V(.03,.03,.02));
     tube.geometry.dispose();tube.geometry=new T.TubeGeometry(new T.CatmullRomCurve3([a,b,c,top]),60,.0045,8,false)}
   placeSteth(0);
 
@@ -295,8 +281,8 @@ float strand(vec3 p){vec3 d=normalize(p-vec3(0.,.72,-.02));float th=atan(d.x,d.z
 
   /* ---------- камера ---------- */
   const look0=V(.0,OY+.4,.05);
-  const A={p:V(.66,OY+.47,1.05),l:V(.02,OY+.41,.05)},B={p:V(.52,OY+.44,.64),l:V(.03,OY+.415,.06)};
-  const C={p:V(.0,OY+.44,.62),l:V(0,OY+CY-.02,CZ)};
+  const A={p:V(.42,OY+.42,.85),l:V(.035,OY+.4,.06)},B={p:V(.28,OY+.42,.5),l:V(.04,OY+.405,.07)};
+  const C={p:V(.0,OY+.42,.56),l:V(0,OY+.42,.01)};
   let last=performance.now(),touched=0,lungAlpha=0;const DUR=4.2,DIVE=3.2;
   R.compile(S,cam);setC("ready");phase="intro";
   setTimeout(()=>{if(!ended&&phase==="intro")setText("exam")},1600);
@@ -310,8 +296,9 @@ float strand(vec3 p){vec3 d=normalize(p-vec3(0.,.72,-.02));float th=atan(d.x,d.z
     /* гърдите и раменете се повдигат при вдишване */
     if(body){body.scale.set(1+.006*b,1+.004*b,1+.014*b);hairShells.forEach(h=>h.scale.copy(body.scale))}
     /* белите дробове се разширяват надолу (диафрагмата) и встрани */
-    lungs.forEach(m=>{m.scale.set(1+.05*b,1+.075*b,1+.05*b);m.position.y=-.012*b})
-    IN.userData.heart.scale.setScalar(.05).multiply(V(1,1.24,.9)).multiplyScalar(1+.04*Math.max(0,Math.sin(tt*7.2)));
+    [ORGS.lungs,ORGS.bronch,ORGS.partery,ORGS.pvein].forEach(m=>{if(m)m.scale.set(1+.035*b,1+.05*b,1+.03*b)});if(ORGS.diaph)ORGS.diaph.position.y=-.012*b;
+    if(ORGS.heart){const hb=(tt*1.2)%1,c=hb<.3?Math.sin(hb/.3*Math.PI):0;ORGS.heart.scale.setScalar(1-.035*c)}
+    M.bronch.userData.uBr&&(M.bronch.userData.uBr.value=flow(tt)>0?breath(tt):0);M.airway.userData.uBr&&(M.airway.userData.uBr.value=flow(tt)>0?breath(tt):0);
     if(diveT<0){/* кабинетът */
       const u=1-Math.pow(1-cl(tt/DUR,0,1),3);cam.position.copy(A.p).lerp(B.p,u);cam.lookAt(A.l.clone().lerp(B.l,u));
       prog+=(progT-prog)*Math.min(1,dt*7);placeSteth(prog);$(".prog").style.setProperty("--pp",Math.round(prog*100)+"%");if(prog>.985)touch()}
@@ -319,17 +306,15 @@ float strand(vec3 p){vec3 d=normalize(p-vec3(0.,.72,-.02));float th=atan(d.x,d.z
       /* проблясък при допира, после камерата влиза към гърдите, кожата избледнява, вътрешността изплува */
       flashEl.style.opacity=(Math.max(0,1-d/.7)*sm(0,.06,d)).toFixed(3);
       const u=sm(.15,DIVE,d);cam.position.copy(B.p).lerp(C.p,u);cam.lookAt(B.l.clone().lerp(C.l,u));
-      if(d>DIVE){const w=d-DIVE,a=Math.sin(w*.18)*.42;cam.position.set(C.p.x+Math.sin(a)*.6,C.p.y+.02*Math.sin(w*.3),CZ+Math.cos(a)*(C.p.z-CZ));cam.lookAt(C.l)}
+      if(d>DIVE){const w=d-DIVE,a=Math.sin(w*.18)*.5;cam.position.set(Math.sin(a)*(C.p.z-.01),C.p.y+.015*Math.sin(w*.3),.01+Math.cos(a)*(C.p.z-.01));cam.lookAt(C.l)}
       const sk=1-sm(.5,2.3,d)*.9;docMats.forEach(m=>{m.opacity=sk;m.depthWrite=sk>.98});
       const sa=1-sm(.25,1.1,d);[chrome,tubeM].forEach(m=>m.opacity=sa);steth.visible=tube.visible=sa>.01;
-      lungAlpha=sm(.7,2.5,d);lungM.opacity=.62*lungAlpha;brM.opacity=lungAlpha;if(brM.userData.rings)brM.userData.rings.opacity=lungAlpha;alvM.opacity=lungAlpha;heartM.opacity=.45*lungAlpha;ribM.opacity=.38*lungAlpha;aM.opacity=lungAlpha;
+      lungAlpha=sm(.7,2.5,d);NAMES.forEach(n=>{M[n].opacity=OP[n]*lungAlpha;if(M[n].depthWrite!==undefined&&OP[n]>=.9)M[n].depthWrite=lungAlpha>.9});
       inner.intensity=1.6*lungAlpha;
       const k=sm(.6,2.6,d);S.background.lerpColors(BG0,BG1,k);S.fog.color.copy(S.background);S.fog.near=lerp(4,.5,k);S.fog.far=lerp(9,1.6,k);hemi.intensity=lerp(.35,.18,k);
       if(d>1.4){setText("lungs");setC("ecg")}
       if(d>DIVE+.6&&phase==="dive"){phase="hold2";$(".hint em").textContent="Scroll to enter";setC("hinted")}}
     /* въздух: навътре при вдишване, навън при издишване */
-    if(lungAlpha>0){const f=flow(tt),P=aG.attributes.position;for(let i=0;i<AIR;i++){const o=airD[i];o.o=(o.o+dt*f*.35+1)%1;const q=airPos(i,o.o);P.setXYZ(i,q.x,q.y,q.z)}P.needsUpdate=true;aM.size=.009+.006*Math.abs(f)}
-    alvM.emissive.setRGB(.25+.4*b,.06+.08*b,.1+.12*b);
     soundFrame(tt);if(ov.classList.contains("ecg")){ecDraw(dt);rrEl.textContent=String(Math.round(60/BP))}
     R.render(S,cam)}
   raf=requestAnimationFrame(frame);
