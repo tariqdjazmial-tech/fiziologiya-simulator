@@ -69,6 +69,10 @@ html body:not(#nb) .lp-hero::before{background:linear-gradient(90deg,rgba(12,13,
 @media (max-width:860px){html body:not(#nb) .lp-hero::before{background:linear-gradient(0deg,rgba(12,13,16,.92) 0%,rgba(12,13,16,.6) 55%,rgba(60,10,18,.12) 100%)!important}}
 html body:not(#nb) .lp-kick,html body:not(#nb) .lp-hero .lp-tag{background:rgba(255,255,255,.18)!important;color:#fff!important;border:1px solid rgba(255,255,255,.45)!important;border-radius:999px!important;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 html body:not(#nb) .lp-ecg path{stroke:#FF4D5A!important}
+html body:not(#nb) .lp-sl-dots{gap:8px}
+html body:not(#nb) .lp-sl-dots button{width:8px!important;height:8px!important;border:0!important;border-radius:999px!important;background:rgba(255,255,255,.45)!important;transition:width .5s var(--ease-out),background-color .3s!important}
+html body:not(#nb) .lp-sl-dots button.on{width:26px!important;background:#fff!important}
+html body:not(#nb) .lp-sl-cap{border-radius:999px!important;border:1px solid rgba(255,255,255,.3)!important;background:rgba(12,13,16,.45)!important;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);padding:6px 12px!important}
 html body:not(#nb) .lp-stats{border-radius:22px!important}
 html body:not(#nb) .lp-stats>div,html body:not(#nb) .lp-stats>div:nth-child(n){background:transparent!important}
 html body:not(#nb) .lp-stats>div+div{border-left:1px solid rgba(29,29,31,.08)!important}
@@ -90,7 +94,10 @@ html body:not(#nb) .lp-tick{background:rgba(255,255,255,.4)!important;-webkit-ba
 html body:not(#nb) .lp-tick *{color:#1D1D1F!important}
 html body:not(#nb) .lp-foot{background:linear-gradient(180deg,#17181B,#0E0F11)!important;border-radius:28px 28px 0 0;margin:0 clamp(10px,1.6vw,22px)}
 
-/* остатъци от стария стил: без твърди черни сенки и черни етикети */
+/* остатъци от стария стил: без жълто, без твърди черни сенки и черни етикети */
+html body:not(#nb) .lp-feat li:nth-child(4){background:linear-gradient(180deg,#1E1F23,#121316)!important}
+html body:not(#nb) .lp-feat li:nth-child(4) h3,html body:not(#nb) .lp-feat li:nth-child(4) p{color:#F5F5F7!important}
+html body:not(#nb) .lp-feat li:nth-child(4) p{color:#A1A1A6!important}
 html body:not(#nb) .lp-feat>li i,html body:not(#nb) .steps>li i{background:rgba(255,255,255,.85)!important;border:1px solid rgba(29,29,31,.08)!important;border-radius:12px!important;box-shadow:0 1px 2px rgba(20,24,32,.08)!important;color:#1D1D1F!important}
 html body:not(#nb) .lp-feat>li[style*="--k"] i{color:#1D1D1F!important}
 html body:not(#nb) .lp-plan.pro{border:1.5px solid rgba(200,16,46,.55)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 24px 48px rgba(200,16,46,.14)!important;background:rgba(255,255,255,.72)!important}

@@ -180,16 +180,15 @@ VIEWS.home=function(main){const s=expStats(),last=store.get("lastTopic",null),it
   main.innerHTML=`
   <section class="lp-hero">
    <div class="lp-slides" aria-roledescription="carousel">${[
-     ["hero",LL("Еритроцити в кръвоносен съд","Red blood cells in a blood vessel"),"55% 45%"],
-     ["hero-muscle",LL("Скелетни мускулни влакна, електронен микроскоп, 5000×","Skeletal muscle fibres, electron micrograph, 5000×"),"50% 50%"],
-     ["hero-neuron",LL("Неврони и техните израстъци, електронен микроскоп, 1000×","Neurons and their processes, electron micrograph, 1000×"),"38% 45%"],
+     ["sec-rbc",LL("Еритроцити, сканиращ електронен микроскоп · D. Gregory & D. Marshall, Wellcome Collection, CC BY 4.0","Red blood cells, scanning electron micrograph · D. Gregory & D. Marshall, Wellcome Collection, CC BY 4.0"),"50% 45%"],
      ["sec-lungs",LL("Белодробни алвеоли, сканиращ електронен микроскоп · D. Gregory & D. Marshall, Wellcome Collection, CC BY 4.0","Lung alveoli, scanning electron micrograph · D. Gregory & D. Marshall, Wellcome Collection, CC BY 4.0"),"50% 50%"],
      ["sec-heart",LL("Сърдечен мускул, трансмисионен електронен микроскоп · Prof G. Gabella, Wellcome Collection, CC BY 4.0","Cardiac muscle, transmission electron micrograph · Prof G. Gabella, Wellcome Collection, CC BY 4.0"),"50% 50%"],
      ["sec-kidney",LL("Бъбречен гломерул, сканиращ електронен микроскоп · D. Gregory & D. Marshall, Wellcome Collection, CC BY 4.0","Renal glomerulus, scanning electron micrograph · D. Gregory & D. Marshall, Wellcome Collection, CC BY 4.0"),"50% 45%"],
+     ["sec-muscle",LL("Скелетен мускул в напречен разрез, сканиращ електронен микроскоп · D. Gregory & D. Marshall, Wellcome Collection, CC BY 4.0","Skeletal muscle in cross-section, scanning electron micrograph · D. Gregory & D. Marshall, Wellcome Collection, CC BY 4.0"),"50% 40%"],
      ["sec-clot",LL("Кръвен съсирек с фибринова мрежа, сканиращ електронен микроскоп · D. Gregory & D. Marshall, Wellcome Collection, CC BY 4.0","Blood clot with fibrin mesh, scanning electron micrograph · D. Gregory & D. Marshall, Wellcome Collection, CC BY 4.0"),"50% 40%"]
     ].map(([f,c,pos],i)=>`<img class="lp-hero-img${i?"":" on"}" src="img/${f}-1600.webp" srcset="img/${f}-900.webp 900w, img/${f}-1600.webp 1600w" sizes="100vw" alt="${c}" data-cap="${c}" style="object-position:${pos}" ${i?'loading="lazy"':'fetchpriority="high"'}>`).join("")}</div>
    <svg class="lp-ecg" viewBox="0 0 1200 80" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M0 50 H140 l12 -6 l12 6 H200 l8 8 l14 -52 l14 62 l10 -18 H300 q20 -14 40 0 H520 l12 -6 l12 6 H580 l8 8 l14 -52 l14 62 l10 -18 H680 q20 -14 40 0 H900 l12 -6 l12 6 H960 l8 8 l14 -52 l14 62 l10 -18 H1060 q20 -14 40 0 H1200"/></svg>
-   <div class="lp-sl-ui"><span class="lp-sl-cap" aria-live="polite"></span><span class="lp-sl-dots">${[0,1,2].map(i=>`<button type="button" aria-label="${LL("Снимка","Image")} ${i+1}"></button>`).join("")}</span></div>
+   <div class="lp-sl-ui"><span class="lp-sl-cap" aria-live="polite"></span><span class="lp-sl-dots">${[0,1,2,3,4,5].map(i=>`<button type="button" aria-label="${LL("Снимка","Image")} ${i+1}"></button>`).join("")}</span></div>
    <div class="lp-w lp-hero-in">
     <p class="lp-kick">${LL("Конспект по физиология за студенти по медицина","Physiology syllabus for medical students")}</p>
     <h1>${LL("Разбери физиологията, вместо да я зубриш","Understand physiology instead of memorizing it")}</h1>
@@ -236,7 +235,7 @@ VIEWS.home=function(main){const s=expStats(),last=store.get("lastTopic",null),it
 
   <section class="lp-sect lp-tint"><div class="lp-w">
    <header class="lp-h"><h2>${LL("12 раздела от конспекта","12 syllabus sections")}</h2><p>${LL("Раздел I е безплатен. Останалите се отключват с пълния достъп.","Section I is free. The rest unlock with full access.")}</p></header>
-   <div class="lp-secs">${SYLLABUS.map(sec=>{const p=secProg(sec),f=first(sec),fr=f&&isFree(f.id);const tps=sec.items.filter(x=>x.ready);const IMG={I:"sec-myelin",II:"hero-muscle",III:"hero",IV:"sec-heart",V:"sec-lungs",VI:"sec-kidney",VII:"sec-tubule",VIII:"sec-gut",IX:"sec-mito",X:"sec-thyroid",XI:"sec-retina",XII:"hero-neuron"};return `<a class="lp-card" href="#${f?f.id:"home"}">${IMG[sec.id]?`<img class="lp-card-img" src="img/${IMG[sec.id]}-900.webp" alt="" loading="lazy" decoding="async">`:""}<span class="lp-card-top"><span class="n">${sec.id}</span><b class="lp-card-no">${sec.id}</b>${fr?`<em class="fr">${LL("безплатно","free")}</em>`:`<em class="lk">${ic("lock",14)}</em>`}</span>
+   <div class="lp-secs">${SYLLABUS.map(sec=>{const p=secProg(sec),f=first(sec),fr=f&&isFree(f.id);const tps=sec.items.filter(x=>x.ready);const IMG={I:"sec-myelin",II:"sec-muscle",III:"sec-rbc",IV:"sec-heart",V:"sec-lungs",VI:"sec-kidney",VII:"sec-tubule",VIII:"sec-gut",IX:"sec-mito",X:"sec-thyroid",XI:"sec-retina",XII:"sec-neurons"};return `<a class="lp-card" href="#${f?f.id:"home"}">${IMG[sec.id]?`<img class="lp-card-img" src="img/${IMG[sec.id]}-900.webp" alt="" loading="lazy" decoding="async">`:""}<span class="lp-card-top"><span class="n">${sec.id}</span><b class="lp-card-no">${sec.id}</b>${fr?`<em class="fr">${LL("безплатно","free")}</em>`:`<em class="lk">${ic("lock",14)}</em>`}</span>
      <span class="lp-card-b"><b>${sec.name}</b><small>${p.n} ${p.n===1?LL("тема","topic"):LL("теми","topics")}, ${p.t} ${LL("въпроса","questions")}</small>
      <span class="lp-card-tp">${tps.slice(0,4).map(x=>`<i>${x.t}</i>`).join("")}${tps.length>4?`<i class="more">+${tps.length-4} ${LL("още","more")}</i>`:""}</span></span></a>`}).join("")}</div>
   </div></section>
