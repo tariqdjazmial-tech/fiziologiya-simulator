@@ -130,6 +130,8 @@ for k, o in enumerate(used):
     if b.startswith(("head", "jaw", "eye", "neck", "levator", "oculi", "orbic", "oris", "risor", "tempor", "special", "tongue")):
         rel = p - eyes; h_up = np.dot(rel, up); h_f = np.dot(rel, fwd)
         c = SKIN
+        rn = p - nb_; aln = np.dot(rn, nup)
+        if b.startswith("neck") and aln < 0.05: c = COAT   # под яката е престилката
         lat = abs(np.dot(rel, side))
         if h_up > 0.32 or (h_f < -0.62 and h_up > -0.45 and lat < 0.62) or (h_f < -0.2 and h_up > 0.05 and lat < 0.78):
             c = HAIR; hair[k] = True
@@ -141,7 +143,7 @@ for k, o in enumerate(used):
         c = COAT
         # кожата на шията над яката: по оста на шията, близо до нея
         rel = p - nb_; along = np.dot(rel, nup); lat = np.linalg.norm(rel - along * nup)
-        if along > -0.1 and lat < 0.5: c = SKIN
+        if along > 0.05 and lat < 0.55: c = SKIN
     col[k] = c
 # фина вариация на цвета (кичури коса, тъкан)
 rng = np.random.default_rng(7)

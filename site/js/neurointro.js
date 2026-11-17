@@ -298,8 +298,10 @@ float strand(vec3 p){vec3 d=normalize(p-vec3(0.,.635,.335));float th=atan(d.x,d.
     /* яка на престилката и стетоскоп около врата */
     const nk=V(0,.999,.549),ax=V(0,.07,-.088).normalize();const collar=new T.Mesh(new T.TorusGeometry(.068,.016,14,48),new T.MeshStandardMaterial({color:0xeef0f2,roughness:.85,envMapIntensity:.35}));collar.position.copy(nk).addScaledVector(ax,-.01);collar.quaternion.setFromUnitVectors(V(0,0,1),ax);collar.castShadow=true;doc.add(collar);docMats.push(collar.material);collar.material.transparent=true;
     const tm=new T.MeshPhysicalMaterial({color:0x1b1d22,roughness:.32,clearcoat:.8,transparent:true});docMats.push(tm);
-    const sp=[V(-.085,.955,.5),V(-.09,.99,.535),V(-.06,1.015,.58),V(0,1.025,.6),V(.06,1.015,.58),V(.09,.99,.535),V(.085,.955,.5)];
-    const tube=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(sp),90,.0058,10,false),tm);tube.castShadow=true;doc.add(tube);
+    const cc=collar.position.clone().addScaledVector(ax,.02),e1=V(1,0,0),e2=V(0,0,0).crossVectors(e1,ax).normalize(),RR=.09,sp=[];
+    for(let k=0;k<=14;k++){const th=-1.75+3.5*k/14;sp.push(cc.clone().addScaledVector(e1,Math.sin(th)*RR).addScaledVector(e2,Math.cos(th)*RR))}
+    [-1,1].forEach(sg=>{const e=sp[sg<0?0:sp.length-1];const q1=e.clone().addScaledVector(e2,-.035).addScaledVector(ax,-.035).add(V(sg*.006,0,0)),q2=q1.clone().addScaledVector(e2,-.02).addScaledVector(ax,-.07);if(sg<0){sp.unshift(q1);sp.unshift(q2)}else{sp.push(q1);sp.push(q2)}});
+    const tube=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(sp),140,.006,10,false),tm);tube.castShadow=true;doc.add(tube);
 }
   else{
   /* тяло в бяла престилка, наведено напред */
