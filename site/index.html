@@ -411,23 +411,24 @@ function expStats(){
 const EXP_GHK=[
  {q:"Предскажи: какво става с потенциала на покой при хиперкалиемия ([K⁺]ₑ = 8 mmol/L)?",opts:["Хиперполяризация (по-отрицателен)","Деполяризация (по-малко отрицателен)","Не се променя"],a:1,
   set:{Ko:8},expl:"E<sub>K</sub> се измества към по-малко отрицателни стойности (по-малък концентрационен градиент), а мембраната в покой е предимно пропусклива за K⁺ — затова V<sub>m</sub> следва E<sub>K</sub> и клетката се деполяризира. Клинично: риск от аритмии и инактивация на Na⁺-канали."},
- {q:"Ако P<sub>Na</sub> стане по-голяма от P<sub>K</sub> (както на върха на АП), към коя стойност се приближава V<sub>m</sub>?",opts:["E<sub>K</sub> ≈ −90 mV","E<sub>Cl</sub> ≈ −64 mV","E<sub>Na</sub> ≈ +60 mV"],a:2,
+ {q:"Ако P<sub>Na</sub> стане по-голяма от P<sub>K</sub> (както на върха на АП), към коя стойност се приближава V<sub>m</sub>?",opts:["E<sub>K</sub> ≈ −94 mV","E<sub>Cl</sub> ≈ −87 mV","E<sub>Na</sub> ≈ +61 mV"],a:2,
   set:{pNa:20},expl:"GHK уравнението е претеглена средна на равновесните потенциали според относителните пропускливости. Йонът с доминираща пропускливост „дърпа“ мембранния потенциал към своя Нернстов потенциал."},
  {q:"Защо промяната на [Na⁺]ₑ почти не влияе на потенциала на покой?",opts:["Защото E<sub>Na</sub> не зависи от [Na⁺]ₑ","Защото P<sub>Na</sub> в покой е много малка","Защото Na⁺ е в равновесие"],a:1,
-  set:{Nao:120},expl:"E<sub>Na</sub> се променя, но тежестта му в GHK е малка (P<sub>Na</sub>:P<sub>K</sub> ≈ 0,04). Затова хипонатриемията не променя съществено V<sub>m</sub> в покой, но намалява амплитудата на АП."},
+  set:{Nao:120},expl:"E<sub>Na</sub> се променя, но тежестта му в GHK е малка (P<sub>Na</sub>:P<sub>K</sub> ≈ 0,01). Затова хипонатриемията не променя съществено V<sub>m</sub> в покой, но намалява амплитудата на АП."},
  {q:"Каква е посоката на нетния ток на Na⁺ в покой?",opts:["Навътре (движеща сила силно отрицателна)","Навън","Нулев"],a:0,
-  set:{reset:1},expl:"Движещата сила V<sub>m</sub> − E<sub>Na</sub> ≈ −74 − (+62) ≈ −136 mV — голяма и насочена навътре. Малкият постоянен Na⁺ „теч“ се компенсира от Na⁺/K⁺-ATP-азата."}
+  set:{reset:1},expl:"Движещата сила V<sub>m</sub> − E<sub>Na</sub> ≈ −87 − (+62) ≈ −149 mV — голяма и насочена навътре. Малкият постоянен Na⁺ „теч“ се компенсира от Na⁺/K⁺-ATP-азата."}
 ];
 function viewGHK(main){
   main.innerHTML=`<h2>Мембранен потенциал на покой</h2><p class="lead">Уравнение на Нернст за всеки йон и уравнение на Goldman–Hodgkin–Katz за мембранния потенциал. Променяй концентрациите и пропускливостите и наблюдавай как V<sub>m</sub> се „придърпва“ към равновесния потенциал на доминиращия йон.</p>
   <div class="grid2"><div class="card" id="ctl"></div>
   <div><div class="card"><canvas class="numline" id="nl"></canvas><div class="stats" id="st"></div>
   <table class="t" id="tb"></table>
-  <div class="note">V<sub>m</sub> = (RT/F)·ln[(P<sub>K</sub>[K⁺]ₑ + P<sub>Na</sub>[Na⁺]ₑ + P<sub>Cl</sub>[Cl⁻]ᵢ) / (P<sub>K</sub>[K⁺]ᵢ + P<sub>Na</sub>[Na⁺]ᵢ + P<sub>Cl</sub>[Cl⁻]ₑ)]</div></div>
+  <div class="note">V<sub>m</sub> = (RT/F)·ln[(P<sub>K</sub>[K⁺]ₑ + P<sub>Na</sub>[Na⁺]ₑ + P<sub>Cl</sub>[Cl⁻]ᵢ) / (P<sub>K</sub>[K⁺]ᵢ + P<sub>Na</sub>[Na⁺]ᵢ + P<sub>Cl</sub>[Cl⁻]ₑ)]</div>
+  <div class="note">Тук V<sub>m</sub> е дифузионният потенциал по GHK. Електрогенният ефект на Na⁺/K⁺ помпата добавя още около −4 mV, затова при нормални стойности реалният потенциал на покой е около −90 mV.</div></div>
   <h3>Експерименти</h3><div id="ex"></div></div></div>`;
   const c=$("#ctl");
-  c.innerHTML=`<div class="btns"><button class="b" data-s="norm">Нормално</button><button class="b" data-s="hyperK">Хиперкалиемия</button><button class="b" data-s="hypoK">Хипокалиемия</button><button class="b" data-s="peak">Връх на АП</button><button class="b" data-s="big">Голямо нервно влакно (Guyton)</button></div>`;
-  const D={Ko:4,Ki:140,Nao:142,Nai:14,Clo:103,Cli:4,pK:1,pNa:0.04,pCl:0.45,T:37};
+  c.innerHTML=`<div class="btns"><button class="b" data-s="norm">Нормално</button><button class="b" data-s="hyperK">Хиперкалиемия</button><button class="b" data-s="hypoK">Хипокалиемия</button><button class="b" data-s="peak">Връх на АП</button><button class="b" data-s="cns">Неврон в ЦНС</button><button class="b" data-s="noCl">Без Cl⁻ проводимост</button></div>`;
+  const D={Ko:4,Ki:140,Nao:142,Nai:14,Clo:103,Cli:4,pK:1,pNa:0.01,pCl:0.45,T:37};
   const S={};
   const upd=()=>draw();
   S.Ko=slider(c,{label:"[K⁺] извънклетъчно",min:1,max:12,step:0.1,value:D.Ko,d:1,unit:"mmol/L",hint:"норма 3,5–5,0"},upd);
@@ -436,10 +437,10 @@ function viewGHK(main){
   S.Nai=slider(c,{label:"[Na⁺] вътреклетъчно",min:5,max:40,step:1,value:D.Nai,unit:"mmol/L"},upd);
   S.Clo=slider(c,{label:"[Cl⁻] извънклетъчно",min:80,max:130,step:1,value:D.Clo,unit:"mmol/L"},upd);
   S.Cli=slider(c,{label:"[Cl⁻] вътреклетъчно",min:2,max:40,step:1,value:D.Cli,unit:"mmol/L"},upd);
-  S.pNa=slider(c,{label:"P<sub>Na</sub> / P<sub>K</sub>",min:0.001,max:20,step:0.001,value:D.pNa,show:v=>v<1?fmt(v,3):fmt(v,1)},upd);
+  {const r=slider(c,{label:"P<sub>Na</sub> / P<sub>K</sub>",min:-3,max:1.3,step:0.01,value:Math.log10(D.pNa),hint:"логаритмична скала: 0,001 … 20",show:v=>{const x=Math.pow(10,v);return x<0.1?fmt(x,3):x<1?fmt(x,2):fmt(x,1)}},upd);S.pNa={get:()=>{const x=Math.pow(10,r.get());return +x.toPrecision(2)},set:v=>r.set(Math.log10(Math.max(0.001,v)))}}
   S.pCl=slider(c,{label:"P<sub>Cl</sub> / P<sub>K</sub>",min:0,max:3,step:0.01,value:D.pCl,d:2},upd);
   S.T=slider(c,{label:"Температура",min:20,max:42,step:0.5,value:D.T,d:1,unit:"°C"},upd);
-  const presets={norm:{},hyperK:{Ko:8},hypoK:{Ko:2.5},peak:{pNa:20},big:{pNa:0.01}};
+  const presets={norm:{},hyperK:{Ko:8},hypoK:{Ko:2.5},peak:{pNa:20},cns:{pNa:0.05,Cli:7},noCl:{pCl:0}};
   const apply=p=>{for(const k in D)S[k]&&S[k].set(D[k]);if(!p.reset)for(const k in p)S[k]&&S[k].set(p[k]);draw()};
   c.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>apply(presets[b.dataset.s]));
   experiments($("#ex"),EXP_GHK,"ghk",apply);
@@ -453,21 +454,21 @@ function viewGHK(main){
     const row=(ion,E,z,p)=>{const df=Vm-E;const dir=Math.abs(df)<0.5?"≈ равновесие":((df*z<0)?"навътре":"навън");return `<tr><td>${ion}</td><td>${fmt(E,1)}</td><td>${fmt(df,1)}</td><td>${dir}</td><td>${p}</td></tr>`};
     $("#tb").innerHTML=`<tr><th>Йон</th><th>E<sub>ion</sub>, mV</th><th>Движеща сила V<sub>m</sub>−E</th><th>Нетен поток</th><th>Отн. пропускливост</th></tr>`+
       row("K⁺",EK,1,"1")+row("Na⁺",ENa,1,v.pNa<1?fmt(v.pNa,3):fmt(v.pNa,1))+row("Cl⁻",ECl,-1,fmt(v.pCl,2));
-    numline($("#nl"),[{v:EK,l:"E_K",c:css("--accent2")},{v:ECl,l:"E_Cl",c:css("--accent3")},{v:ENa,l:"E_Na",c:css("--accent")}],Vm);
+    numline($("#nl"),[{v:EK,l:"E_K",c:"#7048E8"},{v:ECl,l:"E_Cl",c:"#3B82C4"},{v:ENa,l:"E_Na",c:"#C8102E"}],Vm);
   }
   window.onresize=draw; draw();
 }
 function numline(cv,marks,Vm){
   const dpr=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;
   const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);
-  const lo=-130,hi=100,L=20,R=20,y=62,X=v=>L+(Math.max(lo,Math.min(hi,v))-lo)/(hi-lo)*(W-L-R);
+  const lo=-130,hi=100,L=20,R=20,y=54,X=v=>L+(Math.max(lo,Math.min(hi,v))-lo)/(hi-lo)*(W-L-R);
   g.strokeStyle=css("--line");g.lineWidth=2;g.beginPath();g.moveTo(L,y);g.lineTo(W-R,y);g.stroke();
   g.font="11px -apple-system,Segoe UI,Arial";g.fillStyle=css("--muted");g.textAlign="center";
-  for(let v=-120;v<=90;v+=30){g.beginPath();g.moveTo(X(v),y-4);g.lineTo(X(v),y+4);g.stroke();g.fillText(v+" mV",X(v),y+18)}
-  g.fillText("0",X(0),y+18);
-  marks.forEach((m,i)=>{g.fillStyle=m.c;g.beginPath();g.arc(X(m.v),y,6,0,7);g.fill();g.font="bold 12px -apple-system,Segoe UI,Arial";g.fillText(m.l.replace("_",""),X(m.v),y-16-(i%2)*14)});
-  g.fillStyle=css("--ink");g.beginPath();g.moveTo(X(Vm),y+8);g.lineTo(X(Vm)-8,y+30);g.lineTo(X(Vm)+8,y+30);g.closePath();g.fill();
-  g.font="bold 13px -apple-system,Segoe UI,Arial";g.fillText("Vm = "+fmt(Vm,1)+" mV",Math.min(W-60,Math.max(60,X(Vm))),y+46);
+  for(let v=-120;v<=90;v+=30){g.beginPath();g.moveTo(X(v),y-4);g.lineTo(X(v),y+4);g.stroke();g.fillText(v+" mV",X(v),y+34)}
+  const lv=[];[...marks].sort((a,b)=>a.v-b.v).forEach(m=>{const x=X(m.v);let k=0;while(lv.some(o=>o.k===k&&Math.abs(o.x-x)<46))k++;lv.push({x,k});m._k=k});
+  marks.forEach(m=>{g.fillStyle=m.c;g.beginPath();g.arc(X(m.v),y,6,0,7);g.fill();g.font="bold 12px -apple-system,Segoe UI,Arial";g.fillText(m.l.replace("_",""),X(m.v),y-16-m._k*15)});
+  g.fillStyle=css("--ink");g.beginPath();g.moveTo(X(Vm),y+7);g.lineTo(X(Vm)-6,y+20);g.lineTo(X(Vm)+6,y+20);g.closePath();g.fill();
+  g.font="bold 13px -apple-system,Segoe UI,Arial";g.fillText("Vm = "+fmt(Vm,1)+" mV",Math.min(W-60,Math.max(60,X(Vm))),y+56);
 }
 
 /* ================= 2. Акционен потенциал (Hodgkin–Huxley) ================= */
@@ -4049,13 +4050,13 @@ MK.neuron=function(T,o){const V=(x,y,z)=>new T.Vector3(x,y,z),R=MK.rnd(o.seed||5
 const STG_GHK={id:"stgGHK",foc:[[7,-1,0,24],[-5,1,0,22],[-4,-3,0,28],[-7,0,0,26],[0,-0.5,0,36]],title:"Как възниква потенциалът на покой — стъпка по стъпка",h:470,dur:4.5,
  intro:"Участък от мембраната (мащаб в нанометри): K⁺ канал на изтичане, Na⁺/K⁺-ATPаза, малък Na⁺ теч и белтъчни аниони в клетката. Следи йоните, зарядите по двете страни на мембраната и двете сили, които действат на K⁺.",
  cam:{r:36,th:0.32,phi:1.32,target:[0,-0.5,0]},
- legend:[["#9c36b5","K⁺"],["#f59f00","Na⁺"],["#2f9e44","Cl⁻"],["#868e96","белтъчни аниони (A⁻)"],["#845ef7","K⁺ канал на изтичане","box"],["#f08c00","Na⁺/K⁺-ATPаза (α), домени A, N, P","box"],["#e8590c","химична сила (концентрационен градиент)","box"],["#1c7ed6","електрична сила (поле на мембраната)","box"]],
+ legend:[["#9c36b5","K⁺"],["#f76707","Na⁺"],["#4dabf7","Cl⁻"],["#495057","белтъчни аниони (A⁻)"],["#845ef7","K⁺ канал на изтичане","box"],["#c2255c","Na⁺/K⁺-ATPаза: α (домени A, N, P) и β","box"],["#343a40","химична сила (концентрационен градиент)","box"],["#1c7ed6","електрична сила (поле на мембраната)","box"]],
  stages:[
-  {t:"Na⁺/K⁺-ATPаза създава градиентите",short:"Помпата създава градиентите",badge:"3 Na⁺ навън · 2 K⁺ навътре",d:"С енергия от ATP помпата изнася 3 Na⁺ и внася 2 K⁺ на цикъл. Така [K⁺] вътре става ≈ 140 mmol/L (навън ≈ 4), а [Na⁺] навън ≈ 142 mmol/L (вътре ≈ 14). Градиентите са „батерията“ на клетката."},
-  {t:"K⁺ излиза по концентрационния градиент",short:"K⁺ излиза през каналите на изтичане",badge:"химична сила навън",d:"В покой отворени са главно K⁺ каналите на изтичане (K2P, Kir), затова мембраната е ≈ 50–100 пъти по-пропусклива за K⁺, отколкото за Na⁺. K⁺ дифундира навън по концентрационния си градиент (оранжевата стрелка)."},
+  {t:"Na⁺/K⁺-ATPаза създава градиентите",short:"Помпата създава градиентите",badge:"3 Na⁺ навън · 2 K⁺ навътре",d:"С енергия от ATP помпата изнася 3 Na⁺ и внася 2 K⁺ на цикъл. Така [K⁺] вътре става ≈ 140 mmol/L (навън ≈ 4), а [Na⁺] навън ≈ 142 mmol/L (вътре ≈ 14). Градиентите са „батерията“ на клетката. Каналите на изтичане в този етап са мислено затворени, затова V<sub>m</sub> ≈ 0 mV. Самата помпа създава само малка разлика в потенциала."},
+  {t:"K⁺ излиза по концентрационния градиент",short:"K⁺ излиза през каналите на изтичане",badge:"химична сила навън",d:"В покой отворени са главно K⁺ каналите на изтичане (K2P, Kir), затова мембраната е ≈ 50–100 пъти по-пропусклива за K⁺, отколкото за Na⁺. K⁺ дифундира навън по концентрационния си градиент (тъмната стрелка)."},
   {t:"Вътре остава отрицателен заряд",short:"Остава отрицателен заряд вътре",badge:"заряди по мембраната",d:"Всеки излязъл K⁺ оставя вътре несдвоен отрицателен заряд (белтъчните аниони A⁻ не могат да излязат). Зарядите се натрупват като тънък слой по двете повърхности на мембраната (кондензатор). Възниква електрично поле, което дърпа K⁺ обратно навътре (синята стрелка)."},
-  {t:"Равновесие за K⁺: E_K ≈ −94 mV",short:"Равновесен потенциал на K⁺",badge:"химична = електрична",d:"Когато електричната сила стане равна на химичната, нетният поток на K⁺ спира: колкото K⁺ излизат, толкова влизат. Това е равновесният потенциал по уравнението на Нернст: E_K = 61,5·log([K⁺]ₑ/[K⁺]ᵢ) ≈ −94 mV. За това са нужни нищожно малко йони (≈ 1 на 100 000)."},
-  {t:"Малкият Na⁺ теч → Vₘ ≈ −70…−90 mV",short:"Na⁺ теч и помпа → потенциал на покой",badge:"GHK",d:"Мембраната пропуска малко и Na⁺ (P_Na/P_K ≈ 0,01–0,04). Влизащият Na⁺ изтегля потенциала малко към E_Na (+61 mV), затова Vₘ е ≈ −70…−90 mV (уравнение на Goldman–Hodgkin–Katz). Помпата непрекъснато връща изтеклите йони и с отношението 3:2 добавя още ≈ −4 mV (електрогенен ефект)."}],
+  {t:"Равновесие за K⁺: E<sub>K</sub> ≈ −94 mV",short:"Равновесен потенциал на K⁺",badge:"химична = електрична",d:"Когато електричната сила стане равна на химичната, нетният поток на K⁺ спира: колкото K⁺ излизат, толкова влизат. Това е равновесният потенциал по уравнението на Нернст: E<sub>K</sub> = 61·log([K⁺]ₑ/[K⁺]ᵢ) = 61·log(4/140) ≈ −94 mV. За това трябва да се преместят съвсем малко йони (около 1 на 100 000 от K⁺ в клетката), така че концентрациите практически не се променят."},
+  {t:"Na⁺ теч и помпа → V<sub>m</sub> ≈ −90 mV",short:"Na⁺ теч и помпа → потенциал на покой",badge:"GHK + помпа",d:"Мембраната пропуска и малко Na⁺ (P<sub>Na</sub>/P<sub>K</sub> ≈ 0,01). Влизащият Na⁺ изтегля потенциала към E<sub>Na</sub> (+61 mV), затова дифузионният потенциал е около −86 mV, а не −94 mV (уравнение на Goldman–Hodgkin–Katz). Помпата връща изтеклите йони и с отношението 3 Na⁺ : 2 K⁺ добавя още около −4 mV. Така в голямо нервно влакно и в скелетен мускул V<sub>m</sub> ≈ −90 mV. В невроните на ЦНС P<sub>Na</sub> е по-голяма и V<sub>m</sub> е около −65…−70 mV."}],
  build(G,T,ctx){const sc=G.scene,V=(x,y,z)=>new T.Vector3(x,y,z),R=MK.rnd(7);
   sc.add(MK.bilayer(T,{w:30,d:9,z0:-3.3,holes:[[-5,0,2.9],[6,0.2,3.3],[-11,0,1.4]]}));
   // K⁺ канал на изтичане (тетрамер + цитоплазмен домен)
@@ -4063,17 +4064,17 @@ const STG_GHK={id:"stgGHK",foc:[[7,-1,0,24],[-5,1,0,22],[-4,-3,0,28],[-7,0,0,26]
     for(const y of [-3.6,-4.8])kb.push([Math.cos(a)*2.1,y,Math.sin(a)*2.1,1.0,col]);kb.push([Math.cos(a)*1.4,3.1,Math.sin(a)*1.4,0.55,col])}
   const kch=MK.blob(T,kb,{res:52});kch.position.x+=-5;sc.add(kch);
   // малък Na⁺ канал на изтичане
-  const nb=[];for(let k=0;k<4;k++){const a=k*Math.PI/2;for(const y of [-1.8,0,1.8])nb.push([Math.cos(a)*1.0,y,Math.sin(a)*1.0,0.62,0xffa94d])}const nch=MK.blob(T,nb,{res:36});nch.position.x+=-11;sc.add(nch);
+  const nb=[];for(let k=0;k<4;k++){const a=k*Math.PI/2;for(const y of [-1.8,0,1.8])nb.push([Math.cos(a)*1.0,y,Math.sin(a)*1.0,0.62,0xff8a5c])}const nch=MK.blob(T,nb,{res:36});nch.position.x+=-11;sc.add(nch);
   // Na⁺/K⁺-ATPаза: α (TM), A, N, P домени, β с гликани
-  const pb=[];for(let k=0;k<10;k++){const a=k/10*Math.PI*2;for(const y of [-1.8,0,1.8])pb.push([6+Math.cos(a)*2.0,y,0.2+Math.sin(a)*1.4,0.78,0xf08c00])}
-  [[4.6,-4.3,0.6,1.3,0xfab005],[4.2,-5.6,0.2,1.0,0xfab005],[6.4,-4.6,-0.6,1.25,0x1c7ed6],[7.0,-5.4,-0.9,1.0,0x1c7ed6],[7.8,-6.6,-0.1,1.25,0xe03131],[8.6,-7.4,0.4,0.95,0xe03131],[6.0,-3.0,0,1.1,0xf08c00]].forEach(b=>pb.push(b));
+  const pb=[];for(let k=0;k<10;k++){const a=k/10*Math.PI*2;for(const y of [-1.8,0,1.8])pb.push([6+Math.cos(a)*2.0,y,0.2+Math.sin(a)*1.4,0.78,0xc2255c])}
+  [[4.6,-4.3,0.6,1.3,0xf06595],[4.2,-5.6,0.2,1.0,0xf06595],[6.4,-4.6,-0.6,1.25,0x1c7ed6],[7.0,-5.4,-0.9,1.0,0x1c7ed6],[7.8,-6.6,-0.1,1.25,0xe03131],[8.6,-7.4,0.4,0.95,0xe03131],[6.0,-3.0,0,1.1,0xc2255c]].forEach(b=>pb.push(b));
   const pump=MK.blob(T,pb,{res:56});sc.add(pump);
-  const beta=MK.blob(T,[[8.6,0,1.6,0.6,0x2f9e44],[8.6,1.6,1.6,0.6,0x2f9e44],[8.2,3.4,1.4,1.2,0x2f9e44],[7.4,4.3,0.9,1.0,0x2f9e44],[9.0,4.2,1.8,0.9,0x2f9e44]],{res:36});sc.add(beta);
-  [[9.4,5.2,2.2],[9.9,5.9,2.5],[10.4,6.4,2.2],[8.0,5.4,0.4],[8.4,6.2,0.1]].forEach(p=>{const m=new T.Mesh(new T.SphereGeometry(0.3,12,8),MK.mat(T,0xb2f2bb));m.position.set(...p);sc.add(m)});
+  const beta=MK.blob(T,[[8.6,0,1.6,0.6,0xadb5bd],[8.6,1.6,1.6,0.6,0xadb5bd],[8.2,3.4,1.4,1.2,0xadb5bd],[7.4,4.3,0.9,1.0,0xadb5bd],[9.0,4.2,1.8,0.9,0xadb5bd]],{res:36});sc.add(beta);
+  [[9.4,5.2,2.2],[9.9,5.9,2.5],[10.4,6.4,2.2],[8.0,5.4,0.4],[8.4,6.2,0.1]].forEach(p=>{const m=new T.Mesh(new T.SphereGeometry(0.3,12,8),MK.mat(T,0xe9ecef));m.position.set(...p);sc.add(m)});
   // белтъчни аниони вътре
-  ctx.an=[];[[-9,-7.5,2],[1,-8,-2.5],[11.5,-7.5,3],[-2,-6.8,4]].forEach(p=>{const b=MK.blob(T,[[p[0],p[1],p[2],1.1],[p[0]+1,p[1]+0.5,p[2]-0.4,0.9],[p[0]-0.8,p[1]-0.4,p[2]+0.5,0.8]],{res:30,color:0x868e96});sc.add(b);const s=MK.sign(T,"−","#1c7ed6",1.6);s.position.set(p[0]+0.4,p[1]+2.0,p[2]+1.2);sc.add(s)});
+  ctx.an=[];[[-9,-7.5,2],[1,-8,-2.5],[11.5,-7.5,3],[-2,-6.8,4]].forEach(p=>{const b=MK.blob(T,[[p[0],p[1],p[2],1.1],[p[0]+1,p[1]+0.5,p[2]-0.4,0.9],[p[0]-0.8,p[1]-0.4,p[2]+0.5,0.8]],{res:30,color:0x495057});sc.add(b);const s=MK.sign(T,"−","#1c7ed6",1.6);s.position.set(p[0]+0.4,p[1]+2.0,p[2]+1.2);sc.add(s)});
   // йони
-  const ions={K:MK.pool(T,0x9c36b5,0.34,80),Na:MK.pool(T,0xf59f00,0.29,80),Cl:MK.pool(T,0x2f9e44,0.4,40)};Object.values(ions).forEach(m=>sc.add(m));
+  const ions={K:MK.pool(T,0x9c36b5,0.34,80),Na:MK.pool(T,0xf76707,0.29,80),Cl:MK.pool(T,0x4dabf7,0.4,40)};Object.values(ions).forEach(m=>sc.add(m));
   const pop=(n,out)=>{const a=[];for(let i=0;i<n;i++)a.push({b:V(-14+28*R(),out?3.4+6.4*R():-3.4-6.6*R(),-6+12*R()),f:[R()*6,R()*6,R()*6]});return a};
   ctx.bg={K:[...pop(40,0),...pop(4,1)],Na:[...pop(4,0),...pop(36,1)],Cl:[...pop(3,0),...pop(20,1)]};ctx.ions=ions;
   // преходни йони (по пътя през канала / помпата)
@@ -4083,14 +4084,14 @@ const STG_GHK={id:"stgGHK",foc:[[7,-1,0,24],[-5,1,0,22],[-4,-3,0,28],[-7,0,0,26]
   // заряди по мембраната
   ctx.plus=[];ctx.minus=[];for(let i=0;i<22;i++){const x=-13.5+i*1.25+(i%2)*0.3,z=-5+((i*37)%10);const p=MK.sign(T,"+","#e03131",1.25);p.position.set(x,3.0,1.6+(i%3)*0.4);p.visible=false;sc.add(p);ctx.plus.push(p);
     const m=MK.sign(T,"−","#1c7ed6",1.35);m.position.set(x+0.2,-3.0,1.6+((i+1)%3)*0.4);m.visible=false;sc.add(m);ctx.minus.push(m)}
-  ctx.aC=MK.arrow(T,0xe8590c,{w:0.16});ctx.aC.position.set(-7.9,-1.8,2.6);sc.add(ctx.aC);ctx.aE=MK.arrow(T,0x1c7ed6,{w:0.16});ctx.aE.position.set(-8.9,1.8,2.6);ctx.aE.setDirection(V(0,-1,0));sc.add(ctx.aE);
+  ctx.aC=MK.arrow(T,0x343a40,{w:0.16});ctx.aC.position.set(-7.9,-1.8,2.6);sc.add(ctx.aC);ctx.aE=MK.arrow(T,0x1c7ed6,{w:0.16});ctx.aE.position.set(-8.9,1.8,2.6);ctx.aE.setDirection(V(0,-1,0));sc.add(ctx.aE);
   ctx.nDom=pump;ctx.last=-1;ctx.vm.style.display="";ctx.spawnT=0},
  update(ctx,i,u,dt,t){const T=ctx.T,V=(x,y,z)=>new T.Vector3(x,y,z);
   if(i!==ctx.last){ctx.last=i;ctx.tr=[];ctx.spawnT=0}
   // фонови йони (Брауново трептене)
   for(const k of ["Cl"]){ctx.ions[k].put(ctx.bg[k].map(p=>V(p.b.x+0.35*Math.sin(t*0.9+p.f[0]),p.b.y+0.3*Math.sin(t*0.7+p.f[1]),p.b.z+0.35*Math.sin(t*0.8+p.f[2]))))}
   // разписание на преходите
-  const Vm=[0,lerp(0,-35,u),lerp(-35,-94,u),-94,lerp(-94,-72,u)][i];ctx.Vm=Vm;
+  const Vm=[0,lerp(0,-35,u),lerp(-35,-94,u),-94,(u=Math.min(1,u))<0.6?lerp(-94,-86,u/0.6):lerp(-86,-90,(u-0.6)/0.4)][i];ctx.Vm=Vm;
   const rateKout=[0,2.4,lerp(2.2,1.2,u),1.1,1.2][i],rateKin=[0,0,lerp(0,0.8,u),1.1,0.9][i],rateNa=[0,0,0,0,0.6][i],pumpOn=i===0||i===4;
   ctx.spawnT+=dt;const sp=(rate,key,kind)=>{if(rate>0&&Math.random()<rate*dt)ctx.tr.push({kind,path:ctx.paths[key],t0:t,d:1.6})};
   sp(rateKout,"Kout","K");sp(rateKin,"Kin","K");sp(rateNa,"NaIn","Na");
@@ -4100,15 +4101,15 @@ const STG_GHK={id:"stgGHK",foc:[[7,-1,0,24],[-5,1,0,22],[-4,-3,0,28],[-7,0,0,26]
   const K=ctx.bg.K.map(p=>V(p.b.x+0.35*Math.sin(t*0.9+p.f[0]),p.b.y+0.3*Math.sin(t*0.7+p.f[1]),p.b.z+0.35*Math.sin(t*0.8+p.f[2])));ctx.ions.K.put(K.concat(trK));
   const Na=ctx.bg.Na.map(p=>V(p.b.x+0.35*Math.sin(t*0.9+p.f[0]),p.b.y+0.3*Math.sin(t*0.7+p.f[1]),p.b.z+0.35*Math.sin(t*0.8+p.f[2])));ctx.ions.Na.put(Na.concat(trNa));
   // заряди
-  const nq=Math.round([0,lerp(0,6,u),lerp(6,20,u),20,lerp(20,15,u)][i]);ctx.plus.forEach((p,k)=>p.visible=k<nq);ctx.minus.forEach((p,k)=>p.visible=k<nq);
+  const nq=Math.round([0,lerp(0,6,u),lerp(6,20,u),20,lerp(20,19,u)][i]);ctx.plus.forEach((p,k)=>p.visible=k<nq);ctx.minus.forEach((p,k)=>p.visible=k<nq);
   // сили върху K⁺
-  const showF=i>=1;ctx.aC.setLen(showF?3.6:0);ctx.aE.setLen(showF?3.6*Math.abs(Vm)/94:0);
+  const showF=i>=1;ctx.aC.setLen(showF?3.6:0);ctx.aE.setLen(showF?3.6*Math.min(1,Math.abs(Vm)/94):0);
   // помпата „диша“
   ctx.nDom.rotation.z=pumpOn?0.02*Math.sin(t*2.9):0;
   ctx.vm.innerHTML=`Vₘ = <b>${Vm.toFixed(0)} mV</b> <span style="display:inline-block;vertical-align:middle;width:90px;height:8px;border-radius:4px;background:var(--chip);margin-left:6px;position:relative"><span style="position:absolute;left:0;top:0;bottom:0;width:${Math.min(100,Math.abs(Vm)/1.0)}%;background:#1c7ed6;border-radius:4px"></span></span>`},
- labels(ctx,i){const T=ctx.T,V=(x,y,z)=>new T.Vector3(x,y,z);const L=[["извън клетката",V(-12,8.5,-5)],["в клетката",V(-12,-9,-5)],["K⁺ канал на изтичане",V(-5,6.4,1)],["Na⁺/K⁺-ATPаза",V(7.5,-8.6,0)],["β-субединица",V(9.6,6.8,2)],["белтъчни аниони A⁻",V(1,-10.2,-2.5)],["Na⁺ теч",V(-11.6,3.4,0)]];
+ labels(ctx,i){const T=ctx.T,V=(x,y,z)=>new T.Vector3(x,y,z);const L=[["извън клетката",V(1,8.2,-5)],["в клетката",V(-13.5,-9.6,2)],["K⁺ канал на изтичане",V(-5,4.6,2.5)],["Na⁺/K⁺-ATPаза",V(7.5,-8.6,0)],["β-субединица",V(11.6,5.4,2.4)],["белтъчни аниони A⁻",V(1,-10.2,-2.5)],["Na⁺ теч",V(-12.2,-4.4,1.5)]];
   if(i>=1){L.push(["химична",V(-7.6,-2.6,2.6)],["електрична",V(-9.4,2.7,2.6)])}return L},
- stats(ctx,i){return [["Vₘ",ctx.Vm.toFixed(0)+" mV"],["E_K",'−94 mV'],["E_Na","+61 mV"],["Нетен K⁺ поток",i===0?"—":i===3?"0 (равновесие)":i===4?"малко навън":"навън"]]}};
+ stats(ctx,i){return [["V<sub>m</sub>",(ctx.Vm>-0.5?"0":"−"+Math.abs(ctx.Vm).toFixed(0))+" mV"],["E<sub>K</sub>",'−94 mV'],["E<sub>Na</sub>","+61 mV"],["Нетен K⁺ поток",i===0?"—":i===3?"0 (равновесие)":i===4?"малко навън (уравновесява Na⁺ теча)":"навън"]]}};
 
 
 /* --- I.2 Йонните канали по време на акционния потенциал --- */
@@ -5156,10 +5157,10 @@ const GL_ORDER=[...GL].sort((a,b)=>b.t.split(/\s+/).length-a.t.split(/\s+/).leng
 const isL=ch=>!!ch&&/[A-Za-zА-Яа-яЁёЀ-ӿ]/.test(ch);
 function linkTerms(root){
   const used=new Set();
-  root.querySelectorAll(".lead,.note,.expl,.q,ol li,.book .btxt,.keyp ul,.bfig figcaption").forEach(el=>{
+  root.querySelectorAll(".lead,.note,.expl,.q,ol li:not([data-i]),.book .btxt,.keyp ul,.bfig figcaption").forEach(el=>{
     const done=new Set();
     GL_ORDER.forEach(g=>{if(done.has(g.id))return;
-      const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:n=>n.parentElement.closest(".term,b.nolink")?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+      const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:n=>n.parentElement.closest(".term,b.nolink,li[data-i],button")?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
       let n;while((n=w.nextNode())){const s=n.nodeValue;g.rx.lastIndex=0;let mt;
         while((mt=g.rx.exec(s))){const a=mt.index,b=a+mt[0].length;if(!mt[0].length){g.rx.lastIndex++;continue}
           if(isL(s[a-1])||isL(s[b])) continue;
@@ -5194,7 +5195,7 @@ function viewGlossary(main){
 /* ================= Съответствие с учебника ================= */
 const TB={
  ghk:{src:"Guyton & Hall, гл. 4 „Транспорт през клетъчните мембрани“ и гл. 5 „Мембранни потенциали и акционни потенциали“; АРСО „Физиология на човека“ — Физиология на възбудимите тъкани",
-  rows:[["[Na⁺] извън / вътре","142 / 14 mmol/L","142 / 14 (по подразбиране)"],["[K⁺] извън / вътре","4 / 140 mmol/L","4 / 140"],["[Cl⁻] извън / вътре","103 / 4 mmol/L","103 / 4"],["E<sub>Na</sub> / E<sub>K</sub>","+61 / −94 mV","+62 / −95 mV (изчислени)"],["Потенциал на покой","−90 mV (големи влакна), около −70 mV (неврони)","≈ −87 mV (бутон „Голямо влакно“) / ≈ −74 mV"],["P<sub>Na</sub> : P<sub>K</sub>","≈ 1 : 100","0,01 (голямо влакно) или 0,04 (неврон)"],["Принос на помпата","≈ −4 mV","не е включен в GHK, затова −87 вместо −90"]]},
+  rows:[["[Na⁺] извън / вътре","142 / 14 mmol/L","142 / 14 (по подразбиране)"],["[K⁺] извън / вътре","4 / 140 mmol/L","4 / 140"],["[Cl⁻] извън / вътре","103 / 4 mmol/L","103 / 4"],["E<sub>Na</sub> / E<sub>K</sub>","+61 / −94 mV","+62 / −95 mV (изчислени)"],["Потенциал на покой","−90 mV (големи влакна), около −70 mV (неврони)","≈ −87 mV (по подразбиране) / ≈ −69 mV (бутон „Неврон в ЦНС“)"],["P<sub>Na</sub> : P<sub>K</sub>","≈ 1 : 100","0,01 (по подразбиране) или 0,05 (неврон в ЦНС)"],["Принос на помпата","≈ −4 mV","не е включен в GHK, затова −87 вместо −90"]]},
  ap:{src:"Guyton & Hall, гл. 5; АРСО — Акционен потенциал, рефрактерност, акомодация",
   rows:[["Потенциал на покой","−90 mV (голямо влакно)","−65 mV (аксон на калмар, оригинален HH)"],["Връх (овършут)","≈ +35 mV","≈ +40 mV"],["Продължителност на АП","0,4–1 ms (бозайници)","≈ 2–3 ms (HH при 6,3 °C — по-бавна кинетика)"],["Абсолютен рефрактерен период","≈ 0,4 ms (големи миелинизирани влакна)","≈ 3–4 ms в модела"],["Механизъм","Na⁺ активация → инактивация + K⁺ активация","същият (уравнения на Hodgkin–Huxley)"]],
   note:"Моделът използва оригиналните параметри на Hodgkin–Huxley за гигантския аксон на калмар. Механизмите и съотношенията са верни, но абсолютните времена са около 3–5 пъти по-дълги, отколкото при бозайниците при 37 °C."},
@@ -6450,7 +6451,7 @@ const BF=(()=>{
   const cr=pts=>{let d=`M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;for(let i=0;i<pts.length-1;i++){const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
     d+=` C${(p1[0]+(p2[0]-p0[0])/6).toFixed(1)},${(p1[1]+(p2[1]-p0[1])/6).toFixed(1)} ${(p2[0]-(p3[0]-p1[0])/6).toFixed(1)},${(p2[1]-(p3[1]-p1[1])/6).toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`}return d};
   const pth=(d,o={})=>`<path d="${d}" fill="${o.f||"none"}" stroke="${o.c||"var(--ink)"}" stroke-width="${o.w||2}"${o.dash?` stroke-dasharray="${o.dash}"`:""} stroke-linejoin="round" stroke-linecap="round"${o.op?` fill-opacity="${o.op}"`:""}/>`;
-  const RED="#e03131",BLUE="#1c7ed6",GOLD="#f59f00",VIO="#9c36b5",GRN="#2f9e44";
+  const RED="#e03131",BLUE="#1c7ed6",GOLD="#f76707",VIO="#9c36b5",GRN="#3B82C4";
   const F={};
   // два кръга на кръвообращението
   F.circ=()=>{let b="";
@@ -6583,7 +6584,7 @@ const BF=(()=>{
   F._={S,t,tt,box,ln,ar,cr,pth,RED,BLUE,GOLD,VIO,GRN};
   return F})();
 /* ---- схеми за раздели I и II ---- */
-(()=>{const {S,t,tt,box,ln,ar,cr,pth,RED,BLUE,GOLD,VIO,GRN}=BF._,F=BF,NA="#f59f00",K="#9c36b5",CL="#2f9e44",MEM="color-mix(in srgb,#f2a65a 30%,var(--panel))";
+(()=>{const {S,t,tt,box,ln,ar,cr,pth,RED,BLUE,GOLD,VIO,GRN}=BF._,F=BF,NA="#f76707",K="#9c36b5",CL="#4dabf7",MEM="color-mix(in srgb,#f2a65a 30%,var(--panel))";
  const circ=(x,y,r,f,s,w)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${f}"${s?` stroke="${s}" stroke-width="${w||1.2}"`:""}/>`;
  // сфера с отблясък, липиден бислой, белтък със засенчване (общи „анатомични“ примитиви)
  const sph=(x,y,r,f,lab,o={})=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${f}"/><circle cx="${x}" cy="${y}" r="${r}" fill="url(#aSph)"/>`+(lab?t(x,y+(o.fs||r*1.05)*0.36,lab,{fs:o.fs||r*1.05,c:o.c||"#fff",w:700}):"");
@@ -7096,23 +7097,34 @@ Object.assign(BOOK,{
   secs:[
    {h:"Йоните от двете страни на мембраната",fig:BF.ions(),cap:"Концентрации в mmol/L (Guyton, гл. 4). Ca²⁺ вътре е около 0,0001 mmol/L.",
     html:`<p>Извън клетката има много Na⁺ и Cl⁻, а вътре — много K⁺ и белтъци с отрицателен заряд. Тези разлики се създават и поддържат от <b>Na⁺/K⁺ помпата</b>.</p>
-    <p>В покой мембраната пропуска K⁺ около <b>100 пъти по-лесно</b> от Na⁺. K⁺ минава през <b>канали на изтичане</b> (leak), които са отворени постоянно. Затова потенциалът на покой се определя главно от калия.</p>`},
+    <p>В покой мембраната пропуска K⁺ около <b>100 пъти по-лесно</b> от Na⁺. K⁺ минава през <b>канали на изтичане</b> (leak), които са отворени постоянно. Затова потенциалът на покой се определя главно от калия.</p>
+    <p><b>Белтъчните аниони</b> (A⁻) не могат да минат през мембраната. Те не създават сами потенциала, но задържат вътре положителни йони. Без постоянната работа на помпата клетката би поемала Na⁺, Cl⁻ и вода и би набъбнала.</p>`},
    {h:"Дифузионен потенциал и уравнение на Нернст",fig:BF.nernst(),cap:"K⁺ излиза по концентрационния си градиент. Изнесените положителни заряди правят вътрешността отрицателна и тя започва да задържа K⁺.",
     html:`<p>K⁺ излиза навън по градиента си и изнася положителни заряди. Вътре остават отрицателните аниони и вътрешността става отрицателна. Колкото по-отрицателна е тя, толкова по-силно привлича K⁺ обратно.</p>
     <p>Потенциалът, при който двете сили се уравновесяват, се нарича <b>равновесен (Нернстов) потенциал</b>. За едновалентен йон при 37 °C:</p>
-    <p><b>E = ±61 · log(C<sub>вътре</sub> / C<sub>вън</sub>)</b> mV (знакът е минус за положителен йон).</p>
-    <p>Така E<sub>K</sub> ≈ −94 mV, а E<sub>Na</sub> ≈ +61 mV. За да се създаде този потенциал, трябва да преминат съвсем малко йони — само тънък слой заряди от двете страни на мембраната. Концентрациите практически не се променят.</p>`},
+    <p><b>E = (61 / z) · log(C<sub>вън</sub> / C<sub>вътре</sub>)</b> mV, където z е зарядът на йона (+1 за K⁺ и Na⁺, −1 за Cl⁻).</p>
+    <p>Пример с концентрациите от таблицата:</p>
+    <ul><li>K⁺: 61 · log(4 / 140) = 61 · (−1,54) ≈ <b>−94 mV</b></li><li>Na⁺: 61 · log(142 / 14) = 61 · 1,01 ≈ <b>+61 mV</b></li><li>Cl⁻: −61 · log(103 / 4) = −61 · 1,41 ≈ <b>−86 mV</b></li></ul>
+    <p>Знакът показва заряда на вътрешността, при който йонът е в равновесие. K⁺ е повече вътре, затова вътрешността трябва да е отрицателна, за да го задържи. Na⁺ е повече навън, затова вътрешността трябва да е положителна, за да спре влизането му.</p>
+    <p>За да се създаде този потенциал, трябва да преминат съвсем малко йони — само тънък слой заряди от двете страни на мембраната, който действа като кондензатор. Концентрациите практически не се променят.</p>`},
    {h:"Уравнението на Goldman–Hodgkin–Katz",
     html:`<p>Когато мембраната пропуска няколко йона, потенциалът зависи от три неща за всеки йон: заряда му, концентрацията му от двете страни и пропускливостта на мембраната за него (P).</p>
     <p><b>V = −61 · log[(C<sub>Na,вътре</sub>·P<sub>Na</sub> + C<sub>K,вътре</sub>·P<sub>K</sub> + C<sub>Cl,вън</sub>·P<sub>Cl</sub>) / (C<sub>Na,вън</sub>·P<sub>Na</sub> + C<sub>K,вън</sub>·P<sub>K</sub> + C<sub>Cl,вътре</sub>·P<sub>Cl</sub>)]</b></p>
-    <p>Най-голямо влияние има йонът с най-голяма пропускливост. В покой това е K⁺, затова потенциалът е близо до E<sub>K</sub>. По време на акционния потенциал пропускливостта за Na⁺ се увеличава стотици пъти и потенциалът се приближава към E<sub>Na</sub>.</p>`},
+    <p>Най-голямо влияние има йонът с най-голяма пропускливост. В покой това е K⁺, затова потенциалът е близо до E<sub>K</sub>. По време на акционния потенциал пропускливостта за Na⁺ се увеличава стотици пъти и потенциалът се приближава към E<sub>Na</sub>.</p>
+    <p>Уравнението описва потенциала, при който сумата от всички йонни токове е нула. То не включва тока на помпата, затова дава <b>дифузионния</b> потенциал.</p>`},
+   {h:"Движеща сила и ролята на Cl⁻",
+    html:`<p>Йонът се движи, когато мембранният потенциал е различен от неговия равновесен потенциал. Разликата <b>V<sub>m</sub> − E<sub>йон</sub></b> се нарича <b>движеща сила</b>. Колкото е по-голяма, толкова по-силен е токът, ако каналите са отворени.</p>
+    <ul><li>K⁺: −90 − (−94) = +4 mV. Силата е малка и K⁺ изтича бавно навън.</li><li>Na⁺: −90 − (+61) = −151 mV. Силата е голяма и насочена навътре, но каналите в покой са почти затворени, затова токът е малък.</li></ul>
+    <p>В много клетки Cl⁻ няма собствен транспорт и се разпределя пасивно според потенциала. Тогава E<sub>Cl</sub> ≈ V<sub>m</sub> и хлорът стабилизира потенциала, без да го определя. В зрелите неврони транспортерът KCC2 поддържа Cl⁻ вътре нисък. Затова отварянето на Cl⁻ канали (например от GABA) задържа или хиперполяризира мембраната.</p>`},
    {h:"Откъде идват −90 mV",fig:BF.rest(),cap:"Приносите към потенциала на покой на голямо нервно влакно (Guyton, гл. 5).",
     html:`<ul><li>Ако мембраната пропускаше само K⁺, потенциалът щеше да е <b>−94 mV</b>.</li><li>Мембраната пропуска и малко Na⁺ (около 1 : 100). Влизащият Na⁺ го прави по-малко отрицателен — около <b>−86 mV</b> (по GHK).</li><li>Na⁺/K⁺ помпата изнася 3 Na⁺ срещу 2 K⁺ и добавя още около <b>−4 mV</b>.</li></ul>
-    <p>Резултатът е около <b>−90 mV</b> в големите нервни влакна и в скелетния мускул. Невроните в ЦНС имат около −65 mV.</p>`},
+    <p>Резултатът е около <b>−90 mV</b> в големите нервни влакна и в скелетния мускул. Невроните в ЦНС имат около −65 mV, защото пропускливостта им за Na⁺ е относително по-голяма. В гладкомускулните клетки потенциалът е около −50…−60 mV.</p>
+    <p>Прекият електрогенен принос на помпата е малък. Нейната основна роля е <b>непряка</b>: тя поддържа концентрационните градиенти, от които зависи целият потенциал.</p>`},
    {h:"Какво променя потенциала на покой",
-    html:`<p><b>Хиперкалиемия</b> (висок K⁺ в кръвта) прави E<sub>K</sub> по-малко отрицателен и деполяризира клетките. Това е особено опасно за сърцето. <b>Хипокалиемия</b> хиперполяризира мембраната и намалява възбудимостта.</p>
-    <p>Ако помпата спре (например при липса на ATP), градиентите бавно се изравняват и потенциалът постепенно се приближава към нулата.</p>`}],
-  key:["В покой мембраната пропуска K⁺ ≈ 100 пъти по-лесно от Na⁺.","Нернст: E = ±61 · log(C<sub>вътре</sub>/C<sub>вън</sub>); E<sub>K</sub> ≈ −94 mV, E<sub>Na</sub> ≈ +61 mV.","GHK: потенциалът е най-близо до равновесния потенциал на най-пропускливия йон.","−94 (K⁺) → −86 (с Na⁺ теч) → −90 mV (с помпата)."]},
+    html:`<p><b>Хиперкалиемия</b> (висок K⁺ в кръвта) прави E<sub>K</sub> по-малко отрицателен и деполяризира клетките. Леката деполяризация отначало повишава възбудимостта. При по-силна деполяризация Na⁺ каналите се инактивират и клетката става невъзбудима. Затова тежката хиперкалиемия може да спре сърцето. На ЕКГ се виждат високи, заострени T вълни.</p>
+    <p><b>Хипокалиемия</b> по уравнението на Нернст хиперполяризира мембраната и намалява възбудимостта. Проявява се с мускулна слабост, а на ЕКГ с плоски T и U вълни. В сърдечния мускул ефектът е по-сложен, защото при много нисък K⁺ се затварят и част от K⁺ каналите.</p>
+    <p>Ако помпата спре (например при липса на ATP или при отравяне с уабаин), потенциалът веднага става с няколко mV по-малко отрицателен. След това градиентите бавно се изравняват, клетката набъбва и потенциалът постепенно се приближава към нулата.</p>`}],
+  key:["В покой мембраната пропуска K⁺ ≈ 100 пъти по-лесно от Na⁺.","Нернст: E = ±61 · log(C<sub>вътре</sub>/C<sub>вън</sub>); E<sub>K</sub> ≈ −94 mV, E<sub>Na</sub> ≈ +61 mV.","GHK: потенциалът е най-близо до равновесния потенциал на най-пропускливия йон.","−94 (K⁺) → −86 (с Na⁺ теч) → −90 mV (с помпата).","Движеща сила = V<sub>m</sub> − E<sub>йон</sub>; за Na⁺ в покой тя е голяма, но каналите са затворени.","Хиперкалиемията деполяризира и при тежка степен прави клетките невъзбудими."]},
  ap:{title:"Акционен потенциал",adv:"модел на Hodgkin–Huxley с врати m, h, n и стимулация",
   lead:"Нервните и мускулните клетки предават сигнали с бързи промени на мембранния потенциал — акционни потенциали. Всеки започва с внезапна смяна от отрицателен към положителен потенциал и завършва с бързо връщане към покой. По Guyton, гл. 5.",
   secs:[

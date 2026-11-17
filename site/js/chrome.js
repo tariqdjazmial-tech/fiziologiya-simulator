@@ -10,7 +10,7 @@ const SYS='-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Sego
 const css=`
 html:root{
  --bg:transparent!important;--panel:#FFFFFF!important;--plate:#FFFFFF!important;--chip:#F1F2F4!important;--line:rgba(29,29,31,.12)!important;--ink:#1D1D1F!important;--muted:#5E5E63!important;
- --pri:#C8102E!important;--pri-h:#A50D25!important;--pri-50:rgba(200,16,46,.08)!important;--pri-100:rgba(200,16,46,.16)!important;--accent:#C8102E!important;--accent2:#1D1D1F!important;
+ --pri:#C8102E!important;--pri-h:#A50D25!important;--pri-50:rgba(200,16,46,.08)!important;--pri-100:rgba(200,16,46,.16)!important;--accent:#C8102E!important;--accent2:#1D1D1F!important;--accent3:#4F79B3!important;
  --ok:#0A60D6!important;--ok-50:rgba(10,96,214,.10)!important;--err:#C2410C!important;--err-50:rgba(194,65,12,.10)!important;--warn:#A86A00!important;--warn-50:rgba(168,106,0,.10)!important;--warn-ink:#7A4E0B!important;
  --c:#C8102E!important;--cb:#FFFFFF!important;
  --nb-ink:#1D1D1F!important;--nb-on:#FFFFFF!important;--nb-paper:#FFFFFF!important;--nb-bg:transparent!important;
