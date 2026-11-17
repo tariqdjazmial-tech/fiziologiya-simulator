@@ -289,4 +289,5 @@ function initMotion(){const gsap=window.gsap;gsap.registerPlugin(window.ScrollTr
 })();
 /* телефон: таблиците се превъртат в собствената си рамка, надписите в 3D са по-компактни */
 (function(){const st=document.createElement("style");st.textContent=`@media (max-width:700px){#main table.t{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;font-size:13px}#main table.t th,#main table.t td{padding:7px 8px}}
+#main .book table.t{margin:6px 0 16px}
 @media (max-width:560px){.cap-l{font-size:12px!important;padding:4px 8px!important;max-width:60%!important}.cap-r{font-size:11px!important;padding:4px 7px!important;max-width:38%!important}}`;document.head.appendChild(st)})();

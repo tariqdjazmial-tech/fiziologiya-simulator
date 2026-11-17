@@ -3,7 +3,7 @@
    Всички двойки са с отворен лиценз (SIL OFL) и имат български форми на кирилицата (locl BGR). */
 (function(){"use strict";
 const SET=[
- {k:"sys",n:"Сегашен (системен)",d:"SF Pro / Segoe UI / Roboto",ui:null},
+ {k:"sys",n:"Системен (стар)",d:"SF Pro / Segoe UI / Roboto",ui:null},
  {k:"source",n:"Source Serif 4 + Source Sans 3",d:"Adobe · учебник, научно издание",
   ui:'"Source Sans 3"',h:'"Source Serif 4"',r:'"Source Serif 4"',
   css:"family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;500;600;700"},
@@ -24,11 +24,11 @@ const SET=[
   css:"family=Vollkorn:wght@500;600;700&family=Ysabeau+Office:wght@400;500;600;700"}
 ];
 function on(){const c=window.PHYS_CFG||{};return !!c.testOpen||/[?&]fonts\b/.test(location.search)}
-let cur="sys";try{cur=localStorage.getItem("physio_fonttest")||"sys"}catch(e){}
+const DEF="piaz";let cur=DEF;try{cur=localStorage.getItem("physio_fonttest2")||DEF}catch(e){}
 const q=new URLSearchParams(location.search).get("font");if(q)cur=q;
 const st=document.createElement("style");st.id="ft-style";
 const lk=document.createElement("link");lk.rel="stylesheet";lk.id="ft-link";
-function apply(k){const s=SET.find(x=>x.k===k)||SET[0];cur=s.k;try{localStorage.setItem("physio_fonttest",cur)}catch(e){}
+function apply(k){const s=SET.find(x=>x.k===k)||SET[0];cur=s.k;try{if(on())localStorage.setItem("physio_fonttest2",cur)}catch(e){}
   if(!s.ui){st.textContent="";lk.removeAttribute("href")}
   else{lk.href="https://fonts.googleapis.com/css2?"+s.css+"&display=swap";
     const B="html:root body:not(#ft0)";
@@ -38,7 +38,11 @@ ${B}:not(#ft1) :is(.book .btxt,.book .btxt p,.book .btxt li,.book .btxt b,.lead,
 ${B}:not(#ft1) :is(.stat .v,.stats .v,.lp-stats b,td){font-variant-numeric:tabular-nums lining-nums}
 ${B}:not(#ft1) :is(svg,svg *,code,pre,.mono){font-family:revert!important}`}
   document.querySelectorAll(".ft-opt").forEach(b=>b.setAttribute("aria-pressed",b.dataset.k===cur?"true":"false"));
-  const lb=document.querySelector(".ft-fab span");if(lb)lb.textContent=s.n.split(" + ")[0]}
+  const lb=document.querySelector(".ft-fab span");if(lb)lb.textContent=s.n.split(" + ")[0];
+  window.__canvasFont=s.ui?s.ui.replace(/"/g,"'"):null;
+  const redraw=()=>{window.dispatchEvent(new Event("resize"))};if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>setTimeout(redraw,50));setTimeout(redraw,1200)}
+// шрифтът в графиките (canvas) следва избрания шрифт на интерфейса
+{const P=CanvasRenderingContext2D.prototype,d=Object.getOwnPropertyDescriptor(P,"font");if(d&&d.set)Object.defineProperty(P,"font",{configurable:true,get(){return d.get.call(this)},set(v){const f=window.__canvasFont;if(f&&typeof v==="string"&&/-apple-system|system-ui|Segoe UI|Arial|sans-serif/.test(v)&&!/Georgia|serif\b(?!-)|mono/i.test(v.replace(/sans-serif/g,"")))v=v.replace(/(-apple-system|system-ui)[^;]*$/,f+",-apple-system,Segoe UI,Arial,sans-serif");d.set.call(this,v)}})}
 function ui(){
   const css=document.createElement("style");css.textContent=`
 .ft-fab{position:fixed;left:16px;bottom:16px;z-index:2147482000;display:flex;align-items:center;gap:8px;height:40px;padding:0 14px;border-radius:999px;border:1px solid rgba(0,0,0,.12);background:#1D1D1F;color:#fff;font:600 13px/1 system-ui,sans-serif!important;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.22)}
@@ -63,7 +67,7 @@ function ui(){
   pan.addEventListener("click",e=>{const b=e.target.closest(".ft-opt");if(b){apply(b.dataset.k)}});
   document.addEventListener("click",e=>{if(!pan.hidden&&!pan.contains(e.target)&&!fab.contains(e.target))pan.hidden=true});
   document.body.appendChild(fab);document.body.appendChild(pan)}
-function start(){if(!on())return;document.head.appendChild(lk);document.head.appendChild(st);ui();apply(cur)}
+function start(){document.head.appendChild(lk);document.head.appendChild(st);if(on()){ui()}else cur=DEF;apply(cur)}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);else start();
 window.__fontTest={apply,SET};
 })();

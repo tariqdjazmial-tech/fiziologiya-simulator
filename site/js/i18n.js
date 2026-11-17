@@ -24,7 +24,7 @@ const SKIP=new Set(["SCRIPT","STYLE","CANVAS","TEXTAREA","NOSCRIPT"]);
 const LINKSEL=".lead,.note,.expl,.q,ol li:not([data-i]),.book .btxt,.keyp ul,.bfig figcaption";
 function keyOf(el){let h=el.innerHTML;if(h.indexOf('class="term"')>=0){const c=el.cloneNode(true);c.querySelectorAll("span.term").forEach(s=>s.replaceWith(...s.childNodes));c.normalize();h=c.innerHTML}return norm(h)}
 function link(el){if(typeof GL_ORDER==="undefined")return;const done=new Set([...el.querySelectorAll(".term")].map(x=>+x.dataset.g));
-  GL_ORDER.forEach(g=>{if(done.has(g.id))return;for(const rx of [g.rx,g.rx2]){if(!rx||done.has(g.id))continue;const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:n=>n.parentElement.closest(".term,b.nolink,li[data-i],button")?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});let n;
+  GL_ORDER.forEach(g=>{if(done.has(g.id))return;for(const rx of [g.rx,g.rx2]){if(!rx||done.has(g.id))continue;const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:n=>n.parentElement.closest(".term,b.nolink,li[data-i],button,th")?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});let n;
     W:while((n=w.nextNode())){const s=n.nodeValue;rx.lastIndex=0;let mt;while((mt=rx.exec(s))){const a=mt.index,b=a+mt[0].length;if(!mt[0].length){g.rx.lastIndex++;continue}if(isL(s[a-1])||isL(s[b]))continue;
       const r=document.createRange();r.setStart(n,a);r.setEnd(n,b);const sp=document.createElement("span");sp.className="term";sp.dataset.g=g.id;try{r.surroundContents(sp)}catch(e){}done.add(g.id);break W}}}})}
 const ATTR=["placeholder","title","aria-label"];
