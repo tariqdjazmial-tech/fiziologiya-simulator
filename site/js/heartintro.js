@@ -6,7 +6,8 @@
    Ранният черен екран (#hxo) се слага в началото на <body> в index.html, за да се вижда веднага. */
 (function(){"use strict";
 const ov=document.getElementById("hxo");if(!ov)return;window.__hxo=true;
-const EN=window.PHYS_LANG==="en",L=(b,e)=>EN?e:b;
+/* въведението е винаги на английски, независимо от езика на сайта */
+const EN=true,L=(b,e)=>e;
 const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
 const MOBILE=matchMedia("(max-width: 700px)").matches;
 const THREE_URL="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
@@ -61,7 +62,11 @@ const css=`
 #hxo.zoom .hint{opacity:0;pointer-events:none}
 #hxo .skip{position:absolute;top:max(14px,env(safe-area-inset-top,0px));right:max(14px,env(safe-area-inset-right,0px));font:600 12px/1 system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#cfd4cf;
   background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:12px 16px;min-height:44px;cursor:pointer}
-#hxo .skip:focus-visible,#hxo .hint:focus-visible{outline:2px solid #7fd8a6;outline-offset:3px}
+#hxo .snd{position:absolute;top:max(14px,env(safe-area-inset-top,0px));right:calc(max(14px,env(safe-area-inset-right,0px)) + 92px);display:flex;align-items:center;gap:8px;font:600 12px/1 system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#cfd4cf;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:12px 16px;min-height:44px;cursor:pointer}
+#hxo .snd svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+#hxo .snd.on{color:#7fd8a6;border-color:rgba(127,216,166,.4)}
+#hxo .snd.ask{animation:hxp 2s ease-in-out infinite}@keyframes hxp{50%{border-color:rgba(127,216,166,.7)}}
+#hxo .skip:focus-visible,#hxo .snd:focus-visible,#hxo .hint:focus-visible{outline:2px solid #7fd8a6;outline-offset:3px}
 #hxo .cr{position:absolute;left:max(14px,env(safe-area-inset-left,0px));top:max(16px,env(safe-area-inset-top,0px));font:500 10px/1.3 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#7c847e;max-width:46ch}
 #hxo .cr a{color:inherit}
 #hxo.zoom .cr{opacity:0}
@@ -76,7 +81,8 @@ const css=`
   #hxo .brandx{top:calc(50% - 15vh - 10px)}#hxo .load{top:calc(50% + 15vh + 22px)}
   #hxo .cr{top:auto;bottom:6px;left:20px;font-size:9px}
 }
-@media (prefers-reduced-motion:reduce){#hxo .hint span{animation:none}}
+@media (max-width:700px){#hxo .snd .t{display:none}}
+@media (prefers-reduced-motion:reduce){#hxo .hint span,#hxo .snd.ask{animation:none}}
 `;
 const st=document.createElement("style");st.textContent=css;document.head.appendChild(st);
 ov.innerHTML=`<canvas class="gl" aria-hidden="true"></canvas><div class="vig"></div>
@@ -87,21 +93,39 @@ ov.innerHTML=`<canvas class="gl" aria-hidden="true"></canvas><div class="vig"></
  <div class="brandx"><b>Physio<i>Nova</i></b><span>${L("Симулатор по физиология","Physiology simulator")}</span></div>
  <div class="load">${L("Отваряме началната страница","Opening the home page")}<i></i></div>
  <button class="hint" type="button">${L("Скролни, за да влезеш","Scroll to enter")} <span>↓</span></button>
+ <button class="snd ask" type="button" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="w1" d="M16 9a4 4 0 0 1 0 6"/><path class="w2" d="M18.5 6.5a8 8 0 0 1 0 11"/></svg><span class="t">Tap for heartbeat sound</span></button>
  <button class="skip" type="button">${L("Пропусни","Skip")}</button>
  <div class="cr">${L("Модел","Model")}: <a href="https://sketchfab.com/3d-models/realistic-human-heart-3f8072336ce94d18b3d0d055a1ece089" target="_blank" rel="noopener">Realistic Human Heart</a> · neshallads · CC BY 4.0</div>`;
 const $=s=>ov.querySelector(s);
 
+/* ---------- звук: сърдечни тонове S1 („lub“) и S2 („dub“), синтезирани с Web Audio ----------
+   Браузърите пускат звук само след докосване, клик или клавиш, затова контекстът се създава при първия такъв жест. */
+let AC=null,MG=null,sndOn=false,sndMuted=false;
+try{sndMuted=localStorage.getItem("pn_intro_sound")==="off"}catch(e){}
+function audioInit(){if(AC)return AC.state==="suspended"?AC.resume():Promise.resolve();const C=window.AudioContext||window.webkitAudioContext;if(!C)return Promise.reject();
+  AC=new C();MG=AC.createGain();MG.gain.value=0;const lp=AC.createBiquadFilter();lp.type="lowpass";lp.frequency.value=420;const comp=AC.createDynamicsCompressor();MG.connect(lp);lp.connect(comp);comp.connect(AC.destination);return AC.resume()}
+let NB=null;function noise(){if(NB)return NB;const n=AC.sampleRate*.3,b=AC.createBuffer(1,n,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;return NB=b}
+function tone(t,f0,dur,g){const o=AC.createOscillator(),og=AC.createGain();o.type="sine";o.frequency.setValueAtTime(f0*1.7,t);o.frequency.exponentialRampToValueAtTime(f0,t+dur*.6);
+  og.gain.setValueAtTime(0,t);og.gain.linearRampToValueAtTime(g,t+.012);og.gain.exponentialRampToValueAtTime(.0005,t+dur);o.connect(og);og.connect(MG);o.start(t);o.stop(t+dur+.05);
+  const ns=AC.createBufferSource();ns.buffer=noise();const nf=AC.createBiquadFilter();nf.type="bandpass";nf.frequency.value=f0*2.2;nf.Q.value=1.2;const ng=AC.createGain();
+  ng.gain.setValueAtTime(0,t);ng.gain.linearRampToValueAtTime(g*.55,t+.006);ng.gain.exponentialRampToValueAtTime(.0005,t+dur*.7);ns.connect(nf);nf.connect(ng);ng.connect(MG);ns.start(t);ns.stop(t+dur)}
+/* S1 идва веднага след R вълната (затваряне на AV клапите), S2 в края на T вълната (затваряне на полулунните клапи) */
+function heartSound(which){if(!sndOn||!AC)return;const t=AC.currentTime+.01;if(which===1){tone(t,52,.16,.95);tone(t+.035,44,.12,.5)}else tone(t,68,.11,.7)}
+function setSound(on){sndOn=on;const b=ov.querySelector(".snd");if(b){b.classList.toggle("on",on);b.classList.remove("ask");b.setAttribute("aria-pressed",String(on));b.querySelector(".t").textContent=on?"Sound on":"Sound off";b.querySelector(".w1").style.opacity=b.querySelector(".w2").style.opacity=on?1:.15}
+  if(MG&&AC)MG.gain.setTargetAtTime(on?.9:0,AC.currentTime,.08)}
+function enableFromGesture(){if(AC||sndMuted)return;audioInit().then(()=>setSound(true)).catch(()=>{})}
 /* ---------- ЕКГ като на монитор: курсор, който изтрива пред себе си ---------- */
 const HRb=72,Tc=60/HRb;
 function ecgV(t){const p=((t%Tc)+Tc)%Tc/Tc,g=(m,s,a)=>a*Math.exp(-((p-m)*(p-m))/(2*s*s));return g(.10,.025,.13)+g(.185,.008,-.12)+g(.21,.010,1)+g(.235,.010,-.27)+g(.46,.045,.32)}
 const ec=$(".mon canvas"),ex=ec.getContext("2d");let ew=0,eh=0,ed=1,ecX=0,ecLastY=null,ecT=0;
 function ecSize(){const r=ec.getBoundingClientRect();ed=Math.min(2,devicePixelRatio||1);ew=Math.max(1,r.width);eh=Math.max(1,r.height);ec.width=ew*ed;ec.height=eh*ed;ex.setTransform(ed,0,0,ed,0,0);ex.clearRect(0,0,ew,eh);ecX=0;ecLastY=null}
 new ResizeObserver(ecSize).observe(ec);
-function ecDraw(dt){if(!ew)return;const pxs=Math.max(150,ew/2.6);let adv=pxs*dt;const amp=eh*.36,base=eh*.62;
+function ecDraw(dt){if(!ew)return;const pBefore=((ecT%Tc)+Tc)%Tc/Tc;const pxs=Math.max(150,ew/2.6);let adv=pxs*dt;const amp=eh*.36,base=eh*.62;
   ex.lineJoin="round";ex.lineCap="round";
   while(adv>0){const step=Math.min(adv,2);adv-=step;ecT+=step/pxs;const x0=ecX;ecX+=step;if(ecX>ew){ecX=0;ecLastY=null;continue}
     ex.clearRect(ecX,0,Math.min(28,ew-ecX)+1,eh);
-    const y=base-ecgV(ecT)*amp;if(ecLastY!=null){ex.strokeStyle="#7fd8a6";ex.lineWidth=Math.max(1.6,eh/70);ex.shadowColor="rgba(127,216,166,.6)";ex.shadowBlur=6;ex.beginPath();ex.moveTo(x0,ecLastY);ex.lineTo(ecX,y);ex.stroke();ex.shadowBlur=0}ecLastY=y}}
+    const y=base-ecgV(ecT)*amp;if(ecLastY!=null){ex.strokeStyle="#7fd8a6";ex.lineWidth=Math.max(1.6,eh/70);ex.shadowColor="rgba(127,216,166,.6)";ex.shadowBlur=6;ex.beginPath();ex.moveTo(x0,ecLastY);ex.lineTo(ecX,y);ex.stroke();ex.shadowBlur=0}ecLastY=y}
+  const pAfter=((ecT%Tc)+Tc)%Tc/Tc;const cross=x=>pBefore<pAfter?(pBefore<x&&pAfter>=x):(pBefore<x||pAfter>=x);if(cross(.225))heartSound(1);if(cross(.53))heartSound(2)}
 
 /* ---------- състояния ---------- */
 let phase="pre",zoomAt=0,tStart=0,ended=false,R=null,raf=0;
@@ -109,9 +133,12 @@ const html=document.documentElement;html.style.overflow="hidden";
 function setC(c,on=true){ov.classList.toggle(c,on)}
 function enter(){if(phase==="zoom"||ended)return;phase="zoom";zoomAt=performance.now();setC("ecg");setC("zoom");
   const t0=performance.now(),D=RM?900:2600;(function tick(){const k=Math.min(1,(performance.now()-t0)/D);$(".load").style.setProperty("--lp",Math.round(k*100)+"%");if(k<1&&!ended)requestAnimationFrame(tick);else finish()})()}
-function finish(){if(ended)return;ended=true;try{scrollTo(0,0)}catch(e){}setC("out");html.style.overflow="";
+function finish(){if(ended)return;ended=true;if(MG&&AC){MG.gain.setTargetAtTime(0,AC.currentTime,.25);setTimeout(()=>{try{AC.close()}catch(e){}},1500)}try{scrollTo(0,0)}catch(e){}setC("out");html.style.overflow="";
   setTimeout(()=>{cancelAnimationFrame(raf);if(R){R.dispose();R.forceContextLoss&&R.forceContextLoss()}ov.remove();st.remove()},800)}
 $(".skip").onclick=finish;$(".hint").onclick=enter;
+$(".snd").onclick=e=>{e.stopPropagation();if(!AC){sndMuted=false;audioInit().then(()=>setSound(true)).catch(()=>{});return}const on=!sndOn;sndMuted=!on;try{localStorage.setItem("pn_intro_sound",on?"on":"off")}catch(x){}audioInit().then(()=>setSound(on))};
+ov.addEventListener("pointerdown",e=>{if(!e.target.closest(".snd,.skip"))enableFromGesture()});addEventListener("keydown",()=>{if(!ended)enableFromGesture()});addEventListener("touchend",()=>{if(!ended)enableFromGesture()},{passive:true});
+if(sndMuted)setTimeout(()=>{const b=ov.querySelector(".snd");if(b){b.classList.remove("ask");b.querySelector(".t").textContent="Sound off"}},0);
 let ty=null;
 addEventListener("wheel",e=>{if((phase==="hold"||phase==="intro")&&e.deltaY>8)enter()},{passive:true});
 addEventListener("touchstart",e=>{ty=e.touches[0].clientY},{passive:true});
