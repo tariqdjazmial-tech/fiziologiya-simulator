@@ -131,31 +131,32 @@ const tc=()=>{document.querySelectorAll('meta[name="theme-color"]').forEach(m=>m
 const fb=document.createElement("div");fb.id="lm-bg-fallback";
 const cv=document.createElement("canvas");cv.id="lm-bg";cv.setAttribute("aria-hidden","true");
 function mountBg(){if(!document.body)return setTimeout(mountBg,30);document.body.prepend(cv);document.body.prepend(fb);startGL()}
-const U={mx:.5,my:.35,scroll:0};
+const U={mx:.5,my:.35,scroll:0,calm:0};
 function startGL(){
   const gl=cv.getContext("webgl",{antialias:false,alpha:false,premultipliedAlpha:false,powerPreference:"low-power"});if(!gl){cv.remove();return}
   const VS="attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
   const FS=`precision highp float;
-uniform vec2 uRes;uniform float uTime,uScroll;uniform vec2 uMouse;
+uniform vec2 uRes;uniform float uTime,uScroll,uCalm;uniform vec2 uMouse;
 float h21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
 float noise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);return mix(mix(h21(i),h21(i+vec2(1,0)),u.x),mix(h21(i+vec2(0,1)),h21(i+vec2(1,1)),u.x),u.y);}
-float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*noise(p);p=mat2(1.6,1.2,-1.2,1.6)*p;a*=.5;}return v;}
-float field(vec2 p){float t=uTime*.035;vec2 q=vec2(fbm(p+vec2(0.,t)),fbm(p+vec2(5.2,1.3)-t));vec2 r=vec2(fbm(p+3.*q+vec2(1.7,9.2)+t*.6),fbm(p+3.*q+vec2(8.3,2.8)));return fbm(p+2.2*r+vec2(uScroll*.9,0.));}
+/* спокойна повърхност: широки, меки вълни като на полиран лист, без въртене и без течене */
+float field(vec2 p){p*=.55;return noise(p+vec2(uScroll*.12,0.))*.7+noise(p*2.1+vec2(3.1,1.7))*.3;}
 void main(){
   vec2 uv=gl_FragCoord.xy/uRes;vec2 p=(gl_FragCoord.xy-.5*uRes)/uRes.y*1.25;
-  float e=1.5/uRes.y;float h=field(p);vec2 g=vec2(field(p+vec2(e,0.))-h,field(p+vec2(0.,e))-h)/e;
-  vec3 n=normalize(vec3(-g*.035,1.));vec3 r=reflect(vec3(0.,0.,-1.),n);
-  /* студийна среда: светло отгоре, по-тъмно отдолу, меки „софтбоксове“ */
-  float y=clamp(r.y*.9+.55+(uv.y-.5)*.35,0.,1.);
-  vec3 col=mix(vec3(.70,.72,.75),vec3(.975,.978,.982),smoothstep(.05,.95,y));
-  float a=r.x*2.2+r.y*.8+(uMouse.x-.5)*1.4-uScroll*1.6;
-  float b1=exp(-pow((fract(a*.22)-.5)*6.,2.));col+=b1*.16;
-  float b2=exp(-pow((r.x*1.6+(uMouse.y-.5)*1.1-uScroll*.6-.35)*5.,2.));col+=b2*.10;
-  float dark=exp(-pow((r.x*1.4+r.y+.9+uScroll*.5)*3.,2.));col-=dark*.10;
-  float red=exp(-pow((r.y*2.4-r.x*.7+.95-(uMouse.x-.5)*.5)*4.,2.));col=mix(col,vec3(.80,.16,.22),red*.09);
-  /* фини следи от полиране, като на четкан метал */
-  float br=noise(vec2(gl_FragCoord.x*.0025,gl_FragCoord.y*.9));col*=.988+br*.024;
-  col*=1.-.10*smoothstep(.35,1.,length(uv-.5)*1.3);
+  float e=2./uRes.y;float h=field(p);vec2 g=vec2(field(p+vec2(e,0.))-h,field(p+vec2(0.,e))-h)/e;
+  vec3 n=normalize(vec3(-g*.02,1.));vec3 r=reflect(vec3(0.,0.,-1.),n);
+  float y=clamp(r.y*.6+.55+(uv.y-.5)*.45,0.,1.);
+  vec3 col=mix(vec3(.80,.815,.835),vec3(.965,.968,.972),smoothstep(0.,1.,y));
+  /* един широк мек отблясък и една лека сянка; движат се бавно с курсора и скрола */
+  float a=r.x*1.1+r.y*.4+uv.x*.9+(uMouse.x-.5)*.25-uScroll*.35;
+  col+=exp(-pow((a-.55)*2.2,2.))*.07;
+  col-=exp(-pow((a+.55)*2.,2.))*.045;
+  col=mix(col,vec3(.80,.16,.22),exp(-pow((uv.y-.08+uv.x*.15)*7.,2.))*.025);
+  /* фини следи от четкане */
+  float br=noise(vec2(gl_FragCoord.x*.0025,gl_FragCoord.y*.9));col*=.99+br*.02;
+  /* в уроците фонът е почти равномерен, за да не пречи на четенето */
+  vec3 flt=mix(vec3(.885,.89,.90),vec3(.95,.953,.958),uv.y);col=mix(col,flt+(br-.5)*.012,uCalm*.75);
+  col*=1.-.06*smoothstep(.4,1.,length(uv-.5)*1.3);
   gl_FragColor=vec4(col,1.);
 }`;
   const sh=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)){console.error(gl.getShaderInfoLog(o));return null}return o};
@@ -163,14 +164,15 @@ void main(){
   const pr=gl.createProgram();gl.attachShader(pr,vs);gl.attachShader(pr,fs);gl.linkProgram(pr);gl.useProgram(pr);
   const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
   const loc=gl.getAttribLocation(pr,"p");gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
-  const uRes=gl.getUniformLocation(pr,"uRes"),uTime=gl.getUniformLocation(pr,"uTime"),uScroll=gl.getUniformLocation(pr,"uScroll"),uMouse=gl.getUniformLocation(pr,"uMouse");
+  const uRes=gl.getUniformLocation(pr,"uRes"),uTime=gl.getUniformLocation(pr,"uTime"),uScroll=gl.getUniformLocation(pr,"uScroll"),uMouse=gl.getUniformLocation(pr,"uMouse"),uCalm=gl.getUniformLocation(pr,"uCalm");
   /* рисуваме на половин разделителна способност: металът е мек и така фонът не натоварва телефона */
   const SCALE=.5;function size(){cv.width=Math.max(2,Math.round(innerWidth*SCALE));cv.height=Math.max(2,Math.round(innerHeight*SCALE));gl.viewport(0,0,cv.width,cv.height)}
   size();addEventListener("resize",size);
-  let t0=performance.now(),last=0,vis=true;document.addEventListener("visibilitychange",()=>{vis=!document.hidden});
-  function draw(now){if(vis&&now-last>=33){last=now;gl.uniform2f(uRes,cv.width,cv.height);gl.uniform1f(uTime,RM?0:(now-t0)/1000);gl.uniform1f(uScroll,U.scroll);gl.uniform2f(uMouse,U.mx,U.my);gl.drawArrays(gl.TRIANGLES,0,3)}
-    if(!RM)requestAnimationFrame(draw)}
-  requestAnimationFrame(draw);if(RM){addEventListener("scroll",()=>requestAnimationFrame(n=>{last=0;draw(n)}),{passive:true});addEventListener("resize",()=>requestAnimationFrame(n=>{last=0;draw(n)}))}
+  let prev="",vis=true;document.addEventListener("visibilitychange",()=>{vis=!document.hidden});
+  function draw(){const key=[cv.width,cv.height,U.scroll.toFixed(4),U.mx.toFixed(4),U.my.toFixed(4),U.calm.toFixed(3)].join();
+    if(vis&&key!==prev){prev=key;gl.uniform2f(uRes,cv.width,cv.height);gl.uniform1f(uTime,0);gl.uniform1f(uScroll,U.scroll);gl.uniform2f(uMouse,U.mx,U.my);gl.uniform1f(uCalm,U.calm);gl.drawArrays(gl.TRIANGLES,0,3)}
+    requestAnimationFrame(draw)}
+  requestAnimationFrame(draw);
 }
 mountBg();
 
@@ -180,9 +182,10 @@ const G="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/";
 (window.gsap?Promise.resolve():load(G+"gsap.min.js")).then(()=>window.ScrollTrigger?null:load(G+"ScrollTrigger.min.js")).then(initMotion).catch(()=>{});
 function initMotion(){const gsap=window.gsap;gsap.registerPlugin(window.ScrollTrigger);const ST=window.ScrollTrigger;
   /* курсорът и скролът местят отблясъците по метала плавно, с инерция */
-  const qx=gsap.quickTo(U,"mx",{duration:1.6,ease:"power3.out"}),qy=gsap.quickTo(U,"my",{duration:1.6,ease:"power3.out"});
+  const qx=gsap.quickTo(U,"mx",{duration:3.5,ease:"power2.out"}),qy=gsap.quickTo(U,"my",{duration:3.5,ease:"power2.out"});
+  const calmNow=()=>gsap.to(U,{calm:document.body.classList.contains("lp")?0:1,duration:1.2,ease:"power2.out"});calmNow();addEventListener("hashchange",()=>setTimeout(calmNow,60));
   addEventListener("pointermove",e=>{qx(e.clientX/innerWidth);qy(1-e.clientY/innerHeight)},{passive:true});
-  const qs=gsap.quickTo(U,"scroll",{duration:1.2,ease:"power2.out"});
+  const qs=gsap.quickTo(U,"scroll",{duration:2.5,ease:"power2.out"});
   addEventListener("scroll",()=>qs(scrollY/Math.max(1,document.documentElement.scrollHeight-innerHeight)),{passive:true});
   if(RM)return;
   const EASE="expo.out";
