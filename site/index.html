@@ -697,7 +697,7 @@ function viewNeuron3D(main){
       <canvas id="cN" style="width:100%;height:100%;display:block;touch-action:none"></canvas><div id="lbN" style="position:absolute;inset:0;pointer-events:none"></div>
       <div id="load3" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted)">Зареждане на 3D…</div>
     </div>
-    <div class="legend" style="margin-top:8px"><span style="display:inline-flex;align-items:center;gap:6px">−80 mV <i style="width:160px;height:10px;background:linear-gradient(90deg,#6f7fd8,#e6b3a3 12.5%,#ffe08a 33%,#ffb020 67%,#f03e3e)"></i> +40 mV</span><span>покой ≈ −65 mV = цвят на тъканта</span><span>бял пръстен = сонда</span><span>t = <b id="tsim">0,0</b> ms</span></div>
+    <div class="legend" style="margin-top:8px"><span style="display:inline-flex;align-items:center;gap:6px">−80 mV <i style="width:160px;height:10px;background:linear-gradient(90deg,#6f7fd8,#d8a294 12.5%,#ff9a8a 33%,#ff4d6d 67%,#c8102e)"></i> +40 mV</span><span>покой ≈ −65 mV = цвят на тъканта</span><span>бял пръстен = сонда</span><span>t = <b id="tsim">0,0</b> ms</span></div>
   </div>
   <div class="grid2">
     <div class="card" id="ctl"></div>
@@ -810,10 +810,11 @@ function viewNeuron3D(main){
     rN.outputEncoding=T.sRGBEncoding;rN.toneMapping=T.ACESFilmicToneMapping;rN.toneMappingExposure=1.1;
     sN.add(new T.HemisphereLight(0xffffff,0x5a6270,0.75));{const k=new T.DirectionalLight(0xfff4e6,1.2);k.position.set(5,10,8);sN.add(k);const f=new T.DirectionalLight(0xa5d8ff,0.45);f.position.set(-8,3,-4);sN.add(f);const r=new T.DirectionalLight(0xffffff,0.5);r.position.set(0,-6,-9);sN.add(r);sN.add(new T.AmbientLight(0xffffff,0.12))}
     const tgN=new T.Vector3(3.6,0,0);orbit(camN,cvN,tgN,{r:21,th:0.1,phi:1.3,min:3,max:45});
-    const vmat=()=>new T.MeshPhysicalMaterial({vertexColors:true,roughness:0.5,clearcoat:0.25,clearcoatRoughness:0.4});
-    const pm=()=>new T.MeshPhysicalMaterial({roughness:0.48,clearcoat:0.3,clearcoatRoughness:0.4});
+    sN.environment=MK.env(T,rN);sN.children.forEach(l=>{if(l.isHemisphereLight)l.intensity=0.42;if(l.isAmbientLight)l.intensity=0.05});{const bk=new T.DirectionalLight(0xffe8e8,0.9);bk.position.set(-2,4,-12);sN.add(bk)}
+    const vmat=()=>MK.skin(T,new T.MeshPhysicalMaterial({vertexColors:true,roughness:0.62,clearcoat:0.3,clearcoatRoughness:0.4}),{rim:0xffd9d2,rimI:0.3,pow:2.8,env:0.28});
+    const pm=()=>MK.skin(T,new T.MeshPhysicalMaterial({roughness:0.55,clearcoat:0.3,clearcoatRoughness:0.4}),{rim:0xffd9d2,rimI:0.3,pow:2.8,env:0.28});
     const MAT={soma:vmat(),hill:vmat(),den:vmat(),axon:vmat(),spine:pm(),bouton:pm(),term:pm(),coll:pm(),
-      myelin:new T.MeshPhysicalMaterial({color:LIN(T,0xfbf5ea),roughness:0.28,clearcoat:0.8,transparent:true,opacity:0.74,depthWrite:false}),schwann:MK.mat(T,0xb197fc,{roughness:0.5})};
+      myelin:MK.skin(T,new T.MeshPhysicalMaterial({color:LIN(T,0xf6f3ee),roughness:0.22,clearcoat:1,clearcoatRoughness:0.15,transparent:true,opacity:0.78,depthWrite:false}),{rim:0xffffff,rimI:0.35,pow:3,env:0.6}),schwann:MK.mat(T,0x8f9bbd,{roughness:0.5})};
     const nodesU=[],myU=[];for(let b=0;b<CAB_NA;b+=8){nodesU.push((b+0.5)/CAB_NA);const i0=b+1,i1=Math.min(CAB_NA,b+8);if(i0<i1)myU.push([i0/CAB_NA+0.002,i1/CAB_NA-0.002])}
     const COLL=32;
     const NR=MK.neuron(T,{c:[-6,0,0],R:1.25,s:1,seed:11,dend:{n:7,L:2.5,r0:0.3,depth:3},spD:4,axR:0.15,myR:0.36,hillL:0.8,
@@ -829,8 +830,8 @@ function viewNeuron3D(main){
     const lblN=[["Дендрити с шипчета",new T.Vector3(-9.3,2.9,0)],["Сома",new T.Vector3(-6,1.95,0.6)],["Аксонно хълмче",NR.hillEnd.clone().add(new T.Vector3(-0.4,-0.85,0))],["Аксон",NR.pAx(0.6).add(new T.Vector3(0,0.85,0))],["Колатерала",Ec.clone().add(new T.Vector3(1.4,-2.4,0.6))],["Пресинаптични бутони",E1.clone().add(new T.Vector3(1.6,-1.7,0))]];
     const lblMy=["Миелин (Шванова клетка)",NR.pAx(0.5).add(new T.Vector3(0,-0.9,0))],lblNode=["Ранвиеров възел",NR.nodes[3].p.clone().add(new T.Vector3(0,0.8,0))];
     const lbN=$("#lbN");
-    // цветова скала: хиперполяризация (синкаво) → покой (цвят на тъканта) → деполяризация (жълто → червено, със сияние)
-    const ST=[[-80,"#6f7fd8"],[-65,"#e6b3a3"],[-40,"#ffe08a"],[0,"#ffb020"],[40,"#f03e3e"]].map(([v,h])=>[v,new T.Color(h).convertSRGBToLinear()]);
+    // цветова скала: хиперполяризация (синкаво) → покой (цвят на тъканта) → деполяризация (коралово → червено, със сияние)
+    const ST=[[-80,"#6f7fd8"],[-65,"#d8a294"],[-40,"#ff9a8a"],[0,"#ff4d6d"],[40,"#c8102e"]].map(([v,h])=>[v,new T.Color(h).convertSRGBToLinear()]);
     function colV(v,o){let k=0;while(k<ST.length-2&&v>ST[k+1][0])k++;const a=ST[k],b=ST[k+1],t=Math.max(0,Math.min(1,(v-a[0])/(b[0]-a[0])));o.copy(a[1]).lerp(b[1],t);const g=v>-45?Math.min(1,(v+45)/70)*0.7:0;if(g)o.multiplyScalar(1+g);return o}
     const cX=new T.Color(),cY=new T.Color();
     const paintTube=(mesh,vf)=>{const A=mesh.geometry.attributes.color,arr=A.array,seg=mesh.userData.seg,r1=mesh.userData.rad+1;for(let i=0;i<=seg;i++){colV(vf(i/seg),cX);for(let j=0;j<r1;j++){const k=(i*r1+j)*3;arr[k]=cX.r;arr[k+1]=cX.g;arr[k+2]=cX.b}}A.needsUpdate=true};
@@ -3989,6 +3990,22 @@ MK.rocker=function(T,c,W=1){const g=new T.Group();
 MK.ptube=function(T,curve,rf,o={}){const seg=o.seg||40,rad=o.rad||10;const geo=new T.TubeGeometry(curve,seg,1,rad,false);const pos=geo.attributes.position;
   for(let i=0;i<=seg;i++){const t=i/seg,c=curve.getPointAt(t),r=rf(t);for(let j=0;j<=rad;j++){const k=i*(rad+1)+j;pos.setXYZ(k,c.x+(pos.getX(k)-c.x)*r,c.y+(pos.getY(k)-c.y)*r,c.z+(pos.getZ(k)-c.z)*r)}}
   geo.computeVertexNormals();if(o.colors)geo.setAttribute("color",new T.BufferAttribute(new Float32Array(pos.count*3).fill(1),3));const m=new T.Mesh(geo,o.mat);m.userData.seg=seg;m.userData.rad=rad;return m};
+// „кожа“ на неврона: полупрозрачен ръб (Френел) като при микроскопски рендер
+MK.skin=function(T,m,o={}){const rc=new T.Color(o.rim||0xfff0f0).convertSRGBToLinear(),ri=o.rimI==null?0.55:o.rimI,pw=o.pow||2.4;
+  m.onBeforeCompile=sh=>{sh.uniforms.uRim={value:rc};sh.uniforms.uRimI={value:ri};
+    sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\nuniform vec3 uRim;uniform float uRimI;")
+      .replace("#include <emissivemap_fragment>","#include <emissivemap_fragment>\n{float fr=pow(1.0-clamp(abs(dot(normal,normalize(vViewPosition))),0.0,1.0),"+pw.toFixed(2)+");totalEmissiveRadiance+=uRim*fr*uRimI;}")};
+  m.customProgramCacheKey=()=>"skin"+ri+pw;if(o.env!=null)m.envMapIntensity=o.env;return m};
+// студийна околна среда за отражения (меки прозорци върху тъмен фон), кешира се за рендерера
+MK.env=function(T,ren){if(ren._env)return ren._env;const sc=new T.Scene();
+  sc.add(new T.Mesh(new T.SphereGeometry(20,24,16),new T.MeshBasicMaterial({color:0x2a2c31,side:T.BackSide})));
+  const box=(w,h,p,c,i)=>{const m=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({color:new T.Color(c).multiplyScalar(i),side:T.DoubleSide}));m.position.set(...p);m.lookAt(0,0,0);sc.add(m)};
+  box(14,8,[0,12,6],0xffffff,2.2);box(6,14,[-14,2,-4],0xdfe8ff,1.2);box(6,10,[13,-2,-8],0xffe1e1,1.0);box(18,4,[0,-12,0],0x9aa0aa,0.5);
+  const pm=new T.PMREMGenerator(ren);ren._env=pm.fromScene(sc,0.04).texture;pm.dispose();return ren._env};
+// фини спирални линии на миелиновите ламели
+MK.lamTex=function(T){if(MK._lam)return MK._lam;const c=document.createElement("canvas");c.width=64;c.height=128;const g=c.getContext("2d");g.fillStyle="#ffffff";g.fillRect(0,0,64,128);
+  g.strokeStyle="rgba(150,140,150,0.22)";g.lineWidth=1.2;for(let k=-8;k<16;k++){g.beginPath();g.moveTo(k*8,0);g.lineTo(k*8+64,128);g.stroke()}
+  const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.encoding=T.sRGBEncoding;t.anisotropy=4;MK._lam=t;return t};
 // реалистичен мултиполярен неврон: сома (метатопки), разклонени дендрити с шипчета, хълмче, аксон с миелин (Шванови клетки) и възли,
 // колатерала и крайно разклонение с бутони. o.mat = {soma,hill,den,axon,myelin,schwann,spine,bouton,term}
 MK.neuron=function(T,o){const V=(x,y,z)=>new T.Vector3(x,y,z),R=MK.rnd(o.seed||5),G=new T.Group(),s=o.s||1,c=V(...o.c),Rs=o.R,ax=V(1,0,0),out={group:G,den:[],myelin:[],schwann:[],nodes:[],boutons:[]};
@@ -3998,18 +4015,22 @@ MK.neuron=function(T,o){const V=(x,y,z)=>new T.Vector3(x,y,z),R=MK.rnd(o.seed||5
   // посоки на първичните дендрити (далеч от аксона, разпръснати)
   const dirs=[];for(let k=0;k<o.dend.n;k++){let best=null,bs=-1;for(let q=0;q<30;q++){const d=V(R()-0.5,R()-0.5,(R()-0.5)*(o.flat||1.2)).normalize();if(d.x>0.25)continue;const mn=Math.min(2,...dirs.map(e=>e.angleTo(d)));if(mn>bs){bs=mn;best=d}}dirs.push(best||V(-1,0,0))}
   // сома
-  const balls=[[c.x,c.y,c.z,Rs*0.78]];dirs.forEach(d=>{[[0.62,0.5],[1.0,0.34],[1.32,0.24]].forEach(([f,r])=>{const q=c.clone().addScaledVector(d,Rs*f);balls.push([q.x,q.y,q.z,Rs*r])})});
+  const balls=[[c.x,c.y,c.z,Rs*0.72]];dirs.forEach(d=>{[[0.55,0.56],[0.9,0.43],[1.18,0.32],[1.4,0.24]].forEach(([f,r])=>{const q=c.clone().addScaledVector(d,Rs*f);balls.push([q.x,q.y,q.z,Rs*r])})});
   for(let k=0;k<3;k++){const d=V(R()-0.5,R()-0.5,R()-0.5).normalize();const q=c.clone().addScaledVector(d,Rs*0.3);balls.push([q.x,q.y,q.z,Rs*0.5])}
   {const q=c.clone().addScaledVector(ax,Rs*0.62);balls.push([q.x,q.y,q.z,Rs*0.48])}
-  out.soma=MK.blob(T,balls,{res:o.res||52,mat:o.mat.soma});if(o.colors)out.soma.geometry.setAttribute("color",new T.BufferAttribute(new Float32Array(out.soma.geometry.attributes.position.count*3).fill(1),3));G.add(out.soma);
+  out.soma=MK.blob(T,balls,{res:o.res||52,mat:o.mat.soma});
+  {const g=out.soma.geometry,P=g.attributes.position,N=g.attributes.normal,sc=out.soma.scale.x,po=out.soma.position,f=2.1/Rs,A=Rs*0.045/sc,ph=R()*6;
+    for(let k=0;k<P.count;k++){const x=P.getX(k)*sc+po.x,y=P.getY(k)*sc+po.y,z=P.getZ(k)*sc+po.z;
+      const n=Math.sin(f*x+ph)*Math.sin(f*1.3*y+1.7)*Math.sin(f*0.9*z+2.3)+0.45*Math.sin(f*2.7*x+0.6)*Math.sin(f*2.3*z+ph)+0.25*Math.sin(f*5.1*y+ph*2)*Math.sin(f*4.7*x+1.1);
+      const nx=N.getX(k),ny=N.getY(k),nz=N.getZ(k),nl=Math.hypot(nx,ny,nz);if(!(nl>1e-6))continue;const d=A*n/nl;P.setXYZ(k,P.getX(k)+nx*d,P.getY(k)+ny*d,P.getZ(k)+nz*d)}P.needsUpdate=true}if(o.colors)out.soma.geometry.setAttribute("color",new T.BufferAttribute(new Float32Array(out.soma.geometry.attributes.position.count*3).fill(1),3));G.add(out.soma);
   // аксонно хълмче (конус)
   const h0=c.clone().addScaledVector(ax,Rs*0.55),h1=c.clone().addScaledVector(ax,Rs+(o.hillL||0.8*s));out.hillEnd=h1;
   out.hill=MK.ptube(T,new T.LineCurve3(h0,h1),t=>lerp(Rs*0.5,o.axR*1.08,Math.pow(t,0.55)),{seg:16,rad:20,mat:o.mat.hill,colors:o.colors});G.add(out.hill);
   // дендрити
   const spines=[];
   const md=(o.dend.depth==null?3:o.dend.depth)+1;
-  const dend=(p0,d0,L,r0,depth,par,dist0)=>{const n=8,pts=[p0.clone()];let p=p0.clone(),d=d0.clone();const away=p0.clone().sub(c).normalize();
-    for(let k=1;k<=n;k++){d.add(rp(d).multiplyScalar(0.22)).addScaledVector(away,0.07).normalize();p=p.clone().addScaledVector(d,L/n);pts.push(p)}
+  const dend=(p0,d0,L,r0,depth,par,dist0)=>{const n=12,pts=[p0.clone()];let p=p0.clone(),d=d0.clone();const away=p0.clone().sub(c).normalize(),wv=rp(d0),wf=2+R()*2,wa=L*0.018*(1+depth*0.4),wp=R()*6;
+    for(let k=1;k<=n;k++){d.add(rp(d).multiplyScalar(0.17+0.05*depth)).addScaledVector(away,0.06).normalize();p=p.clone().addScaledVector(d,L/n);pts.push(p.clone().addScaledVector(wv,wa*Math.sin(wf*k/n*Math.PI*2+wp)*Math.sin(Math.PI*k/n)))}
     const last=depth>=md||(depth>1&&R()<0.2);
     const cv=new T.CatmullRomCurve3(pts),r1=r0*(last?0.34:0.68),rf=depth===0?t=>lerp(r0,r1,t)*(1+0.55*Math.exp(-t*7)):t=>lerp(r0,r1,Math.pow(t,0.8));
     const m=MK.ptube(T,cv,rf,{seg:depth<2?18:12,rad:depth<2?8:6,mat:o.mat.den,colors:o.colors});G.add(m);
@@ -4019,7 +4040,7 @@ MK.neuron=function(T,o){const V=(x,y,z)=>new T.Vector3(x,y,z),R=MK.rnd(o.seed||5
     if(!last){cap(r1,10);const pr=rp(d),ang=0.42+0.4*R(),big=R()<0.5?1:-1;
       [[big,0.82,0.6],[-big,0.64,1]].forEach(([sg,kr,ka])=>{const nd=d.clone().addScaledVector(pr,sg*ang*ka).add(rp(d).multiplyScalar(0.15)).normalize();dend(p,nd,L*(0.7+0.28*R()),r1*kr,depth+1,D,dist0+L)})}
     else cap(r1,6)};
-  dirs.forEach(d=>dend(c.clone().addScaledVector(d,Rs*1.22),d,o.dend.L*(0.95+0.45*R()),o.dend.r0*0.82,0,null,0));
+  dirs.forEach(d=>dend(c.clone().addScaledVector(d,Rs*1.32),d,o.dend.L*(0.95+0.45*R()),o.dend.r0*0.82,0,null,0));
   if(spines.length){const n=spines.length,hm=new T.InstancedMesh(new T.SphereGeometry(1,10,8),o.mat.spine,n),nm=new T.InstancedMesh(new T.CylinderGeometry(0.35,0.5,1,6),o.mat.spine,n),M=new T.Matrix4(),Q=new T.Quaternion(),Y=V(0,1,0),one=new T.Color(1,1,1);
     spines.forEach((sp,i)=>{Q.setFromUnitVectors(Y,sp.nr);const nk=sp.q.clone().addScaledVector(sp.nr,sp.neck/2);M.compose(nk,Q,V(sp.head*0.45,sp.neck,sp.head*0.45));nm.setMatrixAt(i,M);
       const hd=sp.q.clone().addScaledVector(sp.nr,sp.neck+sp.head*0.7);M.compose(hd,Q,V(sp.head,sp.head*0.85,sp.head));hm.setMatrixAt(i,M);if(o.colors){hm.setColorAt(i,one);nm.setColorAt(i,one)}});
@@ -4030,7 +4051,7 @@ MK.neuron=function(T,o){const V=(x,y,z)=>new T.Vector3(x,y,z),R=MK.rnd(o.seed||5
   // миелин: обвивки с изтънени краища (паранодии) + ядро на Швановата клетка
   const my=new T.Group();G.add(my);out.myG=my;
   (o.my||[]).forEach(([u0,u1],k)=>{const pts=[];for(let q=0;q<=16;q++)pts.push(out.pAx(lerp(u0,u1,q/16)));const sc=new T.CatmullRomCurve3(pts),L=sc.getLength();const e=Math.min(0.2,(o.myR*1.6)/L);
-    const m=MK.ptube(T,sc,t=>o.axR*1.02+(o.myR-o.axR)*sstep(0,e,t)*sstep(1,1-e,t),{seg:36,rad:20,mat:o.mat.myelin});my.add(m);out.myelin.push({m,u0,u1});
+    const m=MK.ptube(T,sc,t=>o.axR*1.02+(o.myR-o.axR)*Math.sqrt(sstep(0,e,t)*sstep(1,1-e,t)),{seg:90,rad:28,mat:o.mat.myelin});if(m.material&&!m.material.map){m.material.map=MK.lamTex(T);m.material.needsUpdate=true}m.material.map&&(m.material.map.repeat.set(Math.max(2,Math.round(L/(o.myR*0.9))),1));my.add(m);out.myelin.push({m,u0,u1});
     const um=(u0+u1)/2,tn=out.tAx(um),nr=rp(tn),ang=R()*Math.PI*2;nr.applyAxisAngle(tn,ang);const nu=new T.Mesh(new T.SphereGeometry(1,16,12),o.mat.schwann);
     nu.position.copy(out.pAx(um)).addScaledVector(nr,o.myR*0.98);const bx=tn.clone(),by=nr.clone(),bz=bx.clone().cross(by);nu.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(bx,by,bz));nu.scale.set(Math.min(L*0.2,o.myR*1.8),o.myR*0.32,o.myR*0.62);my.add(nu);out.schwann.push(nu)});
   out.nodes=(o.nodesU||[]).map(u=>({u,p:out.pAx(u)}));
@@ -4213,9 +4234,9 @@ const STG_CH={id:"stgCH",foc:[[0,0.3,0,12.5],[0,-2,0,8],[0,-0.5,0,7.5],[0,1.3,0,
 
 /* --- I.3 От синапса до аксона: възникване и скачащо провеждане на АП --- */
 const STG_NEU={id:"stgNEU",title:"От синапса до края на аксона — стъпка по стъпка",h:480,dur:4,
- intro:"Неврон с дендрити и шипчета, сома, аксонно хълмче, начален сегмент и миелинизиран аксон с възли на Ранвие. Жълтото сияние е деполяризация. Стрелките показват локалните токове, а червеното — рефрактерния участък.",
+ intro:"Неврон с дендрити и шипчета, сома, аксонно хълмче, начален сегмент и миелинизиран аксон с възли на Ранвие. Розово-червеното сияние е деполяризация. Стрелките показват локалните токове, а виолетовото — рефрактерния участък.",
  cam:{r:44,th:0.05,phi:1.28,target:[4,-1,0],min:8,max:120},
- legend:[["#ffd43b","деполяризация / АП","box"],["#f59f00","Na⁺ (влиза във възлите)"],["#4dabf7","локален ток (+ заряди в аксона)"],["#fa5252","рефрактерен участък","box"],["#f8f0e3","миелин (Шванови клетки / олигодендроцити)","box"],["#e599f7","синаптични бутони","dot"]],
+ legend:[["#ff4d6d","деполяризация / АП","box"],["#f76707","Na⁺ (влиза във възлите)"],["#4dabf7","локален ток (+ заряди в аксона)"],["#6741d9","рефрактерен участък","box"],["#f8f0e3","миелин (Шванови клетки / олигодендроцити)","box"],["#e599f7","синаптични бутони","dot"]],
  stages:[
   {t:"Синаптичните входове създават EPSP",short:"EPSP в дендритите",badge:"локални, затихващи",d:"Възбудните синапси по дендритите (най-често върху шипчета) отварят лиганд-зависими канали. Възникват малки <b>EPSP</b> (≈ 0,5–1 mV), които се разпространяват пасивно към сомата и затихват с разстоянието (електротонично)."},
   {t:"Сумация в сомата и аксонното хълмче",short:"Сумация (пространствена и времева)",badge:"към прага ≈ −55 mV",d:"EPSP от много синапси (<b>пространствена сумация</b>) и бързо следващи си EPSP (<b>времева сумация</b>) се сумират в сомата. Решението „АП или не“ се взема в аксонното хълмче и началния сегмент."},
@@ -4224,13 +4245,15 @@ const STG_NEU={id:"stgNEU",title:"От синапса до края на акс�
   {t:"Скачащо (салтаторно) провеждане",short:"Скачащо провеждане от възел до възел",badge:"до 120 m/s",d:"Под миелина почти няма Na⁺ канали — АП възниква само във възлите, на ≈ 1–2 mm един от друг. Възбуждането „скача“ от възел на възел. Затова миелинизираните влакна провеждат до 50 пъти по-бързо от немиелинизираните с еднакъв диаметър и харчат по-малко енергия."},
   {t:"Еднопосочност: рефрактерност зад вълната",short:"Еднопосочно провеждане",badge:"рефрактерен период",d:"Зад АП Na⁺ каналите са инактивирани (абсолютен рефрактерен период). Локалният ток не може да възбуди отново възела, от който е дошъл. Затова АП пътува само напред — от хълмчето към пресинаптичните окончания."}],
  build(G,T,ctx){const sc=G.scene,V=(x,y,z)=>new T.Vector3(x,y,z),R=MK.rnd(21);
-  const neuMat=new T.MeshPhysicalMaterial({color:LIN(T,0xe7ad9c),roughness:0.5,clearcoat:0.25,emissive:LIN(T,0xffa94d),emissiveIntensity:0});
-  const myM=new T.MeshPhysicalMaterial({color:LIN(T,0xfbf5ea),roughness:0.3,clearcoat:0.7,transparent:true,opacity:0.82,depthWrite:false});
-  const denM=neuMat.clone();
+  sc.environment=MK.env(T,G.ren);sc.children.forEach(l=>{if(l.isHemisphereLight)l.intensity=0.42;if(l.isAmbientLight)l.intensity=0.05});{const bk=new T.DirectionalLight(0xffe8e8,0.9);bk.position.set(-3,6,-14);sc.add(bk)}
+  const NM=()=>MK.skin(T,new T.MeshPhysicalMaterial({color:LIN(T,0xd8a294),roughness:0.62,clearcoat:0.3,clearcoatRoughness:0.4,emissive:LIN(T,0xff6b5a),emissiveIntensity:0}),{rim:0xffd9d2,rimI:0.32,pow:2.8,env:0.28});
+  const neuMat=NM();neuMat.clone=NM;
+  const myM=MK.skin(T,new T.MeshPhysicalMaterial({color:LIN(T,0xf6f3ee),roughness:0.22,clearcoat:1,clearcoatRoughness:0.15,transparent:true,opacity:0.86,depthWrite:false}),{rim:0xffffff,rimI:0.35,pow:3,env:0.6});
+  const denM=NM();
   // реалистичен неврон: сома с конусовидни основи на дендритите, разклонени дендрити с шипчета, хълмче, начален сегмент, миелин и възли
   const X0=6,X1=31.2,ux=x=>(x-X0)/(X1-X0),my=[];for(let k=0;k<4;k++)my.push([ux(10+5.3*k+0.12),ux(14.6+5.3*k-0.12)]);
-  const NR=MK.neuron(T,{c:[0,-0.2,0],R:3.0,s:2.3,seed:21,flat:1.4,dend:{n:6,L:4.4,r0:0.85,depth:2},spD:2.6,axR:0.42,myR:0.95,hillL:3.0,axSeg:120,res:56,
-    axPts:[[18,-0.2,0],[X1,-0.2,0]],my,nodesU:[],term:{n:6,len:2.4},mat:{soma:neuMat.clone(),hill:neuMat.clone(),den:denM,axon:neuMat.clone(),myelin:myM,schwann:MK.mat(T,0xd0bfff),spine:denM,bouton:MK.mat(T,0xe7ad9c),term:neuMat.clone()}});
+  const NR=MK.neuron(T,{c:[0,-0.2,0],R:3.0,s:2.3,seed:21,flat:1.4,dend:{n:7,L:4.6,r0:0.85,depth:3},spD:2.6,axR:0.42,myR:0.95,hillL:3.0,axSeg:120,res:56,
+    axPts:[[18,-0.2,0],[X1,-0.2,0]],my,nodesU:[],term:{n:6,len:2.4},mat:{soma:neuMat.clone(),hill:neuMat.clone(),den:denM,axon:neuMat.clone(),myelin:myM,schwann:MK.mat(T,0x8f9bbd),spine:denM,bouton:NM(),term:neuMat.clone()}});
   sc.add(NR.group);ctx.soma=NR.soma;ctx.hill=NR.hill;ctx.mye=NR.myelin.map(m=>m.m);ctx.term=NR.term;
   ctx.den=NR.den.filter(D=>D.c);
   // синапси (пресинаптични бутони на други неврони) върху дендритите
@@ -4241,22 +4264,22 @@ const STG_NEU={id:"stgNEU",title:"От синапса до края на акс�
   const ais=new T.Mesh(new T.CylinderGeometry(0.445,0.445,4,20,1,true),neuMat.clone());ais.rotation.z=Math.PI/2;ais.position.set(8,-0.2,0);sc.add(ais);ctx.ais=ais;
   ctx.nodes=[];for(let k=0;k<4;k++){const x=14.6+5.3*k+0.35;const nd=new T.Mesh(new T.CylinderGeometry(0.455,0.455,0.7,20,1,true),neuMat.clone());nd.rotation.z=Math.PI/2;nd.position.set(x,-0.2,0);sc.add(nd);ctx.nodes.push({m:nd,x})}
   // токове и йони
-  ctx.cur=MK.pool(T,0x339af0,0.2,60,{glow:0.6});ctx.na=MK.pool(T,0xf59f00,0.17,60,{glow:0.4});ctx.epsp=MK.pool(T,0xffd43b,0.32,40,{glow:0.9});[ctx.cur,ctx.na,ctx.epsp].forEach(m=>sc.add(m));ctx.cur.material.depthTest=false;ctx.cur.renderOrder=10;
-  ctx.halo=[0,1,2].map(()=>{const h=new T.Mesh(new T.SphereGeometry(1.5,24,16),new T.MeshBasicMaterial({color:LIN(T,0xffc300),transparent:true,opacity:0,depthWrite:false,toneMapped:false}));sc.add(h);return h});ctx.camI=-1;
+  ctx.cur=MK.pool(T,0x339af0,0.2,60,{glow:0.6});ctx.na=MK.pool(T,0xf76707,0.17,60,{glow:0.4});ctx.epsp=MK.pool(T,0xff4d6d,0.32,40,{glow:0.9});[ctx.cur,ctx.na,ctx.epsp].forEach(m=>sc.add(m));ctx.cur.material.depthTest=false;ctx.cur.renderOrder=10;
+  ctx.halo=[0,1,2].map(()=>{const h=new T.Mesh(new T.SphereGeometry(1.5,24,16),new T.MeshBasicMaterial({color:LIN(T,0xff4d6d),transparent:true,opacity:0,depthWrite:false,toneMapped:false}));sc.add(h);return h});ctx.camI=-1;
   ctx.vm.style.display=""},
  update(ctx,i,u,dt,t){const T=ctx.T,V=(x,y,z)=>new T.Vector3(x,y,z),e=easeIO(u);
   if(ctx.camI!==i){ctx.camI=i;const c=i<=1?[4,-1,0,44,0.05,1.28]:i===2?[7,-0.5,0,20,0.35,1.3]:[22,-0.5,0,31,0.1,1.32];ctx.G.flyTo(c[0],c[1],c[2],c[3],c[4],c[5])}
-  const glow=(m,v,c)=>{m.material.emissiveIntensity=v*1.4;m.material.emissive.copy(LIN(T,c||0xffa000))};
+  const glow=(m,v,c)=>{m.material.emissiveIntensity=v*1.4;m.material.emissive.copy(LIN(T,c||0xff4d6d))};
   ctx.syn.forEach(s=>glow(s.b,i===0?0.5+0.5*Math.sin(t*6):0.05,0xbe4bdb));
   ctx.den.forEach(D=>glow(D.m,i===0?0.25*(0.5+0.5*Math.sin(t*4)):i===1?0.2*(1-u):0));
   glow(ctx.soma,i===1?0.15+0.5*e:i===2?0.5*(1-e):0);glow(ctx.hill,i===1?0.6*e:i===2?0.9:i===3?0.5*(1-e):0);
-  glow(ctx.ais,i===2?0.4+0.6*Math.sin(Math.PI*Math.min(1,u*1.5)):i===3?0.5*(1-e):i===4||i===5?0:i===1?0.4*e:0,0xffd43b);
+  glow(ctx.ais,i===2?0.4+0.6*Math.sin(Math.PI*Math.min(1,u*1.5)):i===3?0.5*(1-e):i===4||i===5?0:i===1?0.4*e:0,0xff4d6d);
   // EPSP пулсове по дендритите към сомата
   const ep=[];if(i===0||i===1){ctx.syn.forEach((s,k)=>{const ph=((t*0.5+k*0.17)%1);const tt=s.t*(1-ph);ep.push(s.D.c.getPointAt(Math.max(0,tt)))})}ctx.epsp.put(ep.map(p=>Object.assign(p,{s:0.7})));
   // възли: последователно възбуждане
   const nodeT=i===4?e*4:i===5?4:-1;
-  ctx.nodes.forEach((n,k)=>{let v=0,col=0xffd43b;if(i===3&&k===0)v=0.9*e;if(i>=4){const d=nodeT-k;if(d>=0&&(d<1||k===3))v=1-0.3*Math.min(1,d);else if(d>=1){v=1;col=0xe03131}}
-    if(i===5&&k===3)v=1,col=0xffd43b;glow(n.m,v,col)});
+  ctx.nodes.forEach((n,k)=>{let v=0,col=0xff4d6d;if(i===3&&k===0)v=0.9*e;if(i>=4){const d=nodeT-k;if(d>=0&&(d<1||k===3))v=1-0.3*Math.min(1,d);else if(d>=1){v=1;col=0x6741d9}}
+    if(i===5&&k===3)v=1,col=0xff4d6d;glow(n.m,v,col)});
   const hs=[];if(i===2)hs.push([ctx.ais.position.x,0.6+0.4*Math.sin(t*8)]);if(i===3)hs.push([ctx.ais.position.x,0.5*(1-e)],[ctx.nodes[0].x,0.6*e]);if(i>=4){ctx.nodes.forEach((nn,k)=>{const d=nodeT-k;if(d>=0&&(d<1||k===3))hs.push([nn.x,0.75*(1-0.4*Math.min(1,d))])})}if(i===5)hs.push([ctx.nodes[3].x,0.7]);
   ctx.halo.forEach((h,k)=>{const q=hs[k];h.visible=!!q;if(q){h.position.set(q[0],-0.2,0);h.material.opacity=q[1]*0.55;h.scale.setScalar(0.8+0.4*q[1])}});
   // ток в аксона (+ заряди) и Na⁺ във възлите
