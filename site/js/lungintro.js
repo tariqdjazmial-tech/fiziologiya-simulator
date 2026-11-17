@@ -205,7 +205,7 @@ function build(patG,ORG){const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z);
     stool.traverse(o=>{if(o.isMesh){o.castShadow=o.receiveShadow=true}})}S.add(stool);
 
   /* пациентът */
-  const OY=.5,docMats=[];let body=null,hairShells=[];
+  const OY=.45,docMats=[];let body=null,hairShells=[];
   if(patG){const pmM=rim(new T.MeshPhysicalMaterial({vertexColors:true,roughness:.62,clearcoat:.15,clearcoatRoughness:.5,envMapIntensity:.4,transparent:true,sheen:new T.Color(0x3a2620)}),0xffd2c0,.22,2.8);docMats.push(pmM);
     body=new T.Mesh(patG,pmM);body.position.set(0,OY,0);body.castShadow=true;body.receiveShadow=true;S.add(body);
     /* коса: слоеве с кичури, само върху тъмните върхове */
@@ -229,7 +229,7 @@ float vn(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.-2.*f);return mix(mix(mix(h
 float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*vn(p);p*=2.03;a*=.5;}return s;}`;
   const tissue=(o)=>{const m=new T.MeshPhysicalMaterial({color:new T.Color(o.c).convertSRGBToLinear(),roughness:o.r??.45,clearcoat:o.cc??.6,clearcoatRoughness:.22,transparent:true,opacity:0,envMapIntensity:o.env??.6,side:o.ds?T.DoubleSide:T.FrontSide,depthWrite:!!o.dw});
     const rc=new T.Color(o.rim||0xffd6d6).convertSRGBToLinear(),c2=new T.Color(o.c2||o.c).convertSRGBToLinear(),sp=new T.Color(o.sp||0x000000).convertSRGBToLinear();
-    m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,{uRim:{value:rc},uRimI:{value:o.rimI??.5},uC2:{value:c2},uSp:{value:sp},uSc:{value:o.sc||60},uSpk:{value:o.spk||0},uBr:m.userData.uBr={value:0},uCar:{value:new T.Vector3(0,OY+.548-.074,.012)}});
+    m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,{uRim:{value:rc},uRimI:{value:o.rimI??.5},uC2:{value:c2},uSp:{value:sp},uSc:{value:o.sc||60},uSpk:{value:o.spk||0},uBr:m.userData.uBr={value:0},uCar:{value:new T.Vector3(0,OY+.628-.08,.008)}});
       sh.vertexShader=sh.vertexShader.replace("#include <common>","#include <common>\nvarying vec3 vWp;").replace("#include <worldpos_vertex>","#include <worldpos_vertex>\nvWp=(modelMatrix*vec4(transformed,1.0)).xyz;");
       sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\nuniform vec3 uRim,uC2,uSp,uCar;uniform float uRimI,uSc,uSpk,uBr;varying vec3 vWp;\n"+NOISE)
         .replace("#include <color_fragment>","#include <color_fragment>\n{float n=fbm(vWp*uSc);diffuseColor.rgb=mix(diffuseColor.rgb,uC2,smoothstep(.35,.75,n));float v=abs(fbm(vWp*uSc*.45+7.)-.5);diffuseColor.rgb*=1.-.22*smoothstep(.04,.0,v);float d=vn(vWp*uSc*5.);diffuseColor.rgb=mix(diffuseColor.rgb,uSp,uSpk*step(.86,d));}")
@@ -250,8 +250,8 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*vn(p);p*=2.03;a*=.5;
   const ORD={bronch:1,airway:1,partery:2,pvein:2,heart:2,aorta:2,bone:3,diaph:4,cart:5,lungs:6};
   const ORGS={};NAMES.forEach((n,i)=>{const g=ORG&&ORG[i];if(!g)return;const m=new T.Mesh(g,M[n]);m.renderOrder=ORD[n];IN.add(m);ORGS[n]=m});
   /* опорни точки за дишането: белите дробове растат надолу и встрани, диафрагмата слиза */
-  const lungPiv=V(0,.47,.01);[ORGS.lungs,ORGS.bronch,ORGS.partery,ORGS.pvein].forEach(m=>{if(m){m.geometry.translate(-lungPiv.x,-lungPiv.y,-lungPiv.z);m.position.copy(lungPiv)}});
-  const heartPiv=V(.018,.42,.03);if(ORGS.heart){ORGS.heart.geometry.translate(-heartPiv.x,-heartPiv.y,-heartPiv.z);ORGS.heart.position.copy(heartPiv)}
+  const lungPiv=V(0,.55,.01);[ORGS.lungs,ORGS.bronch,ORGS.partery,ORGS.pvein].forEach(m=>{if(m){m.geometry.translate(-lungPiv.x,-lungPiv.y,-lungPiv.z);m.position.copy(lungPiv)}});
+  const heartPiv=V(.02,.5,.03);if(ORGS.heart){ORGS.heart.geometry.translate(-heartPiv.x,-heartPiv.y,-heartPiv.z);ORGS.heart.position.copy(heartPiv)}
   /* ---- стетоскоп: слушалка (диафрагма + камбанка) и тръба нагоре ---- */
   let tt=0;const steth=new T.Group();S.add(steth);
   const chrome=new T.MeshStandardMaterial({color:0xd4d8de,metalness:1,roughness:.18,envMapIntensity:1.2,transparent:true});const tubeM=new T.MeshPhysicalMaterial({color:0x15171b,roughness:.35,clearcoat:.8,transparent:true});
@@ -261,12 +261,12 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*vn(p);p*=2.03;a*=.5;
   steth.traverse(o=>{if(o.isMesh)o.castShadow=true});
   const tube=new T.Mesh(new T.BufferGeometry(),tubeM);tube.castShadow=true;S.add(tube);
   /* аускултационна точка вляво на гърдите: намира се по повърхността на модела с лъч отпред */
-  let chestPt=V(.07,OY+.455,.12),chestN=V(0,0,1);
-  if(body){body.updateMatrixWorld(true);const rc=new T.Raycaster(V(.07,OY+.455,1),V(0,0,-1));const h=rc.intersectObject(body,false)[0];if(h){chestPt=h.point.clone();chestN=h.face.normal.clone().transformDirection(body.matrixWorld)}}
+  let chestPt=V(.075,OY+.53,.13),chestN=V(0,0,1);
+  if(body){body.updateMatrixWorld(true);const rc=new T.Raycaster(V(.075,OY+.53,1),V(0,0,-1));const h=rc.intersectObject(body,false)[0];if(h){chestPt=h.point.clone();chestN=h.face.normal.clone().transformDirection(body.matrixWorld)}}
   const restPt=chestPt.clone().addScaledVector(chestN,.09).add(V(.03,-.13,0));
   function placeSteth(u){const e=u*u*(3-2*u);const end=chestPt.clone().addScaledVector(chestN,.0062);const p=restPt.clone().lerp(end,e);p.addScaledVector(chestN,.035*Math.sin(e*Math.PI));p.x+=.004*Math.sin(tt*1.3)*(1-e);p.y+=.004*Math.sin(tt*1.7)*(1-e);steth.position.copy(p);
     steth.lookAt(p.clone().addScaledVector(chestN,-1));
-    const top=V(.3,OY+.08,.62),a=p.clone().addScaledVector(chestN,.02).add(V(0,-.02,0)),b=a.clone().lerp(top,.35).add(V(.02,.02,.04)),c=a.clone().lerp(top,.7).add(V(.03,.03,.02));
+    const top=V(.3,OY+.14,.66),a=p.clone().addScaledVector(chestN,.02).add(V(0,-.02,0)),b=a.clone().lerp(top,.35).add(V(.02,.02,.04)),c=a.clone().lerp(top,.7).add(V(.03,.03,.02));
     tube.geometry.dispose();tube.geometry=new T.TubeGeometry(new T.CatmullRomCurve3([a,b,c,top]),60,.0045,8,false)}
   placeSteth(0);
 
@@ -281,8 +281,8 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*vn(p);p*=2.03;a*=.5;
 
   /* ---------- камера ---------- */
   const look0=V(.0,OY+.4,.05);
-  const A={p:V(.42,OY+.42,.85),l:V(.035,OY+.4,.06)},B={p:V(.28,OY+.42,.5),l:V(.04,OY+.405,.07)};
-  const C={p:V(.0,OY+.42,.56),l:V(0,OY+.42,.01)};
+  const A={p:V(.44,OY+.5,.9),l:V(.035,OY+.48,.06)},B={p:V(.3,OY+.5,.55),l:V(.04,OY+.485,.07)};
+  const C={p:V(.0,OY+.5,.62),l:V(0,OY+.5,.01)};
   let last=performance.now(),touched=0,lungAlpha=0;const DUR=4.2,DIVE=3.2;
   R.compile(S,cam);setC("ready");phase="intro";
   setTimeout(()=>{if(!ended&&phase==="intro")setText("exam")},1600);
