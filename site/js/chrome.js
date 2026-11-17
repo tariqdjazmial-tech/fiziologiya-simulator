@@ -137,26 +137,37 @@ function startGL(){
   const VS="attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
   const FS=`precision highp float;
 uniform vec2 uRes;uniform float uTime,uScroll,uCalm;uniform vec2 uMouse;
-float h21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
-float noise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);return mix(mix(h21(i),h21(i+vec2(1,0)),u.x),mix(h21(i+vec2(0,1)),h21(i+vec2(1,1)),u.x),u.y);}
-/* спокойна повърхност: широки, меки вълни като на полиран лист, без въртене и без течене */
-float field(vec2 p){p*=.55;return noise(p+vec2(uScroll*.12,0.))*.7+noise(p*2.1+vec2(3.1,1.7))*.3;}
+/* тапет в стила на iPadOS: големи гладки дъги от ъглите, с мек светъл ръб; сребро, графит, кардио червено.
+   Лявата и средната част остават светли, защото там е текстът. */
+float arc(vec2 p,vec2 c,float r,float t,float k){vec2 d=p-c;float a=atan(d.y,d.x);
+  return length(d)-r-.035*sin(a*3.+t)-.02*sin(a*5.-t*1.3+k);}
+float hash(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
 void main(){
-  vec2 uv=gl_FragCoord.xy/uRes;vec2 p=(gl_FragCoord.xy-.5*uRes)/uRes.y*1.25;
-  float e=2./uRes.y;float h=field(p);vec2 g=vec2(field(p+vec2(e,0.))-h,field(p+vec2(0.,e))-h)/e;
-  vec3 n=normalize(vec3(-g*.02,1.));vec3 r=reflect(vec3(0.,0.,-1.),n);
-  float y=clamp(r.y*.6+.55+(uv.y-.5)*.45,0.,1.);
-  vec3 col=mix(vec3(.80,.815,.835),vec3(.965,.968,.972),smoothstep(0.,1.,y));
-  /* един широк мек отблясък и една лека сянка; движат се бавно с курсора и скрола */
-  float a=r.x*1.1+r.y*.4+uv.x*.9+(uMouse.x-.5)*.25-uScroll*.35;
-  col+=exp(-pow((a-.55)*2.2,2.))*.07;
-  col-=exp(-pow((a+.55)*2.,2.))*.045;
-  col=mix(col,vec3(.80,.16,.22),exp(-pow((uv.y-.08+uv.x*.15)*7.,2.))*.025);
-  /* фини следи от четкане */
-  float br=noise(vec2(gl_FragCoord.x*.0025,gl_FragCoord.y*.9));col*=.99+br*.02;
-  /* в уроците фонът е почти равномерен, за да не пречи на четенето */
-  vec3 flt=mix(vec3(.885,.89,.90),vec3(.95,.953,.958),uv.y);col=mix(col,flt+(br-.5)*.012,uCalm*.75);
-  col*=1.-.06*smoothstep(.4,1.,length(uv-.5)*1.3);
+  vec2 uv=gl_FragCoord.xy/uRes;float ar=uRes.x/uRes.y;vec2 p=vec2((uv.x-.5)*ar,uv.y-.5);
+  float t=uTime*.15;vec2 m=(uMouse-.5)*.05;float sc=uScroll;
+  vec3 col=mix(vec3(.83,.845,.86),vec3(.975,.978,.982),smoothstep(-.2,1.,uv.y-.2*uv.x+.2));
+  /* 1) голям светъл сатенен лист отляво горе */
+  float d1=arc(p-m*.6,vec2(-.55*ar,.95),1.05+.03*sin(t*.7),t,0.);
+  col=mix(col,vec3(.985,.987,.99),(1.-smoothstep(-.04,.02,d1))*.8);
+  col+=exp(-pow(d1/.014,2.))*.18;
+  /* 2) графитна дъга в горния десен ъгъл */
+  float d2=arc(p-m*1.5,vec2(.5*ar+.20,.60+sc*.12),(.56+.02*sin(t*.9+1.))*mix(.72,1.,clamp(ar,0.,1.)),t*1.1,1.7);
+  float s2=1.-smoothstep(-.006,.006,d2);
+  vec3 c2=mix(vec3(.30,.32,.36),vec3(.12,.13,.15),smoothstep(-.35,0.,d2));
+  col*=1.-.12*exp(-pow((d2-.03)/.05,2.))*(1.-s2);
+  col=mix(col,c2,s2);
+  col+=vec3(.93,.95,.98)*exp(-pow(d2/.009,2.))*.6;
+  /* 3) червена дъга в долния десен ъгъл */
+  float d3=arc(p+m*1.3,vec2(.5*ar+.10,-.70-sc*.10),(.60+.02*sin(t*.8+2.))*mix(.72,1.,clamp(ar,0.,1.)),-t,.6);
+  float s3=1.-smoothstep(-.006,.006,d3);
+  vec3 c3=mix(vec3(.86,.12,.22),vec3(.45,.03,.09),smoothstep(-.4,0.,d3));
+  col*=1.-.12*exp(-pow((d3-.03)/.05,2.))*(1.-s3);
+  col=mix(col,c3,s3);
+  col+=vec3(1.,.84,.86)*exp(-pow(d3/.009,2.))*.55;
+  col+=(hash(gl_FragCoord.xy)-.5)*.012;
+  /* в уроците: почти равномерен сребрист фон */
+  vec3 flt=mix(vec3(.885,.89,.90),vec3(.955,.958,.962),uv.y);
+  col=mix(col,flt,uCalm*.85);
   gl_FragColor=vec4(col,1.);
 }`;
   const sh=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)){console.error(gl.getShaderInfoLog(o));return null}return o};
@@ -168,9 +179,9 @@ void main(){
   /* рисуваме на половин разделителна способност: металът е мек и така фонът не натоварва телефона */
   const SCALE=.5;function size(){cv.width=Math.max(2,Math.round(innerWidth*SCALE));cv.height=Math.max(2,Math.round(innerHeight*SCALE));gl.viewport(0,0,cv.width,cv.height)}
   size();addEventListener("resize",size);
-  let prev="",vis=true;document.addEventListener("visibilitychange",()=>{vis=!document.hidden});
-  function draw(){const key=[cv.width,cv.height,U.scroll.toFixed(4),U.mx.toFixed(4),U.my.toFixed(4),U.calm.toFixed(3)].join();
-    if(vis&&key!==prev){prev=key;gl.uniform2f(uRes,cv.width,cv.height);gl.uniform1f(uTime,0);gl.uniform1f(uScroll,U.scroll);gl.uniform2f(uMouse,U.mx,U.my);gl.uniform1f(uCalm,U.calm);gl.drawArrays(gl.TRIANGLES,0,3)}
+  let t0=performance.now(),last=0,vis=true;document.addEventListener("visibilitychange",()=>{vis=!document.hidden});
+  /* плавно движение около 30 кадъра/s; при „намалено движение“ фонът стои */
+  function draw(now){if(vis&&now-last>=33){last=now;gl.uniform2f(uRes,cv.width,cv.height);gl.uniform1f(uTime,RM?0:(now-t0)/1000);gl.uniform1f(uScroll,U.scroll);gl.uniform2f(uMouse,U.mx,U.my);gl.uniform1f(uCalm,U.calm);gl.drawArrays(gl.TRIANGLES,0,3)}
     requestAnimationFrame(draw)}
   requestAnimationFrame(draw);
 }
