@@ -179,7 +179,13 @@ VIEWS.home=function(main){const s=expStats(),last=store.get("lastTopic",null),it
   const lang=EN?"en":"bg";
   main.innerHTML=`
   <section class="lp-hero">
-   <img class="lp-hero-img" src="img/hero-1600.webp" srcset="img/hero-900.webp 900w, img/hero-1600.webp 1600w" sizes="100vw" alt="" fetchpriority="high">
+   <div class="lp-slides" aria-roledescription="carousel">${[
+     ["hero",LL("Еритроцити в кръвоносен съд","Red blood cells in a blood vessel"),"55% 45%"],
+     ["hero-muscle",LL("Скелетни мускулни влакна, електронен микроскоп, 5000×","Skeletal muscle fibres, electron micrograph, 5000×"),"50% 50%"],
+     ["hero-neuron",LL("Неврони и техните израстъци, електронен микроскоп, 1000×","Neurons and their processes, electron micrograph, 1000×"),"38% 45%"]
+    ].map(([f,c,pos],i)=>`<img class="lp-hero-img${i?"":" on"}" src="img/${f}-1600.webp" srcset="img/${f}-900.webp 900w, img/${f}-1600.webp 1600w" sizes="100vw" alt="${c}" data-cap="${c}" style="object-position:${pos}" ${i?'loading="lazy"':'fetchpriority="high"'}>`).join("")}</div>
+   <svg class="lp-ecg" viewBox="0 0 1200 80" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M0 50 H140 l12 -6 l12 6 H200 l8 8 l14 -52 l14 62 l10 -18 H300 q20 -14 40 0 H520 l12 -6 l12 6 H580 l8 8 l14 -52 l14 62 l10 -18 H680 q20 -14 40 0 H900 l12 -6 l12 6 H960 l8 8 l14 -52 l14 62 l10 -18 H1060 q20 -14 40 0 H1200"/></svg>
+   <div class="lp-sl-ui"><span class="lp-sl-cap" aria-live="polite"></span><span class="lp-sl-dots">${[0,1,2].map(i=>`<button type="button" aria-label="${LL("Снимка","Image")} ${i+1}"></button>`).join("")}</span></div>
    <div class="lp-w lp-hero-in">
     <p class="lp-kick">${LL("Конспект по физиология за студенти по медицина","Physiology syllabus for medical students")}</p>
     <h1>${LL("Разбери физиологията, вместо да я зубриш","Understand physiology instead of memorizing it")}</h1>
@@ -226,7 +232,9 @@ VIEWS.home=function(main){const s=expStats(),last=store.get("lastTopic",null),it
 
   <section class="lp-sect lp-tint"><div class="lp-w">
    <header class="lp-h"><h2>${LL("12 раздела от конспекта","12 syllabus sections")}</h2><p>${LL("Раздел I е безплатен. Останалите се отключват с пълния достъп.","Section I is free. The rest unlock with full access.")}</p></header>
-   <div class="lp-secs">${SYLLABUS.map(sec=>{const p=secProg(sec),f=first(sec),fr=f&&isFree(f.id);return `<a class="sec lp-sec" href="#${f?f.id:"home"}" style="--sec:${SEC_COL[sec.id]||"var(--pri)"}"><span class="n">${sec.id}</span><span class="lp-sec-t"><b>${sec.name}</b><small>${p.n} ${p.n===1?LL("тема","topic"):LL("теми","topics")}, ${p.t} ${LL("въпроса","questions")}</small></span>${fr?`<em class="fr">${LL("безплатно","free")}</em>`:`<em>${ic("lock",14)}</em>`}</a>`}).join("")}</div>
+   <div class="lp-secs">${SYLLABUS.map(sec=>{const p=secProg(sec),f=first(sec),fr=f&&isFree(f.id);const tps=sec.items.filter(x=>x.ready);return `<a class="lp-card" href="#${f?f.id:"home"}"><span class="lp-card-top"><span class="n">${sec.id}</span><b class="lp-card-no">${sec.id}</b>${fr?`<em class="fr">${LL("безплатно","free")}</em>`:`<em class="lk">${ic("lock",14)}</em>`}</span>
+     <span class="lp-card-b"><b>${sec.name}</b><small>${p.n} ${p.n===1?LL("тема","topic"):LL("теми","topics")}, ${p.t} ${LL("въпроса","questions")}</small>
+     <span class="lp-card-tp">${tps.slice(0,4).map(x=>`<i>${x.t}</i>`).join("")}${tps.length>4?`<i class="more">+${tps.length-4} ${LL("още","more")}</i>`:""}</span></span></a>`}).join("")}</div>
   </div></section>
 
   <section class="lp-sect" id="lp-price"><div class="lp-w">
@@ -274,12 +282,22 @@ VIEWS.home=function(main){const s=expStats(),last=store.get("lastTopic",null),it
   ${full?"":`<div class="lp-w"><section class="hband"><div><h3>${LL("Отключи всички 12 раздела","Unlock all 12 sections")}</h3><p>${LL(`${st.locked} теми и ${st.lq} въпроса с обяснения. Плащаш веднъж, без абонамент.`,`${st.locked} topics and ${st.lq} questions with explanations. One payment, no subscription.`)}</p></div><a class="b primary" href="#me">${LL("Пълен достъп за ","Full access for ")+price}</a></section></div>`}
 
   <footer class="lp-foot"><div class="lp-w">
-   <div class="lp-fb"><b>${LL("Физиология","Physiology")}</b><p>${LL("Интерактивен симулатор по физиология за студенти по медицина.","Interactive physiology simulator for medical students.")}</p></div>
+   <div class="lp-fb"><b>${"PhysioNova"}</b><p>${LL("Интерактивен симулатор по физиология за студенти по медицина.","Interactive physiology simulator for medical students.")}</p></div>
    <nav><h4>${LL("Учене","Learn")}</h4><a href="#${READY[0].id}">${LL("Първа тема","First topic")}</a><a href="#test">${LL("Тест по всички теми","Quiz on all topics")}</a><a href="#glossary">${LL("Речник","Glossary")}</a><a href="#me">${LL("Профил","Profile")}</a></nav>
    <nav><h4>${LL("Информация","Info")}</h4><a href="#about">${LL("За приложението и лицензи","About and licences")}</a><a href="#privacy">${LL("Поверителност","Privacy")}</a><a href="#terms">${LL("Условия","Terms")}</a></nav>
    <nav><h4>${LL("Контакт","Contact")}</h4><a href="mailto:${mail}">${mail}</a></nav>
-  </div><p class="lp-copy">© ${new Date().getFullYear()} ${LL("Физиология","Physiology")}</p></footer>`;
+  </div><p class="lp-copy">© ${new Date().getFullYear()} ${"PhysioNova"}</p></footer>`;
   main.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{const t=document.getElementById(b.dataset.go);if(t)t.scrollIntoView({behavior:"smooth",block:"start"})});
+  // числата се отброяват, когато лентата се покаже
+  {const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;io.unobserve(e.target);const el=e.target,to=+el.dataset.to;if(matchMedia("(prefers-reduced-motion: reduce)").matches){el.textContent=to;return}const t0=performance.now(),d=1100;const f=t=>{const k=Math.min(1,(t-t0)/d),v=Math.round(to*(1-Math.pow(1-k,3)));el.textContent=v;if(k<1)requestAnimationFrame(f)};requestAnimationFrame(f)}),{threshold:.4});
+   main.querySelectorAll(".lp-stats b").forEach(b=>{b.dataset.to=b.textContent.trim();b.textContent="0";io.observe(b)})}
+  // слайдшоу в началото: смяна на всеки 6 s, точки за ръчен избор, пауза при посочване
+  {clearInterval(window.__heroT);const im=[...main.querySelectorAll(".lp-hero-img")],dots=[...main.querySelectorAll(".lp-sl-dots button")],cap=main.querySelector(".lp-sl-cap"),hero=main.querySelector(".lp-hero");let k=0,hold=false;
+   const show=n=>{k=(n+im.length)%im.length;im.forEach((x,j)=>x.classList.toggle("on",j===k));dots.forEach((d,j)=>{d.classList.toggle("on",j===k);d.setAttribute("aria-current",j===k?"true":"false")});if(cap)cap.textContent=im[k].dataset.cap};
+   show(0);dots.forEach((d,j)=>d.onclick=()=>{show(j);restart()});
+   const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+   const restart=()=>{clearInterval(window.__heroT);if(reduce)return;window.__heroT=setInterval(()=>{if(!hold&&!document.hidden&&document.body.contains(hero))show(k+1);else if(!document.body.contains(hero))clearInterval(window.__heroT)},6000)};
+   if(hero){hero.onmouseenter=()=>hold=true;hero.onmouseleave=()=>hold=false}restart()}
   window.onresize=null};
 // ---------- профили, вход, кодове за достъп и админ ----------
 const hex=b=>Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,"0")).join("");
@@ -460,7 +478,11 @@ function paywallHTML(it){const [,q]=topicProg(it.id),sec=it.sec,first=READY.find
      <h1 class="pw-t">${tt(it.t)}</h1>
      <p class="pw-lead">${ic("lock",17)}<span>${L("Тази тема е в пълния достъп. Отключи я заедно с целия конспект.","This topic is part of full access. Unlock it together with the whole syllabus.")}</span></p></header>
    ${buyCard()}
-   <figure class="pw-shot"><img src="img/${BEN?"en":"bg"}_${it.id}.webp" alt="${L("Преглед на симулацията","Simulation preview")}" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>${ic("lock",14)}<span>${L("Така изглежда симулацията в тази тема","This is what the simulation in this topic looks like")}</span></figcaption></figure>
+   <figure class="pw-shot pw-blur" aria-label="${L("Темата е заключена","This topic is locked")}">
+     <div class="pw-fake" aria-hidden="true"><i class="l h"></i><i class="l"></i><i class="l"></i><i class="l s"></i>
+      <div class="pw-fsim"><img src="img/${BEN?"en":"bg"}_${it.id}.webp" alt="" loading="lazy" onerror="this.remove()"></div>
+      <i class="l"></i><i class="l m"></i><i class="l s"></i></div>
+     <figcaption class="pw-lock"><span class="pw-lk">${ic("lock",26)}</span><b>${L("Темата е заключена","This topic is locked")}</b><span>${L("Отключи я с пълния достъп","Unlock it with full access")}</span></figcaption></figure>
    <section class="pw-in"><h2>${L("Какво има в темата","What's in this topic")}</h2><ul>
      <li>${ic("book",19)}<div><b>${L("Теория по учебника","Textbook theory")}</b><span>${L("ясен текст с фигури, формули и клинични бележки","clear text with figures, formulas and clinical notes")}</span></div></li>
      <li>${ic("play",19)}<div><b>${L("Интерактивна симулация","Interactive simulation")}</b><span>${L("променяш параметрите и виждаш какво става","change the parameters and see what happens")}</span></div></li>
@@ -579,10 +601,10 @@ VIEWS.me=function(main){const s=expStats(),opened=READY.filter(r=>status(r.id)!=
 // ---------- след всяка смяна на страница ----------
 function after(){const v=typeof curView!=="undefined"?curView:"home",it=READY.find(i=>i.id===v),mn=$("#main");touchDay();document.body.classList.toggle("lp",v==="home");
   document.querySelectorAll("#tabbar [data-v],.quick a").forEach(a=>a.classList.toggle("on",a.dataset.v===v||(a.dataset.v==="me"&&v==="auth")||(a.dataset.v==="nav"&&!!it)));
-  if(v==="auth"){$("#crumb").style.visibility="";$("#crumb .s").textContent="Физиология";$("#crumb .t").textContent=authMode==="up"?"Регистрация":"Вход";document.title="Профил — Физиология"}
-  if(v==="privacy"||v==="terms"){$("#crumb").style.visibility="";$("#crumb .s").textContent="Физиология";$("#crumb .t").textContent=v==="privacy"?"Поверителност":"Условия";document.title=(v==="privacy"?"Поверителност":"Условия")+" — Физиология"}
-  if(v==="admin"){$("#crumb").style.visibility="";$("#crumb .s").textContent="Физиология";$("#crumb .t").textContent="Админ";document.title="Админ — Физиология"}
-  if(v==="me"){$("#crumb").style.visibility="";$("#crumb .s").textContent="Физиология";$("#crumb .t").textContent="Профил и пълен достъп";document.title="Профил — Физиология"}
+  if(v==="auth"){$("#crumb").style.visibility="";$("#crumb .s").textContent="PhysioNova";$("#crumb .t").textContent=authMode==="up"?"Регистрация":"Вход";document.title="Профил — PhysioNova"}
+  if(v==="privacy"||v==="terms"){$("#crumb").style.visibility="";$("#crumb .s").textContent="PhysioNova";$("#crumb .t").textContent=v==="privacy"?"Поверителност":"Условия";document.title=(v==="privacy"?"Поверителност":"Условия")+" — PhysioNova"}
+  if(v==="admin"){$("#crumb").style.visibility="";$("#crumb .s").textContent="PhysioNova";$("#crumb .t").textContent="Админ";document.title="Админ — PhysioNova"}
+  if(v==="me"){$("#crumb").style.visibility="";$("#crumb .s").textContent="PhysioNova";$("#crumb .t").textContent="Профил и пълен достъп";document.title="Профил — PhysioNova"}
   if(it){if(isFree(v))store.set("seen_"+v,1);mn.style.setProperty("--sec",SEC_COL[it.sec.id]||"var(--accent)");
     if(!isFree(v)){(window.__cleanups||[]).forEach(f=>{try{f()}catch(e){}});window.__cleanups=[];mn.innerHTML=paywallHTML(it);wireBuy(mn);
       return}

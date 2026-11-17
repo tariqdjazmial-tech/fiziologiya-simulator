@@ -224,7 +224,7 @@ function prog(){try{const s=expStats(),p=s.tot?Math.round(s.ans/s.tot*100):0;con
 
 /* --- икони на разделите, баджове и информационни кутии --- */
 function decorate(){
-  document.querySelectorAll(".nsh .n,.sec .n,.cont2 .cn,.fa-map li b").forEach(n=>{if(n.dataset.ic)return;const id=n.textContent.trim();if(!SEC_ICO[id])return;n.dataset.ic=1;n.title=L("Раздел ","Section ")+id;n.innerHTML=ico(SEC_ICO[id],n.closest(".nsh")?16:18)});
+  document.querySelectorAll(".nsh .n,.sec .n,.cont2 .cn,.fa-map li b,.lp-card .n").forEach(n=>{if(n.dataset.ic)return;const id=n.textContent.trim();if(!SEC_ICO[id])return;n.dataset.ic=1;n.title=L("Раздел ","Section ")+id;n.innerHTML=ico(SEC_ICO[id],n.closest(".nsh")?16:18)});
   // баджове под заглавието на темата
   const id=(location.hash||"").slice(1),it=topics().find(r=>r.id===id),main=$("#main");
   if(it&&main&&!main.querySelector(".badges")&&!main.querySelector(".pw")){const h=main.querySelector("h1,h2");if(h&&!h.closest(".card,section")){

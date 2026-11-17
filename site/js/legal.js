@@ -5,7 +5,7 @@ const C=window.PHYS_CFG,en=()=>window.PHYS_LANG==="en";
 const mail=()=>C.email?`<a href="mailto:${C.email}">${C.email}</a>`:(en()?"[contact e-mail — to be added]":"[имейл за контакт — предстои]");
 const page=(main,h,body)=>{main.innerHTML=`<h2>${h}</h2><p class="small">${en()?"Last updated":"Последна промяна"}: ${C.updated}</p><div class="card legal" style="max-width:78ch">${body}</div>`;main.querySelectorAll(".legal").forEach(e=>e.setAttribute("data-noi18n","1"))};
 const PRIV_BG=()=>`
-<h3>Кой обработва данните</h3><p>Администратор на личните данни е ${C.owner} (физическо лице), автор на приложението „Физиология — симулатор“. Връзка: ${mail()}.</p>
+<h3>Кой обработва данните</h3><p>Администратор на личните данни е ${C.owner} (физическо лице), автор на приложението „PhysioNova“ (симулатор по физиология). Връзка: ${mail()}.</p>
 <h3>Какви данни събираме</h3><ul>
 <li><b>При регистрация:</b> име, фамилия, имейл, институция, цел на ползване, избран език, парола (пази се само като криптографски хеш).</li>
 <li><b>При ползване:</b> кои теми си отворил и завършил, брой решени въпроси, брой дни с активност, вид устройство (напр. iPad, Android), дата на регистрация и на последно влизане.</li>
@@ -18,7 +18,7 @@ const PRIV_BG=()=>`
 <h3>Твоите права</h3><p>Имаш право на достъп, поправка, изтриване, ограничаване, преносимост и възражение. Пиши ни на ${mail()}. Можеш да подадеш жалба до Комисията за защита на личните данни (cpdp.bg).</p>
 <h3>Деца</h3><p>Приложението е за студенти и преподаватели. Ако си под 16 години, регистрирай се само със съгласие на родител.</p>`;
 const PRIV_EN=()=>`
-<h3>Who processes the data</h3><p>The data controller is ${C.owner} (a private individual), author of the “Physiology — simulator” app. Contact: ${mail()}.</p>
+<h3>Who processes the data</h3><p>The data controller is ${C.owner} (a private individual), author of the “PhysioNova” (physiology simulator) app. Contact: ${mail()}.</p>
 <h3>What we collect</h3><ul>
 <li><b>At registration:</b> first and last name, e-mail, institution, purpose of use, chosen language, password (stored only as a cryptographic hash).</li>
 <li><b>While you use the app:</b> which topics you opened and completed, number of questions answered, number of active days, device type (e.g. iPad, Android), date of registration and last visit.</li>
@@ -31,7 +31,7 @@ const PRIV_EN=()=>`
 <h3>Your rights</h3><p>You have the right of access, rectification, erasure, restriction, portability and objection. Write to ${mail()}. You may complain to the Bulgarian Commission for Personal Data Protection (cpdp.bg) or your local authority.</p>
 <h3>Children</h3><p>The app is for students and teachers. If you are under 16, register only with a parent's consent.</p>`;
 const TERMS_BG=()=>`
-<h3>Какво е приложението</h3><p>„Физиология — симулатор“ е неофициално учебно помагало с теория, 3D модели, симулации и тестове. Не е издание на университет или издателство, не замества лекциите и учебника и <b>не е предназначено за клинични решения</b>.</p>
+<h3>Какво е приложението</h3><p>„PhysioNova“ (симулатор по физиология) е неофициално учебно помагало с теория, 3D модели, симулации и тестове. Не е издание на университет или издателство, не замества лекциите и учебника и <b>не е предназначено за клинични решения</b>.</p>
 <h3>Профил</h3><p>Отговаряш за паролата си и за верността на данните при регистрация. Един профил е за един човек.</p>
 <h3>Безплатна и платена част</h3><p>Раздел I е безплатен. Пълният достъп до разделите II–XII струва <b>${C.price}</b> еднократно — 20 € + ДДС; за България с 20% ДДС това са 24 €, за други държави ДДС се изчислява от Stripe по местната ставка и сумата се вижда преди плащане, без абонамент, за неограничено време, докато приложението се поддържа. Плащането и продажбата се извършват от Stripe като търговец (merchant of record): Stripe издава фактурата, начислява ДДС според държавата ти и отговаря за въпроси по самото плащане. Достъпът се отключва за профила, с който си платил.</p>
 <h3>Право на отказ</h3><p>Като потребител в ЕС по принцип имаш 14 дни да се откажеш от покупка. При цифрово съдържание това право отпада, ако <b>изрично се съгласиш</b> достъпът да започне веднага и потвърдиш, че така губиш правото си на отказ. Условията за отказ и съгласието се показват от Stripe при плащането. Ако има технически проблем, който не можем да оправим, ще ти върнем парите.</p>
@@ -40,7 +40,7 @@ const TERMS_BG=()=>`
 <h3>Отговорност</h3><p>Стараем се стойностите да съвпадат с учебниците, но моделите опростяват реалните процеси и може да има грешки. Ако забележиш такава, пиши ни. Не отговаряме за решения, взети само въз основа на приложението.</p>
 <h3>Промени и приложимо право</h3><p>Може да променяме условията; за съществени промени ще те уведомим. Прилага се българското право. Връзка: ${mail()}. Онлайн решаване на спорове: ec.europa.eu/consumers/odr.</p>`;
 const TERMS_EN=()=>`
-<h3>What the app is</h3><p>“Physiology — simulator” is an unofficial study aid with theory, 3D models, simulations and tests. It is not published by a university or publisher, does not replace lectures or the textbook and is <b>not intended for clinical decisions</b>.</p>
+<h3>What the app is</h3><p>“PhysioNova” (physiology simulator) is an unofficial study aid with theory, 3D models, simulations and tests. It is not published by a university or publisher, does not replace lectures or the textbook and is <b>not intended for clinical decisions</b>.</p>
 <h3>Account</h3><p>You are responsible for your password and for accurate registration details. One account is for one person.</p>
 <h3>Free and paid parts</h3><p>Section I is free. Full access to sections II–XII costs <b>${C.price}</b> once — €20 + VAT; with Bulgaria's 20% VAT that is €24, for other countries Stripe adds the local VAT rate and shows the total before you pay, with no subscription, for as long as the app is maintained. Payment and sale are handled by Stripe as merchant of record: Stripe issues the invoice, charges VAT for your country and handles questions about the payment itself. Access is unlocked for the account you paid with.</p>
 <h3>Right of withdrawal</h3><p>As an EU consumer you normally have 14 days to withdraw from a purchase. For digital content this right ends if you <b>expressly agree</b> that access starts immediately and acknowledge that you thereby lose the right of withdrawal. The withdrawal terms and consent are shown by Stripe at checkout. If there is a technical problem we cannot fix, we will refund you.</p>
