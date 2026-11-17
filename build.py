@@ -15,7 +15,7 @@ o='<script src="js/shell.js"></script>'
 assert h.count(o)==1
 h=h.replace(o,'<script src="js/config.js"></script><script src="js/supabase.min.js"></script><script src="js/sb.js"></script><script src="js/native.js"></script>'+o)
 h=h.replace('<body>','<body>'+'<div id="hxo" style="position:fixed;inset:0;z-index:100000;background:#060708;display:grid;place-items:center;color:#8d958f;font:600 13px/1 system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase">PhysioNova</div><script>/* въведение: черен екран веднага; предпазител, ако js/heartintro.js не поеме */document.documentElement.style.overflow="hidden";setTimeout(function(){if(!window.__hxo){var o=document.getElementById("hxo");if(o)o.remove();document.documentElement.style.overflow=""}},25000);</script>',1)
-h=h.replace('<script src="js/brutal.js"></script>','<script src="js/brutal.js"></script><script src="js/palette.js"></script><script src="js/heartintro.js"></script>',1)
+h=h.replace('<script src="js/brutal.js"></script>','<script src="js/brutal.js"></script><script src="js/palette-metal.js"></script><script src="js/heartintro.js"></script>',1)
 h=h.replace("<title>","<meta name=\"description\" content=\"Интерактивен симулатор по физиология за студенти по медицина: 3D модели, симулации, тестове.\"><title>",1)
 # тежките 3D модели — в отделни файлове, зареждат се при нужда (страницата се отваря бързо)
 import re as _re
