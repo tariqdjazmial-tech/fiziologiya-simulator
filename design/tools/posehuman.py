@@ -35,7 +35,8 @@ def rot_to(u, v):
 # поза: ("rot", ос, градуси) — завъртане в покойната рамка; ("dir", посока) — посока на костта в света
 X = [1, 0, 0]
 import os
-ROLL = float(os.environ.get("ROLL", "-80"))
+ROLL = float(os.environ.get("ROLL", "10"))
+ROLLR = float(os.environ.get("ROLLR", "-10"))
 POSE = {
     "upperleg01.L": ("dir", [0.05, -0.12, 1]), "upperleg01.R": ("dir", [-0.05, -0.12, 1]),
     "lowerleg01.L": ("dir", [0.05, -1, 0.12]), "lowerleg01.R": ("dir", [-0.05, -1, 0.12]),
@@ -43,13 +44,13 @@ POSE = {
     "spine05": ("rot", X, 7), "spine04": ("rot", X, 7), "spine03": ("rot", X, 6), "spine02": ("rot", X, 5), "spine01": ("rot", X, 4),
     "neck01": ("rot", X, 9), "neck02": ("rot", X, 9), "neck03": ("rot", X, 8), "head": ("rot", X, 14),
     "upperarm01.L": ("dir", [0.32, -0.62, 0.72]), "upperarm01.R": ("dir", [-0.32, -0.62, 0.72]),
-    "lowerarm01.L": ("dir", [-0.48, 0.0, 0.88], ROLL), "lowerarm01.R": ("dir", [0.48, 0.0, 0.88], -ROLL),
-    "wrist.L": ("dir", [-0.45, -0.35, 0.82]), "wrist.R": ("dir", [0.45, -0.35, 0.82]),
+    "lowerarm01.L": ("dir", [-0.48, 0.0, 0.88], ROLL), "lowerarm01.R": ("dir", [0.48, 0.0, 0.88], ROLLR),
+    "wrist.L": ("dir", [-0.5, 0.02, 0.86]), "wrist.R": ("dir", [0.5, 0.02, 0.86]),
 }
 for s in "LR":
     for f in range(1, 6):
         for k in (1, 2, 3):
-            POSE[f"finger{f}-{k}.{s}"] = ("rot", X, 14 if f > 1 else 6)
+            POSE[f"finger{f}-{k}.{s}"] = ("rot", X, 5 if f > 1 else 3)
 
 # глобални трансформации (родителите преди децата)
 order, seen = [], set()

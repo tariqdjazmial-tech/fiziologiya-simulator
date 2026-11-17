@@ -35,7 +35,7 @@ const css=`
 #hxo .side small{display:block;font:600 11.5px/1.2 system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#ff4d5a;margin-bottom:12px}
 #hxo .side b{display:block;font-weight:800;font-size:clamp(26px,3.2vw,44px);line-height:1.02;letter-spacing:-.02em;color:#f3f1ec;text-wrap:balance}
 #hxo .side span{display:block;margin-top:12px;font:400 15px/1.45 system-ui,sans-serif;color:#c3c8c4}
-#hxo .mon{display:none!important;position:absolute;left:50%;bottom:max(26px,env(safe-area-inset-bottom,0px));width:min(760px,calc(100% - 40px));height:110px;transform:translate(-50%,40px);opacity:0;
+#hxo .mon{position:absolute;left:50%;bottom:max(26px,env(safe-area-inset-bottom,0px));width:min(760px,calc(100% - 40px));height:110px;transform:translate(-50%,40px);opacity:0;
   background:rgba(14,15,17,.72);border:1px solid rgba(255,255,255,.12);border-radius:12px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
   transition:opacity .8s ease,transform .9s cubic-bezier(.2,.8,.2,1),width 1.2s cubic-bezier(.6,0,.2,1),height 1.2s cubic-bezier(.6,0,.2,1),bottom 1.2s cubic-bezier(.6,0,.2,1),border-color 1s,background 1s}
 #hxo.ecg .mon{opacity:1;transform:translate(-50%,0)}
@@ -43,20 +43,21 @@ const css=`
 #hxo .mon canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 #hxo .mon .lab{position:absolute;left:12px;top:9px;font:600 11px/1 ui-monospace,monospace;letter-spacing:.12em;color:#ff4d5a;opacity:.85;transition:opacity .6s}
 #hxo.zoom .mon .lab{opacity:0}
-#hxo .brandx{position:absolute;left:0;right:0;top:calc(50% - 8px);transform:translateY(-100%);text-align:center;opacity:0;transition:opacity .9s ease .5s}
+#hxo .brandx{position:absolute;left:0;right:0;top:calc(50% - 21vh - 10px);transform:translateY(-100%);text-align:center;opacity:0;transition:opacity .9s ease .5s}
 #hxo .brandx b{display:block;font-weight:800;font-size:clamp(44px,8vw,104px);letter-spacing:-.03em;color:#1D1D1F;line-height:1}
 #hxo .brandx b i{font-style:normal;color:#C8102E}
 #hxo .brandx span{display:block;margin-top:12px;font:600 12px/1 system-ui,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#5E5E63}
 #hxo.zoom .brandx{opacity:1}
-#hxo .load{position:absolute;left:50%;top:calc(50% + 22px);transform:translateX(-50%);width:min(320px,70vw);opacity:0;transition:opacity .6s ease .8s;text-align:center;font:500 12px/1 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#5E5E63}
+#hxo .load{position:absolute;left:50%;top:calc(50% + 21vh + 26px);transform:translateX(-50%);width:min(320px,70vw);opacity:0;transition:opacity .6s ease .8s;text-align:center;font:500 12px/1 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#5E5E63}
 #hxo .load i{display:block;height:2px;margin-top:12px;background:rgba(29,29,31,.12);overflow:hidden;border-radius:2px}
 #hxo .load i::after{content:"";display:block;height:100%;width:var(--lp,0%);background:#C8102E;transition:width .25s linear}
 #hxo.zoom .load{opacity:1}
-#hxo .hint{position:absolute;left:50%;bottom:calc(max(26px,env(safe-area-inset-bottom,0px)) + 40px);transform:translateX(-50%);opacity:0;transition:opacity .8s;
+#hxo .hint{position:absolute;left:50%;bottom:calc(max(26px,env(safe-area-inset-bottom,0px)) + 40px);transition:opacity .8s,bottom .8s;transform:translateX(-50%);opacity:0;transition:opacity .8s;
   font:600 12px/1 system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#e9ece8;border:0;background:none;cursor:pointer;padding:12px 16px;min-height:44px;pointer-events:none}
 #hxo .hint span{display:inline-block;animation:hxb 1.6s ease-in-out infinite}
 @keyframes hxb{50%{transform:translateY(5px)}}
 #hxo.hinted .hint{opacity:.9;pointer-events:auto}
+#hxo.ecg .hint{bottom:calc(max(26px,env(safe-area-inset-bottom,0px)) + 124px)}
 #hxo.zoom .hint{opacity:0;pointer-events:none}
 #hxo .skip{position:absolute;top:max(14px,env(safe-area-inset-top,0px));right:max(14px,env(safe-area-inset-right,0px));font:600 12px/1 system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#cfd4cf;
   background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:12px 16px;min-height:44px;cursor:pointer}
@@ -78,6 +79,7 @@ const css=`
 
   #hxo .cr{top:auto;bottom:6px;left:20px;font-size:9px}
   #hxo .snd .t{display:none}
+  #hxo .brandx{top:calc(50% - 15vh - 10px)}#hxo .load{top:calc(50% + 15vh + 22px)}#hxo.ecg .hint{bottom:calc(max(26px,env(safe-area-inset-bottom,0px)) + 100px)}
 }
 @media (prefers-reduced-motion:reduce){#hxo .hint span{animation:none}}
 `;
@@ -85,7 +87,7 @@ const st=document.createElement("style");st.textContent=css;document.head.append
 ov.innerHTML=`<canvas class="gl" aria-hidden="true"></canvas><div class="vig"></div><div class="fade"></div>
  <div class="pre">Preparing the consulting room…</div>
  <div class="side l"></div><div class="side r"></div>
- <div class="mon"><canvas aria-hidden="true"></canvas><span class="lab">ECG · II · 25 mm/s</span></div>
+ <div class="mon"><canvas aria-hidden="true"></canvas><span class="lab">Vm · axon · mV</span></div>
  <div class="brandx"><b>Physio<i>Nova</i></b><span>Physiology simulator</span></div>
  <div class="load">Opening the home page<i></i></div>
  <button class="hint" type="button"><em>Scroll to look inside</em> <span>↓</span></button>
@@ -116,11 +118,11 @@ function setSound(on){sndOn=on;const b=$(".snd");b.classList.toggle("on",on);b.s
 function enableFromGesture(){if(AC||sndMuted)return;audioInit().then(()=>setSound(true)).catch(()=>{})}
 
 /* ---------- монитор отдолу: ЕКГ (листовете на бюрото) → ЕЕГ → потенциал на аксона → ВПСП ---------- */
-const ec=$(".mon canvas"),ex=ec.getContext("2d");let ew=0,eh=0,ed=1,ecX=0,ecLastY=null,ecT=0,mode="ecg",spikeT=0;
+const ec=$(".mon canvas"),ex=ec.getContext("2d");let ew=0,eh=0,ed=1,ecX=0,ecLastY=null,ecT=0,mode="ap",spikeT=0;
 function ecSize(){const r=ec.getBoundingClientRect();ed=Math.min(2,devicePixelRatio||1);ew=Math.max(1,r.width);eh=Math.max(1,r.height);ec.width=ew*ed;ec.height=eh*ed;ex.setTransform(ed,0,0,ed,0,0);ex.clearRect(0,0,ew,eh);ecX=0;ecLastY=null}
 new ResizeObserver(ecSize).observe(ec);
 const LAB={ecg:"ECG · II · 25 mm/s",eeg:"EEG · Fp1–F3 · alpha",ap:"Vm · axon · mV",epsp:"EPSP · dendrite · mV"};
-function setMode(m){if(mode===m)return;mode=m;$(".mon .lab").textContent=LAB[m]}
+function setMode(m){m="ap";if(mode===m)return;mode=m;$(".mon .lab").textContent=LAB[m]}
 const g1=(p,m,s,a)=>a*Math.exp(-((p-m)*(p-m))/(2*s*s));
 let nextSpike=.4,lastSpikeAt=-9;
 function sig(t){if(mode==="ecg"){const T=60/72,p=((t%T)+T)%T/T;return g1(p,.10,.025,.13)+g1(p,.185,.008,-.12)+g1(p,.21,.010,1)+g1(p,.235,.010,-.27)+g1(p,.46,.045,.32)-.15}
@@ -231,8 +233,8 @@ function build(brainG,neuronG,docG){const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z
   {const L=.55,gm=new T.PlaneGeometry(.06,L,3,160);const P=gm.attributes.position;for(let i=0;i<P.count;i++){const py=P.getY(i)+L/2;const z0=.3,y=DY+.0012;let pz,pyy;if(py<z0){pz=-.12+py;pyy=y}else{const a=(py-z0);const ang=Math.min(Math.PI/2,a*9);pz=-.12+z0+Math.sin(ang)/9+Math.max(0,a-Math.PI/18)*0;pyy=y-(1-Math.cos(ang))/9-Math.max(0,a-Math.PI/18)}P.setXYZ(i,P.getX(i),pyy,pz)}
     gm.computeVertexNormals();const tx=ecgStrip(7,false);tx.rotation=Math.PI/2;tx.center.set(.5,.5);const m=new T.Mesh(gm,new T.MeshStandardMaterial({map:tx,roughness:.9,side:T.DoubleSide,envMapIntensity:.25}));m.position.set(-.62,0,.33);m.castShadow=true;S1.add(m)}
   /* лентата в ръцете: опъната между двете ръце, краищата падат към бюрото */
-  const held=(()=>{const L=.7,gm=new T.PlaneGeometry(L,.06,280,3);const P=gm.attributes.position;for(let i=0;i<P.count;i++){const px=P.getX(i),ax=Math.abs(px);let y;if(ax<.14)y=.072-.012*Math.cos(px/.14*Math.PI/2);else{const a=ax-.14;y=Math.max(.0015,.072-a*a*3.6-a*.25)}P.setZ(i,y+.0015*Math.sin(px*30))}gm.computeVertexNormals();
-    const m=new T.Mesh(gm,new T.MeshStandardMaterial({map:ecgStrip(5,false),roughness:.9,side:T.DoubleSide,envMapIntensity:.25}));m.rotation.set(-Math.PI/2+.12,0,.02);m.position.set(0,DY,.2);m.castShadow=true;m.receiveShadow=true;S1.add(m);return m})();
+  const held=(()=>{const L=.7,gm=new T.PlaneGeometry(L,.06,280,3);const P=gm.attributes.position;for(let i=0;i<P.count;i++){const px=P.getX(i),ax=Math.abs(px);let y;if(ax<.2)y=.0245-.0015*Math.cos(px/.2*Math.PI/2);else{const a=ax-.2;y=Math.max(.0025,.0245-a*.32-a*a*1.5)}P.setZ(i,y+.0006*Math.sin(px*30))}gm.computeVertexNormals();
+    const m=new T.Mesh(gm,new T.MeshStandardMaterial({map:ecgStrip(5,false),roughness:.9,side:T.DoubleSide,envMapIntensity:.25}));m.rotation.set(-Math.PI/2,0,.0);m.position.set(0,DY,.12);m.castShadow=true;m.receiveShadow=true;S1.add(m);return m})();
   /* химикалка, чаша кафе, стетоскоп, лампа, телефон */
   const pen=new T.Group();{const b=new T.Mesh(new T.CylinderGeometry(.0045,.0045,.14,16),new T.MeshPhysicalMaterial({color:0x1d1d22,roughness:.25,clearcoat:1}));pen.add(b);const tip=new T.Mesh(new T.ConeGeometry(.0045,.012,16),new T.MeshStandardMaterial({color:0xc0c4ca,metalness:1,roughness:.25}));tip.position.y=-.076;tip.rotation.x=Math.PI;pen.add(tip);
     const clip=new T.Mesh(new T.BoxGeometry(.002,.04,.003),tip.material);clip.position.set(.005,.045,0);pen.add(clip)}
@@ -269,14 +271,14 @@ function build(brainG,neuronG,docG){const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z
     const dm=rim(new T.MeshPhysicalMaterial({vertexColors:true,roughness:.72,clearcoat:.12,clearcoatRoughness:.6,envMapIntensity:.35,transparent:true}),0xffffff,.18,3);docMats.push(dm);
     const sk=docG.userData.skel;let body;
     if(sk){dm.skinning=true;body=new T.SkinnedMesh(docG,dm);const bl=sk.map(()=>new T.Bone());sk.forEach((b,i)=>{const p=b.par>=0?sk[b.par].piv:[0,0,0];bl[i].position.set(b.piv[0]-p[0],b.piv[1]-p[1],b.piv[2]-p[2]);(b.par>=0?bl[b.par]:body).add(bl[i])});
-      body.rotation.y=Math.PI;body.position.set(0,.451,.75);doc.add(body);doc.updateMatrixWorld(true);body.bind(new T.Skeleton(bl));
+      body.rotation.y=Math.PI;body.position.set(0,.456,.75);doc.add(body);doc.updateMatrixWorld(true);body.bind(new T.Skeleton(bl));
       const Q=sk.map(b=>new T.Quaternion(b.q[0],b.q[1],b.q[2],b.q[3])),I=new T.Quaternion(),tmp=new T.Quaternion(),ax=new T.Vector3(1,0,0),az=new T.Vector3(0,0,1),ay=new T.Vector3(0,1,0);
       /* цикъл: ръката се вдига към главата, почесва, после се връща върху лентата */
       docAnim=t=>{const P=8.5,c=t%P,up=c<1.1?sm(0,1.1,c):c<3.0?1:c<4.1?1-sm(3.0,4.1,c):0;const scr=c>1.0&&c<3.1?Math.sin((c-1)*18)*sm(1.0,1.3,c)*(1-sm(2.8,3.1,c)):0;
         for(let i=2;i<6;i++)bl[i].quaternion.copy(I).slerp(Q[i],up);
         bl[5].quaternion.multiply(tmp.setFromAxisAngle(ax,scr*.22));bl[4].quaternion.multiply(tmp.setFromAxisAngle(az,scr*.05));
         bl[1].quaternion.setFromAxisAngle(az,-.12*up).multiply(tmp.setFromAxisAngle(ay,.06*Math.sin(t*.4)))}}
-    else{body=new T.Mesh(docG,dm);body.rotation.y=Math.PI;body.position.set(0,.451,.75);doc.add(body)}
+    else{body=new T.Mesh(docG,dm);body.rotation.y=Math.PI;body.position.set(0,.456,.75);doc.add(body)}
     body.castShadow=true;body.receiveShadow=true;
     /* коса: кичури върху скалпа и 10 полупрозрачни слоя („черупки“), по-дълги към върха */
     const GL_N=`float h3(vec3 p){p=fract(p*.3183099+.1);p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
@@ -400,7 +402,6 @@ float strand(vec3 p){vec3 d=normalize(p-vec3(0.,.635,.335));float th=atan(d.x,d.
   let tt=0,last=performance.now(),cur=1;
   const DUR=4.6;
   R.compile(S1,cam);setC("ready");phase="intro";
-  setTimeout(()=>{if(!ended&&phase!=="zoom")setC("ecg")},1800);
   setTimeout(()=>{if(!ended&&phase==="intro")setText("office")},2400);
   setTimeout(()=>{if(!ended&&phase==="intro"){setC("hinted");phase="hold"}},4200);
   /* етапи на гмуркането (секунди) */
@@ -410,7 +411,7 @@ float strand(vec3 p){vec3 d=normalize(p-vec3(0.,.635,.335));float th=atan(d.x,d.
   function frame(n){if(ended)return;raf=requestAnimationFrame(frame);const dt=Math.min(.05,(n-last)/1000);last=n;tt+=dt;
     if(spikeT>0)spikeT=Math.max(0,spikeT-dt*4);
     /* дишане и леко движение на главата */
-    const br=Math.sin(tt*1.35);doc.scale.set(1+.004*br,1+.003*br,1+.004*br);if(docAnim&&cur===1)docAnim(window.__nxDocT!=null?window.__nxDocT:tt+2.5);held.rotation.z=.02+.01*Math.sin(tt*.5);
+    const br=Math.sin(tt*1.35);doc.scale.set(1+.004*br,1+.003*br,1+.004*br);if(docAnim&&cur===1)docAnim(window.__nxDocT!=null?window.__nxDocT:tt+2.5);
     let fade=0;
     if(diveT<0){/* кабинетът отгоре */
       const u=ease(cl(tt/DUR,0,1));cam.position.copy(A.p).lerp(B.p,u);const lk=A.l.clone().lerp(B.l,u);const k=u>=1?1:0;cam.position.x+=Math.sin(tt*.3)*.02*k;cam.lookAt(lk);cur=1}
@@ -431,7 +432,7 @@ float strand(vec3 p){vec3 d=normalize(p-vec3(0.,.635,.335));float th=atan(d.x,d.
     }
     fadeEl.style.opacity=fade.toFixed(3);
     if(cur===2){if(!netWarm){netWarm=1;for(let w=0;w<70;w++)netStep(.05)}netStep(dt)}
-    R.render(cur===1?S1:cur===2?S2:SB,cam)}
+    R.render(cur===1?S1:cur===2?S2:SB,cam);if(cur===2&&!ov.classList.contains("ecg"))setC("ecg");if(ov.classList.contains("ecg"))ecDraw(dt)}
   raf=requestAnimationFrame(frame);
   window.__nxSeek=d=>{if(diveT<0){phase="dive";setC("hinted",false)}diveT=d};
 }
