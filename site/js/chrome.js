@@ -51,9 +51,9 @@ html body:not(#nb) .lp-card .fr{background:#C8102E!important;color:#fff!importan
 html body:not(#nb) .lp-card .lk{background:rgba(255,255,255,.8)!important;border:1px solid rgba(29,29,31,.1)!important;border-radius:999px!important}
 
 /* лента за навигация: стъкло отгоре (HIG navigation bar) */
-html body:not(#nb) header.bar{background:rgba(250,250,252,.62)!important;-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);border-bottom:1px solid rgba(29,29,31,.08)!important;box-shadow:none!important}
+html body:not(#nb) header.bar{background:#F7F7F9!important;-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);border-bottom:1px solid rgba(29,29,31,.08)!important;box-shadow:none!important}
 html body:not(#nb) aside#nav{background:rgba(250,250,252,.66)!important;-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);border-right:1px solid rgba(29,29,31,.08)!important}
-html body:not(#nb) #tabbar{background:rgba(250,250,252,.7)!important;-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);border-top:1px solid rgba(29,29,31,.08)!important}
+html body:not(#nb) #tabbar{background:#F7F7F9!important;-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);border-top:1px solid rgba(29,29,31,.08)!important}
 html body:not(#nb) .tb-search input,html body:not(#nb) #navq{background:rgba(118,118,128,.12)!important;border:0!important;border-radius:10px!important;color:#1D1D1F!important;min-height:36px}
 
 /* бутони: капсули, поне 44 pt (HIG), червен основен и стъклен второстепенен */
@@ -113,6 +113,42 @@ html body:not(#nb) header.bar .quick>a:last-child:not(.prem){background:rgba(255
 html body:not(#nb) .lp-cta>*:nth-child(2){background:rgba(255,255,255,.22)!important;color:#fff!important;border:1px solid rgba(255,255,255,.55)!important;border-radius:999px!important;box-shadow:none!important;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
 html body:not(#nb) .lp-cta>*:nth-child(2) *{color:#fff!important}
 html body:not(#nb) .lp-cta>*:first-child{border-radius:999px!important}
+/* ===== урок: иконки, номера, значки и табове в стила на iOS (по-силна специфичност от стария слой) ===== */
+html:root body:not(#nb) .secchip{border:0!important;border-radius:999px!important;background:rgba(255,255,255,.75)!important;box-shadow:0 1px 2px rgba(20,24,32,.08)!important;padding:5px 12px 5px 5px!important;gap:8px}
+html:root body:not(#nb) .secchip i{background:#C8102E!important;color:#fff!important;border-radius:999px!important;min-width:24px;height:24px;display:inline-grid!important;place-items:center;font-style:normal;padding:0 7px!important}
+html:root body:not(#nb) .badges .bdg{border:0!important;border-radius:999px!important;background:rgba(255,255,255,.75)!important;box-shadow:0 1px 2px rgba(20,24,32,.08)!important;padding:5px 11px!important;color:#1D1D1F!important}
+html:root body:not(#nb) .badges .bdg.red,html:root body:not(#nb) .badges .bdg.hy,html:root body:not(#nb) .badges .bdg[class*="pri"]{background:#C8102E!important;color:#fff!important}
+html:root body:not(#nb) .badges .bdg .lc{color:inherit!important}
+/* табове на урока: сегментиран контрол (HIG), плътно стъкло, за да не прозира текстът при скрол */
+html:root body:not(#nb) .booktabs{background:#EEEFF2!important;-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
+ border:0!important;border-radius:14px!important;padding:4px!important;gap:2px!important;box-shadow:0 1px 2px rgba(20,24,32,.06),0 8px 24px rgba(20,24,32,.08)!important;z-index:5}
+html:root body:not(#nb) .booktabs button{border:0!important;border-radius:10px!important;background:transparent!important;box-shadow:none!important;color:#5E5E63!important;min-height:36px;padding:8px 16px!important}
+html:root body:not(#nb) .booktabs button.on{background:#fff!important;color:#1D1D1F!important;box-shadow:0 1px 3px rgba(20,24,32,.14),0 1px 1px rgba(20,24,32,.06)!important}
+html:root body:not(#nb) .booktabs button::after,html:root body:not(#nb) .booktabs button.on::after{display:none!important}
+/* номерата на секциите в урока */
+html:root body:not(#nb) section.book:not(.keyp) h3::before,html:root body:not(#nb) section.book h3::before{border:0!important;border-radius:9px!important;background:rgba(200,16,46,.10)!important;color:#C8102E!important;box-shadow:none!important}
+/* карти, фигури, бележки и въпроси: заоблени */
+html:root body:not(#nb) #main .card,html:root body:not(#nb) #main .exp,html:root body:not(#nb) #main section.card{border-radius:22px!important;border:1px solid rgba(255,255,255,.8)!important;box-shadow:var(--glass-sh)!important;background:rgba(255,255,255,.7)!important}
+html:root body:not(#nb) #main .bfig,html:root body:not(#nb) #main .note,html:root body:not(#nb) #main .keyp,html:root body:not(#nb) #main table.t{border-radius:16px!important;overflow:hidden}
+html:root body:not(#nb) #main .exp .tag{border:0!important;border-radius:999px!important;background:rgba(29,29,31,.06)!important;padding:3px 10px!important}
+html:root body:not(#nb) #main .opts button{border:1px solid rgba(29,29,31,.08)!important;box-shadow:0 1px 2px rgba(20,24,32,.05)!important}
+/* бутоните в симулациите: капсули */
+html:root body:not(#nb) #main .b,html:root body:not(#nb) #main .btns button{border-radius:999px!important;border:1px solid rgba(29,29,31,.10)!important;background:rgba(255,255,255,.85)!important;box-shadow:0 1px 2px rgba(20,24,32,.06)!important;color:#1D1D1F!important}
+html:root body:not(#nb) #main .b.primary{background:#C8102E!important;color:#fff!important;border-color:#C8102E!important}
+html:root body:not(#nb) #main .toggle{border-radius:12px!important;border:0!important;background:rgba(118,118,128,.12)!important;padding:3px!important}
+html:root body:not(#nb) #main .toggle button{border:0!important;border-radius:9px!important;box-shadow:none!important;background:transparent!important}
+html:root body:not(#nb) #main .toggle button.on{background:#fff!important;box-shadow:0 1px 3px rgba(20,24,32,.14)!important}
+/* платната на симулациите */
+html:root body:not(#nb) #main canvas{border-radius:14px}
+/* странично меню: иконки в мек заоблен квадрат, активна тема без черна рамка */
+html:root body:not(#nb) aside#nav .nsh .n{border:0!important;border-radius:10px!important;background:rgba(255,255,255,.85)!important;box-shadow:0 1px 2px rgba(20,24,32,.08)!important}
+html:root body:not(#nb) aside#nav .ns.open .nsh .n{background:#C8102E!important;color:#fff!important}
+html:root body:not(#nb) aside#nav .ns.open .nsh .n .lc{color:#fff!important;stroke:#fff!important}
+html:root body:not(#nb) aside#nav a.active{box-shadow:none!important;border:0!important;border-radius:12px!important;background:rgba(200,16,46,.09)!important;color:#C8102E!important}
+html:root body:not(#nb) aside#nav .nsl a{border-radius:12px!important}
+/* горна лента: езиков бутон и лента за напредъка */
+html:root body:not(#nb) #langBtn{border-radius:999px!important;border:1px solid rgba(29,29,31,.12)!important;background:rgba(255,255,255,.75)!important;box-shadow:none!important;min-width:40px}
+html:root body:not(#nb) .tb-prog,html:root body:not(#nb) .tb-prog *{border-radius:999px!important}
 /* тестове: синьо с ✓ за вярно, оранжево с ✕ за грешно (HIG системни цветове) */
 html body:not(#nb) .opts button{border-radius:14px!important}
 html body:not(#nb) .opts button.right{background:#0A60D6!important;color:#fff!important;border-color:#0A60D6!important}
