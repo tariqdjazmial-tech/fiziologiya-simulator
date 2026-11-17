@@ -166,6 +166,14 @@ html:root body:not(#nb) .nsh .n,html:root body:not(#nb) aside#nav .nsh .n{displa
  width:32px!important;height:32px!important;min-width:32px!important;padding:0!important;line-height:0!important;color:#1D1D1F!important}
 html:root body:not(#nb) .nsh .n svg,html:root body:not(#nb) .lp-card .n svg,html:root body:not(#nb) .sec .n svg{display:block!important;margin:0!important;width:17px!important;height:17px!important;stroke-width:1.8!important}
 html:root body:not(#nb) .lp-card .n,html:root body:not(#nb) .sec .n{display:inline-grid!important;place-items:center!important;justify-content:center!important;align-content:center!important;padding:0!important;line-height:0!important}
+/* галерия със симулациите: снимката на цялата карта, надписът върху мек тъмен преход */
+html:root body:not(#nb) .lp-gal a{position:relative!important;display:block;border:0!important;border-radius:20px!important;overflow:hidden!important;background:#EEF0F3!important;
+ box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 18px 40px rgba(0,0,0,.45)!important;transform:none;transition:transform .6s var(--ease-out),box-shadow .6s var(--ease-out)!important}
+html:root body:not(#nb) .lp-gal a:hover{transform:translateY(-4px)!important;box-shadow:0 26px 54px rgba(0,0,0,.55)!important}
+html:root body:not(#nb) .lp-gal img{display:block;width:100%!important;height:100%!important;object-fit:cover!important;transition:transform 1.2s var(--ease-out)}
+html:root body:not(#nb) .lp-gal a:hover img{transform:scale(1.045)}
+html:root body:not(#nb) .lp-gal span{position:absolute!important;left:0;right:0;bottom:0;padding:44px 18px 16px!important;background:linear-gradient(0deg,rgba(12,13,16,.88) 0%,rgba(12,13,16,.55) 55%,rgba(12,13,16,0) 100%)!important;color:#fff!important}
+html:root body:not(#nb) .lp-gal small{color:#FF8A95!important;letter-spacing:.02em}
 /* тестове: синьо с ✓ за вярно, оранжево с ✕ за грешно (HIG системни цветове) */
 html body:not(#nb) .opts button{border-radius:14px!important}
 html body:not(#nb) .opts button.right{background:#0A60D6!important;color:#fff!important;border-color:#0A60D6!important}
