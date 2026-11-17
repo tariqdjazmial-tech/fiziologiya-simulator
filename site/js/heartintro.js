@@ -5,6 +5,7 @@
    Моделът е същият като в раздела за сърцето: m/hglb3.txt („Realistic Human Heart“, neshallads, CC BY 4.0).
    Ранният черен екран (#hxo) се слага в началото на <body> в index.html, за да се вижда веднага. */
 (function(){"use strict";
+if(window.__introPick&&window.__introPick!=="heart")return;
 const ov=document.getElementById("hxo");if(!ov)return;window.__hxo=true;
 /* въведението е винаги на английски, независимо от езика на сайта */
 const EN=true,L=(b,e)=>e;
