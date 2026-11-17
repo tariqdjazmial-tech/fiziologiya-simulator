@@ -8,12 +8,12 @@ shutil.rmtree(S,ignore_errors=True);os.makedirs(S+"/js")
 for f in os.listdir(H+"/js"):shutil.copy(H+"/js/"+f,S+"/js/"+f)
 shutil.copytree(H+"/fonts",S+"/fonts",dirs_exist_ok=True)
 shutil.copy("/tmp/sbjs/node_modules/@supabase/supabase-js/dist/umd/supabase.js",S+"/js/supabase.min.js")
-pub={k:cfg[k] for k in ("supabaseUrl","supabaseAnon","price","email") if cfg.get(k)}
+pub={k:cfg[k] for k in ("supabaseUrl","supabaseAnon","price","email","siteUrl") if cfg.get(k)}
 open(S+"/js/config.js","w").write("/* публични настройки на сайта (без тайни ключове) */\nwindow.PHYS_CFG="+json.dumps(pub,ensure_ascii=False)+";\n")
 h=open(H+"/fiziologiya-simulator.html",encoding="utf8").read()
 o='<script src="js/shell.js"></script>'
 assert h.count(o)==1
-h=h.replace(o,'<script src="js/config.js"></script><script src="js/supabase.min.js"></script><script src="js/sb.js"></script>'+o)
+h=h.replace(o,'<script src="js/config.js"></script><script src="js/supabase.min.js"></script><script src="js/sb.js"></script><script src="js/native.js"></script>'+o)
 h=h.replace("<title>","<meta name=\"description\" content=\"Интерактивен симулатор по физиология за студенти по медицина: 3D модели, симулации, тестове.\"><title>",1)
 # тежките 3D модели — в отделни файлове, зареждат се при нужда (страницата се отваря бързо)
 import re as _re

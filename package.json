@@ -1,0 +1,23 @@
+{
+  "name": "physionova",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PhysioNova — симулатор по физиология: сайт (site/) и мобилно приложение (android/, ios/) с Capacitor",
+  "scripts": {
+    "cap:sync": "cap sync",
+    "android": "cap sync android && cap open android",
+    "ios": "cap sync ios && cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.6.2",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/browser": "8.0.5",
+    "@capacitor/core": "8.6.2",
+    "@capacitor/ios": "8.6.2",
+    "@capacitor/splash-screen": "8.0.2",
+    "@capacitor/status-bar": "8.0.4"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.6.2"
+  }
+}
