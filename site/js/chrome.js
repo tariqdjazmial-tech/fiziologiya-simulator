@@ -9,11 +9,11 @@ const SYS='-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Sego
 /* ---------- цветове и материали ---------- */
 const css=`
 html:root{
- --bg:transparent!important;--panel:rgba(255,255,255,.62)!important;--plate:rgba(255,255,255,.62)!important;--chip:rgba(255,255,255,.5)!important;--line:rgba(29,29,31,.12)!important;--ink:#1D1D1F!important;--muted:#5E5E63!important;
+ --bg:transparent!important;--panel:#FFFFFF!important;--plate:#FFFFFF!important;--chip:#F1F2F4!important;--line:rgba(29,29,31,.12)!important;--ink:#1D1D1F!important;--muted:#5E5E63!important;
  --pri:#C8102E!important;--pri-h:#A50D25!important;--pri-50:rgba(200,16,46,.08)!important;--pri-100:rgba(200,16,46,.16)!important;--accent:#C8102E!important;--accent2:#1D1D1F!important;
  --ok:#0A60D6!important;--ok-50:rgba(10,96,214,.10)!important;--err:#C2410C!important;--err-50:rgba(194,65,12,.10)!important;--warn:#A86A00!important;--warn-50:rgba(168,106,0,.10)!important;--warn-ink:#7A4E0B!important;
- --c:#C8102E!important;--cb:rgba(255,255,255,.62)!important;
- --nb-ink:#1D1D1F!important;--nb-on:#FFFFFF!important;--nb-paper:rgba(255,255,255,.62)!important;--nb-bg:transparent!important;
+ --c:#C8102E!important;--cb:#FFFFFF!important;
+ --nb-ink:#1D1D1F!important;--nb-on:#FFFFFF!important;--nb-paper:#FFFFFF!important;--nb-bg:transparent!important;
  --nb-red:#C8102E!important;--nb-red-50:rgba(200,16,46,.08)!important;
  --nb-y:rgba(255,255,255,.72)!important;--nb-y-50:rgba(255,255,255,.5)!important;--nb-lm:rgba(255,255,255,.72)!important;
  --nb-pk:#C8102E!important;--nb-or:#C8102E!important;--nb-tl:#C8102E!important;--nb-rd:#C8102E!important;--nb-bl:rgba(255,255,255,.62)!important;--nb-vi:rgba(255,255,255,.62)!important;
@@ -149,6 +149,23 @@ html:root body:not(#nb) aside#nav .nsl a{border-radius:12px!important}
 /* горна лента: езиков бутон и лента за напредъка */
 html:root body:not(#nb) #langBtn{border-radius:999px!important;border:1px solid rgba(29,29,31,.12)!important;background:rgba(255,255,255,.75)!important;box-shadow:none!important;min-width:40px}
 html:root body:not(#nb) .tb-prog,html:root body:not(#nb) .tb-prog *{border-radius:999px!important}
+/* термини от речника: тънко плътно подчертаване вместо червени точки (не прилича на правописна грешка) */
+html:root body:not(#nb) .term{border-bottom:0!important;text-decoration:underline!important;text-decoration-thickness:1.5px!important;text-underline-offset:3px!important;
+ text-decoration-color:rgba(29,29,31,.28)!important;text-decoration-style:solid!important;cursor:help;border-radius:4px;transition:background-color .2s,text-decoration-color .2s;color:inherit!important}
+html:root body:not(#nb) .term:hover,html:root body:not(#nb) .term:focus-visible,html:root body:not(#nb) .term.on{text-decoration-color:#C8102E!important;background:rgba(200,16,46,.07)!important}
+/* изскачащото обяснение и всички плаващи панели: плътни, за да се четат */
+html:root body:not(#nb) #pop{background:#FFFFFF!important;border:1px solid rgba(29,29,31,.10)!important;border-radius:16px!important;
+ box-shadow:0 2px 6px rgba(20,24,32,.08),0 18px 44px rgba(20,24,32,.20)!important;padding:14px 16px!important;color:#1D1D1F!important;max-width:min(360px,calc(100vw - 32px))}
+html:root body:not(#nb) #pop b{display:block;font-size:15px;margin-bottom:6px;color:#1D1D1F!important}
+html:root body:not(#nb) #pop div{color:#3A3A3E!important;line-height:1.5}
+html:root body:not(#nb) #pop a{color:#C8102E!important;font-weight:600;text-decoration:none!important;display:inline-block;margin-top:8px}
+@media (max-width:980px){html:root body:not(#nb) aside#nav{background:#F7F7F9!important}}
+html:root body:not(#nb) .tb-res,html:root body:not(#nb) .tb-search .res,html:root body:not(#nb) [role=listbox],html:root body:not(#nb) .menu,html:root body:not(#nb) dialog{background:#FFFFFF!important}
+/* иконките на разделите в менюто: центрирани в заоблено квадратче */
+html:root body:not(#nb) .nsh .n,html:root body:not(#nb) aside#nav .nsh .n{display:inline-grid!important;place-items:center!important;justify-content:center!important;align-content:center!important;
+ width:32px!important;height:32px!important;min-width:32px!important;padding:0!important;line-height:0!important;color:#1D1D1F!important}
+html:root body:not(#nb) .nsh .n svg,html:root body:not(#nb) .lp-card .n svg,html:root body:not(#nb) .sec .n svg{display:block!important;margin:0!important;width:17px!important;height:17px!important;stroke-width:1.8!important}
+html:root body:not(#nb) .lp-card .n,html:root body:not(#nb) .sec .n{display:inline-grid!important;place-items:center!important;justify-content:center!important;align-content:center!important;padding:0!important;line-height:0!important}
 /* тестове: синьо с ✓ за вярно, оранжево с ✕ за грешно (HIG системни цветове) */
 html body:not(#nb) .opts button{border-radius:14px!important}
 html body:not(#nb) .opts button.right{background:#0A60D6!important;color:#fff!important;border-color:#0A60D6!important}
