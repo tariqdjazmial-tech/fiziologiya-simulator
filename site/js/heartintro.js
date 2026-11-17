@@ -1,166 +1,252 @@
-/* ===== Начална сцена: сърце на операционна маса, приближаване при скрол (по идеята на ORYZO).
-   Реалистичният модел е същият като в раздела за сърцето: m/hglb3.txt („Realistic Human Heart“, neshallads, CC BY 4.0).
-   Вмъква се само на началната страница, преди .lp-hero; останалият сайт не се променя. ===== */
+/* ===== Въведение при отваряне на сайта ===== */
+/* 1) поглед отгоре към операционното поле, камерата се спуска към сърцето (тръгва само);
+   2) отдолу ЕКГ като на монитор, отстрани текст за ученето;
+   3) при скрол ЕКГ се уголемява до зареждащ екран „PhysioNova“, после се отваря сайтът.
+   Моделът е същият като в раздела за сърцето: m/hglb3.txt („Realistic Human Heart“, neshallads, CC BY 4.0).
+   Ранният черен екран (#hxo) се слага в началото на <body> в index.html, за да се вижда веднага. */
 (function(){"use strict";
-const EN=()=>window.PHYS_LANG==="en";
+const ov=document.getElementById("hxo");if(!ov)return;window.__hxo=true;
+const EN=window.PHYS_LANG==="en",L=(b,e)=>EN?e:b;
 const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const MOBILE=matchMedia("(max-width: 700px)").matches;
 const THREE_URL="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
 const GLTF="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js";
 const ROOM="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js";
-const load=src=>new Promise((res,rej)=>{if([...document.scripts].some(s=>s.src===src))return res();const s=document.createElement("script");s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s)});
+const load=src=>new Promise((res,rej)=>{if(src===THREE_URL&&window.THREE)return res();if([...document.scripts].some(s=>s.src===src))return res();const s=document.createElement("script");s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s)});
+const brand=document.querySelector(".brand b,.logo b,.brand");const FONT=brand?getComputedStyle(brand).fontFamily:"system-ui,sans-serif";
 
+/* ---------- изглед ---------- */
 const css=`
-.hx{position:relative;height:460vh;background:#100904;color:#ffedd7;margin:0}
-.hx-st{position:sticky;top:var(--hx-top,56px);height:calc(100vh - var(--hx-top,56px));height:calc(100svh - var(--hx-top,56px));overflow:hidden}
-.hx canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-.hx-ov{position:absolute;inset:0;pointer-events:none;padding:28px max(18px,env(safe-area-inset-left,0px)) 28px max(18px,env(safe-area-inset-right,0px))}
-.hx-t{position:absolute;opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .7s cubic-bezier(.2,.8,.2,1);text-transform:uppercase;font-weight:500;letter-spacing:.01em;line-height:.95}
-.hx-t.on{opacity:1;transform:none}
-.hx-l{left:max(18px,env(safe-area-inset-left,0px));top:50%;margin-top:-1.2em}
-.hx-r{right:max(18px,env(safe-area-inset-right,0px));top:50%;margin-top:-1.2em;text-align:right}
-.hx-k{display:block;font-size:12px;letter-spacing:.14em;opacity:.62;margin-bottom:10px;font-weight:500}
-.hx-big{font-size:clamp(30px,4.4vw,56px)}
-.hx-c{left:0;right:0;bottom:max(34px,calc(env(safe-area-inset-bottom,0px) + 24px));text-align:center;padding:0 18px}
-.hx-brand{font-size:clamp(46px,9vw,128px);letter-spacing:-.01em}
-.hx-sub{display:block;margin-top:14px;font-size:13px;letter-spacing:.16em;opacity:.7}
-.hx-body{text-transform:none;font-weight:400;font-size:clamp(19px,2.1vw,29px);line-height:1.26;max-width:30ch;margin:0 auto;letter-spacing:0}
-.hx-cta{pointer-events:auto;border:0;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:10px;margin-top:18px;padding:14px 22px;border-radius:36px;background:#382416;color:#ffedd7;text-decoration:none;font-size:14px;letter-spacing:.08em;min-height:44px}
-.hx-cta:focus-visible{outline:2px solid #ffedd7;outline-offset:3px}
-.hx-hr{position:absolute;right:max(18px,env(safe-area-inset-right,0px));bottom:max(22px,calc(env(safe-area-inset-bottom,0px) + 14px));font:500 12px/1 ui-monospace,monospace;letter-spacing:.08em;opacity:.7;display:flex;gap:8px;align-items:center}
-.hx-hr i{width:7px;height:7px;border-radius:50%;background:#ff3b30;transform:scale(var(--p,1))}
-.hx-cr{position:absolute;max-width:calc(100% - 150px);left:max(18px,env(safe-area-inset-left,0px));bottom:max(22px,calc(env(safe-area-inset-bottom,0px) + 14px));font:500 10px/1.3 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#dc5000;opacity:.85;max-width:52ch}
-.hx-cr a{color:inherit;pointer-events:auto}
-.hx-load{position:absolute;inset:0;display:grid;place-items:center;font-size:12px;letter-spacing:.16em;text-transform:uppercase;opacity:.6}
-.hx-bar{position:absolute;left:0;top:0;height:2px;background:#ffedd7;opacity:.5;width:calc(var(--prog,0) * 100%)}
-@media (max-width:700px){.hx-l,.hx-r{top:22px;margin:0}.hx-big{font-size:30px}.hx-c{bottom:calc(140px + env(safe-area-inset-bottom,0px))}.hx-hr,.hx-cr{bottom:calc(88px + env(safe-area-inset-bottom,0px))}.hx-cr{max-width:56%}}
-@media (prefers-reduced-motion:reduce){.hx-t{transition:opacity .3s}}
+#hxo{position:fixed;inset:0;z-index:100000;background:#060708;color:#eef0ee;overflow:hidden;font-family:${FONT};transition:opacity .7s ease}
+#hxo.out{opacity:0;pointer-events:none}
+#hxo canvas.gl{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity 1.2s ease,transform 1.3s cubic-bezier(.6,0,.2,1)}
+#hxo.ready canvas.gl{opacity:1}
+#hxo.zoom canvas.gl{transform:scale(1.25);opacity:0}
+#hxo .vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 70% 62% at 50% 46%,transparent 40%,rgba(3,4,5,.55) 72%,rgba(3,4,5,.92) 100%)}
+#hxo .pre{position:absolute;inset:0;display:grid;place-items:center;font:600 13px/1 system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#8d958f;transition:opacity .6s}
+#hxo.ready .pre{opacity:0}
+#hxo .side{text-shadow:0 2px 18px rgba(0,0,0,.85);position:absolute;top:50%;transform:translateY(-50%);max-width:min(30vw,340px);opacity:0;transition:opacity 1s ease,transform 1.2s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+#hxo .side.l{left:max(28px,env(safe-area-inset-left,0px));transform:translate(-18px,-50%)}
+#hxo .side.r{right:max(28px,env(safe-area-inset-right,0px));text-align:right;transform:translate(18px,-50%)}
+#hxo.texts .side{opacity:1;transform:translate(0,-50%)}
+#hxo.zoom .side{opacity:0}
+#hxo .side small{display:block;font:600 11.5px/1.2 system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#7fd8a6;margin-bottom:12px}
+#hxo .side b,#hxo .side span,#hxo .side small{text-transform:none}#hxo .side small{text-transform:uppercase}
+#hxo .side b{display:block;font-weight:800;font-size:clamp(26px,3.2vw,44px);line-height:1.02;letter-spacing:-.02em;color:#f3f1ec;text-wrap:balance}
+#hxo .side span{display:block;margin-top:12px;font:400 15px/1.45 system-ui,sans-serif;color:#b9bfba}
+#hxo .mon{position:absolute;left:50%;bottom:max(26px,env(safe-area-inset-bottom,0px));width:min(760px,calc(100% - 40px));height:118px;transform:translate(-50%,40px);opacity:0;
+  background:rgba(4,10,8,.72);border:1px solid rgba(127,216,166,.18);border-radius:12px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  transition:opacity .8s ease,transform .9s cubic-bezier(.2,.8,.2,1),width 1.2s cubic-bezier(.6,0,.2,1),height 1.2s cubic-bezier(.6,0,.2,1),bottom 1.2s cubic-bezier(.6,0,.2,1),border-color 1s,background 1s}
+#hxo.ecg .mon{opacity:1;transform:translate(-50%,0)}
+#hxo.zoom .mon{bottom:calc(50% - 21vh);width:100%;height:42vh;border-color:transparent;background:transparent;border-radius:0}
+#hxo .mon canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#hxo .mon .lab{position:absolute;left:12px;top:9px;font:600 11px/1 ui-monospace,monospace;letter-spacing:.12em;color:#7fd8a6;opacity:.85;transition:opacity .6s}
+#hxo .mon .hr{position:absolute;right:12px;top:8px;font:600 26px/1 ui-monospace,monospace;color:#7fd8a6;transition:opacity .6s}
+#hxo .mon .hr small{font-size:10px;letter-spacing:.12em;margin-left:4px;opacity:.8}
+#hxo.zoom .mon .lab,#hxo.zoom .mon .hr{opacity:0}
+#hxo .brandx{position:absolute;left:0;right:0;top:calc(50% - 21vh - 10px);transform:translateY(-100%);text-align:center;opacity:0;transition:opacity .9s ease .5s}
+#hxo .brandx b{display:block;font-weight:800;font-size:clamp(44px,8vw,104px);letter-spacing:-.03em;color:#f3f1ec;line-height:1}
+#hxo .brandx b i{font-style:normal;color:#ff3b30}
+#hxo .brandx span{display:block;margin-top:12px;font:600 12px/1 system-ui,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#7fd8a6}
+#hxo.zoom .brandx{opacity:1}
+#hxo .load{position:absolute;left:50%;top:calc(50% + 21vh + 26px);transform:translateX(-50%);width:min(320px,70vw);opacity:0;transition:opacity .6s ease .8s;text-align:center;font:500 12px/1 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8d958f}
+#hxo .load i{display:block;height:2px;margin-top:12px;background:rgba(127,216,166,.15);overflow:hidden}
+#hxo .load i::after{content:"";display:block;height:100%;width:var(--lp,0%);background:#7fd8a6;transition:width .25s linear}
+#hxo.zoom .load{opacity:1}
+#hxo .hint{position:absolute;left:50%;bottom:calc(max(26px,env(safe-area-inset-bottom,0px)) + 132px);transform:translateX(-50%);opacity:0;transition:opacity .8s;
+  font:600 12px/1 system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#e9ece8;border:0;background:none;cursor:pointer;padding:12px 16px;min-height:44px}
+#hxo .hint span{display:inline-block;animation:hxb 1.6s ease-in-out infinite}
+@keyframes hxb{50%{transform:translateY(5px)}}
+#hxo.hinted .hint{opacity:.9}
+#hxo.zoom .hint{opacity:0;pointer-events:none}
+#hxo .skip{position:absolute;top:max(14px,env(safe-area-inset-top,0px));right:max(14px,env(safe-area-inset-right,0px));font:600 12px/1 system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#cfd4cf;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:12px 16px;min-height:44px;cursor:pointer}
+#hxo .skip:focus-visible,#hxo .hint:focus-visible{outline:2px solid #7fd8a6;outline-offset:3px}
+#hxo .cr{position:absolute;left:max(14px,env(safe-area-inset-left,0px));top:max(16px,env(safe-area-inset-top,0px));font:500 10px/1.3 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#7c847e;max-width:46ch}
+#hxo .cr a{color:inherit}
+#hxo.zoom .cr{opacity:0}
+@media (max-width:700px){
+  #hxo .side{top:auto;transform:none!important;max-width:none;left:20px!important;right:20px!important;text-align:left!important}
+  #hxo .side.l{top:max(64px,calc(env(safe-area-inset-top,0px) + 52px))}
+  #hxo .side.r{display:none}
+  #hxo .side b{font-size:28px}
+  #hxo .mon{height:96px}
+  #hxo .hint{bottom:calc(max(26px,env(safe-area-inset-bottom,0px)) + 104px)}
+  #hxo.zoom .mon{bottom:calc(50% - 15vh);height:30vh}
+  #hxo .brandx{top:calc(50% - 15vh - 10px)}#hxo .load{top:calc(50% + 15vh + 22px)}
+  #hxo .cr{top:auto;bottom:6px;left:20px;font-size:9px}
+}
+@media (prefers-reduced-motion:reduce){#hxo .hint span{animation:none}}
 `;
-const st=document.createElement("style");st.id="hx-css";st.textContent=css;document.head.appendChild(st);
+const st=document.createElement("style");st.textContent=css;document.head.appendChild(st);
+ov.innerHTML=`<canvas class="gl" aria-hidden="true"></canvas><div class="vig"></div>
+ <div class="pre">${L("Подготвяме операционната…","Preparing the operating room…")}</div>
+ <div class="side l"><small>${L("Учи като в операционната","Learn like in the OR")}</small><b>${L("Физиологията, която виждаш да работи","Physiology you can watch at work")}</b><span>${L("Теория по Guyton, живи симулации и 3D модели на органите.","Guyton-based theory, live simulations and 3D organ models.")}</span></div>
+ <div class="side r"><small>${L("За студенти по медицина","For medical students")}</small><b>${L("12 раздела · 627 въпроса","12 sections · 627 questions")}</b><span>${L("Целият конспект, с обяснение към всеки отговор.","The whole syllabus, with an explanation for every answer.")}</span></div>
+ <div class="mon"><canvas aria-hidden="true"></canvas><span class="lab">II · 25 mm/s</span><span class="hr"><span id="hxo-hr">72</span><small>${L("УД./МИН","BPM")}</small></span></div>
+ <div class="brandx"><b>Physio<i>Nova</i></b><span>${L("Симулатор по физиология","Physiology simulator")}</span></div>
+ <div class="load">${L("Отваряме началната страница","Opening the home page")}<i></i></div>
+ <button class="hint" type="button">${L("Скролни, за да влезеш","Scroll to enter")} <span>↓</span></button>
+ <button class="skip" type="button">${L("Пропусни","Skip")}</button>
+ <div class="cr">${L("Модел","Model")}: <a href="https://sketchfab.com/3d-models/realistic-human-heart-3f8072336ce94d18b3d0d055a1ece089" target="_blank" rel="noopener">Realistic Human Heart</a> · neshallads · CC BY 4.0</div>`;
+const $=s=>ov.querySelector(s);
 
-function texts(){const e=EN();return [
- {a:0,b:.16,cls:"hx-c",html:`<span class="hx-brand">PhysioNova</span><span class="hx-sub">${e?"Physiology simulator · scroll":"Симулатор по физиология · скролни"} ↓</span>`},
- {a:.2,b:.42,cls:"hx-l",html:`<span class="hx-k">${e?"Operating room":"Операционна зала"}</span><span class="hx-big">07:42</span>`},
- {a:.2,b:.42,cls:"hx-r",html:`<span class="hx-k">${e?"Donor heart":"Донорско сърце"}</span><span class="hx-big">≈ 310 g</span>`},
- {a:.46,b:.7,cls:"hx-l",html:`<span class="hx-k">${e?"Heart rate":"Сърдечна честота"}</span><span class="hx-big">72 ${e?"bpm":"уд./мин"}</span>`},
- {a:.46,b:.7,cls:"hx-r",html:`<span class="hx-k">${e?"Stroke volume":"Ударен обем"}</span><span class="hx-big">70 ml</span>`},
- {a:.5,b:.7,cls:"hx-c",html:`<p class="hx-body">${e?"About 5 litres of blood a minute, every minute of your life. Here you see how.":"Около 5 литра кръв в минута, всяка минута от живота ти. Тук ще видиш как."}</p>`},
- {a:.74,b:.97,cls:"hx-l",html:`<span class="hx-k">${e?"Left ventricle":"Лява камера"}</span><span class="hx-big">8–12 mm</span>`},
- {a:.74,b:.97,cls:"hx-r",html:`<span class="hx-k">${e?"Pressure":"Налягане"}</span><span class="hx-big">120 mmHg</span>`},
- {a:.8,b:1.01,cls:"hx-c",html:`<button type="button" class="hx-cta" data-go>${e?"Continue to PhysioNova":"Към PhysioNova"} ↓</button>`}
-]}
+/* ---------- ЕКГ като на монитор: курсор, който изтрива пред себе си ---------- */
+const HRb=72,Tc=60/HRb;
+function ecgV(t){const p=((t%Tc)+Tc)%Tc/Tc,g=(m,s,a)=>a*Math.exp(-((p-m)*(p-m))/(2*s*s));return g(.10,.025,.13)+g(.185,.008,-.12)+g(.21,.010,1)+g(.235,.010,-.27)+g(.46,.045,.32)}
+const ec=$(".mon canvas"),ex=ec.getContext("2d");let ew=0,eh=0,ed=1,ecX=0,ecLastY=null,ecT=0;
+function ecSize(){const r=ec.getBoundingClientRect();ed=Math.min(2,devicePixelRatio||1);ew=Math.max(1,r.width);eh=Math.max(1,r.height);ec.width=ew*ed;ec.height=eh*ed;ex.setTransform(ed,0,0,ed,0,0);ex.clearRect(0,0,ew,eh);ecX=0;ecLastY=null}
+new ResizeObserver(ecSize).observe(ec);
+function ecDraw(dt){if(!ew)return;const pxs=Math.max(150,ew/2.6);let adv=pxs*dt;const amp=eh*.36,base=eh*.62;
+  ex.lineJoin="round";ex.lineCap="round";
+  while(adv>0){const step=Math.min(adv,2);adv-=step;ecT+=step/pxs;const x0=ecX;ecX+=step;if(ecX>ew){ecX=0;ecLastY=null;continue}
+    ex.clearRect(ecX,0,Math.min(28,ew-ecX)+1,eh);
+    const y=base-ecgV(ecT)*amp;if(ecLastY!=null){ex.strokeStyle="#7fd8a6";ex.lineWidth=Math.max(1.6,eh/70);ex.shadowColor="rgba(127,216,166,.6)";ex.shadowBlur=6;ex.beginPath();ex.moveTo(x0,ecLastY);ex.lineTo(ecX,y);ex.stroke();ex.shadowBlur=0}ecLastY=y}}
 
-let inst=null;
-function mount(){const main=document.getElementById("main");if(!main||!document.body.classList.contains("lp"))return;
-  const hero=main.querySelector(":scope > .lp-hero");if(!hero||main.querySelector(":scope > .hx"))return;
-  const sec=document.createElement("section");sec.className="hx";sec.setAttribute("aria-label",EN()?"Heart on the operating table":"Сърце на операционна маса");
-  sec.innerHTML=`<div class="hx-st"><canvas aria-hidden="true"></canvas><div class="hx-bar"></div><div class="hx-load">${EN()?"Preparing the operating room…":"Подготвяме операционната…"}</div>
-   <div class="hx-ov">${texts().map((t,i)=>`<div class="hx-t ${t.cls}" data-i="${i}">${t.html}</div>`).join("")}
-   <div class="hx-hr"><i></i><span>72 ${EN()?"BPM":"УД./МИН"}</span></div>
-   <div class="hx-cr">${EN()?"Model":"Модел"}: <a href="https://sketchfab.com/3d-models/realistic-human-heart-3f8072336ce94d18b3d0d055a1ece089" target="_blank" rel="noopener">Realistic Human Heart</a> · neshallads · CC BY 4.0</div></div></div>`;
-  main.insertBefore(sec,hero);sec.querySelector("[data-go]").addEventListener("click",()=>hero.scrollIntoView({behavior:RM?"auto":"smooth"}));
-  const bar=document.querySelector("header.bar");if(bar)sec.style.setProperty("--hx-top",bar.offsetHeight+"px");
-  if(inst)inst.stop();inst=start(sec)}
+/* ---------- състояния ---------- */
+let phase="pre",zoomAt=0,tStart=0,ended=false,R=null,raf=0;
+const html=document.documentElement;html.style.overflow="hidden";
+function setC(c,on=true){ov.classList.toggle(c,on)}
+function enter(){if(phase==="zoom"||ended)return;phase="zoom";zoomAt=performance.now();setC("ecg");setC("zoom");
+  const t0=performance.now(),D=RM?900:2600;(function tick(){const k=Math.min(1,(performance.now()-t0)/D);$(".load").style.setProperty("--lp",Math.round(k*100)+"%");if(k<1&&!ended)requestAnimationFrame(tick);else finish()})()}
+function finish(){if(ended)return;ended=true;try{scrollTo(0,0)}catch(e){}setC("out");html.style.overflow="";
+  setTimeout(()=>{cancelAnimationFrame(raf);if(R){R.dispose();R.forceContextLoss&&R.forceContextLoss()}ov.remove();st.remove()},800)}
+$(".skip").onclick=finish;$(".hint").onclick=enter;
+let ty=null;
+addEventListener("wheel",e=>{if((phase==="hold"||phase==="intro")&&e.deltaY>8)enter()},{passive:true});
+addEventListener("touchstart",e=>{ty=e.touches[0].clientY},{passive:true});
+addEventListener("touchmove",e=>{if(ty!=null&&ty-e.touches[0].clientY>30&&(phase==="hold"||phase==="intro"))enter()},{passive:true});
+addEventListener("keydown",e=>{if(ended)return;if(["ArrowDown","PageDown"," ","Enter"].includes(e.key)&&(phase==="hold"||phase==="intro")&&!(e.target&&e.target.closest&&e.target.closest("button"))){e.preventDefault();enter()}if(e.key==="Escape")finish()});
 
-function start(sec){
-  let dead=false,raf=0;const cv=sec.querySelector("canvas"),stage=sec.querySelector(".hx-st"),TX=[...sec.querySelectorAll(".hx-t")],T0=texts(),hrEl=sec.querySelector(".hx-hr i");
-  const fail=()=>{sec.querySelector(".hx-load").textContent=EN()?"3D could not load in this browser.":"3D не се зареди в този браузър.";sec.style.height="100vh"};
-  (window.THREE?Promise.resolve():load(THREE_URL)).then(()=>load(GLTF)).then(()=>load(ROOM).catch(()=>null))
+/* резервен път: ако 3D не тръгне, показваме само ЕКГ и текста */
+function noGL(){if(ended||phase!=="pre")return;$(".pre").textContent="";phase="hold";setC("ready");setC("ecg");setC("texts");setC("hinted");loop2D()}
+function loop2D(){let last=performance.now();(function f(n){if(ended)return;const dt=Math.min(.05,(n-last)/1000);last=n;ecDraw(dt);raf=requestAnimationFrame(f)})(last)}
+
+if(RM){noGL()}else{
+  load(THREE_URL).then(()=>load(GLTF)).then(()=>load(ROOM).catch(()=>null))
    .then(()=>fetch("m/hglb3.txt").then(r=>{if(!r.ok)throw new Error("model");return r.text()}))
-   .then(b64=>{if(dead)return;const bin=atob(b64.trim()),u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
-     return new Promise((res,rej)=>new THREE.GLTFLoader().parse(u8.buffer,"",res,rej))})
-   .then(gl=>{if(dead||!gl)return;sec.querySelector(".hx-load").remove();build(gl)}).catch(e=>{console.error(e);fail()});
+   .then(b64=>{const bin=atob(b64.trim()),u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);return new Promise((res,rej)=>new THREE.GLTFLoader().parse(u8.buffer,"",res,rej))})
+   .then(gl=>{if(!ended&&phase==="pre")build(gl)}).catch(e=>{console.error(e);noGL()});
+}
+setTimeout(()=>{if(phase==="pre")noGL()},20000);
 
-  function build(gl){const T=THREE;
-    const R=new T.WebGLRenderer({canvas:cv,antialias:true});R.setPixelRatio(Math.min(1.75,devicePixelRatio||1));
-    R.outputEncoding=T.sRGBEncoding;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.0;R.shadowMap.enabled=true;R.shadowMap.type=T.PCFSoftShadowMap;
-    const BG=new T.Color(0x100904);const sc=new T.Scene();sc.background=BG;sc.fog=new T.FogExp2(0x100904,.035);
-    if(T.RoomEnvironment){const pm=new T.PMREMGenerator(R);sc.environment=pm.fromScene(new T.RoomEnvironment(),.04).texture}
-    const cam=new T.PerspectiveCamera(35,1,.05,60);
+/* ---------- текстури, рисувани в канвас ---------- */
+function canvasTex(w,h,draw,rep){const c=document.createElement("canvas");c.width=w;c.height=h;draw(c.getContext("2d"),w,h);const t=new THREE.CanvasTexture(c);if(rep){t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep[0],rep[1])}t.anisotropy=4;return t}
+const rnd=(a,b)=>a+Math.random()*(b-a);
+function blood(g,x,y,r,a){for(let k=0;k<7;k++){const rx=x+rnd(-r,r)*.6,ry=y+rnd(-r,r)*.6,rr=r*rnd(.25,.7);const gr=g.createRadialGradient(rx,ry,0,rx,ry,rr);gr.addColorStop(0,`rgba(92,8,12,${a})`);gr.addColorStop(.6,`rgba(120,14,18,${a*.75})`);gr.addColorStop(1,"rgba(120,14,18,0)");g.fillStyle=gr;g.beginPath();g.ellipse(rx,ry,rr,rr*rnd(.6,1),rnd(0,3),0,7);g.fill()}}
 
-    /* ---- операционна маса ---- */
-    const steel=new T.MeshStandardMaterial({color:0x5d6166,metalness:.85,roughness:.42,envMapIntensity:.35});
-    const table=new T.Mesh(new T.BoxGeometry(7,.2,3.6),steel);table.position.y=-.1;table.receiveShadow=true;sc.add(table);
-    const dg=new T.PlaneGeometry(6.2,3.2,90,46);{const P=dg.attributes.position;for(let i=0;i<P.count;i++){const x=P.getX(i),y=P.getY(i);P.setZ(i,.05+.025*Math.sin(x*3.1+y*1.7)+.015*Math.sin(x*7.3-y*5.1))}dg.computeVertexNormals()}
-    const drape=new T.Mesh(dg,new T.MeshStandardMaterial({color:0x123f3b,roughness:1,metalness:0,envMapIntensity:.08}));drape.rotation.x=-Math.PI/2;drape.position.y=0;drape.receiveShadow=true;sc.add(drape);
-    /* бъбрековидно легенче от стомана */
-    const prof=[[0,0],[.95,0],[1.08,.05],[1.16,.13],[1.2,.19],[1.24,.2]].map(p=>new T.Vector2(p[0],p[1]));
-    const dish=new T.Mesh(new T.LatheGeometry(prof,72),new T.MeshStandardMaterial({color:0x9ea3a9,metalness:.95,roughness:.28,envMapIntensity:.45,side:T.DoubleSide}));dish.scale.set(1.25,1,.85);dish.position.y=.1;dish.receiveShadow=true;dish.castShadow=true;sc.add(dish);
-    /* инструменти: скалпел и пинсета */
-    const inst=new T.Group();const hm=new T.MeshStandardMaterial({color:0xb5b9be,metalness:.95,roughness:.2,envMapIntensity:.5});
-    const handle=new T.Mesh(new T.BoxGeometry(1.0,.035,.09),hm);const bshape=new T.Shape();bshape.moveTo(0,0);bshape.lineTo(.34,0);bshape.quadraticCurveTo(.3,.09,0,.08);
-    const blade=new T.Mesh(new T.ExtrudeGeometry(bshape,{depth:.008,bevelEnabled:false}),hm);blade.rotation.x=-Math.PI/2;blade.position.set(.5,0,.04);
-    const sc1=new T.Group();sc1.add(handle,blade);sc1.position.set(2.2,.11,-.55);sc1.rotation.y=.35;inst.add(sc1);
-    const fA=new T.Mesh(new T.BoxGeometry(1.05,.03,.06),hm),fB=fA.clone();fA.position.z=.05;fA.rotation.y=-.05;fB.position.z=-.05;fB.rotation.y=.05;
-    const fp=new T.Group();fp.add(fA,fB);fp.position.set(2.15,.11,.55);fp.rotation.y=-.25;inst.add(fp);
-    inst.traverse(o=>{if(o.isMesh){o.castShadow=true}});sc.add(inst);
-    /* хирургическа лампа */
-    const lamp=new T.Group();const hous=new T.Mesh(new T.CylinderGeometry(1.35,1.5,.32,64),new T.MeshStandardMaterial({color:0x1a1715,metalness:.3,roughness:.75,envMapIntensity:.15}));lamp.add(hous);
-    const face=new T.Mesh(new T.CircleGeometry(1.28,64),new T.MeshBasicMaterial({color:0x3a352e}));face.rotation.x=Math.PI/2;face.position.y=-.165;lamp.add(face);
-    const bulbM=new T.MeshBasicMaterial({color:0xfff3df});[[0,0],...Array.from({length:6},(_,i)=>[Math.cos(i/6*6.283)*.72,Math.sin(i/6*6.283)*.72])].forEach(p=>{const b=new T.Mesh(new T.CircleGeometry(.26,40),bulbM);b.rotation.x=Math.PI/2;b.position.set(p[0],-.17,p[1]);lamp.add(b)});
-    const arm=new T.Mesh(new T.CylinderGeometry(.08,.08,3,16),new T.MeshStandardMaterial({color:0x2c2a27,metalness:.5,roughness:.5}));arm.position.y=1.65;lamp.add(arm);
-    lamp.position.set(0,3.25,-.9);lamp.rotation.x=.32;sc.add(lamp);
-    const spot=new T.SpotLight(0xfff1dc,2.6,14,.38,.6,1.2);spot.position.set(0,3.05,-.75);spot.castShadow=true;spot.shadow.mapSize.set(1536,1536);spot.shadow.bias=-.0004;spot.shadow.radius=4;sc.add(spot);sc.add(spot.target);
-    const hemi=new T.HemisphereLight(0xffe7cc,0x100904,.25);sc.add(hemi);
-    const rim=new T.DirectionalLight(0xffb27a,0);rim.position.set(-2.5,2.5,-3);sc.add(rim);
-    const fill=new T.DirectionalLight(0xfff0e0,0);fill.position.set(2,1.5,3);sc.add(fill);
+function build(gl){const T=THREE;
+  const cv=$("canvas.gl");
+  R=new T.WebGLRenderer({canvas:cv,antialias:true,powerPreference:"high-performance"});R.setPixelRatio(Math.min(MOBILE?1.5:1.75,devicePixelRatio||1));
+  R.outputEncoding=T.sRGBEncoding;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=.92;R.shadowMap.enabled=true;R.shadowMap.type=T.PCFSoftShadowMap;
+  const sc=new T.Scene();sc.background=new T.Color(0x060708);
+  if(T.RoomEnvironment){const pm=new T.PMREMGenerator(R);sc.environment=pm.fromScene(new T.RoomEnvironment(),.04).texture}
+  const cam=new T.PerspectiveCamera(38,1,.05,80);
 
-    /* ---- сърцето (същата обработка на материалите като в раздела за сърцето) ---- */
-    gl.scene.updateMatrixWorld(true);const parts=[];gl.scene.traverse(o=>{if(o.isMesh)parts.push(o)});
-    const bb=new T.Box3();parts.forEach(o=>bb.expandByObject(o));const cen=bb.getCenter(new T.Vector3()),H=bb.getSize(new T.Vector3()).y,s=1.55/H;
-    const heart=new T.Group(),inner=new T.Group();heart.add(inner);
-    parts.forEach(o=>{const g=o.geometry.clone();g.applyMatrix4(o.matrixWorld);g.translate(-cen.x,-cen.y,-cen.z);g.scale(s,s,s);g.computeVertexNormals();
-      const om=o.material;const m=new T.MeshPhysicalMaterial({map:om.map,normalMap:om.normalMap,roughnessMap:om.roughnessMap,metalness:0,roughness:.66,clearcoat:.45,clearcoatRoughness:.3,envMapIntensity:.55,side:T.DoubleSide});
-      if(m.map)m.map.encoding=T.sRGBEncoding;const mesh=new T.Mesh(g,m);mesh.castShadow=true;mesh.receiveShadow=true;inner.add(mesh)});
-    sc.add(heart);
-    /* легнало положение: върхът сочи надясно, предната стена нагоре */
-    const LIE={rx:-1.32,ry:.25,rz:-1.15},DISH_TOP=.13,UP={rx:.05,ry:-.35,rz:.12};
-    heart.rotation.set(LIE.rx,LIE.ry,LIE.rz);heart.updateMatrixWorld(true);const hb=new T.Box3().setFromObject(heart);const restY=DISH_TOP-.04-hb.min.y;
+  /* стерилни чаршафи: синьо нетъкано платно с плетка и големи гънки */
+  const weave=canvasTex(512,512,(g,w,h)=>{g.fillStyle="#2b5d86";g.fillRect(0,0,w,h);const id=g.getImageData(0,0,w,h),d=id.data;
+    for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=(y*w+x)*4,n=(Math.random()-.5)*22+((x%4<2)!==(y%4<2)?6:-6);d[i]+=n;d[i+1]+=n;d[i+2]+=n}g.putImageData(id,0,0)},[10,7]);
+  weave.encoding=T.sRGBEncoding;
+  const bump=canvasTex(256,256,(g,w,h)=>{const id=g.createImageData(w,h),d=id.data;for(let i=0;i<d.length;i+=4){const v=128+(Math.random()-.5)*90;d[i]=d[i+1]=d[i+2]=v;d[i+3]=255}g.putImageData(id,0,0)},[40,28]);
+  const dg=new T.PlaneGeometry(16,11,220,150);{const P=dg.attributes.position;const folds=[[.3,1.2,-2.5,.22],[1.1,.4,3.2,.18],[-.6,1,1.5,.14],[2.2,-.3,-4,.2],[.9,.9,0,.06]];
+    for(let i=0;i<P.count;i++){const x=P.getX(i),y=P.getY(i);let z=0;
+      folds.forEach(([a,b,c,amp])=>{const dd=(a*x+b*y+c)/Math.hypot(a,b);z+=amp*Math.exp(-dd*dd*1.6)*(1+.3*Math.sin(x*1.3+y))});
+      z+=.025*Math.sin(x*2.1+y*3.3)+.015*Math.sin(x*5.7-y*4.1);
+      const r=Math.hypot(x-.2,y+.1);const flat=Math.max(0,Math.min(1,(r-2.1)/.9));z=z*flat-.02*(1-flat)+.1*Math.exp(-((r-2.45)**2)*4);P.setZ(i,z)}dg.computeVertexNormals()}
+  const drape=new T.Mesh(dg,new T.MeshStandardMaterial({map:weave,bumpMap:bump,bumpScale:.012,roughness:.95,metalness:0,envMapIntensity:.12}));drape.rotation.x=-Math.PI/2;drape.receiveShadow=true;sc.add(drape);
+  /* петна кръв и мокро около легена */
+  const stain=canvasTex(1024,1024,(g,w,h)=>{blood(g,640,560,80,.55);blood(g,720,650,40,.45);blood(g,330,700,55,.35);blood(g,790,380,30,.3);
+    for(let k=0;k<40;k++){g.fillStyle=`rgba(80,6,10,${rnd(.2,.5)})`;g.beginPath();g.arc(rnd(450,820),rnd(420,760),rnd(1,4),0,7);g.fill()}
+    const wet=g.createRadialGradient(512,512,180,512,512,330);wet.addColorStop(0,"rgba(10,30,50,0)");wet.addColorStop(.6,"rgba(10,30,50,.28)");wet.addColorStop(1,"rgba(10,30,50,0)");g.fillStyle=wet;g.fillRect(0,0,w,h)});
+  stain.encoding=T.sRGBEncoding;
+  const stM=new T.Mesh(new T.PlaneGeometry(9,9),new T.MeshStandardMaterial({map:stain,transparent:true,roughness:.35,metalness:0,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2}));stM.rotation.x=-Math.PI/2;stM.position.set(.2,.06,.1);sc.add(stM);
 
-    /* ---- кадри на камерата по скрола ---- */
-    const V=(x,y,z)=>new T.Vector3(x,y,z);
-    const K=[ // t, позиция, цел, мъгла
-     {t:0,  p:V(0,2.15,6.6), l:V(0,1.0,0),  f:.035},
-     {t:.3, p:V(.9,1.45,3.2),l:V(0,.5,0),   f:.06},
-     {t:.55,p:V(0,1.75,3.6), l:V(0,1.7,0),  f:.32},
-     {t:.8, p:V(.42,1.86,1.32),l:V(.12,1.78,.15),f:.42},
-     {t:1,  p:V(.3,1.8,1.9), l:V(0,1.72,0), f:.42}];
-    const sm=x=>x*x*(3-2*x),cl=(x,a,b)=>Math.max(a,Math.min(b,x));
-    function cam_at(t,out){let i=0;while(i<K.length-2&&t>K[i+1].t)i++;const a=K[i],b=K[i+1],u=sm(cl((t-a.t)/(b.t-a.t),0,1));
-      out.p.copy(a.p).lerp(b.p,u);out.l.copy(a.l).lerp(b.l,u);out.f=a.f+(b.f-a.f)*u;return out}
-    const cs={p:new T.Vector3(),l:new T.Vector3(),f:0};
+  /* стоманен леген със студен физиологичен разтвор и лед */
+  const brushed=canvasTex(256,256,(g,w,h)=>{g.fillStyle="#9a9fa5";g.fillRect(0,0,w,h);for(let i=0;i<900;i++){g.strokeStyle=`rgba(${rnd(120,200)|0},${rnd(120,200)|0},${rnd(125,205)|0},.18)`;g.beginPath();const y=rnd(0,h);g.moveTo(0,y);g.lineTo(w,y+rnd(-2,2));g.stroke()}},[3,1]);
+  const steelM=()=>new T.MeshStandardMaterial({color:0xc7ccd2,map:brushed,metalness:.95,roughness:.3,envMapIntensity:.9});
+  const bowlP=[[0,.02],[1.5,.02],[1.75,.12],[1.95,.38],[2.08,.62],[2.18,.66],[2.24,.64]].map(p=>new T.Vector2(p[0],p[1]));
+  const bowl=new T.Mesh(new T.LatheGeometry(bowlP,96),new T.MeshStandardMaterial({color:0xaeb4ba,metalness:.95,roughness:.38,envMapIntensity:.55,side:T.DoubleSide}));bowl.position.set(.2,.08,.1);bowl.castShadow=bowl.receiveShadow=true;sc.add(bowl);
+  const waterY=.08+.42;
+  const water=new T.Mesh(new T.CircleGeometry(1.98,96),new T.MeshPhysicalMaterial({color:0x34596a,transparent:true,opacity:.34,roughness:.03,metalness:0,clearcoat:1,clearcoatRoughness:.02,envMapIntensity:1.4,depthWrite:false}));
+  water.rotation.x=-Math.PI/2;water.position.set(.2,waterY,.1);sc.add(water);
+  const iceM=new T.MeshPhysicalMaterial({color:0xdfeef4,transparent:true,opacity:.42,roughness:.12,metalness:0,clearcoat:1,clearcoatRoughness:.05,envMapIntensity:1.3});
+  const ice=[];for(let i=0;i<16;i++){const g=new T.IcosahedronGeometry(rnd(.08,.15),2);const P=g.attributes.position;for(let k=0;k<P.count;k++){P.setXYZ(k,P.getX(k)*rnd(.75,1.25),P.getY(k)*rnd(.6,1),P.getZ(k)*rnd(.75,1.25))}g.computeVertexNormals();
+    const m=new T.Mesh(g,iceM);const a=rnd(0,6.28),r=rnd(1.2,1.8);m.position.set(.2+Math.cos(a)*r,waterY+rnd(-.03,.04),.1+Math.sin(a)*r);m.rotation.set(rnd(0,3),rnd(0,3),rnd(0,3));m.castShadow=true;m.userData.y=m.position.y;sc.add(m);ice.push(m)}
 
-    /* ---- ЕКГ ритъм и съкращение с инерция ---- */
-    const HR=72,Tc=60/HR;let ph=0;const sp={x:0,v:0,w:2*Math.PI*9,z:.9};
-    const sys=p=>{if(p<.12||p>.48)return 0;return Math.pow(Math.sin((p-.12)/.36*Math.PI),1.3)};
-    const atr=p=>{const d=(p-.9+1)%1;return d<.1?Math.sin(d/.1*Math.PI):0};
+  /* поднос с инструменти (Mayo) */
+  const tray=new T.Mesh(new T.BoxGeometry(2.6,.08,4.4),steelM());tray.position.set(-4.3,.25,.2);tray.castShadow=tray.receiveShadow=true;sc.add(tray);
+  const towel=new T.Mesh(new T.PlaneGeometry(2.4,4.2,40,60),new T.MeshStandardMaterial({color:0x2f6b78,roughness:1,envMapIntensity:.1}));{const P=towel.geometry.attributes.position;for(let i=0;i<P.count;i++)P.setZ(i,.01*Math.sin(P.getX(i)*9)+.008*Math.sin(P.getY(i)*7));towel.geometry.computeVertexNormals()}
+  towel.rotation.x=-Math.PI/2;towel.position.set(-4.3,.325,.2);towel.receiveShadow=true;sc.add(towel);
+  const shine=()=>new T.MeshStandardMaterial({color:0xd9dde2,metalness:1,roughness:.16,envMapIntensity:1.1});
+  function ringHandled(len,open){const g=new T.Group();[-1,1].forEach(s=>{const arm=new T.Mesh(new T.BoxGeometry(len,.035,.055),shine());arm.position.set(0,0,s*open);arm.rotation.y=-s*open*.6;g.add(arm);
+      const ring=new T.Mesh(new T.TorusGeometry(.13,.028,10,32),shine());ring.rotation.x=Math.PI/2;ring.position.set(-len/2-.1,0,s*(open+.1));g.add(ring)});
+    const box=new T.Mesh(new T.BoxGeometry(.12,.06,.16),shine());box.position.x=len*.1;g.add(box);g.traverse(o=>{if(o.isMesh)o.castShadow=true});return g}
+  const scalpel=new T.Group();{const h=new T.Mesh(new T.BoxGeometry(1.1,.035,.1),shine());scalpel.add(h);const s=new T.Shape();s.moveTo(0,0);s.lineTo(.36,0);s.quadraticCurveTo(.33,.1,0,.085);
+    const b=new T.Mesh(new T.ExtrudeGeometry(s,{depth:.006,bevelEnabled:false}),shine());b.rotation.x=-Math.PI/2;b.position.set(.55,0,.045);scalpel.add(b);scalpel.traverse(o=>{if(o.isMesh)o.castShadow=true})}
+  const forceps=()=>{const g=new T.Group();[-1,1].forEach(s=>{const a=new T.Mesh(new T.BoxGeometry(1.2,.025,.06),shine());a.position.z=s*.05;a.rotation.y=s*.04;g.add(a)});g.traverse(o=>{if(o.isMesh)o.castShadow=true});return g};
+  /* инструментите лежат успоредно, по дължината на подноса */
+  [[scalpel,-1.65],[ringHandled(1.0,.035),-1.05],[ringHandled(.9,.03),-.45],[forceps(),.1],[forceps(),.6],[ringHandled(1.1,.04),1.15],[ringHandled(.8,.02),1.7]]
+   .forEach(([m,x])=>{m.rotation.y=Math.PI/2+rnd(-.04,.04);m.position.set(-4.3+x*.62,.37,.2);sc.add(m)});
 
-    let prog=0,progT=0;const clk=new T.Clock();
-    function size(){const w=stage.clientWidth,h=stage.clientHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.fov=cam.aspect<.8?52:35;cam.updateProjectionMatrix()}
-    size();const ro=new ResizeObserver(size);ro.observe(stage);
-    function scrollProg(){const r=sec.getBoundingClientRect(),tot=r.height-stage.clientHeight;return cl(-r.top/Math.max(1,tot),0,1)}
-    function frame(){if(dead)return;raf=requestAnimationFrame(frame);const r=sec.getBoundingClientRect();if(r.bottom<0||r.top>innerHeight)return;
-      const dt=Math.min(.05,clk.getDelta());progT=scrollProg();prog+= (progT-prog)*(RM?1:1-Math.pow(.0015,dt));
-      sec.style.setProperty("--prog",prog.toFixed(4));
-      /* сърдечен цикъл */
-      ph=(ph+dt/Tc*(RM?.4:1))%1;const tg=sys(ph);const n=Math.max(1,Math.ceil(dt/.002)),h=dt/n;for(let i=0;i<n;i++){sp.v+=h*(sp.w*sp.w*(tg-sp.x)-2*sp.z*sp.w*sp.v);sp.x+=h*sp.v}
-      const c=sp.x,a=atr(ph)*.4;inner.scale.set(1-.045*c+.012*a,1-.03*c+.01*a,1-.045*c+.012*a);inner.rotation.y=.05*c;
-      hrEl.style.setProperty("--p",(1+.7*c).toFixed(3));
-      /* сърцето се надига от легенчето и застава изправено */
-      const lift=sm(cl((prog-.3)/.25,0,1));heart.position.y=restY+(1.72-restY)*lift;
-      heart.rotation.x=LIE.rx+(UP.rx-LIE.rx)*lift;heart.rotation.z=LIE.rz+(UP.rz-LIE.rz)*lift;heart.rotation.y=LIE.ry+(UP.ry-LIE.ry)*lift+(RM?0:Math.sin(clk.elapsedTime*.25)*.12*lift);
-      /* камера, мъгла и светлини: от залата към празнота */
-      cam_at(prog,cs);cam.position.copy(cs.p);cam.lookAt(cs.l);sc.fog.density=cs.f;
-      const vo=sm(cl((prog-.35)/.25,0,1));spot.intensity=2.6-1.2*vo;spot.target.position.set(0,heart.position.y*.9,0);rim.intensity=1.8*vo;fill.intensity=1.0*vo;hemi.intensity=.25+.15*vo;
-      lamp.visible=vo<.5;
-      R.render(sc,cam);
-      TX.forEach((el,i)=>{const t=T0[i];el.classList.toggle("on",prog>=t.a&&prog<t.b)})}
-    raf=requestAnimationFrame(frame);
-    stopRO=()=>{ro.disconnect();R.dispose()}}
-  let stopRO=()=>{};
-  return {stop(){dead=true;cancelAnimationFrame(raf);stopRO()}}}
+  /* марли с кръв */
+  const gauzeT=a=>{const t=canvasTex(256,256,(g,w,h)=>{g.fillStyle="#f1efe9";g.fillRect(0,0,w,h);g.strokeStyle="rgba(150,145,135,.35)";for(let i=0;i<w;i+=4){g.beginPath();g.moveTo(i,0);g.lineTo(i,h);g.stroke();g.beginPath();g.moveTo(0,i);g.lineTo(w,i);g.stroke()}
+    blood(g,rnd(80,170),rnd(80,170),rnd(40,80),a)});t.encoding=T.sRGBEncoding;return t};
+  [[2.95,-1.6,.35,.62],[3.7,.5,-.5,.4],[2.85,2.0,.9,.75]].forEach(([x,z,rot,a])=>{const g=new T.PlaneGeometry(1.15,1.15,30,30);const P=g.attributes.position;for(let i=0;i<P.count;i++){const px=P.getX(i),py=P.getY(i);P.setZ(i,.06*Math.sin(px*6+py*2)*Math.cos(py*5)+.05*Math.exp(-(px*px+py*py)*4))}g.computeVertexNormals();
+    const m=new T.Mesh(g,new T.MeshStandardMaterial({map:gauzeT(a),roughness:1,envMapIntensity:.15,side:T.DoubleSide}));m.rotation.set(-Math.PI/2,0,rot);m.position.set(x,.14,z);m.castShadow=m.receiveShadow=true;sc.add(m)});
+  /* спринцовка */
+  const syr=new T.Group();{const barrel=new T.Mesh(new T.CylinderGeometry(.11,.11,1.1,24,1,true),new T.MeshPhysicalMaterial({color:0xffffff,transparent:true,opacity:.35,roughness:.05,clearcoat:1,side:T.DoubleSide}));syr.add(barrel);
+    const plug=new T.Mesh(new T.CylinderGeometry(.1,.1,.08,24),new T.MeshStandardMaterial({color:0x2a2a2a,roughness:.6}));plug.position.y=-.1;syr.add(plug);
+    const rod=new T.Mesh(new T.BoxGeometry(.05,.75,.05),new T.MeshStandardMaterial({color:0xf3f3f3,roughness:.5}));rod.position.y=-.55;syr.add(rod);
+    const fl=new T.Mesh(new T.CylinderGeometry(.16,.16,.03,24),new T.MeshStandardMaterial({color:0xf3f3f3,roughness:.5}));fl.position.y=-.93;syr.add(fl);
+    const nd=new T.Mesh(new T.CylinderGeometry(.008,.008,.5,8),shine());nd.position.y=.8;syr.add(nd);
+    syr.rotation.set(Math.PI/2,0,-.35);syr.position.set(3.2,.25,-3.0);syr.traverse(o=>{if(o.isMesh)o.castShadow=true});sc.add(syr)}
+  /* пакетче конци */
+  const sut=canvasTex(256,160,(g,w,h)=>{g.fillStyle="#f6f6f2";g.fillRect(0,0,w,h);g.fillStyle="#2d5fa3";g.fillRect(0,0,w,34);g.fillStyle="#fff";g.font="600 20px system-ui";g.fillText("4-0 · 75 cm",12,24);
+    g.fillStyle="#333";g.font="500 16px system-ui";g.fillText(EN?"Monofilament":"Монофиламент",12,64);g.fillText(EN?"Sterile":"Стерилно",12,88);g.strokeStyle="#2d5fa3";g.lineWidth=2;g.beginPath();g.arc(200,110,26,Math.PI*.1,Math.PI*1.2);g.stroke()});
+  sut.encoding=T.sRGBEncoding;
+  const plain=new T.MeshStandardMaterial({color:0xf3f3ef,roughness:.6});
+  const spk=new T.Mesh(new T.BoxGeometry(1.0,.02,.62),[plain,plain,new T.MeshStandardMaterial({map:sut,roughness:.6}),plain,plain,plain]);spk.position.set(-2.0,.14,-3.1);spk.rotation.y=.25;spk.castShadow=true;sc.add(spk);
 
-/* началната страница се рисува наново при всяка смяна на изгледа, затова следим #main */
-function watch(){const main=document.getElementById("main");if(!main)return setTimeout(watch,200);
-  new MutationObserver(()=>{if(inst&&!document.body.contains(document.querySelector(".hx"))){inst.stop();inst=null}mount()}).observe(main,{childList:true});mount()}
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",watch);else watch();
+  /* двукуполна хирургическа лампа: кръгло петно светлина и меки двойни сенки */
+  const s1=new T.SpotLight(0xfff4e6,2.7,30,.34,.6,1.1);s1.position.set(1.4,10,1.8);s1.target.position.set(.2,0,.1);
+  const s2=new T.SpotLight(0xf3f6ff,1.1,30,.42,.75,1.1);s2.position.set(-2.2,9,-1.2);s2.target.position.set(.2,0,.1);
+  [s1,s2].forEach(s=>{s.castShadow=true;s.shadow.mapSize.set(MOBILE?1024:2048,MOBILE?1024:2048);s.shadow.bias=-.0003;s.shadow.radius=5;sc.add(s);sc.add(s.target)});
+  sc.add(new T.HemisphereLight(0xdfe8ff,0x0a0c10,.12));
+
+  /* сърцето (материали като в раздела за сърцето, мокра повърхност) */
+  gl.scene.updateMatrixWorld(true);const parts=[];gl.scene.traverse(o=>{if(o.isMesh)parts.push(o)});
+  const bb=new T.Box3();parts.forEach(o=>bb.expandByObject(o));const cen=bb.getCenter(new T.Vector3()),H=bb.getSize(new T.Vector3()).y,s=2.35/H;
+  const heart=new T.Group(),inner=new T.Group();heart.add(inner);
+  parts.forEach(o=>{const g=o.geometry.clone();g.applyMatrix4(o.matrixWorld);g.translate(-cen.x,-cen.y,-cen.z);g.scale(s,s,s);g.computeVertexNormals();
+    const om=o.material;const m=new T.MeshPhysicalMaterial({map:om.map,normalMap:om.normalMap,roughnessMap:om.roughnessMap,metalness:0,roughness:.6,clearcoat:.6,clearcoatRoughness:.2,envMapIntensity:.55,side:T.DoubleSide});
+    if(m.map)m.map.encoding=T.sRGBEncoding;const mesh=new T.Mesh(g,m);mesh.castShadow=true;mesh.receiveShadow=true;inner.add(mesh)});
+  /* легнало по гръб: предната стена гледа нагоре към камерата */
+  heart.rotation.set(-Math.PI/2+.12,0,.55);heart.position.set(.2,waterY+.18,.15);sc.add(heart);
+
+  /* ---- камера: от високо над полето надолу към сърцето ---- */
+  const V=(x,y,z)=>new T.Vector3(x,y,z);
+  const A={p:V(0,15,3.2),l:V(.2,0,.3)},B={p:V(.4,6.4,1.9),l:V(.2,.3,.1)};
+  const ease=x=>1-Math.pow(1-x,3),cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const DUR=5.2;
+  function size(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.fov=cam.aspect<.8?62:38;cam.updateProjectionMatrix()}
+  size();addEventListener("resize",size);
+
+  /* сърдечен цикъл с инерция */
+  const spg={x:0,v:0,w:2*Math.PI*9,z:.9};const sys=p=>p<.12||p>.48?0:Math.pow(Math.sin((p-.12)/.36*Math.PI),1.3);const atr=p=>{const d=(p-.9+1)%1;return d<.1?Math.sin(d/.1*Math.PI):0};
+  let last=performance.now(),tt=0,hrUi=0;const hrEl=$("#hxo-hr");
+  R.compile(sc,cam);setC("ready");phase="intro";tStart=performance.now();tt=0;
+  setTimeout(()=>{if(!ended&&phase!=="zoom")setC("ecg")},2200);
+  setTimeout(()=>{if(!ended&&phase!=="zoom")setC("texts")},3000);
+  setTimeout(()=>{if(!ended&&phase!=="zoom"){setC("hinted");phase="hold"}},4800);
+  function frame(n){if(ended)return;raf=requestAnimationFrame(frame);const dt=Math.min(.05,(n-last)/1000);last=n;tt+=dt;const edt=Math.min(.12,dt*1.0);
+    const p=(tt%Tc)/Tc,tg=sys(p);const k=Math.max(1,Math.ceil(dt/.002)),h=dt/k;for(let i=0;i<k;i++){spg.v+=h*(spg.w*spg.w*(tg-spg.x)-2*spg.z*spg.w*spg.v);spg.x+=h*spg.v}
+    const c=spg.x,a=atr(p)*.4;inner.scale.set(1-.045*c+.012*a,1-.03*c+.01*a,1-.045*c+.012*a);inner.rotation.y=.05*c;
+    water.position.y=waterY+.004*c;ice.forEach((m,i)=>{m.position.y=m.userData.y+Math.sin(tt*1.3+i)*.006});
+    const u=ease(cl(tt/DUR,0,1));
+    cam.position.copy(A.p).lerp(B.p,u);const look=A.l.clone().lerp(B.l,u);
+    const br=u>=1?1:0;cam.position.x+=Math.sin(tt*.35)*.04*br;cam.position.y+=Math.sin(tt*.5)*.03*br;cam.lookAt(look);
+    if(phase!=="zoom")R.render(sc,cam);ecDraw(dt);
+    hrUi+=dt;if(hrUi>.5){hrUi=0;hrEl.textContent=String(70+Math.round(Math.random()*4))}}
+  raf=requestAnimationFrame(frame);
+}
 })();
