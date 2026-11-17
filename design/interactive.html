@@ -1,0 +1,383 @@
+<title>PhysioNova интерактивна лаборатория</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a night lab. Porcelain sculptures + one cardiac red, on near-black. Motion comes only from real physiological rhythms.
+   Single dark look on purpose (3D sculptures under lab light), so every color is set explicitly. */
+:root{
+  color-scheme:dark;
+  --bg:#07080b; --panel:#0d0f14; --panel2:#12151c; --ink:#eef0f4; --muted:#8b91a0; --line:#1d212b; --red:#ff3b4e; --red-d:#c81e33; --porc:#e9e6e1;
+  --f-disp:"Source Serif 4",Georgia,serif; --f-ui:"IBM Plex Sans",system-ui,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--ink);font:16px/1.55 var(--f-ui);margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+#gl{position:fixed;inset:0;width:100%;height:100%;z-index:20;pointer-events:none}
+.band{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.in{max-width:1200px;margin:0 auto}
+
+/* верхна лента */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:25;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.bar .in{display:flex;align-items:center;gap:20px;height:60px}
+.logo{display:flex;align-items:center;gap:9px;font:600 17px/1 var(--f-ui);letter-spacing:-.01em;color:var(--ink);text-decoration:none}
+.logo svg{width:34px;height:24px;overflow:visible}
+.logo path{stroke:var(--red);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:60;stroke-dashoffset:calc(60 - 60 * var(--draw,1))}
+.nav{display:flex;gap:4px;margin-left:12px}
+.nav a{font:500 14px/1 var(--f-ui);color:var(--muted);text-decoration:none;padding:10px 12px;border-radius:8px}
+.nav a:hover,.nav a:focus-visible{color:var(--ink);background:var(--panel2)}
+.vitals{margin-left:auto;display:flex;align-items:center;gap:10px;font:500 13px/1 var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.vitals .dot{width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 0 0 var(--red);transform:scale(var(--pulse,1))}
+.vitals b{color:var(--ink);font-weight:500}
+@media (max-width:760px){.nav{display:none}}
+
+/* hero */
+.hero .in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:24px;align-items:center;padding-block:56px 8px}
+@media (max-width:860px){.hero .in{grid-template-columns:minmax(0,1fr);padding-block:32px 0}}
+.eyebrow{font:500 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:400 clamp(40px,6vw,74px)/1 var(--f-disp);letter-spacing:-.02em;margin:16px 0 18px;text-wrap:balance}
+h1 em{font-style:normal;color:var(--red)}
+.lead{color:var(--muted);font-size:18px;max-width:46ch;margin:0 0 26px}
+.ctas{display:flex;gap:12px;flex-wrap:wrap}
+.btn{font:600 15px/1 var(--f-ui);padding:15px 20px;border-radius:12px;text-decoration:none;border:1px solid var(--line);color:var(--ink);background:var(--panel2);transition:transform .25s cubic-bezier(.2,.8,.2,1),border-color .2s;min-height:44px;display:inline-flex;align-items:center}
+.btn.pri{background:var(--red);border-color:var(--red);color:#1a0306}
+.btn:hover{transform:translate(var(--mx,0),var(--my,0))}
+.btn:focus-visible,.tile:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+.hint{margin-top:22px;font:400 13px/1.5 var(--f-mono);color:var(--muted)}
+.hint b{color:var(--ink);font-weight:500}
+.heroview{position:relative;aspect-ratio:1/1;width:100%;max-width:600px;justify-self:center}
+.readout{position:absolute;font:500 12px/1.5 var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums;pointer-events:none}
+.readout b{display:block;color:var(--ink);font:400 26px/1.1 var(--f-disp);letter-spacing:-.01em}
+.r1{left:0;top:8%}.r2{right:0;top:8%;text-align:right}.r3{left:0;bottom:6%}.r4{right:0;bottom:6%;text-align:right}
+
+/* ЕКГ лента */
+.ecg{padding-block:8px 64px}
+.ecgbox{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+.ecgbox canvas{display:block;width:100%;height:150px}
+.ecgcap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 14px;border-top:1px solid var(--line);font:400 12px/1.4 var(--f-mono);color:var(--muted)}
+
+/* меню на разделите */
+.sect{padding-block:24px 72px}
+.sh{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap;margin-bottom:22px}
+h2{font:400 clamp(30px,3.6vw,44px)/1.05 var(--f-disp);letter-spacing:-.015em;margin:8px 0 0}
+.sh p{margin:0;color:var(--muted);max-width:52ch}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:1000px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:700px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
+.tile{position:relative;border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;display:grid;gap:4px;cursor:pointer;text-align:left;color:inherit;font:inherit;
+  transition:border-color .3s,background .3s,transform .5s cubic-bezier(.2,.8,.2,1)}
+.tile:hover,.tile.on{border-color:color-mix(in srgb,var(--red) 55%,var(--line));background:var(--panel2)}
+.tile .v{aspect-ratio:1/.82;width:100%;margin-bottom:6px}
+.tile .n{font:500 12px/1 var(--f-mono);color:var(--red);letter-spacing:.06em}
+.tile .t{font:500 15px/1.25 var(--f-ui);color:var(--ink)}
+.tile .u{font:400 12px/1.3 var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.tile .free{position:absolute;top:12px;right:12px;font:500 10.5px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink);padding:5px 7px;border-radius:6px;background:var(--panel2);border:1px solid var(--line)}
+
+/* принципи и образци */
+.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.cols{grid-template-columns:minmax(0,1fr)}}
+.card{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:18px;display:grid;gap:8px;min-width:0}
+.card h3{margin:0;font:600 16px/1.3 var(--f-ui)}
+.card p{margin:0;color:var(--muted);font-size:14.5px}
+.do li,.dont li{margin:4px 0;color:var(--muted);font-size:14.5px}
+.do li::marker{color:var(--red)}
+ul{margin:0;padding-left:18px}
+.refs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:1000px){.refs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.refs{grid-template-columns:minmax(0,1fr)}}
+.ref{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:16px;display:grid;gap:6px;align-content:start;min-width:0}
+.ref a{font:600 15px/1.3 var(--f-ui);color:var(--ink);text-decoration:none}
+.ref a:hover{color:var(--red)}
+.ref .k{font:500 11px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.ref p{margin:0;font-size:14px;color:var(--muted)}
+.ref p b{color:var(--ink);font-weight:500}
+.sub{font:500 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:30px 0 12px}
+.note{font-size:13px;color:var(--muted);margin-top:14px;max-width:80ch}
+.err{display:none;color:var(--muted);font:400 13px/1.4 var(--f-mono);padding:12px}
+.nogl .err{display:block}
+@media (prefers-reduced-motion:reduce){.btn,.tile{transition:none}}
+</style>
+
+<div lang="bg">
+<canvas id="gl" aria-hidden="true"></canvas>
+
+<header class="bar band"><div class="in">
+  <a class="logo" href="#top" aria-label="PhysioNova начало"><svg viewBox="0 0 34 24" aria-hidden="true"><path d="M1 16h8.5l1.6-2.4 1.6 2.4h1.6l2.6-14 3.2 21 2.2-7.5h1.6l1.8 1.5h7.3"/></svg>PhysioNova</a>
+  <nav class="nav" aria-label="Основно меню"><a href="#menu">Раздели</a><a href="#principles">Принципи</a><a href="#refs">Образци</a></nav>
+  <div class="vitals" aria-live="off"><span class="dot" id="vdot"></span><span><b id="vhr">72</b> уд./мин</span><span id="vph">диастола</span></div>
+</div></header>
+
+<section class="hero band" id="top"><div class="in">
+  <div>
+    <span class="eyebrow">Прототип · интерфейс и движение</span>
+    <h1>Физиологията, <em>която тупти</em> на екрана</h1>
+    <p class="lead">Всяко движение тук идва от тялото: сърцето бие с истинската си честота, ЕКГ кривата е отвеждане II, белите дробове дишат 12 пъти в минута.</p>
+    <div class="ctas"><a class="btn pri mag" href="#menu">Разгледай разделите</a><a class="btn mag" href="#refs">Виж образците</a></div>
+    <p class="hint">Движи курсора бързо: <b>сърдечната честота се вдига</b>, както при натоварване, и после пада обратно.</p>
+  </div>
+  <div class="heroview" id="heroview" data-k="heart-hero">
+    <div class="readout r1">ЧСС<b id="rhr">72</b>уд./мин</div>
+    <div class="readout r2">Фаза<b id="rph">Диастола</b>на камерите</div>
+    <div class="readout r3">Ударен обем<b>70 ml</b>в покой</div>
+    <div class="readout r4">Минутен обем<b id="rco">5,0</b>L/min</div>
+    <p class="err">3D изгледът не се зареди в този браузър.</p>
+  </div>
+</div></section>
+
+<section class="ecg band"><div class="in">
+  <div class="ecgbox"><canvas id="ecg" aria-label="Жива ЕКГ крива, отвеждане II"></canvas>
+    <div class="ecgcap"><span>Отвеждане II · 25 mm/s · 10 mm/mV</span><span>P · QRS · T, синхронно със сърцето горе</span></div></div>
+</div></section>
+
+<section class="sect band" id="menu"><div class="in">
+  <div class="sh"><div><span class="eyebrow">Меню</span><h2>Дванадесет раздела, дванадесет живи модела</h2></div>
+    <p>Посочи раздел или го фокусирай с Tab: моделът показва своя процес. На телефон докосни картата.</p></div>
+  <div class="tiles" id="tiles"></div>
+</div></section>
+
+<section class="sect band" id="principles"><div class="in">
+  <div class="sh"><div><span class="eyebrow">Принципи</span><h2>Технологично, но не като от генератор</h2></div></div>
+  <div class="cols">
+    <div class="card"><h3>Какво правим</h3><ul class="do">
+      <li>Движението е от физиологията: 72 уд./мин, 12 вдишвания/мин, акционен потенциал. Нищо не мърда просто за украса.</li>
+      <li>Интерактивността отговаря на човека: сърцето ускорява от движението ти, окото следи курсора, нервът дава импулс при посочване.</li>
+      <li>Обектите са като скулптури: един материал (порцелан) и един цвят (кардиологично червено).</li>
+      <li>Едно 3D платно за цялата страница, за да е бързо и на телефон. При „намалено движение“ анимациите спират.</li>
+    </ul></div>
+    <div class="card"><h3>Какво избягваме</h3><ul class="dont">
+      <li>Виолетово-сини градиенти, „аврори“ и неонови петна.</li>
+      <li>Мрежи от светещи точки и линии, които не означават нищо.</li>
+      <li>Стъклени карти навсякъде, числа, които се броят нагоре, текст, който се „пише“ сам.</li>
+      <li>3D, което забавя: всичко се рисува само когато е на екрана.</li>
+    </ul></div>
+  </div>
+</div></section>
+
+<section class="sect band" id="refs"><div class="in">
+  <div class="sh"><div><span class="eyebrow">Образци</span><h2>Какво да вземем и от кого</h2></div>
+    <p>Първата група е от Refero Styles и е проверена днес. Втората са известни интерактивни сайтове, които давам по памет.</p></div>
+  <div class="sub">От Refero Styles</div>
+  <div class="refs" id="refsA"></div>
+  <div class="sub">Известни интерактивни и 3D сайтове</div>
+  <div class="refs" id="refsB"></div>
+  <p class="note">Не копираме нито един от тях. Взимаме принцип: как 3D обектът стои сам, как скролът разказва, как микроанимацията потвърждава действие.</p>
+</div></section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+"use strict";
+const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const MOTION=RM?0.15:1;
+const $=s=>document.querySelector(s);
+const fmt=(v,d)=>v.toFixed(d).replace(".",",");
+
+/* ---------- данни ---------- */
+const SECS=[
+ {k:"cell",n:"I",t:"Обща физиология и възбудими тъкани",u:"покой −70 mV",free:1},
+ {k:"muscle",n:"II",t:"Мускули",u:"съкращение за ~100 ms"},
+ {k:"blood",n:"III",t:"Кръв",u:"≈ 5×10¹² еритроцита/L"},
+ {k:"heart",n:"IV",t:"Сърдечно-съдова система",u:"72 уд./мин"},
+ {k:"lungs",n:"V",t:"Дишане",u:"12 вдишвания/мин"},
+ {k:"kidney",n:"VI",t:"Бъбреци и водно-електролитен баланс",u:"ГФ ≈ 125 ml/min"},
+ {k:"ph",n:"VII",t:"Киселинно-алкален баланс",u:"pH 7,35–7,45"},
+ {k:"gut",n:"VIII",t:"Храносмилане",u:"бавни вълни 3/мин в стомаха"},
+ {k:"thermo",n:"IX",t:"Обмяна на веществата и терморегулация",u:"37,0 °C"},
+ {k:"endo",n:"X",t:"Ендокринна система",u:"стероиден скелет"},
+ {k:"eye",n:"XI",t:"Сензорни системи",u:"зеница 2–8 mm"},
+ {k:"neuron",n:"XII",t:"ЦНС и вегетативна нервна система",u:"до 120 m/s по миелин"}
+];
+$("#tiles").innerHTML=SECS.map(s=>`<button class="tile" data-k="${s.k}" aria-label="Раздел ${s.n}: ${s.t}">${s.free?'<span class="free">безплатен</span>':''}<div class="v" data-k="${s.k}"></div><span class="n">${s.n}</span><span class="t">${s.t}</span><span class="u">${s.u}</span></button>`).join("");
+
+const RA=[
+ ["TWOMUCH.STUDIO","12b3e1b6-31b9-4843-9b3b-8f39c9dd1474","3D обекти като в музей","<b>Вземи:</b> обектите плуват свободно, а навигацията е едно хапче в центъра. <b>За нас:</b> органите като експонати."],
+ ["ORYZO AI","1f204e95-454a-437e-845b-c1b169d35607","един обект в тъмнина","<b>Вземи:</b> един предмет, осветен като в галерия, без нищо около него. <b>За нас:</b> героят на началния екран."],
+ ["Apple iPhone 18 Pro","40be36d7-7fe6-4451-9f2d-7ceccfd43be8","скрол разказ","<b>Вземи:</b> всеки екран е плинт за един детайл, текстът е тих етикет. <b>За нас:</b> урок, който се разгръща при скрол."],
+ ["Scale AI","e81d4724-9615-4159-8678-cef35f986cab","wireframe в празнота","<b>Вземи:</b> телена илюстрация върху черно, после светъл раздел. <b>За нас:</b> анатомия като чертеж преди 3D."],
+ ["Pravah","30a8b128-a5bb-4d86-85eb-743b78091596","инженерно досие","<b>Вземи:</b> wireframe решетки и точкови илюстрации като в технически доклад. <b>За нас:</b> схемите в уроците."],
+ ["Dala","e5f5f8cf-e68d-4ed1-bbf5-6b67569af648","съзвездие на черно","<b>Вземи:</b> понятия като звезди със смислени връзки. <b>За нас:</b> речникът като карта на връзките."],
+ ["GitHub","c3ceca5c-d329-4559-b947-016172941ba2","космически команден пулт","<b>Вземи:</b> полупрозрачни повърхности и една зелена „пътека“. <b>Внимавай:</b> лилавата атмосфера е клише."],
+ ["Hyperstudio","8eb9c53e-d69c-497a-b640-610856cf3a60","чертеж върху обсидиан","<b>Вземи:</b> тънки линии, които „издълбават“ светлина от черното, и златни знаци за посока."],
+ ["Unicorn Studio","6bd8007f-01bc-46cc-8599-b396a39c1474","светлината като продукт","<b>Вземи:</b> WebGL шейдър като главен герой. <b>Внимавай:</b> призматичната аврора е най-лесно разпознаваемият ИИ стил."]
+];
+$("#refsA").innerHTML=RA.map(r=>`<div class="ref"><span class="k">${r[2]}</span><a href="https://styles.refero.design/style/${r[1]}" rel="noopener">${r[0]}</a><p>${r[3]}</p></div>`).join("");
+const RB=[
+ ["BioDigital Human","https://www.biodigital.com","медицинско 3D","<b>Вземи:</b> интерактивното човешко тяло в браузъра, слоевете и етикетите върху 3D. Най-близо до нашата тема."],
+ ["Lusion","https://lusion.co","WebGL студио","<b>Вземи:</b> физиката: обектите имат тежест и реагират на курсора естествено."],
+ ["Active Theory","https://activetheory.net","3D навигация","<b>Вземи:</b> преходи с камера между разделите вместо смяна на страница."],
+ ["Apple AirPods Pro","https://www.apple.com/airpods-pro/","кадри при скрол","<b>Вземи:</b> 3D обект, който се разглобява и обяснява, докато скролираш."],
+ ["Linear","https://linear.app","прецизни микроанимации","<b>Вземи:</b> бързите, тихи анимации при всяко действие. Технологично без шум."],
+ ["Vercel","https://vercel.com","жив глобус","<b>Вземи:</b> 3D обект с реални данни. <b>За нас:</b> модел, който показва твоя напредък."],
+ ["Neuralink","https://neuralink.com","наука и технология","<b>Вземи:</b> сдържан, клиничен тон и видео на истинския уред вместо абстракции."],
+ ["Bruno Simon","https://bruno-simon.com","3D като игра","<b>Вземи:</b> идеята, че ученето може да е изследване. <b>Внимавай:</b> за учебно приложение е твърде много."],
+ ["Nothing","https://nothing.tech","индустриален точков шрифт","<b>Вземи:</b> точкова матрица и прозрачност на хардуера. <b>За нас:</b> показанията на уредите."]
+];
+$("#refsB").innerHTML=RB.map(r=>`<div class="ref"><span class="k">${r[2]}</span><a href="${r[1]}" rel="noopener">${r[0]}</a><p>${r[3]}</p></div>`).join("");
+
+/* ---------- сърдечен ритъм: ЕКГ отвеждане II, сбор от гаусови вълни ---------- */
+function ecg(p){const g=(m,s,a)=>a*Math.exp(-((p-m)*(p-m))/(2*s*s));return g(.10,.025,.13)+g(.185,.008,-.12)+g(.21,.010,1)+g(.235,.010,-.27)+g(.46,.045,.32)}
+function contraction(p){if(p<.22||p>.56)return 0;const x=(p-.22)/.34;return Math.sin(x*Math.PI)**1.4}
+let hr=72,hrT=72,phase=0,lastPX=null,lastT=0,speed=0;
+addEventListener("pointermove",e=>{const now=performance.now();if(lastPX){const dt=Math.max(1,now-lastT);const v=Math.hypot(e.clientX-lastPX[0],e.clientY-lastPX[1])/dt*1000;speed=speed*.85+v*.15}lastPX=[e.clientX,e.clientY];lastT=now;
+  mouse.x=e.clientX;mouse.y=e.clientY},{passive:true});
+const mouse={x:innerWidth/2,y:innerHeight/2};
+
+/* ---------- ЕКГ лента (2D) ---------- */
+const ec=$("#ecg"),ex=ec.getContext("2d");let ecgBuf=[];
+function sizeECG(){const r=ec.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1);ec.width=r.width*d;ec.height=r.height*d;ex.setTransform(d,0,0,d,0,0);ecgBuf=new Array(Math.ceil(r.width)).fill(0)}
+function drawECG(vs){const w=ec.width/(Math.min(2,devicePixelRatio||1)),h=ec.height/(Math.min(2,devicePixelRatio||1));
+  for(const v of vs)ecgBuf.push(v);if(ecgBuf.length>w)ecgBuf.splice(0,ecgBuf.length-w);
+  ex.clearRect(0,0,w,h);
+  /* милиметрова хартия: тънка мрежа на 1 mm (≈5px), дебела на 5 mm */
+  ex.lineWidth=1;for(let x=0;x<w;x+=5){ex.strokeStyle=x%25===0?"rgba(255,59,78,.13)":"rgba(255,59,78,.05)";ex.beginPath();ex.moveTo(x+.5,0);ex.lineTo(x+.5,h);ex.stroke()}
+  for(let y=0;y<h;y+=5){ex.strokeStyle=y%25===0?"rgba(255,59,78,.13)":"rgba(255,59,78,.05)";ex.beginPath();ex.moveTo(0,y+.5);ex.lineTo(w,y+.5);ex.stroke()}
+  const base=h*.62,amp=h*.48;ex.lineJoin="round";ex.lineCap="round";
+  ex.strokeStyle="rgba(255,59,78,.25)";ex.lineWidth=6;ex.beginPath();ecgBuf.forEach((s,i)=>{const y=base-s*amp;i?ex.lineTo(i,y):ex.moveTo(i,y)});ex.stroke();
+  ex.strokeStyle="#ff3b4e";ex.lineWidth=1.8;ex.stroke();
+  const lx=ecgBuf.length-1,ly=base-ecgBuf[lx]*amp;ex.fillStyle="#fff";ex.beginPath();ex.arc(lx,ly,2.6,0,7);ex.fill()}
+sizeECG();addEventListener("resize",sizeECG);
+const PXS=125;let pxAcc=0,phU=0;
+/* попълва лентата с 10 s запис при 72 уд./мин, за да не започва празна */
+(function(){const n=ecgBuf.length;for(let i=0;i<n;i++){ecgBuf[i]=ecg(((i-n)/PXS*72/60%1+1)%1)}})();
+function ecgSamples(dph,dt){pxAcc+=PXS*dt;const n=Math.floor(pxAcc);pxAcc-=n;const out=[];for(let i=1;i<=n;i++){out.push(ecg(((phU-dph+dph*i/n)%1+1)%1))}return out}
+
+/* ---------- 3D ---------- */
+const canvas=$("#gl");let R;
+try{if(!window.THREE)throw 0;R=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});}catch(e){document.documentElement.classList.add("nogl");loopNoGL();return}
+R.setPixelRatio(Math.min(2,devicePixelRatio||1));R.setClearColor(0x000000,0);
+function size(){R.setSize(innerWidth,innerHeight,false)}size();addEventListener("resize",size);
+
+const C={porc:0xe9e6e1,red:0xc8182f,steel:0x2a2e38,ink:0x0d0f14};
+const M={
+ porc:()=>new THREE.MeshPhysicalMaterial({color:C.porc,roughness:.42,metalness:0,clearcoat:.6,clearcoatRoughness:.35}),
+ red:()=>new THREE.MeshPhysicalMaterial({color:C.red,roughness:.32,metalness:0,clearcoat:1,clearcoatRoughness:.2}),
+ steel:()=>new THREE.MeshStandardMaterial({color:C.steel,roughness:.35,metalness:.7}),
+ glass:()=>new THREE.MeshPhysicalMaterial({color:C.porc,roughness:.15,transparent:true,opacity:.18,depthWrite:false}),
+ glow:()=>new THREE.MeshBasicMaterial({color:0xff5466})
+};
+function stage(){const s=new THREE.Scene();
+  s.add(new THREE.HemisphereLight(0xffffff,0x1a1c22,.6));
+  const k=new THREE.DirectionalLight(0xfff3e6,1.25);k.position.set(2.5,3,4);s.add(k);
+  const r=new THREE.DirectionalLight(0xff3b4e,1.1);r.position.set(-3,1,-3);s.add(r);
+  const f=new THREE.DirectionalLight(0x9fb3ff,.35);f.position.set(-3,-2,2);s.add(f);
+  const cam=new THREE.PerspectiveCamera(32,1,.1,50);cam.position.set(0,0,5.2);return {s,cam}}
+const ease=(a,b,t)=>a+(b-a)*t;
+const rdir=()=>{const u=Math.random()*2-1,a=Math.random()*6.2832,r=Math.sqrt(1-u*u);return new THREE.Vector3(r*Math.cos(a),u,r*Math.sin(a))};
+
+/* сърце: деформирана сфера с конусовиден връх и предсърдия; камерите се свиват при систола */
+function makeHeart(scale){const g=new THREE.SphereGeometry(1,96,64);const P=g.attributes.position,base=new Float32Array(P.array.length);
+  for(let i=0;i<P.count;i++){let x=P.getX(i),y=P.getY(i),z=P.getZ(i);
+    const b=.16*Math.exp(-((x-.42)**2+(y-.62)**2)*7)+.14*Math.exp(-((x+.48)**2+(y-.55)**2)*7);
+    let r=1+b;x*=r;y*=r*1.08;z*=r*.86;
+    if(y<0){const k=1+y*.42;x*=k;z*=k;y*=1.28}
+    base[i*3]=x;base[i*3+1]=y;base[i*3+2]=z}
+  const mesh=new THREE.Mesh(g,M.red());const grp=new THREE.Group();grp.add(mesh);
+  const ao=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(.12,.75,0),new THREE.Vector3(.18,1.35,.05),new THREE.Vector3(-.25,1.55,0),new THREE.Vector3(-.62,1.2,-.05),new THREE.Vector3(-.7,.85,-.1)]),48,.15,20),M.porc());grp.add(ao);
+  const pa=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(-.1,.6,.35),new THREE.Vector3(-.2,1.1,.4),new THREE.Vector3(.35,1.25,.25)]),32,.11,16),M.porc());grp.add(pa);
+  [[.5,1.3,.0],[.32,1.42,.05],[.1,1.48,.08]].forEach(p=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(.045,.05,.35,12),M.porc());c.position.set(p[0]*.35-.1,p[1]+.12,p[2]);grp.add(c)});
+  grp.rotation.z=-.42;grp.scale.setScalar(scale);grp.position.y=-.2*scale;
+  return {grp,update(c){for(let i=0;i<P.count;i++){const y=base[i*3+1];const v=Math.min(1,Math.max(0,(.3-y)/1.2));const k=1-.085*c*v-.02*c;P.setXYZ(i,base[i*3]*k,y*(1-.03*c*v),base[i*3+2]*k)}P.needsUpdate=true;g.computeVertexNormals()}}}
+
+const views=[];
+function addView(el,build){const st=stage();const v={el,...st,h:0,on:false,...build(st)};views.push(v);return v}
+
+/* герой */
+const heroEl=$("#heroview");
+addView(heroEl,({s,cam})=>{const H=makeHeart(1.05);s.add(H.grp);cam.position.z=5.4;return {kind:"hero",H,tick(t,dt,c){H.update(c);const r=heroEl.getBoundingClientRect();
+  const tx=((mouse.y-(r.top+r.height/2))/innerHeight)*.5,ty=((mouse.x-(r.left+r.width/2))/innerWidth)*.9;
+  H.grp.rotation.x=ease(H.grp.rotation.x,tx,.06);H.grp.rotation.y=ease(H.grp.rotation.y,ty+Math.sin(t*.25)*.25*MOTION,.06)}}});
+
+/* плочките */
+const B={
+ heart({s}){const H=makeHeart(.82);s.add(H.grp);return {tick(t,dt,c,h){H.update(c);H.grp.rotation.y+=dt*(.25+h*.9)*MOTION}}},
+ cell({s}){const g=new THREE.Group();const mem=new THREE.Mesh(new THREE.SphereGeometry(1.15,64,48),M.glass());g.add(mem);
+   const shell=new THREE.Mesh(new THREE.SphereGeometry(1.15,48,32),new THREE.MeshBasicMaterial({color:C.porc,wireframe:true,transparent:true,opacity:.07}));g.add(shell);
+   const nuc=new THREE.Mesh(new THREE.SphereGeometry(.42,48,32),M.porc());g.add(nuc);
+   const ions=[];for(let i=0;i<26;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(.05,12,8),i%3?M.red():M.porc());const d=rdir();ions.push({m,d,o:Math.random()*6.28});g.add(m)}
+   s.add(g);return {tick(t,dt,c,h){g.rotation.y+=dt*.2*MOTION;ions.forEach(o=>{const r=1.15+Math.sin(t*(1+h*3)*MOTION+o.o)*(.25+h*.35);o.m.position.copy(o.d).multiplyScalar(r)})}}},
+ muscle({s}){const g=new THREE.Group();const fib=[];const pos=[[0,0]];for(let i=0;i<6;i++)pos.push([Math.cos(i/6*6.28)*.34,Math.sin(i/6*6.28)*.34]);
+   pos.forEach((p,i)=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(.16,.16,2.2,28,1),i===0?M.red():M.porc());m.position.set(p[0],0,p[1]);g.add(m);fib.push(m)});
+   for(let k=-4;k<=4;k++){const r=new THREE.Mesh(new THREE.TorusGeometry(.53,.012,8,64),M.steel());r.rotation.x=Math.PI/2;r.position.y=k*.24;r.userData.y=k*.24;g.add(r)}
+   g.rotation.z=.9;g.rotation.x=.35;s.add(g);return {tick(t,dt,c,h){const q=h*(.5+.5*Math.sin(t*6*MOTION));const sy=1-.22*q,sx=1+.11*q;g.scale.set(sx,sy,sx);g.rotation.y+=dt*.15*MOTION}}},
+ blood({s}){const pts=[];const prof=[[0,.10],[.18,.075],[.32,.09],[.42,.10],[.47,.06],[.48,0]];prof.forEach(p=>pts.push(new THREE.Vector2(p[0],p[1])));for(let i=prof.length-2;i>=0;i--)pts.push(new THREE.Vector2(prof[i][0],-prof[i][1]));
+   const geo=new THREE.LatheGeometry(pts,40);const cells=[];const g=new THREE.Group();
+   for(let i=0;i<16;i++){const m=new THREE.Mesh(geo,M.red());m.userData={a:i/16*6.28,r:1.05+Math.random()*.25,sp:Math.random()*6.28,y:(Math.random()-.5)*.5};g.add(m);cells.push(m)}
+   const tube=new THREE.Mesh(new THREE.TorusGeometry(1.15,.48,24,96),M.glass());tube.rotation.x=Math.PI/2;g.add(tube);g.rotation.x=.55;s.add(g);
+   return {tick(t,dt,c,h){cells.forEach(m=>{const u=m.userData;u.a+=dt*(.35+h*1.4)*MOTION;m.position.set(Math.cos(u.a)*u.r,u.y,Math.sin(u.a)*u.r);m.rotation.set(u.a*2+u.sp,u.a*1.3,u.sp)})}}},
+ lungs({s}){const g=new THREE.Group();const L=[];
+   [-1,1].forEach(sd=>{const m=new THREE.Mesh(new THREE.SphereGeometry(1,64,48),M.porc());m.scale.set(.55,.95,.42);m.position.set(sd*.62,-.2,0);g.add(m);L.push(m)});
+   const tr=new THREE.Mesh(new THREE.CylinderGeometry(.09,.09,.9,20),M.red());tr.position.y=.95;g.add(tr);
+   [-1,1].forEach(sd=>{const b=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(0,.55,0),new THREE.Vector3(sd*.25,.35,.05),new THREE.Vector3(sd*.5,0,.25)]),24,.06,12),M.red());g.add(b)});
+   s.add(g);return {tick(t,dt,c,h){const per=h>.5?2.5:5;const br=.5-.5*Math.cos(t/per*6.283*MOTION);L.forEach(m=>{m.scale.set(.55*(1+.13*br),.95*(1+.07*br),.42*(1+.13*br))});g.rotation.y=Math.sin(t*.3*MOTION)*.35}}},
+ kidney({s}){const geo=new THREE.SphereGeometry(1,64,48);const P=geo.attributes.position;for(let i=0;i<P.count;i++){let x=P.getX(i),y=P.getY(i),z=P.getZ(i);x*=.62;z*=.42;if(x>0){x-=.38*Math.exp(-y*y*5)*x}P.setXYZ(i,x,y*.98,z)}geo.computeVertexNormals();
+   const g=new THREE.Group();const k=new THREE.Mesh(geo,M.porc());g.add(k);
+   const ves=[[.05,.2,.0],[.05,-.05,.05]];ves.forEach((v,i)=>{const tb=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(v[0],v[1],v[2]),new THREE.Vector3(.6,v[1]+.05,0),new THREE.Vector3(1.1,v[1]+.2,0)]),20,.07,10),i?M.porc():M.red());g.add(tb)});
+   const ur=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(.08,-.25,0),new THREE.Vector3(.35,-.8,0),new THREE.Vector3(.3,-1.4,0)]),20,.05,10),M.porc());g.add(ur);
+   const drops=[];for(let i=0;i<5;i++){const d=new THREE.Mesh(new THREE.SphereGeometry(.05,10,8),M.glow());d.userData.o=i/5;g.add(d);drops.push(d)}
+   const curve=new THREE.CatmullRomCurve3([new THREE.Vector3(.08,-.25,0),new THREE.Vector3(.35,-.8,0),new THREE.Vector3(.3,-1.4,0)]);
+   g.position.x=-.2;s.add(g);return {tick(t,dt,c,h){g.rotation.y=Math.sin(t*.4*MOTION)*.5;drops.forEach(d=>{const u=(t*(.15+h*.6)*MOTION+d.userData.o)%1;d.position.copy(curve.getPoint(u));d.visible=h>.05})}}},
+ ph({s}){const g=new THREE.Group();const P=[];for(let i=0;i<22;i++){const red=i<11;const m=new THREE.Mesh(new THREE.SphereGeometry(red?.12:.17,20,14),red?M.red():M.porc());m.userData={p:rdir().multiplyScalar(.4+Math.random()*.8),o:Math.random()*6.28,red};g.add(m);P.push(m)}
+   s.add(g);return {tick(t,dt,c,h){g.rotation.y+=dt*.2*MOTION;P.forEach(m=>{const u=m.userData;const sc=u.red?1-h*.55:1+h*.15;m.scale.setScalar(Math.max(.2,sc));m.position.copy(u.p).multiplyScalar(1+.08*Math.sin(t*2*MOTION+u.o))})}}},
+ gut({s}){class K extends THREE.Curve{getPoint(u){const t=u*Math.PI*2*2,p=2,q=3,r=Math.cos(q*t/2)+2;return new THREE.Vector3(r*Math.cos(p*t/2)*.38,Math.sin(q*t/2)*.38,r*Math.sin(p*t/2)*.38)}}
+   const cur=new K();const tube=new THREE.Mesh(new THREE.TubeGeometry(cur,220,.14,18,true),M.porc());const g=new THREE.Group();g.add(tube);
+   const bol=[];for(let i=0;i<3;i++){const b=new THREE.Mesh(new THREE.SphereGeometry(.17,20,14),M.red());b.userData.o=i/3;g.add(b);bol.push(b)}
+   g.rotation.x=.9;s.add(g);return {tick(t,dt,c,h){g.rotation.z+=dt*.15*MOTION;bol.forEach(b=>{const u=(t*(.03+h*.12)*MOTION+b.userData.o)%1;b.position.copy(cur.getPoint(u))})}}},
+ thermo({s}){const geo=new THREE.SphereGeometry(.9,72,48);const P=geo.attributes.position,base=P.array.slice();const mat=M.porc();const m=new THREE.Mesh(geo,mat);s.add(m);
+   const cold=new THREE.Color(C.porc),hot=new THREE.Color(C.red);
+   return {tick(t,dt,c,h){for(let i=0;i<P.count;i++){const x=base[i*3],y=base[i*3+1],z=base[i*3+2];const n=1+(.04+.1*h)*Math.sin(x*5+t*1.5*MOTION)*Math.sin(y*4+t*1.1*MOTION)*Math.sin(z*5-t*MOTION);P.setXYZ(i,x*n,y*n,z*n)}P.needsUpdate=true;geo.computeVertexNormals();mat.color.copy(cold).lerp(hot,h*.85);m.rotation.y+=dt*.2*MOTION}}},
+ endo({s}){const g=new THREE.Group();const ring=(n,x,y,red)=>{const m=new THREE.Mesh(new THREE.TorusGeometry(.32,.055,10,n),red?M.red():M.porc());m.position.set(x,y,0);m.rotation.z=n===6?Math.PI/6:Math.PI/10;g.add(m);return m};
+   /* стероиден скелет: три шестоъгълни и един петоъгълен пръстен (A, B, C, D) */
+   ring(6,-.83,-.25);ring(6,-.28,-.25);ring(6,.0,.23);ring(5,.52,.25,true);
+   const tail=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(.75,.45,0),new THREE.Vector3(1.05,.75,0),new THREE.Vector3(1.3,.6,0)]),16,.05,8),M.porc());g.add(tail);
+   g.scale.setScalar(1.05);s.add(g);return {tick(t,dt,c,h){g.rotation.y+=dt*(.35+h*1.2)*MOTION;g.rotation.x=Math.sin(t*.6*MOTION)*.3;g.position.y=Math.sin(t*1.2*MOTION)*.06*(1+h*2)}}},
+ eye({s,cam}){const g=new THREE.Group();const ball=new THREE.Mesh(new THREE.SphereGeometry(1,64,48),M.porc());g.add(ball);
+   const iris=new THREE.Mesh(new THREE.RingGeometry(.2,.46,64),new THREE.MeshStandardMaterial({color:0x1d2a55,roughness:.5,side:THREE.DoubleSide}));iris.position.z=.985;g.add(iris);
+   const pupil=new THREE.Mesh(new THREE.CircleGeometry(.2,48),new THREE.MeshBasicMaterial({color:0x050507}));pupil.position.z=.99;g.add(pupil);
+   const cornea=new THREE.Mesh(new THREE.SphereGeometry(.5,48,32,0,Math.PI*2,0,Math.PI/2.4),M.glass());cornea.rotation.x=Math.PI/2;cornea.position.z=.72;g.add(cornea);
+   const nerve=new THREE.Mesh(new THREE.CylinderGeometry(.13,.13,.9,16),M.red());nerve.rotation.x=Math.PI/2;nerve.position.z=-1.2;g.add(nerve);
+   s.add(g);let pr=.2;return {tick(t,dt,c,h,el){const r=el.getBoundingClientRect();const dx=(mouse.x-(r.left+r.width/2))/innerWidth,dy=(mouse.y-(r.top+r.height/2))/innerHeight;
+     g.rotation.y=ease(g.rotation.y,Math.max(-.8,Math.min(.8,dx*2.2)),.12);g.rotation.x=ease(g.rotation.x,Math.max(-.6,Math.min(.6,dy*2.2)),.12);
+     pr=ease(pr,h>.5?.36:.17,.08);pupil.scale.setScalar(pr/.2);iris.geometry.dispose();iris.geometry=new THREE.RingGeometry(pr,.46,64)}}},
+ neuron({s}){const g=new THREE.Group();const soma=new THREE.Mesh(new THREE.SphereGeometry(.32,40,28),M.porc());soma.position.x=-1.1;g.add(soma);
+   for(let i=0;i<7;i++){const a=i/7*6.28+.4,pts=[new THREE.Vector3(-1.1,0,0)];let p=new THREE.Vector3(-1.1,0,0);for(let k=1;k<4;k++){p=p.clone().add(new THREE.Vector3(Math.cos(a)*.25-(.08*k),Math.sin(a)*.25,(Math.random()-.5)*.25));pts.push(p)}
+     g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),24,.035,8),M.porc()))}
+   const ax=new THREE.CatmullRomCurve3([new THREE.Vector3(-.8,0,0),new THREE.Vector3(0,.15,0),new THREE.Vector3(.8,-.1,0),new THREE.Vector3(1.4,.05,0)]);
+   g.add(new THREE.Mesh(new THREE.TubeGeometry(ax,64,.045,10),M.porc()));
+   for(let i=0;i<5;i++){const u=.12+i*.18,m=new THREE.Mesh(new THREE.CylinderGeometry(.09,.09,.22,20),M.steel());m.position.copy(ax.getPoint(u));const tg=ax.getTangent(u);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),tg);g.add(m)}
+   const sp=new THREE.Mesh(new THREE.SphereGeometry(.09,16,12),M.glow());g.add(sp);let u0=0;
+   g.rotation.x=.4;s.add(g);return {tick(t,dt,c,h){g.rotation.y=Math.sin(t*.35*MOTION)*.6;u0+=dt*(h>.05?1.4:.35)*MOTION;const u=u0%1;
+     /* скачаща проводимост: импулсът „прескача“ между перехватите на Ранвие */
+     const nodes=[.02,.23,.41,.59,.77,.95,1];let k=0;while(k<nodes.length-1&&u>nodes[k+1])k++;const local=(u-nodes[k])/(nodes[k+1]-nodes[k]);const uu=nodes[k]+(nodes[k+1]-nodes[k])*Math.pow(local,4);
+     sp.position.copy(ax.getPoint(Math.min(1,uu)));sp.scale.setScalar(1+.6*h);soma.material.color.set(local<.15&&h>.05?0xffb3bb:C.porc)}}}
+};
+document.querySelectorAll(".tile .v").forEach(el=>{const k=el.dataset.k;const tile=el.closest(".tile");const v=addView(el,B[k]);v.tile=tile;
+  tile.addEventListener("pointerenter",()=>v.on=true);tile.addEventListener("pointerleave",()=>v.on=false);
+  tile.addEventListener("focus",()=>v.on=true);tile.addEventListener("blur",()=>v.on=false);
+  tile.addEventListener("click",e=>{if(matchMedia("(hover: none)").matches){v.on=!v.on;tile.classList.toggle("on",v.on)}})});
+
+/* магнитни бутони */
+document.querySelectorAll(".mag").forEach(b=>{b.addEventListener("pointermove",e=>{const r=b.getBoundingClientRect();b.style.setProperty("--mx",((e.clientX-r.left-r.width/2)*.18)+"px");b.style.setProperty("--my",((e.clientY-r.top-r.height/2)*.25)+"px")});b.addEventListener("pointerleave",()=>{b.style.setProperty("--mx","0px");b.style.setProperty("--my","0px")})});
+
+/* ---------- цикъл ---------- */
+const clock=new THREE.Clock();const barEl=$(".bar");let uiT=0,lastPh="";const logo=$(".logo"),vdot=$("#vdot");
+function frame(){const dt=Math.min(.05,clock.getDelta()),t=clock.elapsedTime;
+  speed*=Math.pow(.2,dt);hrT=64+Math.min(84,speed/22);hr=ease(hr,hrT,dt*(hrT>hr?1.2:.35));
+  const prev=phase;const dph=dt*hr/60*Math.max(MOTION,.35);phU+=dph;phase=(phase+dph)%1;const c=contraction(phase);
+  drawECG(ecgSamples(dph,dt));
+  if(phase<prev||prev<.21&&phase>=.21){logo.style.setProperty("--draw",0);requestAnimationFrame(()=>{logo.style.transition="none"})}
+  logo.style.setProperty("--draw",Math.min(1,phase/.35));vdot.style.setProperty("--pulse",1+.6*c);
+  uiT+=dt;if(uiT>.25){uiT=0;const h=Math.round(hr);$("#vhr").textContent=h;$("#rhr").textContent=h;$("#rco").textContent=fmt(h*.07,1);const ph=c>.02?"систола":"диастола";if(ph!==lastPh){lastPh=ph;$("#vph").textContent=ph;$("#rph").textContent=ph[0].toUpperCase()+ph.slice(1)}}
+  R.setScissorTest(false);R.clear();R.setScissorTest(true);
+  const H=innerHeight,W=innerWidth,topClip=barEl.getBoundingClientRect().bottom;
+  for(const v of views){const r=v.el.getBoundingClientRect();if(r.bottom<0||r.top>H||r.right<0||r.left>W||r.width<2)continue;
+    v.h=ease(v.h,v.on?1:0,dt*5);v.tick(t,dt,c,v.h,v.el);
+    v.cam.aspect=r.width/r.height;v.cam.updateProjectionMatrix();
+    const st=Math.max(r.top,topClip);if(st>=r.bottom)continue;R.setViewport(r.left,H-r.bottom,r.width,r.height);R.setScissor(r.left,H-r.bottom,r.width,r.bottom-st);R.render(v.s,v.cam)}
+  requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+function loopNoGL(){let p=0,last=performance.now();(function f(n){const dt=Math.min(.05,(n-last)/1000);last=n;const d=dt*72/60;p=(p+d)%1;phU+=d;drawECG(ecgSamples(d,dt));requestAnimationFrame(f)})(last)}
+})();
+</script>
