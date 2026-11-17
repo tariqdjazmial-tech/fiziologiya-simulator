@@ -14,6 +14,7 @@ h=open(H+"/fiziologiya-simulator.html",encoding="utf8").read()
 o='<script src="js/shell.js"></script>'
 assert h.count(o)==1
 h=h.replace(o,'<script src="js/config.js"></script><script src="js/supabase.min.js"></script><script src="js/sb.js"></script><script src="js/native.js"></script>'+o)
+h=h.replace('<script src="js/brutal.js"></script>','<script src="js/brutal.js"></script><script src="js/heartintro.js"></script>',1)
 h=h.replace("<title>","<meta name=\"description\" content=\"Интерактивен симулатор по физиология за студенти по медицина: 3D модели, симулации, тестове.\"><title>",1)
 # тежките 3D модели — в отделни файлове, зареждат се при нужда (страницата се отваря бързо)
 import re as _re
