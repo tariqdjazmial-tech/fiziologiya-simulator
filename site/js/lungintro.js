@@ -336,6 +336,8 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*vn(p);p*=2.03;a*=.5;
       if(d>1.4){setText("lungs");setC("ecg")}
       if(d>DIVE+.6&&phase==="dive"){phase="hold2";$(".hint em").textContent="Scroll to enter";setC("hinted")}}
     /* въздух: навътре при вдишване, навън при издишване */
+    /* лицето остава извън кадър: ако върхът на носа влиза в изгледа, камерата се накланя надолу */
+    {const nose=V(0,OY+.772,.135),q=V(0,0,0);cam.updateMatrixWorld();for(let k=0;k<24;k++){q.copy(nose).project(cam);if(q.z>1||q.y>1.06)break;cam.rotateX(-.012*(1+Math.max(0,1.06-q.y)*2));cam.updateMatrixWorld()}}
     soundFrame(tt);if(ov.classList.contains("ecg")){ecDraw(dt);rrEl.textContent=String(Math.round(60/BP))}
     R.render(S,cam)}
   raf=requestAnimationFrame(frame);
