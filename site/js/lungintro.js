@@ -207,6 +207,27 @@ function build(patG,ORG){const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z);
   /* пациентът */
   const OY=.45,docMats=[];let body=null,hairShells=[];
   if(patG){const pmM=rim(new T.MeshPhysicalMaterial({vertexColors:true,roughness:.62,clearcoat:.15,clearcoatRoughness:.5,envMapIntensity:.4,transparent:true,sheen:new T.Color(0x3a2620)}),0xffd2c0,.22,2.8);docMats.push(pmM);
+    /* реалистична кожа: тонове (меланин/хемоглобин), пори и фин релеф, зърна, промяна на гланца, топла полупрозрачност по ръбовете */
+    {const prev=pmM.onBeforeCompile;pmM.onBeforeCompile=sh=>{prev(sh);
+      sh.vertexShader=sh.vertexShader.replace("#include <common>","#include <common>\nvarying vec3 vOP;").replace("#include <begin_vertex>","#include <begin_vertex>\nvOP=position;");
+      sh.fragmentShader=sh.fragmentShader.replace("#include <common>",`#include <common>
+varying vec3 vOP;
+float sh3(vec3 p){p=fract(p*.3183099+.1);p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
+float sn(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.-2.*f);return mix(mix(mix(sh3(i),sh3(i+vec3(1,0,0)),f.x),mix(sh3(i+vec3(0,1,0)),sh3(i+vec3(1,1,0)),f.x),f.y),mix(mix(sh3(i+vec3(0,0,1)),sh3(i+vec3(1,0,1)),f.x),mix(sh3(i+vec3(0,1,1)),sh3(i+vec3(1,1,1)),f.x),f.y),f.z);}
+float sf(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*sn(p);p*=2.07;a*=.5;}return s;}
+float areola(vec3 p){vec3 c=vec3(sign(p.x)*.094,.452,0.);vec2 d=vec2(p.x-c.x,(p.y-c.y)*1.1);float r=length(d);return (1.-smoothstep(.009,.0125,r))*step(.09,p.z);}
+float nip(vec3 p){vec3 c=vec3(sign(p.x)*.094,.452,0.);float r=length(vec2(p.x-c.x,p.y-c.y));return (1.-smoothstep(.0016,.0034,r))*step(.09,p.z);}`)
+        .replace("#include <color_fragment>",`#include <color_fragment>
+{bool sk=vColor.r>.25&&vColor.g>.12;if(sk){float m=sf(vOP*22.),h=sf(vOP*9.+3.),f=sn(vOP*420.);
+  diffuseColor.rgb*=1.+.10*(m-.5);diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(1.08,.9,.88),smoothstep(.45,.8,h)*.6);
+  diffuseColor.rgb*=1.-.05*step(.93,f);float a=areola(vOP);diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(.72,.5,.46),a*.85);diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(.62,.4,.38),nip(vOP));}}`)
+        .replace("#include <roughnessmap_fragment>","#include <roughnessmap_fragment>\nroughnessFactor=clamp(roughnessFactor*(.8+.45*sn(vOP*60.)),.25,.9);")
+        .replace("#include <normal_fragment_maps>",`#include <normal_fragment_maps>
+{float e=.0009;vec3 p=vOP*520.;float c=sn(p),dx=sn(p+vec3(e*520.,0.,0.))-c,dy=sn(p+vec3(0.,e*520.,0.))-c;float c2=sn(vOP*130.),dx2=sn(vOP*130.+vec3(.12,0.,0.))-c2,dy2=sn(vOP*130.+vec3(0.,.12,0.))-c2;
+  normal=normalize(normal-(vec3(dx,dy,0.)*.1+vec3(dx2,dy2,0.)*.12)*(vColor.r>.25?1.:0.));
+  float n=nip(vOP);normal=normalize(normal+vec3(0.,0.,n*.5));}`)
+        .replace("#include <emissivemap_fragment>",`#include <emissivemap_fragment>
+{float fr=1.0-clamp(abs(dot(normal,normalize(vViewPosition))),0.0,1.0);totalEmissiveRadiance+=vec3(.55,.18,.12)*pow(fr,1.6)*.12*(vColor.r>.25?1.:0.);}`)};}
     body=new T.Mesh(patG,pmM);body.position.set(0,OY,0);body.castShadow=true;body.receiveShadow=true;S.add(body);
     /* коса: слоеве с кичури, само върху тъмните върхове */
     const GL_N=`float h3(vec3 p){p=fract(p*.3183099+.1);p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
