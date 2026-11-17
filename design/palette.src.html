@@ -1,0 +1,210 @@
+<title>PhysioNova палитра</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a design-review sheet. Page chrome is neutral and theme-aware; the palette swatches and UI samples carry their own fixed colors. */
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --ink:#111827; --muted:#5b6474; --line:#e3e6ec; --chip:#eef0f4; --focus:#2c5bb8;
+  --f-disp:"Source Serif 4",Georgia,serif; --f-ui:"IBM Plex Sans",system-ui,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0c0f15;--card:#141922;--ink:#e9ecf2;--muted:#9aa3b3;--line:#262d3a;--chip:#1d2330;--focus:#8fb0ff;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0c0f15;--card:#141922;--ink:#e9ecf2;--muted:#9aa3b3;--line:#262d3a;--chip:#1d2330;--focus:#8fb0ff;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-ui);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:40px 64px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:36px}
+header{display:grid;gap:12px;max-width:74ch}
+.eyebrow{font:500 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(32px,4.6vw,50px)/1.05 var(--f-disp);letter-spacing:-.015em;margin:0;text-wrap:balance}
+h2{font:600 clamp(24px,3vw,32px)/1.15 var(--f-disp);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h3{font:600 17px/1.3 var(--f-ui);margin:0}
+p{margin:0}
+.muted{color:var(--muted)}
+section{display:grid;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;display:grid;gap:14px;min-width:0}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:900px){.two,.three{grid-template-columns:minmax(0,1fr)}}
+.tag{display:inline-block;font:500 11px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;padding:6px 8px;border-radius:6px;background:var(--chip);color:var(--muted)}
+.tag.rec{background:#c8102e;color:#fff}
+
+/* мостри */
+.sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.s{border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--card)}
+.s i{display:block;height:58px;background:var(--c)}
+.s div{padding:8px 9px;display:grid;gap:2px}
+.s b{font:600 12.5px/1.2 var(--f-ui)}
+.s code{font:500 11.5px/1 var(--f-mono);color:var(--muted)}
+.s span{font-size:11.5px;color:var(--muted);line-height:1.3}
+
+/* примерен интерфейс в двата режима на посока B */
+.demo{border-radius:14px;padding:20px;display:grid;gap:14px;background:var(--d-bg);color:var(--d-ink);border:1px solid var(--d-line)}
+.demo .k{font:500 11px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--d-muted)}
+.demo h4{margin:0;font:600 24px/1.15 var(--f-disp);color:var(--d-ink)}
+.demo p{color:var(--d-muted);font-size:14.5px}
+.demo .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.demo .btn{font:600 14px/1 var(--f-ui);padding:12px 16px;border-radius:10px;background:var(--d-red);color:var(--d-on-red);min-height:44px;display:inline-flex;align-items:center}
+.demo .btn2{font:600 14px/1 var(--f-ui);padding:12px 16px;border-radius:10px;border:1px solid var(--d-line);color:var(--d-ink);background:var(--d-surface);min-height:44px;display:inline-flex;align-items:center}
+.demo .mark{background:var(--d-mark);color:var(--d-mark-ink);padding:1px 5px;border-radius:4px}
+.demo .q{display:grid;gap:8px}
+.demo .a{display:flex;gap:10px;align-items:center;padding:11px 13px;border-radius:10px;border:1px solid var(--d-line);background:var(--d-surface);font-size:14.5px}
+.demo .a.ok{border-color:var(--d-ok);background:color-mix(in srgb,var(--d-ok) 12%,var(--d-surface))}
+.demo .a.no{border-color:var(--d-no);background:color-mix(in srgb,var(--d-no) 12%,var(--d-surface))}
+.demo .a em{font-style:normal;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font:700 12px/1 var(--f-ui);flex:none}
+.demo .a.ok em{background:var(--d-ok);color:var(--d-bg)}.demo .a.no em{background:var(--d-no);color:var(--d-bg)}
+.demo .a span.s2{margin-left:auto;font:500 12px/1 var(--f-mono);color:var(--d-muted)}
+.demo .surf{background:var(--d-surface);border:1px solid var(--d-line);border-radius:12px;padding:12px}
+.demo svg text{font-family:var(--f-mono)}
+.demo .legend{display:flex;gap:14px;flex-wrap:wrap;font:500 12px/1 var(--f-mono);color:var(--d-muted)}
+.demo .legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle;background:var(--c)}
+.B-dark{--d-bg:#0b111c;--d-surface:#121a28;--d-line:#26324a;--d-ink:#eef1f6;--d-muted:#9aa6bc;--d-red:#d72f33;--d-on-red:#ffffff;--d-ok:#7fd8a6;--d-no:#ff8a4c;--d-mark:#ffd23f;--d-mark-ink:#111111;--d-blue:#6f9cf2}
+.B-light{--d-bg:#f7f7f4;--d-surface:#ffffff;--d-line:#dde2ea;--d-ink:#0e1a2b;--d-muted:#566176;--d-red:#c8102e;--d-on-red:#ffffff;--d-ok:#0b7a55;--d-no:#c2410c;--d-mark:#ffe27a;--d-mark-ink:#0e1a2b;--d-blue:#2c5bb8}
+
+/* таблица с контраст */
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:14px}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font:600 12px/1.2 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+td.r{font:500 13px/1 var(--f-mono);font-variant-numeric:tabular-nums}
+.pill{display:inline-block;padding:4px 8px;border-radius:6px;font:600 12px/1 var(--f-ui)}
+.pill.ok{background:#0b7a5522;color:#0b7a55}.pill.mid{background:#9a670022;color:#9a6700}.pill.bad{background:#c2410c22;color:#c2410c}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .pill.ok{color:#7fd8a6}:root:not([data-theme="light"]) .pill.mid{color:#f2c14e}:root:not([data-theme="light"]) .pill.bad{color:#ff8a4c}}
+:root[data-theme="dark"] .pill.ok{color:#7fd8a6}:root[data-theme="dark"] .pill.mid{color:#f2c14e}:root[data-theme="dark"] .pill.bad{color:#ff8a4c}
+.prev{display:inline-flex;align-items:center;justify-content:center;width:64px;height:30px;border-radius:6px;font:600 13px/1 var(--f-ui)}
+
+/* изображения */
+.imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:14px}
+.im{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:grid;grid-template-rows:auto 1fr;min-width:0}
+.im figure{margin:0;aspect-ratio:16/10;background:#0b111c;position:relative;overflow:hidden}
+.im figure img{width:100%;height:100%;object-fit:cover;display:block}
+.im figure .ph{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:16px;color:#9aa6bc;font:500 12px/1.4 var(--f-mono);letter-spacing:.04em;
+  background:repeating-linear-gradient(135deg,#0f1726 0 12px,#121c2d 12px 24px)}
+.im figure .ph b{display:block;color:#eef1f6;font:600 15px/1.3 var(--f-ui);letter-spacing:0;margin-bottom:6px}
+.im figure .now{position:absolute;left:10px;top:10px;font:600 11px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;background:#7fd8a6;color:#08130e;padding:5px 7px;border-radius:5px}
+.im .t{padding:14px 16px;display:grid;gap:6px;align-content:start}
+.im .t p{font-size:14px;color:var(--muted)}
+.im .t .src{font:500 12px/1.4 var(--f-mono);color:var(--muted)}
+.im .t .src b{color:var(--ink);font-weight:500}
+ol.steps{margin:0;padding-left:20px;display:grid;gap:8px;color:var(--muted)}
+ol.steps b{color:var(--ink)}
+a{color:inherit}
+a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+</style>
+
+<div class="wrap" lang="bg">
+<header>
+  <span class="eyebrow">PhysioNova · цветове и изображения</span>
+  <h1>Палитра и изображения за сайта</h1>
+  <p class="muted">Три посоки за палитрата, проверени за контраст, и план кои изображения да добавим, откъде и под какъв лиценз. Препоръката ми е посока B: тя продължава въведението (тъмно, червено сърце, зелен ЕКГ монитор) и следва проучванията за четене.</p>
+</header>
+
+<!-- ============ ПАЛИТРИ ============ -->
+<section>
+  <div><span class="tag rec">Препоръка</span></div>
+  <h2>B · „Кардиолаб“: тъмносиньо мастило, кардиологично червено, зелен монитор</h2>
+  <p class="muted" style="max-width:76ch">Два режима с една и съща идентичност. Тъмният е за началната страница, въведението и 3D моделите. Светлият е за уроците и тестовете, защото тъмен текст на светъл фон се чете по-добре. Червеното е марката и сърцето, зеленото е „живо“ и „вярно“, а жълтото остава от сегашния сайт, но само като маркер за подчертаване.</p>
+  <div class="two">
+    <div class="card"><h3>Тъмен режим</h3><div class="sw" id="swBd"></div></div>
+    <div class="card"><h3>Светъл режим</h3><div class="sw" id="swBl"></div></div>
+  </div>
+  <div class="two">
+    <div class="demo B-dark" id="demoD"></div>
+    <div class="demo B-light" id="demoL"></div>
+  </div>
+</section>
+
+<section>
+  <h2>Цветове за физиологията</h2>
+  <p class="muted" style="max-width:76ch">Едни и същи навсякъде: в графиките, 3D моделите, схемите и текста. Цветът тук носи смисъл и помага да се запомни, затова не се ползва за украса. Следват учебниковата традиция: артериалната кръв е червена, венозната синя.</p>
+  <div class="card"><div class="sw" id="swPhys"></div></div>
+</section>
+
+<section>
+  <h2>Две алтернативи</h2>
+  <div class="two">
+    <div class="card"><div><span class="tag">A · Еволюция</span></div><h3>Запазваме сегашния вид, но го подреждаме</h3><p class="muted">Черно, бяло, червено и жълто остават. Сменяме само значенията: жълтото вече не е „верен отговор“, добавяме зелено за вярно и оранжево за грешно, а червеното става едно.</p><div class="sw" id="swA"></div></div>
+    <div class="card"><div><span class="tag">C · Клиничен светъл</span></div><h3>Само светъл, най-медицински</h3><p class="muted">Порцеланов фон, тъмносиньо мастило, тюркоаз за данните и тъмночервено за марката. Най-спокойният вариант, но се разминава с тъмното въведение.</p><div class="sw" id="swC"></div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Проверка на контраста (WCAG)</h2>
+  <p class="muted" style="max-width:76ch">За обикновен текст трябва поне 4,5:1, а за едър текст и иконки поне 3:1. Стойностите се изчисляват на живо от цветовете на тази страница.</p>
+  <div class="tw"><table id="ct"><thead><tr><th>Двойка</th><th>Пример</th><th>Контраст</th><th>Оценка</th></tr></thead><tbody></tbody></table></div>
+</section>
+
+<!-- ============ ИЗОБРАЖЕНИЯ ============ -->
+<section>
+  <h2>Изображения, които да добавим</h2>
+  <p class="muted" style="max-width:76ch">Стилът вече е зададен от трите големи снимки: истински микрографии в тъмночервено. Предлагам да го доведем до край, по една снимка на раздел, и да добавим неща, които сега липсват: изображение за споделяне на линк, наши 3D рендери и схеми. Снимките със зелен етикет вече са в сайта.</p>
+  <div class="imgs" id="imgs"></div>
+</section>
+
+<section class="card">
+  <h3>Откъде и при какви условия</h3>
+  <ol class="steps">
+    <li><b>Wellcome Collection</b> (wellcomecollection.org): хиляди електронни микрографии и исторически медицински изображения, повечето под CC BY 4.0. Изисква се посочване на автора.</li>
+    <li><b>NIH, NIGMS Image Gallery и CDC Public Health Image Library</b>: много изображения са обществено достояние. Лицензът се проверява за всяко изображение отделно.</li>
+    <li><b>Servier Medical Art</b> (smart.servier.com): медицински илюстрации на органи и клетки под CC BY 4.0, удобни за схеми.</li>
+    <li><b>Wikimedia Commons</b>: хистология и микрографии с различни лицензи. Взимаме само CC BY, CC BY-SA и обществено достояние.</li>
+    <li><b>Наши 3D рендери</b> от моделите, които вече са в сайта: сърце, бял дроб и лява камера. Нищо ново не се купува, посочва се авторът на модела.</li>
+    <li><b>Генерирани от ИИ снимки</b> не препоръчвам за анатомия и хистология: често са анатомично грешни, а студентите по медицина ще го забележат. Подходящи са само за фон без анатомични детайли.</li>
+  </ol>
+</section>
+</div>
+
+<script>
+(function(){
+const S=(el,list)=>{document.getElementById(el).innerHTML=list.map(([c,n,u])=>`<div class="s"><i style="--c:${c}"></i><div><b>${n}</b><code>${c}</code><span>${u}</span></div></div>`).join("")};
+S("swBd",[["#0b111c","Нощно мастило","фон"],["#121a28","Повърхност","карти, панели"],["#26324a","Линия","рамки, разделители"],["#eef1f6","Текст","основен текст"],["#9aa6bc","Приглушен","второстепенен текст"],["#e5383b","Кардио червено","лого, графики, едър текст"],["#d72f33","Червен бутон","главен бутон с бял текст"],["#7fd8a6","Монитор","живи данни, вярно"],["#ffd23f","Маркер","подчертаване"]]);
+S("swBl",[["#f7f7f4","Порцелан","фон за четене"],["#ffffff","Повърхност","карти"],["#dde2ea","Линия","рамки"],["#0e1a2b","Мастило","основен текст"],["#566176","Приглушен","второстепенен текст"],["#c8102e","Кардио червено","марка, главен бутон"],["#0b7a55","Клинично зелено","вярно, успех"],["#ffe27a","Маркер","фон на подчертаване"]]);
+S("swPhys",[["#d7263d","Артериална кръв","богата на O₂"],["#3a6ea5","Венозна кръв","бедна на O₂"],["#7fd8a6","O₂","кислород"],["#8e7cc3","CO₂","въглероден диоксид"],["#f2a541","Na⁺","натрий"],["#6c5ce7","K⁺","калий"],["#2fb67c","Ca²⁺","калций"],["#3fb6c6","Cl⁻","хлор"],["#e86a92","H⁺","pH, киселини"],["#c9a227","Глюкоза","енергия"]]);
+S("swA",[["#0a0a0a","Черно","фон, текст"],["#ffffff","Бяло","фон"],["#e3201b","Червено","марка"],["#ffd23f","Жълто","маркер, без „вярно“"],["#1f9d55","Зелено","вярно"],["#ea580c","Оранжево","грешно"]]);
+S("swC",[["#f7f7f4","Порцелан","фон"],["#101b3b","Тъмносиньо","текст"],["#0e8a7e","Тюркоаз","данни"],["#a4122a","Тъмночервено","марка"],["#e8edf3","Мъгла","повърхности"],["#c2410c","Оранжево","грешно"]]);
+
+/* примерен урок с тест и графика, еднакъв за двата режима */
+const demo=(mode)=>`<span class="k">${mode} · IV. Сърдечно-съдова система</span><h4>Налягане в лявата камера</h4>
+<p>При изоволумното съкращение налягането расте рязко, а обемът остава <span class="mark">постоянен</span>, докато аортната клапа се отвори при около 80 mmHg.</p>
+<div class="surf"><svg viewBox="0 0 320 120" width="100%" role="img" aria-label="Налягане в лявата камера и аортата през един сърдечен цикъл">
+ <line x1="30" x2="312" y1="100" y2="100" stroke="var(--d-line)"/><line x1="30" x2="30" y1="8" y2="100" stroke="var(--d-line)"/>
+ <text x="26" y="14" font-size="9" fill="var(--d-muted)" text-anchor="end">120</text><text x="26" y="103" font-size="9" fill="var(--d-muted)" text-anchor="end">0</text>
+ <text x="171" y="116" font-size="9" fill="var(--d-muted)" text-anchor="middle">време в цикъла, 0–0,8 s</text>
+ <path d="M30 96 L70 95 L84 60 L100 22 L130 14 L160 24 L176 70 L190 95 L312 96" fill="none" stroke="var(--d-red)" stroke-width="2.2"/>
+ <path d="M30 40 L84 46 L100 30 L130 18 L160 26 L176 34 L200 36 L312 44" fill="none" stroke="var(--d-blue)" stroke-width="2" stroke-dasharray="5 4"/>
+</svg><div class="legend"><span><i style="--c:var(--d-red)"></i>лява камера</span><span><i style="--c:var(--d-blue)"></i>аорта</span></div></div>
+<div class="q"><div class="a ok"><em>✓</em>Аортната клапа се отваря<span class="s2">вярно</span></div><div class="a no"><em>✕</em>Митралната клапа се отваря<span class="s2">грешно</span></div></div>
+<div class="row"><span class="btn">Продължи урока</span><span class="btn2">Към теста</span></div>`;
+document.getElementById("demoD").innerHTML=demo("Тъмен");document.getElementById("demoL").innerHTML=demo("Светъл");
+
+/* контраст по WCAG 2.x */
+const lum=h=>{const c=h.match(/\w\w/g).map(x=>parseInt(x,16)/255).map(v=>v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4));return .2126*c[0]+.7152*c[1]+.0722*c[2]};
+const ratio=(a,b)=>{const A=lum(a),B=lum(b);return (Math.max(A,B)+.05)/(Math.min(A,B)+.05)};
+const P=[["Текст върху тъмен фон","#eef1f6","#0b111c","текст"],["Приглушен текст, тъмен","#9aa6bc","#0b111c","текст"],["Бяло върху червения бутон (тъмен)","#ffffff","#d72f33","текст"],["Червено върху тъмен фон (лого, акцент)","#e5383b","#0b111c","едро"],["Монитор зелено върху тъмен фон","#7fd8a6","#0b111c","текст"],["Оранжево „грешно“ върху тъмен фон","#ff8a4c","#0b111c","текст"],
+ ["Мастило върху порцелан","#0e1a2b","#f7f7f4","текст"],["Приглушен текст, светъл","#566176","#f7f7f4","текст"],["Бяло върху червения бутон (светъл)","#ffffff","#c8102e","текст"],["Клинично зелено върху бяло","#0b7a55","#ffffff","текст"],["Клинично зелено върху порцелан","#0b7a55","#f7f7f4","текст"],["Оранжево „грешно“ върху бяло","#c2410c","#ffffff","текст"],["Мастило върху жълт маркер","#0e1a2b","#ffe27a","текст"],
+ ["Сегашно: жълто върху бяло (за сравнение)","#ffd23f","#ffffff","текст"],["Сегашно: червено #E3201B върху черно","#e3201b","#000000","текст"]];
+document.querySelector("#ct tbody").innerHTML=P.map(([n,f,b,k])=>{const r=ratio(f,b);const need=k==="едро"||k==="бутон"?3:4.5;const cls=r>=need+1.5?"ok":r>=need?"mid":"bad";
+  const txt=cls==="ok"?"отлично":cls==="mid"?"минава":"не минава";return `<tr><td>${n}</td><td><span class="prev" style="color:${f};background:${b}">Аа 72</span></td><td class="r">${r.toFixed(2).replace(".",",")}:1</td><td><span class="pill ${cls}">${txt}${k==="едро"?" (едър текст)":""}</span></td></tr>`}).join("");
+
+/* план за изображенията */
+const I=[
+ ["{{IMG_INTRO}}",1,"Въведение: сърце на операционна маса","Вече е направено. Предлагам кадър от него да стане изображение за споделяне на линк (1200×630), което се показва във Viber, Messenger и Facebook.","Наш 3D рендер · модел CC BY 4.0"],
+ ["{{IMG_RBC}}",1,"I/III · Еритроцити в съд","Вече е на началната страница. Пасва на раздел „Кръв“.","Сегашна снимка в сайта"],
+ ["{{IMG_MUS}}",1,"II · Скелетни мускулни влакна","Вече е на началната страница. Пасва на раздел „Мускули“.","Сегашна снимка в сайта"],
+ ["{{IMG_NEU}}",1,"XII · Неврони","Вече е на началната страница. Пасва на раздел „ЦНС“.","Сегашна снимка в сайта"],
+ ["",0,"IV · Сърдечен мускул","Кардиомиоцити с интеркаларни дискове (СЕМ или хистология). Заглавие на раздела за сърцето.","Wellcome Collection / Wikimedia · CC BY"],
+ ["",0,"V · Алвеоли","СЕМ на белодробни алвеоли, като пчелна пита. Заглавие на раздел „Дишане“.","Wellcome Collection · CC BY 4.0"],
+ ["",0,"VI · Гломерул","СЕМ корозионен отпечатък на гломерулни капиляри. Раздел „Бъбреци“.","Wellcome Collection / NIH · проверка за всяко"],
+ ["",0,"VIII · Чревни въси","СЕМ на въси в тънкото черво. Раздел „Храносмилане“.","Wellcome Collection · CC BY 4.0"],
+ ["",0,"XI · Пръчици и колбички","СЕМ на ретината. Раздел „Сензорни системи“.","Wellcome Collection / NIH"],
+ ["",0,"X · Щитовидни фоликули","Хистология с колоид във фоликулите. Раздел „Ендокринна система“.","Wikimedia Commons · CC BY-SA"],
+ ["",0,"III · Тромб и фибрин","СЕМ на еритроцити, уловени във фибринова мрежа. Подраздел „Хемостаза“.","Wellcome Collection / CDC PHIL"],
+ ["",0,"I · Йонен канал","Рендер на калиев канал от Protein Data Bank. Раздел „Възбудими тъкани“.","RCSB PDB · свободно ползване"],
+ ["",0,"Наши 3D рендери на органите","Сърце, бял дроб и лява камера от моделите в сайта, в еднаква светлина. За карти на разделите и за страницата с цени.","Наш рендер · модели CC BY 4.0"],
+ ["",0,"Клиничен контекст","Истински снимки: ЕКГ монитор, измерване на кръвно налягане, спирометрия, студенти в лаборатория. За раздела „Защо PhysioNova“.","Unsplash / Pexels · свободен лиценз"],
+ ["",0,"Схеми към уроците","Еднакви по стил илюстрации на органи и клетки, в цветовете за физиология отгоре.","Servier Medical Art · CC BY 4.0"],
+ ["",0,"Иконка на сайта и на приложението","ЕКГ линията от логото в червено върху тъмно, във всички размери за браузъри, iPhone и Android.","Наш дизайн"]];
+document.getElementById("imgs").innerHTML=I.map(([src,now,t,d,s])=>`<article class="im"><figure>${src?`<img src="${src}" alt="${t}" loading="lazy">`:`<div class="ph"><div><b>${t}</b>предстои да се намери</div></div>`}${now?'<span class="now">Вече е в сайта</span>':''}</figure><div class="t"><h3>${t}</h3><p>${d}</p><span class="src"><b>Източник:</b> ${s}</span></div></article>`).join("");
+})();
+</script>
