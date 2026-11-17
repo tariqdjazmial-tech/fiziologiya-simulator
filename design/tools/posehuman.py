@@ -17,7 +17,19 @@ for l in open(f"{SRC}/base.obj"):
     elif l.startswith("g "): G = l.split()[1]
     elif l.startswith("f "): faces.append([int(x.split("/")[0]) - 1 for x in l.split()[1:]]); grp.append(G)
 V = np.array(V)
+# морфинг цели на MakeHuman (CC0): MORPH="файл:тегло,файл:тегло"
+import os as _os
+for spec in filter(None, _os.environ.get("MORPH", "").split(",")):
+    fn, w = spec.rsplit(":", 1); w = float(w)
+    for l in open(f"{SRC}/{fn}"):
+        if l.startswith("#") or not l.strip(): continue
+        i, dx, dy, dz = l.split(); V[int(i)] += w * np.array([float(dx), float(dy), float(dz)])
 J = lambda n: V[sk["joints"][n]].mean(0)
+# мъжки торс: гърдите се прибират към гръдната стена
+if _os.environ.get("FLATCHEST"):
+    for bn in ("breast.L", "breast.R"):
+        h_, t_ = J(sk["bones"][bn]["head"]), J(sk["bones"][bn]["tail"])
+        for i, w in W[bn]: V[i] -= w * float(_os.environ.get("FLATCHEST")) * (t_ - h_) * np.array([0.3, 0.6, 1.0])
 bones = sk["bones"]
 H = {b: J(bones[b]["head"]) for b in bones}
 TL = {b: J(bones[b]["tail"]) for b in bones}
@@ -47,6 +59,16 @@ POSE = {
     "lowerarm01.L": ("dir", [-0.48, 0.0, 0.88], ROLL), "lowerarm01.R": ("dir", [0.48, 0.0, 0.88], ROLLR),
     "wrist.L": ("dir", [-0.5, 0.02, 0.86]), "wrist.R": ("dir", [0.5, 0.02, 0.86]),
 }
+PATIENT = os.environ.get("POSE") == "patient"
+if PATIENT:  # пациент: седи изправен, ръцете отпуснати върху бедрата, гол торс
+    POSE = {
+        "upperleg01.L": ("dir", [0.12, -0.1, 1]), "upperleg01.R": ("dir", [-0.12, -0.1, 1]),
+        "lowerleg01.L": ("dir", [0.06, -1, 0.05]), "lowerleg01.R": ("dir", [-0.06, -1, 0.05]),
+        "spine04": ("rot", X, -2), "spine02": ("rot", X, -1), "neck01": ("rot", X, -3), "head": ("rot", X, 4),
+        "upperarm01.L": ("dir", [0.22, -1, 0.1]), "upperarm01.R": ("dir", [-0.22, -1, 0.1]),
+        "lowerarm01.L": ("dir", [0.02, -0.55, 1]), "lowerarm01.R": ("dir", [-0.02, -0.55, 1]),
+        "wrist.L": ("dir", [0.0, -0.45, 1]), "wrist.R": ("dir", [0.0, -0.45, 1]),
+    }
 for s in "LR":
     for f in range(1, 6):
         for k in (1, 2, 3):
@@ -131,14 +153,15 @@ for k, o in enumerate(used):
         rel = p - eyes; h_up = np.dot(rel, up); h_f = np.dot(rel, fwd)
         c = SKIN
         rn = p - nb_; aln = np.dot(rn, nup)
-        if b.startswith("neck") and aln < 0.05: c = COAT   # под яката е престилката
+        if b.startswith("neck") and aln < 0.05 and not PATIENT: c = COAT   # под яката е престилката
         lat = abs(np.dot(rel, side))
         if h_up > 0.32 or (h_f < -0.62 and h_up > -0.45 and lat < 0.62) or (h_f < -0.2 and h_up > 0.05 and lat < 0.78):
             c = HAIR; hair[k] = True
     elif b.startswith(("wrist", "metacarpal", "finger")): c = SKIN
     elif b.startswith(("foot", "toe")): c = SHOE
     elif b.startswith(("lowerleg",)): c = PANTS
-    elif b.startswith(("upperleg",)): c = COAT if (V[o][1] > -2.2) else PANTS
+    elif b.startswith(("upperleg",)): c = PANTS if PATIENT else (COAT if (V[o][1] > -2.2) else PANTS)
+    elif PATIENT: c = PANTS if b.startswith(("pelvis", "root")) or (V[o][1] < 0.35 and abs(V[o][0]) < 1.9) else SKIN
     else:
         c = COAT
         # кожата на шията над яката: по оста на шията, близо до нея
@@ -215,6 +238,8 @@ hip = GR["upperleg01.L"] @ H["upperleg01.L"] + GT["upperleg01.L"]
 ht = GR["head"] @ TL["head"] + GT["head"]
 wl = GR["wrist.L"] @ H["wrist.L"] + GT["wrist.L"]
 n1 = GR["neck01"] @ H["neck01"] + GT["neck01"]; cl_ = GR["clavicle.L"] @ TL["clavicle.L"] + GT["clavicle.L"]
+sp2 = wpos(GR, GT, "spine02"); sp4 = wpos(GR, GT, "spine04")
+print("spine02(m)", np.round(sp2*0.1,3), "spine04(m)", np.round(sp4*0.1,3))
 print("neck01(m)", np.round(n1*0.1,3), "shoulderL(m)", np.round(cl_*0.1,3))
 print("headtop(m)", np.round(ht*0.1,3), "wristL(m)", np.round(wl*0.1,3))
 print("verts", len(Pu), "tris", len(tris), "bytes", len(buf), "hip(m)", np.round(hip * 0.1, 3), "head(m)", np.round(hd * 0.1, 3), "min", np.round(mn, 3), "size", np.round(sz, 3))
