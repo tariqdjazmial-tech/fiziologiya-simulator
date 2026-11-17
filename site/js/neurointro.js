@@ -1,6 +1,6 @@
 /* ===== Въведение „Нервна система“ =====
-   1) поглед отгоре: лекар на бюро разглежда ЕКГ листове;
-   2) при скрол камерата влиза в главата: за кратко се вижда мозъкът, после невроните с акционни потенциали и накрая синапсът;
+   1) поглед отгоре: лекар на бюро разглежда ЕКГ ленти;
+   2) при скрол камерата влиза в главата: за кратко се вижда мозъкът, после невронна мрежа, в която сигналът минава от неврон на неврон;
    3) при следващ скрол — зареждащ екран „PhysioNova“ и началната страница.
    Модели: мозък — „Brain AS.stl“, Agnieszka Starostecka, CC BY 4.0 (Wikimedia Commons), опростен в m/brain.txt;
            неврон — „Neuron mapped by gamers in EyeWire.stl“, EyeWire / Seung Lab, обществено достояние, опростен в m/neuron.txt.
@@ -91,7 +91,7 @@ ov.innerHTML=`<canvas class="gl" aria-hidden="true"></canvas><div class="vig"></
  <button class="hint" type="button"><em>Scroll to look inside</em> <span>↓</span></button>
  <button class="snd" type="button" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="w1" d="M16 9a4 4 0 0 1 0 6"/><path class="w2" d="M18.5 6.5a8 8 0 0 1 0 11"/></svg><span class="t">Tap to hear the neurons</span></button>
  <button class="skip" type="button">Skip</button>
- <div class="cr">Models: brain — <a href="https://commons.wikimedia.org/wiki/File:Brain_AS.stl" target="_blank" rel="noopener">Agnieszka Starostecka</a>, CC BY 4.0 · neuron — <a href="https://commons.wikimedia.org/wiki/File:Neuron_mapped_by_gamers_in_EyeWire.stl" target="_blank" rel="noopener">EyeWire</a>, public domain</div>`;
+ <div class="cr">Models: doctor — <a href="http://www.makehumancommunity.org/" target="_blank" rel="noopener">MakeHuman</a> base mesh, CC0<span class="crb"> · brain — <a href="https://commons.wikimedia.org/wiki/File:Brain_AS.stl" target="_blank" rel="noopener">Agnieszka Starostecka</a>, CC BY 4.0</span></div>`;
 const $=s=>ov.querySelector(s);
 
 /* ---------- текст за всеки етап ---------- */
@@ -99,7 +99,7 @@ const TXT={
  office:[["Nervous system","Reading the heart takes a brain","An ECG on the desk — and 86 billion neurons interpreting it."],["For medical students","From signal to synapse","Theory, live simulations and 3D models for every topic."]],
  brain:[["The brain","1.4 kg, 20 % of your energy","Most of it spent keeping ion gradients ready for the next signal."],["Cortex","16 billion cortical neurons","Each one listening to thousands of others."]],
  neuron:[["Electrical signal","An action potential","Na⁺ rushes in, K⁺ flows out — up to 120 m/s along myelinated axons."],["All or none","−70 → +30 mV in 1 ms","The same spike, every time. Strength is coded by frequency."]],
- syn:[["Chemical signal","The synapse","Ca²⁺ enters, vesicles fuse, transmitter crosses a 20 nm cleft."],["≈ 0.5 ms","Synaptic delay","The pause where learning, drugs and toxins act."]]};
+ net:[["Neural network","Neurons talk in chains","Each spike reaches the next cell through a synapse in about 0.5 ms."],["Divergence & convergence","1 neuron · 7,000 synapses","One cell informs thousands; thousands decide whether it fires."]]};
 let txtKey=null;
 function setText(k){if(txtKey===k)return;txtKey=k;ov.classList.remove("texts");setTimeout(()=>{if(txtKey!==k)return;const [l,r]=TXT[k];
   $(".side.l").innerHTML=`<small>${l[0]}</small><b>${l[1]}</b><span>${l[2]}</span>`;$(".side.r").innerHTML=`<small>${r[0]}</small><b>${r[1]}</b><span>${r[2]}</span>`;if(!ended&&phase!=="zoom")ov.classList.add("texts")},450)}
@@ -159,7 +159,7 @@ function noGL(){if(ended||phase!=="pre")return;$(".pre").textContent="";phase="h
 
 const getMesh=u=>fetch(u).then(r=>{if(!r.ok)throw new Error(u);return r.text()}).then(decodeMesh).catch(()=>null);
 if(RM){noGL()}else{
-  load(THREE_URL).then(()=>Promise.all([getMesh("m/brain.txt"),getMesh("m/neuron.txt"),getMesh("m/doctor.txt")])).then(([b,n,d])=>{if(!ended&&phase==="pre")build(b,n,d)}).catch(e=>{console.error(e);noGL()});
+  load(THREE_URL).then(()=>Promise.all([getMesh("m/brain.txt"),Promise.resolve(null),getMesh("m/doctor.txt")])).then(([b,n,d])=>{if(!ended&&phase==="pre")build(b,n,d)}).catch(e=>{console.error(e);noGL()});
 }
 setTimeout(()=>{if(phase==="pre")noGL()},20000);
 
@@ -176,18 +176,14 @@ function decodeMesh(b64){const bin=atob(b64.trim()),u8=new Uint8Array(bin.length
 const rnd=(a,b)=>a+Math.random()*(b-a);
 function canvasTex(w,h,draw,rep,srgb=true){const c=document.createElement("canvas");c.width=w;c.height=h;draw(c.getContext("2d"),w,h);const t=new THREE.CanvasTexture(c);if(rep){t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep[0],rep[1])}t.anisotropy=8;if(srgb)t.encoding=THREE.sRGBEncoding;return t}
 function noiseFill(g,w,h,base,amp){g.fillStyle=base;g.fillRect(0,0,w,h);const id=g.getImageData(0,0,w,h),d=id.data;for(let i=0;i<d.length;i+=4){const n=(Math.random()-.5)*amp;d[i]+=n;d[i+1]+=n;d[i+2]+=n}g.putImageData(id,0,0)}
-/* ЕКГ лист: розова милиметрова мрежа, 12 отвеждания и ритъмна лента */
-function ecgSheet(seed){return canvasTex(1024,724,(g,w,h)=>{g.fillStyle="#fffafa";g.fillRect(0,0,w,h);
-  for(let x=0;x<w;x+=5){g.strokeStyle=x%25===0?"rgba(226,90,110,.55)":"rgba(240,150,165,.32)";g.lineWidth=x%25===0?1.1:.6;g.beginPath();g.moveTo(x+.5,40);g.lineTo(x+.5,h-14);g.stroke()}
-  for(let y=40;y<h-14;y+=5){g.strokeStyle=(y-40)%25===0?"rgba(226,90,110,.55)":"rgba(240,150,165,.32)";g.lineWidth=(y-40)%25===0?1.1:.6;g.beginPath();g.moveTo(0,y+.5);g.lineTo(w,y+.5);g.stroke()}
-  g.fillStyle="#2b2b2e";g.font="600 15px system-ui,sans-serif";g.fillText("Patient 0"+(seed+3)+"  ·  HR 7"+seed+" bpm  ·  PR 160 ms  ·  QRS 92 ms  ·  QTc 41"+seed+" ms",16,26);g.font="500 12px system-ui";g.fillText("25 mm/s   10 mm/mV",w-170,26);
-  const leads=[["I","aVR","V1","V4"],["II","aVL","V2","V5"],["III","aVF","V3","V6"]],amps={I:.7,II:1,III:.5,aVR:-.8,aVL:.3,aVF:.7,V1:-.6,V2:-.2,V3:.5,V4:1.2,V5:1,V6:.8};
-  const beat=(p,a)=>g1(p,.12,.022,.12*Math.sign(a)+.05)+g1(p,.205,.007,-.15)+g1(p,.23,.009,a)+g1(p,.255,.009,-.25*Math.abs(a))+g1(p,.5,.04,.3*Math.sign(a+.3));
-  g.strokeStyle="#1d1d22";g.lineWidth=1.6;g.lineJoin="round";
-  const row=(y,list,cw)=>list.forEach((L,ci)=>{const x0=ci*cw;g.fillStyle="#1d1d22";g.font="600 13px system-ui";g.fillText(L,x0+8,y-22);g.beginPath();for(let x=0;x<cw;x+=1.5){const t=x/125+seed*.17,p=(t%.8)/.8;const v=beat(p,amps[L]);g[x?"lineTo":"moveTo"](x0+x,y-v*42)}g.stroke()});
-  [0,1,2].forEach(r=>row(140+r*150,leads[r],w/4));
-  g.strokeStyle="#C8102E";g.beginPath();for(let x=0;x<w;x+=1.5){const t=x/125+seed*.11,p=(t%.8)/.8;g[x?"lineTo":"moveTo"](x,640-beat(p,1)*42)}g.stroke();g.fillStyle="#C8102E";g.fillText("II",8,612)})}
-
+/* ЕКГ лента: тясна и дълга, розова милиметрова мрежа, едно или две отвеждания */
+function ecgStrip(seed,two){const W=2048,Hh=two?300:200;return canvasTex(W,Hh,(g,w,h)=>{g.fillStyle="#fff8f7";g.fillRect(0,0,w,h);const top=two?26:22,bot=8;
+  for(let x=0;x<w;x+=6){g.strokeStyle=x%30===0?"rgba(222,84,104,.6)":"rgba(238,150,164,.36)";g.lineWidth=x%30===0?1.2:.6;g.beginPath();g.moveTo(x+.5,top);g.lineTo(x+.5,h-bot);g.stroke()}
+  for(let y=top;y<h-bot;y+=6){g.strokeStyle=(y-top)%30===0?"rgba(222,84,104,.6)":"rgba(238,150,164,.36)";g.lineWidth=(y-top)%30===0?1.2:.6;g.beginPath();g.moveTo(0,y+.5);g.lineTo(w,y+.5);g.stroke()}
+  g.fillStyle="#3a3a40";g.font="600 14px system-ui,sans-serif";g.fillText("25 mm/s · 10 mm/mV · HR 7"+seed+" · "+(seed%2?"sinus rhythm":"PR 0.16 s · QRS 0.09 s"),12,16);
+  const beat=(p,a)=>g1(p,.12,.022,.13)+g1(p,.205,.007,-.14)+g1(p,.23,.009,a)+g1(p,.255,.009,-.24)+g1(p,.5,.04,.3);
+  const lead=(y0,a,lab,c)=>{g.strokeStyle=c;g.lineWidth=2;g.lineJoin="round";g.beginPath();for(let x=0;x<w;x+=1.5){const t=x/150+seed*.21,p=(t%(.78+seed*.01))/(.78+seed*.01);g[x?"lineTo":"moveTo"](x,y0-beat(p,a)*52)}g.stroke();g.fillStyle=c;g.font="700 15px system-ui";g.fillText(lab,8,y0-50)};
+  if(two){lead(top+110,1,"II","#1d1d22");lead(top+232,.8,"V5","#C8102E")}else lead(top+118,1,["II","V1","V5","aVF"][seed%4],seed%3?"#1d1d22":"#C8102E")})}
 /* ===================================================================== */
 function build(brainG,neuronG,docG){const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z);
   const cv=$("canvas.gl");
@@ -216,11 +212,21 @@ function build(brainG,neuronG,docG){const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z
   const deskM=new T.MeshPhysicalMaterial({map:wood,roughness:.42,clearcoat:.6,clearcoatRoughness:.25,envMapIntensity:.6});
   const DY=.75;const desk=new T.Mesh(new T.BoxGeometry(1.7,.04,.9),deskM);desk.position.set(0,DY-.02,0);desk.castShadow=desk.receiveShadow=true;S1.add(desk);
   [[-.8,-.4],[.8,-.4],[-.8,.4],[.8,.4]].forEach(([x,z])=>{const l=new T.Mesh(new T.BoxGeometry(.05,DY-.04,.05),new T.MeshStandardMaterial({color:0x1d1e21,roughness:.5,metalness:.6}));l.position.set(x,(DY-.04)/2,z);l.castShadow=true;S1.add(l)});
-  /* ЕКГ листове */
-  const paper=(seed,x,z,ry,lift=0)=>{const gm=new T.PlaneGeometry(.297,.21,24,16);const P=gm.attributes.position;for(let i=0;i<P.count;i++){const px=P.getX(i),py=P.getY(i);P.setZ(i,lift*(Math.cos(px*7)*.5+.5)*.012+.002*Math.sin(py*30+seed))}gm.computeVertexNormals();
-    const m=new T.Mesh(gm,new T.MeshStandardMaterial({map:ecgSheet(seed),roughness:.92,envMapIntensity:.25,side:T.DoubleSide}));m.rotation.set(-Math.PI/2,0,ry);m.position.set(x,DY+.002+seed*.0007,z);m.receiveShadow=true;m.castShadow=true;S1.add(m);return m};
-  paper(1,-.42,-.12,.35);paper(2,-.18,-.25,-.12);paper(3,.36,-.2,.22);paper(4,.52,.08,-.4);paper(5,-.55,.16,.6);
-  const held=paper(6,0,.13,.04,1);held.position.y=DY+.06;held.rotation.x=-Math.PI/2+.38;
+  /* ЕКГ ленти: тесни и дълги, леко извити краища; една виси от ръба, една е в ръцете на лекаря */
+  const strip=(seed,L,Wd,x,z,ry,o={})=>{const segs=Math.round(L*260),gm=new T.PlaneGeometry(L,Wd,segs,3);const P=gm.attributes.position;
+    for(let i=0;i<P.count;i++){const px=P.getX(i),py=P.getY(i),u=px/L+.5;let h=.0026+.0012*Math.sin(px*40+seed)+.0006*Math.sin(py*90);
+      if(o.curlA)h+=o.curlA*Math.exp(-u*14);if(o.curlB)h+=o.curlB*Math.exp(-(1-u)*14);if(o.fold){const f=Math.abs(((u*o.fold)%1)-.5);h+=.004*(.5-f)}P.setZ(i,h)}gm.computeVertexNormals();
+    const tx=ecgStrip(seed,Wd>.07);tx.repeat.set(1,1);
+    const m=new T.Mesh(gm,new T.MeshStandardMaterial({map:tx,roughness:.9,envMapIntensity:.25,side:T.DoubleSide}));m.rotation.set(-Math.PI/2,0,ry);m.position.set(x,DY+.0015+seed*.0004,z);m.receiveShadow=true;m.castShadow=true;S1.add(m);return m};
+  strip(1,.62,.06,-.2,-.18,.12,{curlA:.012,curlB:.006});strip(2,.5,.06,.3,-.26,-.08,{curlB:.014});strip(3,.44,.085,-.48,.04,.5,{curlA:.01});strip(4,.38,.06,.48,.04,-.35,{curlA:.008,curlB:.01});
+  /* сгънат на хармоника куп ленти от апарата */
+  for(let k=0;k<6;k++){const p=new T.Mesh(new T.BoxGeometry(.21,.0012,.085),[0,1,2,3,4,5].map(i=>i===2?new T.MeshStandardMaterial({map:ecgStrip(10+k,true),roughness:.9}):new T.MeshStandardMaterial({color:0xf3e9e8,roughness:.9})));p.position.set(.6,DY+.001+k*.0013,-.33);p.rotation.y=.25+k*.01;p.castShadow=p.receiveShadow=true;S1.add(p)}
+  /* лента, която виси от предния ръб на бюрото */
+  {const L=.55,gm=new T.PlaneGeometry(.06,L,3,160);const P=gm.attributes.position;for(let i=0;i<P.count;i++){const py=P.getY(i)+L/2;const z0=.3,y=DY+.0012;let pz,pyy;if(py<z0){pz=-.12+py;pyy=y}else{const a=(py-z0);const ang=Math.min(Math.PI/2,a*9);pz=-.12+z0+Math.sin(ang)/9+Math.max(0,a-Math.PI/18)*0;pyy=y-(1-Math.cos(ang))/9-Math.max(0,a-Math.PI/18)}P.setXYZ(i,P.getX(i),pyy,pz)}
+    gm.computeVertexNormals();const tx=ecgStrip(7,false);tx.rotation=Math.PI/2;tx.center.set(.5,.5);const m=new T.Mesh(gm,new T.MeshStandardMaterial({map:tx,roughness:.9,side:T.DoubleSide,envMapIntensity:.25}));m.position.set(-.62,0,.33);m.castShadow=true;S1.add(m)}
+  /* лентата в ръцете: опъната между двете ръце, краищата падат към бюрото */
+  const held=(()=>{const L=.7,gm=new T.PlaneGeometry(L,.06,280,3);const P=gm.attributes.position;for(let i=0;i<P.count;i++){const px=P.getX(i),ax=Math.abs(px);let y;if(ax<.14)y=.072-.012*Math.cos(px/.14*Math.PI/2);else{const a=ax-.14;y=Math.max(.0015,.072-a*a*3.6-a*.25)}P.setZ(i,y+.0015*Math.sin(px*30))}gm.computeVertexNormals();
+    const m=new T.Mesh(gm,new T.MeshStandardMaterial({map:ecgStrip(5,false),roughness:.9,side:T.DoubleSide,envMapIntensity:.25}));m.rotation.set(-Math.PI/2+.12,0,.02);m.position.set(0,DY,.2);m.castShadow=true;m.receiveShadow=true;S1.add(m);return m})();
   /* химикалка, чаша кафе, стетоскоп, лампа, телефон */
   const pen=new T.Group();{const b=new T.Mesh(new T.CylinderGeometry(.0045,.0045,.14,16),new T.MeshPhysicalMaterial({color:0x1d1d22,roughness:.25,clearcoat:1}));pen.add(b);const tip=new T.Mesh(new T.ConeGeometry(.0045,.012,16),new T.MeshStandardMaterial({color:0xc0c4ca,metalness:1,roughness:.25}));tip.position.y=-.076;tip.rotation.x=Math.PI;pen.add(tip);
     const clip=new T.Mesh(new T.BoxGeometry(.002,.04,.003),tip.material);clip.position.set(.005,.045,0);pen.add(clip)}
@@ -232,7 +238,7 @@ function build(brainG,neuronG,docG){const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z
   const steth=new T.Group();{const tm=new T.MeshPhysicalMaterial({color:0x1d1f24,roughness:.35,clearcoat:.7});const pts=[V(-.62,0,-.32),V(-.5,0,-.36),V(-.38,0,-.3),V(-.36,0,-.2),V(-.45,0,-.12),V(-.6,0,-.14),V(-.7,0,-.22),V(-.72,0,-.33),V(-.64,0,-.4)];
     steth.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),120,.0055,10,false),tm));const chest=new T.Mesh(new T.CylinderGeometry(.022,.022,.012,32),new T.MeshStandardMaterial({color:0xd0d4da,metalness:1,roughness:.2}));chest.position.copy(pts[0]).y+=.006;steth.add(chest);
     const d=new T.Mesh(new T.CircleGeometry(.018,32),new T.MeshStandardMaterial({color:0x2a2a2e,roughness:.4}));d.rotation.x=-Math.PI/2;d.position.copy(chest.position).y+=.0065;steth.add(d)}
-  steth.position.y=DY+.006;steth.traverse(o=>{if(o.isMesh)o.castShadow=true});S1.add(steth);
+
   const phone=new T.Mesh(new T.BoxGeometry(.075,.008,.155),[0,1,2,3,4,5].map(k=>k===2?new T.MeshPhysicalMaterial({color:0x08090b,roughness:.05,clearcoat:1,envMapIntensity:1.2}):new T.MeshStandardMaterial({color:0x2b2d31,metalness:.8,roughness:.3})));phone.position.set(.72,DY+.004,.2);phone.rotation.y=.3;phone.castShadow=true;S1.add(phone);
   const lamp=new T.Group();{const lm=new T.MeshStandardMaterial({color:0x1b1c1f,metalness:.7,roughness:.35});const base=new T.Mesh(new T.CylinderGeometry(.07,.08,.02,32),lm);lamp.add(base);
     const arm=new T.Mesh(new T.CylinderGeometry(.008,.008,.42,12),lm);arm.position.set(.05,.2,0);arm.rotation.z=-.25;lamp.add(arm);const head=new T.Mesh(new T.ConeGeometry(.07,.12,32,1,true),lm);head.position.set(.16,.39,.04);head.rotation.z=1.0;head.material.side=T.DoubleSide;lamp.add(head)}
@@ -256,7 +262,13 @@ function build(brainG,neuronG,docG){const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z
   if(docG&&docG.isBufferGeometry){/* базов човек на MakeHuman (CC0), поставен седнал и оцветен по области — design/tools/posehuman.py */
     const dm=rim(new T.MeshPhysicalMaterial({vertexColors:true,roughness:.72,clearcoat:.12,clearcoatRoughness:.6,envMapIntensity:.35,transparent:true}),0xffffff,.18,3);docMats.push(dm);
     const body=new T.Mesh(docG,dm);body.castShadow=true;body.receiveShadow=true;body.rotation.y=Math.PI;body.position.set(0,.451,.75);doc.add(body);
-    headG=new T.Group();headG.position.set(0,1.099,.395);headG.rotation.x=-.95;doc.add(headG)}
+    headG=new T.Group();headG.position.set(0,1.099,.395);headG.rotation.x=-.95;doc.add(headG);
+    /* яка на престилката и стетоскоп около врата */
+    const nk=V(0,.999,.549),ax=V(0,.07,-.088).normalize();const collar=new T.Mesh(new T.TorusGeometry(.068,.016,14,48),new T.MeshStandardMaterial({color:0xeef0f2,roughness:.85,envMapIntensity:.35}));collar.position.copy(nk).addScaledVector(ax,-.01);collar.quaternion.setFromUnitVectors(V(0,0,1),ax);collar.castShadow=true;doc.add(collar);docMats.push(collar.material);collar.material.transparent=true;
+    const tm=new T.MeshPhysicalMaterial({color:0x1b1d22,roughness:.32,clearcoat:.8,transparent:true});docMats.push(tm);
+    const sp=[V(-.085,.955,.5),V(-.09,.99,.535),V(-.06,1.015,.58),V(0,1.025,.6),V(.06,1.015,.58),V(.09,.99,.535),V(.085,.955,.5)];
+    const tube=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(sp),90,.0058,10,false),tm);tube.castShadow=true;doc.add(tube);
+}
   else{
   /* тяло в бяла престилка, наведено напред */
   const torso=new T.Group();torso.position.set(0,.56,.68);torso.rotation.x=-.42;doc.add(torso);
@@ -295,49 +307,56 @@ function build(brainG,neuronG,docG){const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z
   const win=new T.DirectionalLight(0xcfe0ff,.9);win.position.set(2.5,3.2,1.2);win.castShadow=true;win.shadow.mapSize.set(1024,1024);win.shadow.camera.left=-1.2;win.shadow.camera.right=1.2;win.shadow.camera.top=1.2;win.shadow.camera.bottom=-1.2;win.shadow.bias=-.0003;win.shadow.radius=6;S1.add(win);
   S1.add(new T.HemisphereLight(0xffffff,0x1a1b1e,.35));
 
+  if(!brain){const c=$(".cr .crb");if(c)c.remove()}
   /* ================= мозък (отделна тъмна сцена) ================= */
   const SB=new T.Scene();SB.background=new T.Color(0x09090c);SB.environment=ENV;SB.fog=new T.Fog(0x09090c,8,16);
   SB.add(new T.HemisphereLight(0xfff2f0,0x121216,.45));{const k=new T.DirectionalLight(0xfff4ee,1.3);k.position.set(3,6,5);SB.add(k);const b=new T.DirectionalLight(0xff9aa8,1.1);b.position.set(-4,1,-6);SB.add(b)}
   const brainPivot=new T.Group();SB.add(brainPivot);if(brain)brainPivot.add(brain);
-  /* ================= 2. неврони ================= */
-  const S2=new T.Scene();S2.background=new T.Color(0x0b0b0e);S2.fog=new T.FogExp2(0x0b0b0e,.055);S2.environment=ENV;
-  S2.add(new T.HemisphereLight(0xffeeee,0x101014,.5));{const k=new T.DirectionalLight(0xfff0ea,1.2);k.position.set(4,6,5);S2.add(k);const b=new T.DirectionalLight(0xffb0b8,.9);b.position.set(-5,-2,-8);S2.add(b)}
-  const neuM=rim(new T.MeshPhysicalMaterial({color:0xd99a8e,roughness:.55,clearcoat:.35,envMapIntensity:.35,emissive:0x000000}),0xffd0c8,.5);
-  const neurons=[];
-  if(neuronG&&neuronG.isBufferGeometry){neuronG.computeBoundingBox();const bb=neuronG.boundingBox,c=bb.getCenter(V(0,0,0)),sz=bb.getSize(V(0,0,0)),L=Math.max(sz.x,sz.y,sz.z);neuronG.translate(-c.x,-c.y,-c.z);neuronG.scale(9/L,9/L,9/L);
-    [[0,0,0,0,0,0,1],[-7,3,-8,.6,1.2,.3,.9],[8,-2,-10,-.4,2.4,.8,1],[-3,-5,-14,1.2,.4,-.5,1.1],[10,5,-18,.3,-1,1.4,1.2],[-12,-1,-20,-.8,2,.2,1.3],[3,7,-24,.5,.9,-1,1.4]].forEach(([x,y,z,a,b,c2,s])=>{const m=new T.Mesh(neuronG,neuM);m.position.set(x,y,z);m.rotation.set(a,b,c2);m.scale.setScalar(s);S2.add(m);neurons.push(m)})}
-  else{/* резервен вариант без файла: прости разклонени неврони */
-    const mk=(x,y,z)=>{const g=new T.Group();g.position.set(x,y,z);g.add(new T.Mesh(new T.SphereGeometry(.6,32,24),neuM));for(let k=0;k<7;k++){const d=V(rnd(-1,1),rnd(-1,1),rnd(-1,1)).normalize();const pts=[V(0,0,0)];let p=V(0,0,0);for(let j=0;j<6;j++){d.add(V(rnd(-.4,.4),rnd(-.4,.4),rnd(-.4,.4))).normalize();p=p.clone().addScaledVector(d,.7);pts.push(p)}g.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),40,.08,8,false),neuM))}S2.add(g);neurons.push(g)};
-    mk(0,0,0);mk(-6,3,-8);mk(7,-2,-10);mk(-3,-5,-14)}
-  /* искри: точки, които светват по невроните */
-  const spN=160,spG=new T.BufferGeometry(),spP=new Float32Array(spN*3),spA=new Float32Array(spN);for(let i=0;i<spN;i++){spP[i*3]=rnd(-14,14);spP[i*3+1]=rnd(-8,8);spP[i*3+2]=rnd(-26,3);spA[i]=Math.random()}spG.setAttribute("position",new T.BufferAttribute(spP,3));
-  const dotT=canvasTex(64,64,(g,w,h)=>{const r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,"rgba(255,255,255,1)");r.addColorStop(.25,"rgba(255,120,140,.9)");r.addColorStop(1,"rgba(255,60,90,0)");g.fillStyle=r;g.fillRect(0,0,w,h)});
-  const spM=new T.PointsMaterial({size:.35,map:dotT,transparent:true,depthWrite:false,blending:T.AdditiveBlending,opacity:.0});const sparks=new T.Points(spG,spM);S2.add(sparks);
-
-  /* ================= 3. синапс ================= */
-  const S3=new T.Scene();S3.background=new T.Color(0x0c0b0e);S3.fog=new T.Fog(0x0c0b0e,6,16);S3.environment=ENV;
-  S3.add(new T.HemisphereLight(0xfff0f0,0x101014,.55));{const k=new T.DirectionalLight(0xffffff,1.1);k.position.set(3,6,6);S3.add(k);const b=new T.DirectionalLight(0xff9aa8,.8);b.position.set(-4,-3,-6);S3.add(b)}
-  const preM=rim(new T.MeshPhysicalMaterial({color:0xd6a093,roughness:.5,clearcoat:.4,transparent:true,opacity:.55,depthWrite:false,side:T.DoubleSide,envMapIntensity:.4}),0xffd6cc,.7,2.2);
-  const preP=new T.SplineCurve([[0,3.7],[1.1,3.55],[2.05,3.1],[2.65,2.35],[2.92,1.5],[2.9,.8],[2.6,.42],[1.9,.3],[.9,.28],[0,.28]].map(p=>new T.Vector2(p[0],p[1]))).getPoints(80);
-  const pre=new T.Mesh(new T.LatheGeometry(preP,128),preM);S3.add(pre);
-  const ax=new T.Mesh(new T.CylinderGeometry(.75,1.1,4,48,1,true),preM);ax.position.y=5.4;S3.add(ax);
-  const postM=rim(new T.MeshPhysicalMaterial({color:0xd59a8e,roughness:.55,clearcoat:.3,envMapIntensity:.35,side:T.DoubleSide}),0xffd0c8,.45);
-  const postG=new T.PlaneGeometry(9,6,90,60);{const P=postG.attributes.position;for(let i=0;i<P.count;i++){const x=P.getX(i),y=P.getY(i);P.setZ(i,-.06*(x*x+y*y)+.04*Math.sin(x*2+y))}postG.computeVertexNormals()}
-  const post=new T.Mesh(postG,postM);post.rotation.x=-Math.PI/2;post.position.y=-.2;S3.add(post);
-  /* везикули с медиатор */
-  const vesM=rim(new T.MeshPhysicalMaterial({color:0xf2c4cf,roughness:.25,clearcoat:1,transparent:true,opacity:.85,envMapIntensity:.8,emissive:0x3a0c18}),0xffffff,.5);
-  const VN=90,vesI=new T.InstancedMesh(new T.SphereGeometry(.13,24,16),vesM,VN),ves=[];
-  for(let i=0;i<VN;i++){let b;if(i<14){const a=i/14*6.28+rnd(-.2,.2),r=rnd(.4,1.6);b=V(Math.cos(a)*r,.48+rnd(0,.08),Math.sin(a)*r)}else{const a=rnd(0,6.28),r=Math.sqrt(Math.random())*2.2;b=V(Math.cos(a)*r,Math.max(.7,rnd(.8,3.0)*(1-r*r/10)),Math.sin(a)*r)}ves.push({b,ph:rnd(0,6.28),fuse:i<10?i*.3+.25:-1})}S3.add(vesI);
-  /* митохондрия в бутона */
-  {const mit=new T.Mesh(new T.SphereGeometry(.45,32,20),rim(new T.MeshPhysicalMaterial({color:0xb5656a,roughness:.5,clearcoat:.4}),0xffc0c0,.4));mit.scale.set(2.2,.8,.9);mit.position.set(-.6,2.5,-.6);mit.rotation.y=.6;S3.add(mit)}
-  /* Ca²⁺ канали в активната зона и рецептори отсреща */
-  const recM=new T.MeshPhysicalMaterial({color:0x8a7c9e,roughness:.35,clearcoat:.7,emissive:0x0,envMapIntensity:.5});
-  const recs=[];for(let i=0;i<22;i++){const a=rnd(0,6.28),r=Math.sqrt(Math.random())*2.1;const m=new T.Mesh(new T.CylinderGeometry(.08,.1,.24,20),recM.clone());m.position.set(Math.cos(a)*r,-.2-.06*r*r+.14,Math.sin(a)*r);S3.add(m);recs.push(m)}
-  const caM=new T.MeshPhysicalMaterial({color:0x6c7a99,roughness:.4,clearcoat:.5});for(let i=0;i<10;i++){const a=i/10*6.28,m=new T.Mesh(new T.CylinderGeometry(.08,.08,.22,12),caM);m.position.set(Math.cos(a)*1.4,.33,Math.sin(a)*1.4);S3.add(m)}
-  /* молекули медиатор в цепнатината */
-  const NT=520,ntG=new T.BufferGeometry(),ntP=new Float32Array(NT*3);ntG.setAttribute("position",new T.BufferAttribute(ntP,3));
-  const ntM=new T.PointsMaterial({size:.2,map:dotT,transparent:true,depthWrite:false,blending:T.AdditiveBlending,color:0xffd0dc});const nt=new T.Points(ntG,ntM);S3.add(nt);
-  const ntD=[];for(let i=0;i<NT;i++)ntD.push({o:V(0,0,0),v:V(rnd(-1,1),-rnd(.6,1.4),rnd(-1,1)),t0:1e9});
+  /* ================= 2. невронна мрежа: сигналът минава от неврон на неврон ================= */
+  const S2=new T.Scene();S2.background=new T.Color(0x0a0a0d);S2.fog=new T.FogExp2(0x0a0a0d,.042);S2.environment=ENV;
+  S2.add(new T.HemisphereLight(0xfff0ee,0x0e0e12,.22));{const k=new T.DirectionalLight(0xfff2ec,.75);k.position.set(5,8,6);S2.add(k);const b=new T.DirectionalLight(0xff8fa0,1.1);b.position.set(-6,-3,-9);S2.add(b)}
+  const R2=(()=>{let s=17;return()=>(s=(s*16807)%2147483647)/2147483647})(),rr=(a,b)=>a+R2()*(b-a);
+  const rp=d=>{const a=V(R2()-.5,R2()-.5,R2()-.5);return a.sub(d.clone().multiplyScalar(a.dot(d))).normalize()};
+  /* тръба с променлив радиус (стеснява се към края) */
+  const ptube=(curve,rf,seg,rad,mat)=>{const g=new T.TubeGeometry(curve,seg,1,rad,false),P=g.attributes.position;for(let i=0;i<=seg;i++){const c=curve.getPointAt(i/seg),r=rf(i/seg);for(let j=0;j<=rad;j++){const k=i*(rad+1)+j;P.setXYZ(k,c.x+(P.getX(k)-c.x)*r,c.y+(P.getY(k)-c.y)*r,c.z+(P.getZ(k)-c.z)*r)}}g.computeVertexNormals();return new T.Mesh(g,mat)};
+  const NEU=[];const NP=[[-7.5,1.8,-3],[-3.6,-1.6,-6],[0,1.4,-2.4],[3.8,-1.2,-5.4],[7.6,1.6,-3.2],[-5.2,3.6,-11],[1.6,4.2,-10],[6.4,-3.6,-11],[-1.4,-4.4,-12],[10,3,-9],[-10,-2.6,-9]];
+  const baseM=()=>rim(new T.MeshPhysicalMaterial({color:0xc4877d,roughness:.55,clearcoat:.35,clearcoatRoughness:.35,envMapIntensity:.18,emissive:0xff4d6d,emissiveIntensity:0}),0xffc4ba,.55,2.0);
+  NP.forEach((p,i)=>{const c=V(...p),g=new T.Group();S2.add(g);const m=baseM();
+    /* сома: неправилна, с конусовидни основи */
+    const sg=new T.SphereGeometry(.55,64,48),SP=sg.attributes.position;for(let k=0;k<SP.count;k++){const v=V(SP.getX(k),SP.getY(k),SP.getZ(k));const n=v.clone().normalize();const f=1+.12*Math.sin(n.x*5+i)*Math.sin(n.y*4+i*2)*Math.sin(n.z*6)+.06*Math.sin(n.x*11+n.z*9);v.copy(n).multiplyScalar(.55*f);SP.setXYZ(k,v.x,v.y*1.12,v.z)}sg.computeVertexNormals();
+    const soma=new T.Mesh(sg,m);soma.position.copy(c);g.add(soma);
+    /* дендрити: разклонени, стесняващи се, криволичещи */
+    const tips=[];const dend=(p0,d0,L,r0,depth)=>{const n=7,pts=[p0.clone()];let q=p0.clone(),d=d0.clone();for(let k=1;k<=n;k++){d.add(rp(d).multiplyScalar(.28)).normalize();q=q.clone().addScaledVector(d,L/n);pts.push(q)}
+      const cv=new T.CatmullRomCurve3(pts),last=depth>=2||(depth>0&&R2()<.25),r1=r0*(last?.3:.66);g.add(ptube(cv,t=>r0+(r1-r0)*Math.pow(t,.8)+(depth===0?r0*.6*Math.exp(-t*8):0),depth<1?40:28,depth<1?8:6,m));
+      if(!last){const pr=rp(d);[1,-1].forEach((sgn,k)=>dend(q,d.clone().addScaledVector(pr,sgn*rr(.4,.8)).normalize(),L*rr(.6,.85),r1*(k?.75:.9),depth+1))}else tips.push({p:q,c:cv})};
+    const nd=6+Math.floor(R2()*3),axDir=V(rr(-1,1),rr(-.5,.5),rr(-1,1)).normalize();
+    for(let k=0;k<nd;k++){let d=V(rr(-1,1),rr(-1,1),rr(-1,1)).normalize();if(d.dot(axDir)>.5)d.addScaledVector(axDir,-1).normalize();dend(c.clone().addScaledVector(d,.45),d,rr(1.6,2.6),.12,0)}
+    NEU.push({c,g,m,soma,tips,axDir,out:[],fire:-9,glow:0})});
+  /* аксони: от всеки неврон към един или два други, завършват с разклонения и бутони */
+  const CON=[[0,2],[0,1],[1,3],[2,4],[2,3],[3,7],[4,9],[2,6],[1,8],[5,2],[6,4],[8,3],[10,1],[10,5],[9,7],[7,8],[6,9]];
+  const bm=rim(new T.MeshPhysicalMaterial({color:0xf0c2b8,roughness:.4,clearcoat:.6,emissive:0xff4d6d,emissiveIntensity:0}),0xffffff,.5);
+  CON.forEach(([a,b])=>{const A=NEU[a],B=NEU[b];const start=A.c.clone().addScaledVector(B.c.clone().sub(A.c).normalize(),.5);
+    const tip=B.tips.reduce((best,t)=>{const d=t.p.distanceTo(A.c);return !best||d<best.d?{d,t}:best},null).t;const end=tip.p.clone().lerp(B.c,.35);
+    const span=start.distanceTo(end),jit=Math.min(.6,span*.08),mid1=start.clone().lerp(end,.33).add(V(rr(-jit,jit),rr(-jit,jit),rr(-jit,jit))),mid2=start.clone().lerp(end,.66).add(V(rr(-jit,jit),rr(-jit,jit),rr(-jit,jit)));
+    const cv=new T.CatmullRomCurve3([start,mid1,mid2,end]);A.g.add(ptube(cv,t=>.045-.015*t+(t<.05?.07*(1-t/.05):0),160,7,A.m));
+    const bt=new T.Mesh(new T.SphereGeometry(.13,20,14),bm.clone());bt.position.copy(end);A.g.add(bt);
+    A.out.push({cv,to:b,bt,len:cv.getLength()})});
+  /* импулси: светеща точка с опашка, която тича по аксона */
+  const dotT=canvasTex(64,64,(g,w,h)=>{const r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,"rgba(255,255,255,1)");r.addColorStop(.22,"rgba(255,140,160,.95)");r.addColorStop(1,"rgba(255,60,90,0)");g.fillStyle=r;g.fillRect(0,0,w,h)});
+  const PN=600,pG=new T.BufferGeometry(),pP=new Float32Array(PN*3),pC=new Float32Array(PN*3);pG.setAttribute("position",new T.BufferAttribute(pP,3));pG.setAttribute("color",new T.BufferAttribute(pC,3));
+  const pM=new T.PointsMaterial({size:1.0,map:dotT,vertexColors:true,transparent:true,depthWrite:false,blending:T.AdditiveBlending});const pts=new T.Points(pG,pM);pts.frustumCulled=false;pts.renderOrder=5;S2.add(pts);
+  const halo=NEU.map(n=>{const s=new T.Sprite(new T.SpriteMaterial({map:dotT,color:0xff6680,transparent:true,depthWrite:false,depthTest:false,blending:T.AdditiveBlending,opacity:0}));s.position.copy(n.c);s.scale.setScalar(3.2);S2.add(s);return s});
+  const pulses=[];const SPEED=7;
+  const fire=(i,t)=>{const n=NEU[i];if(t-n.fire<.6)return;n.fire=t;n.glow=1;click(.45);spikeT=1;n.out.forEach(o=>pulses.push({o,t0:t+.05}))};
+  /* фонови неврони в далечината за дълбочина */
+  {const fG=new T.BufferGeometry(),fp=[];for(let i=0;i<260;i++)fp.push(rr(-26,26),rr(-14,14),rr(-40,-14));fG.setAttribute("position",new T.Float32BufferAttribute(fp,3));S2.add(new T.Points(fG,new T.PointsMaterial({size:.5,map:dotT,color:0x6a4048,transparent:true,depthWrite:false,blending:T.AdditiveBlending,opacity:.6})))}
+  let netT=0,nextSeed=0,netWarm=0;
+  function netStep(dt){netT+=dt;const t=netT;if(t>nextSeed){fire([0,10,5][Math.floor(R2()*3)],t);nextSeed=t+rr(.7,1.3)}
+    let k=0;for(let i=pulses.length-1;i>=0;i--){const p=pulses[i],a=t-p.t0;if(a<0)continue;const u=a*SPEED/p.o.len;
+      if(u>=1){p.o.bt.material.emissiveIntensity=1.6;const to=p.o.to;pulses.splice(i,1);fire(to,t+.12);continue}
+      for(let tr=0;tr<10&&k<PN;tr++){const uu=u-tr*.01;if(uu<0)break;const q=p.o.cv.getPointAt(uu);pP[k*3]=q.x;pP[k*3+1]=q.y;pP[k*3+2]=q.z;const f=1-tr/10;pC[k*3]=f;pC[k*3+1]=f*.55;pC[k*3+2]=f*.62;k++}}
+    for(;k<PN;k++){pP[k*3+1]=-999}pG.attributes.position.needsUpdate=true;pG.attributes.color.needsUpdate=true;
+    NEU.forEach((n,i)=>{n.glow=Math.max(0,n.glow-dt*1.6);n.m.emissiveIntensity=n.glow*1.4;halo[i].material.opacity=n.glow*.9;n.out.forEach(o=>{o.bt.material.emissiveIntensity=Math.max(0,o.bt.material.emissiveIntensity-dt*2.5)})})}
 
   /* ---------- размер ---------- */
   function size(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.fov=cam.aspect<.8?60:36;cam.updateProjectionMatrix()}
@@ -355,13 +374,12 @@ function build(brainG,neuronG,docG){const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z
   setTimeout(()=>{if(!ended&&phase==="intro")setText("office")},2400);
   setTimeout(()=>{if(!ended&&phase==="intro"){setC("hinted");phase="hold"}},4200);
   /* етапи на гмуркането (секунди) */
-  const D={head:2.4,brain:brain?2.6:.3,x1:.55,neu:3.2,x2:.55,syn:3.8};
-  const t1=D.head,t2=t1+D.brain,t3=t2+D.x1,t4=t3+D.neu,t5=t4+D.x2,t6=t5+D.syn;
-  let fused=0;
+  const D={head:2.4,brain:brain?2.6:.3,x1:.55,neu:8.5};
+  const t1=D.head,t2=t1+D.brain,t3=t2+D.x1,t4=t3+D.neu,t6=t4;
   function frame(n){if(ended)return;raf=requestAnimationFrame(frame);const dt=Math.min(.05,(n-last)/1000);last=n;tt+=dt;
     if(spikeT>0)spikeT=Math.max(0,spikeT-dt*4);
     /* дишане и леко движение на главата */
-    const br=Math.sin(tt*1.35);doc.scale.set(1+.004*br,1+.003*br,1+.004*br);held.rotation.z=.04+.015*Math.sin(tt*.5);
+    const br=Math.sin(tt*1.35);doc.scale.set(1+.004*br,1+.003*br,1+.004*br);held.rotation.z=.02+.01*Math.sin(tt*.5);
     let fade=0;
     if(diveT<0){/* кабинетът отгоре */
       const u=ease(cl(tt/DUR,0,1));cam.position.copy(A.p).lerp(B.p,u);const lk=A.l.clone().lerp(B.l,u);const k=u>=1?1:0;cam.position.x+=Math.sin(tt*.3)*.02*k;cam.lookAt(lk);cur=1}
@@ -372,26 +390,15 @@ function build(brainG,neuronG,docG){const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z
         else{cur=4;const v=cl((d-SW)/(t2-SW),0,1);cam.position.set(Math.sin(v*1.1-.5)*6.5,1.6-.6*v,Math.cos(v*1.1-.5)*6.5);cam.lookAt(0,0,0);brainPivot.rotation.y=.2*v;
           if(brainM.userData.uW)brainM.userData.uW.value=-3+((d-SW)*2.4%1)*6;setText("brain");setMode("eeg")}
         if(brain)fade=Math.max(fade,sm(SW-.3,SW,d)*(1-sm(SW,SW+.35,d)))}
-      else if(d<t4){cur=2;const v=cl((d-t3)/D.neu,0,1);/* полет между невроните, акционни потенциали тичат по тях */
-        cam.position.set(lerp(-1.5,1.2,v),lerp(.8,-.3,v),lerp(16,5.5,ease(v)));cam.lookAt(lerp(-.5,.3,v),0,-6);
-        neurons.forEach((m,i)=>{m.rotation.y+=dt*.04*(i%2?1:-1)});const w=-14+((d-t2)*9)%30;neuM.userData.uW&&(neuM.userData.uW.value=w);
-        spM.opacity=.9;const P=spG.attributes.position;for(let i=0;i<spN;i++){spA[i]+=dt*rnd(.2,1.2);if(spA[i]>1){spA[i]=0;P.setXYZ(i,rnd(-14,14),rnd(-8,8),rnd(-26,3))}}spM.size=.25+.25*spikeT;P.needsUpdate=true;
-        setText("neuron");setMode("ap")}
-      else{cur=3;const v=cl((d-t5)/D.syn,0,1);/* синапсът: Ca²⁺ влиза, везикулите се сливат, медиаторът пресича цепнатината */
-        cam.position.set(lerp(7.2,5.0,ease(v)),lerp(2.4,1.0,ease(v)),lerp(8.2,6.2,ease(v)));cam.lookAt(0,.9,0);
-        setText("syn");setMode("epsp")}
+      else{cur=2;const v=cl((d-t3)/D.neu,0,1);/* полет през мрежата */
+        const e=ease(v);cam.position.set(lerp(-9,8,e),lerp(2.5,-.5,e)+Math.sin(v*3)*.6,lerp(9,3.5,e));cam.lookAt(lerp(-3,3,e),0,-6);
+        setText(v<.45?"neuron":"net");setMode(v<.45?"ap":"epsp")}
       if(d>t6&&phase==="dive"){phase="hold2";$(".hint em").textContent="Scroll to enter";setC("hinted")}
       /* затъмняване между сцените */
-      fade=Math.max(fade,sm(t2-.05,t2+.25,d)*(1-sm(t3-.2,t3+.05,d)),sm(t4-.05,t4+.25,d)*(1-sm(t5-.2,t5+.05,d)))}
+      fade=Math.max(fade,sm(t2-.05,t2+.25,d)*(1-sm(t3-.2,t3+.05,d)))}
     fadeEl.style.opacity=fade.toFixed(3);
-    /* синапс: везикули, сливане и медиатор */
-    if(cur===3){const M=new T.Matrix4(),q=new T.Quaternion(),s=V(1,1,1),ds=diveT-t5;
-      ves.forEach((o,i)=>{let p=o.b.clone().add(V(.05*Math.sin(tt*1.3+o.ph),.05*Math.cos(tt*1.1+o.ph),.05*Math.sin(tt*.9+o.ph)));let sc=1;
-        if(o.fuse>=0){const f=ds-o.fuse;if(f>0){const k=cl(f/.45,0,1);p=V(o.b.x*.75,lerp(o.b.y,.42,k),o.b.z*.75);if(f>.45){sc=Math.max(0,1-(f-.45)/.2);if(!o.fired){o.fired=true;let c=0;for(const n of ntD){if(n.t0>1e8&&c<55){n.t0=tt;n.o.copy(p).setY(.3);n.v.set(rnd(-.9,.9),-rnd(.5,1.1),rnd(-.9,.9));c++}}click(.4);spikeT=1}}}}
-        M.compose(p,q,s.set(sc,sc,sc));vesI.setMatrixAt(i,M)});vesI.instanceMatrix.needsUpdate=true;
-      const P=ntG.attributes.position;for(let i=0;i<NT;i++){const n=ntD[i];if(n.t0>1e8){P.setXYZ(i,0,-50,0);continue}const a=tt-n.t0;let x=n.o.x+n.v.x*a*.7,y=Math.max(-.15,n.o.y+n.v.y*a*.7),z=n.o.z+n.v.z*a*.7;if(a>3.2){n.t0=1e9}P.setXYZ(i,x,y,z)}P.needsUpdate=true;
-      recs.forEach((r,i)=>{let hit=0;for(let k=i*20;k<i*20+20&&k<NT;k++){const n=ntD[k];if(n.t0<1e8&&tt-n.t0>.5)hit=1}r.material.emissive.setRGB(hit*.9,hit*.18,hit*.3)})}
-    R.render(cur===1?S1:cur===2?S2:cur===4?SB:S3,cam);ecDraw(dt)}
+    if(cur===2){if(!netWarm){netWarm=1;for(let w=0;w<70;w++)netStep(.05)}netStep(dt)}
+    R.render(cur===1?S1:cur===2?S2:SB,cam);ecDraw(dt)}
   raf=requestAnimationFrame(frame);
   window.__nxSeek=d=>{if(diveT<0){phase="dive";setC("hinted",false)}diveT=d};
 }

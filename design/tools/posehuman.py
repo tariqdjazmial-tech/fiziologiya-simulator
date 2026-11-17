@@ -34,6 +34,8 @@ def rot_to(u, v):
 
 # поза: ("rot", ос, градуси) — завъртане в покойната рамка; ("dir", посока) — посока на костта в света
 X = [1, 0, 0]
+import os
+ROLL = float(os.environ.get("ROLL", "-80"))
 POSE = {
     "upperleg01.L": ("dir", [0.05, -0.12, 1]), "upperleg01.R": ("dir", [-0.05, -0.12, 1]),
     "lowerleg01.L": ("dir", [0.05, -1, 0.12]), "lowerleg01.R": ("dir", [-0.05, -1, 0.12]),
@@ -41,8 +43,8 @@ POSE = {
     "spine05": ("rot", X, 7), "spine04": ("rot", X, 7), "spine03": ("rot", X, 6), "spine02": ("rot", X, 5), "spine01": ("rot", X, 4),
     "neck01": ("rot", X, 9), "neck02": ("rot", X, 9), "neck03": ("rot", X, 8), "head": ("rot", X, 14),
     "upperarm01.L": ("dir", [0.32, -0.62, 0.72]), "upperarm01.R": ("dir", [-0.32, -0.62, 0.72]),
-    "lowerarm01.L": ("dir", [-0.48, 0.06, 0.88]), "lowerarm01.R": ("dir", [0.48, 0.06, 0.88]),
-    "wrist.L": ("dir", [-0.55, -0.15, 0.82]), "wrist.R": ("dir", [0.55, -0.15, 0.82]),
+    "lowerarm01.L": ("dir", [-0.48, 0.0, 0.88], ROLL), "lowerarm01.R": ("dir", [0.48, 0.0, 0.88], -ROLL),
+    "wrist.L": ("dir", [-0.45, -0.35, 0.82]), "wrist.R": ("dir", [0.45, -0.35, 0.82]),
 }
 for s in "LR":
     for f in range(1, 6):
@@ -65,7 +67,9 @@ for b in order:
     if b in POSE:
         kind, a, *r = POSE[b]
         if kind == "rot": Rl = rot(a, r[0])
-        else: Rl = rot_to(TL[b] - H[b], PR.T @ np.asarray(a, float))
+        else:
+            rd = TL[b] - H[b]; Rl = rot_to(rd, PR.T @ np.asarray(a, float))
+            if r: Rl = Rl @ rot(rd, r[0])  # завъртане около собствената ос (пронация/супинация)
     # M_b = M_p · T(H) · R · T(-H)
     R = PR @ Rl; T = PR @ (H[b] - Rl @ H[b]) + PT
     GR[b], GT[b] = R, T
@@ -82,10 +86,8 @@ P = np.where(ws[:, None] > 0, acc / np.maximum(ws, 1e-9)[:, None], V)
 
 body = [f for f, g in zip(faces, grp) if g == "body"]
 used = sorted(set(i for f in body for i in f)); remap = {o: k for k, o in enumerate(used)}
-tris = []
-for f in body:
-    a, b, c, d = [remap[i] for i in f]; tris += [(a, b, c), (a, c, d)]
-tris = np.array(tris, np.uint32); Pu = P[used]
+quads = np.array([[remap[i] for i in f] for f in body], np.int64)
+tris = np.concatenate([quads[:, [0, 1, 2]], quads[:, [0, 2, 3]]]).astype(np.uint32); Pu = P[used]
 
 # оцветяване по области
 COAT, SKIN, HAIR, PANTS, SHOE = (236, 238, 241), (198, 140, 112), (38, 27, 19), (34, 38, 48), (18, 18, 20)
@@ -124,6 +126,36 @@ for t in tris:
 N /= np.maximum(np.linalg.norm(N, axis=1, keepdims=True), 1e-9)
 Pu[hair] += N[hair] * (0.07 + 0.03 * rng.random(int(hair.sum())))[:, None]
 
+def catmull_clark(Pv, Cv, Q):
+    """едно ниво Catmull–Clark за четириъгълна мрежа (с краища)"""
+    nv = len(Pv); nf = len(Q)
+    fp = Pv[Q].mean(1); fc = Cv[Q].mean(1)
+    e = np.stack([Q, np.roll(Q, -1, 1)], 2).reshape(-1, 2); es = np.sort(e, 1)
+    uniq, inv, cnt = np.unique(es, axis=0, return_inverse=True, return_counts=True); inv = inv.reshape(-1)
+    ne = len(uniq); fidx = np.repeat(np.arange(nf), 4)
+    fsum = np.zeros((ne, 3)); np.add.at(fsum, inv, fp[fidx])
+    mid = Pv[uniq].mean(1); border = cnt[: ne] < 2
+    ep = np.where(border[:, None], mid, (Pv[uniq].sum(1) + fsum) / (2 + cnt[:, None]))
+    ec = Cv[uniq].mean(1)
+    # новите позиции на старите върхове
+    val = np.zeros(nv); np.add.at(val, uniq[:, 0], 1); np.add.at(val, uniq[:, 1], 1)
+    Rs = np.zeros((nv, 3)); np.add.at(Rs, uniq[:, 0], mid); np.add.at(Rs, uniq[:, 1], mid)
+    Qs = np.zeros((nv, 3)); fv = np.zeros(nv); np.add.at(Qs, Q.reshape(-1), np.repeat(fp, 4, 0)); np.add.at(fv, Q.reshape(-1), 1)
+    onb = np.zeros(nv, bool); onb[uniq[border].reshape(-1)] = True
+    n = np.maximum(val, 1)[:, None]
+    vp = (Qs / np.maximum(fv, 1)[:, None] + 2 * Rs / n + (n - 3) * Pv) / n
+    vp[onb] = Pv[onb]; vp[val < 3] = Pv[val < 3]
+    NP = np.concatenate([vp, ep, fp]); NC = np.concatenate([Cv, ec, fc])
+    E = inv.reshape(nf, 4) + nv; Fc = np.arange(nf) + nv + ne
+    nq = []
+    for i in range(4):
+        nq.append(np.stack([Q[:, i], E[:, i], Fc, E[:, (i - 1) % 4]], 1))
+    return NP, NC, np.concatenate(nq)
+
+colf = col.astype(float)
+Pu, colf, quads = catmull_clark(Pu, colf, quads)
+col = np.clip(colf, 0, 255).astype(np.uint8)
+tris = np.concatenate([quads[:, [0, 1, 2]], quads[:, [0, 2, 3]]]).astype(np.uint32)
 Pu *= 0.1  # дециметри → метри
 mn = Pu.min(0); sz = np.maximum(Pu.max(0) - mn, 1e-6)
 q = np.round((Pu - mn) / sz * 65535).astype(np.uint16)
@@ -133,5 +165,7 @@ open(OUT, "w").write(base64.b64encode(buf).decode())
 hip = GR["upperleg01.L"] @ H["upperleg01.L"] + GT["upperleg01.L"]
 ht = GR["head"] @ TL["head"] + GT["head"]
 wl = GR["wrist.L"] @ H["wrist.L"] + GT["wrist.L"]
+n1 = GR["neck01"] @ H["neck01"] + GT["neck01"]; cl_ = GR["clavicle.L"] @ TL["clavicle.L"] + GT["clavicle.L"]
+print("neck01(m)", np.round(n1*0.1,3), "shoulderL(m)", np.round(cl_*0.1,3))
 print("headtop(m)", np.round(ht*0.1,3), "wristL(m)", np.round(wl*0.1,3))
 print("verts", len(Pu), "tris", len(tris), "bytes", len(buf), "hip(m)", np.round(hip * 0.1, 3), "head(m)", np.round(hd * 0.1, 3), "min", np.round(mn, 3), "size", np.round(sz, 3))
