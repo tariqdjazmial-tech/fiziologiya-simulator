@@ -35,7 +35,7 @@ const css=`
 #hxo .side small{display:block;font:600 11.5px/1.2 system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#ff4d5a;margin-bottom:12px}
 #hxo .side b{display:block;font-weight:800;font-size:clamp(26px,3.2vw,44px);line-height:1.02;letter-spacing:-.02em;color:#f3f1ec;text-wrap:balance}
 #hxo .side span{display:block;margin-top:12px;font:400 15px/1.45 system-ui,sans-serif;color:#c3c8c4}
-#hxo .mon{position:absolute;left:50%;bottom:max(26px,env(safe-area-inset-bottom,0px));width:min(760px,calc(100% - 40px));height:110px;transform:translate(-50%,40px);opacity:0;
+#hxo .mon{display:none!important;position:absolute;left:50%;bottom:max(26px,env(safe-area-inset-bottom,0px));width:min(760px,calc(100% - 40px));height:110px;transform:translate(-50%,40px);opacity:0;
   background:rgba(14,15,17,.72);border:1px solid rgba(255,255,255,.12);border-radius:12px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
   transition:opacity .8s ease,transform .9s cubic-bezier(.2,.8,.2,1),width 1.2s cubic-bezier(.6,0,.2,1),height 1.2s cubic-bezier(.6,0,.2,1),bottom 1.2s cubic-bezier(.6,0,.2,1),border-color 1s,background 1s}
 #hxo.ecg .mon{opacity:1;transform:translate(-50%,0)}
@@ -43,16 +43,16 @@ const css=`
 #hxo .mon canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 #hxo .mon .lab{position:absolute;left:12px;top:9px;font:600 11px/1 ui-monospace,monospace;letter-spacing:.12em;color:#ff4d5a;opacity:.85;transition:opacity .6s}
 #hxo.zoom .mon .lab{opacity:0}
-#hxo .brandx{position:absolute;left:0;right:0;top:calc(50% - 21vh - 10px);transform:translateY(-100%);text-align:center;opacity:0;transition:opacity .9s ease .5s}
+#hxo .brandx{position:absolute;left:0;right:0;top:calc(50% - 8px);transform:translateY(-100%);text-align:center;opacity:0;transition:opacity .9s ease .5s}
 #hxo .brandx b{display:block;font-weight:800;font-size:clamp(44px,8vw,104px);letter-spacing:-.03em;color:#1D1D1F;line-height:1}
 #hxo .brandx b i{font-style:normal;color:#C8102E}
 #hxo .brandx span{display:block;margin-top:12px;font:600 12px/1 system-ui,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#5E5E63}
 #hxo.zoom .brandx{opacity:1}
-#hxo .load{position:absolute;left:50%;top:calc(50% + 21vh + 26px);transform:translateX(-50%);width:min(320px,70vw);opacity:0;transition:opacity .6s ease .8s;text-align:center;font:500 12px/1 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#5E5E63}
+#hxo .load{position:absolute;left:50%;top:calc(50% + 22px);transform:translateX(-50%);width:min(320px,70vw);opacity:0;transition:opacity .6s ease .8s;text-align:center;font:500 12px/1 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#5E5E63}
 #hxo .load i{display:block;height:2px;margin-top:12px;background:rgba(29,29,31,.12);overflow:hidden;border-radius:2px}
 #hxo .load i::after{content:"";display:block;height:100%;width:var(--lp,0%);background:#C8102E;transition:width .25s linear}
 #hxo.zoom .load{opacity:1}
-#hxo .hint{position:absolute;left:50%;bottom:calc(max(26px,env(safe-area-inset-bottom,0px)) + 124px);transform:translateX(-50%);opacity:0;transition:opacity .8s;
+#hxo .hint{position:absolute;left:50%;bottom:calc(max(26px,env(safe-area-inset-bottom,0px)) + 40px);transform:translateX(-50%);opacity:0;transition:opacity .8s;
   font:600 12px/1 system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#e9ece8;border:0;background:none;cursor:pointer;padding:12px 16px;min-height:44px;pointer-events:none}
 #hxo .hint span{display:inline-block;animation:hxb 1.6s ease-in-out infinite}
 @keyframes hxb{50%{transform:translateY(5px)}}
@@ -73,9 +73,9 @@ const css=`
   #hxo .side.r{display:none}
   #hxo .side b{font-size:28px}
   #hxo .mon{height:90px}
-  #hxo .hint{bottom:calc(max(26px,env(safe-area-inset-bottom,0px)) + 100px)}
+  #hxo .hint{bottom:calc(max(26px,env(safe-area-inset-bottom,0px)) + 34px)}
   #hxo.zoom .mon{bottom:calc(50% - 15vh);height:30vh}
-  #hxo .brandx{top:calc(50% - 15vh - 10px)}#hxo .load{top:calc(50% + 15vh + 22px)}
+
   #hxo .cr{top:auto;bottom:6px;left:20px;font-size:9px}
   #hxo .snd .t{display:none}
 }
@@ -278,6 +278,20 @@ function build(brainG,neuronG,docG){const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z
         bl[1].quaternion.setFromAxisAngle(az,-.12*up).multiply(tmp.setFromAxisAngle(ay,.06*Math.sin(t*.4)))}}
     else{body=new T.Mesh(docG,dm);body.rotation.y=Math.PI;body.position.set(0,.451,.75);doc.add(body)}
     body.castShadow=true;body.receiveShadow=true;
+    /* коса: кичури върху скалпа и 10 полупрозрачни слоя („черупки“), по-дълги към върха */
+    const GL_N=`float h3(vec3 p){p=fract(p*.3183099+.1);p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
+float vn(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.-2.*f);return mix(mix(mix(h3(i),h3(i+vec3(1,0,0)),f.x),mix(h3(i+vec3(0,1,0)),h3(i+vec3(1,1,0)),f.x),f.y),mix(mix(h3(i+vec3(0,0,1)),h3(i+vec3(1,0,1)),f.x),mix(h3(i+vec3(0,1,1)),h3(i+vec3(1,1,1)),f.x),f.y),f.z);}
+float strand(vec3 p){vec3 d=normalize(p-vec3(0.,.635,.335));float th=atan(d.x,d.z),ph=acos(clamp(d.y,-1.,1.));return vn(vec3(th*150.,ph*7.,0.))*.65+vn(vec3(th*360.,ph*16.,5.))*.35;}`;
+    {const prev=dm.onBeforeCompile;dm.onBeforeCompile=sh=>{prev(sh);sh.vertexShader=sh.vertexShader.replace("#include <common>","#include <common>\nvarying vec3 vOP;").replace("#include <begin_vertex>","#include <begin_vertex>\nvOP=position;");
+      sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\nvarying vec3 vOP;\n"+GL_N).replace("#include <color_fragment>","#include <color_fragment>\n{float hm=step(vColor.r,.04)*step(vColor.b*1.6,vColor.r);float n=strand(vOP);diffuseColor.rgb*=mix(1.,.45+1.1*n,hm);}")};dm.customProgramCacheKey=()=>"docskin"}
+    if(sk){const col=docG.attributes.color,ix=docG.index.array,hi=[];for(let t=0;t<ix.length;t+=3){let ok=1;for(let j=0;j<3;j++){const v=ix[t+j],r=col.getX(v),b=col.getZ(v);if(!(r<.045&&r>b*1.5)){ok=0;break}}if(ok)hi.push(ix[t],ix[t+1],ix[t+2])}
+      const hg=new T.BufferGeometry();["position","normal","skinIndex","skinWeight"].forEach(a=>hg.setAttribute(a,docG.attributes[a]));hg.setIndex(hi);
+      const NS=10;for(let l=1;l<=NS;l++){const L=l/NS;const hm=new T.MeshStandardMaterial({color:new T.Color(0x22160f).lerp(new T.Color(0x3a281b),L*.7).convertSRGBToLinear(),roughness:.55,metalness:0,skinning:true,envMapIntensity:.45});
+        hm.onBeforeCompile=sh=>{sh.uniforms.uOff={value:.00075*l};sh.uniforms.uL={value:L};hm.userData.sh=sh;
+          sh.vertexShader=sh.vertexShader.replace("#include <common>","#include <common>\nuniform float uOff;varying vec3 vOP;").replace("#include <begin_vertex>","#include <begin_vertex>\nvOP=position;transformed+=objectNormal*uOff;");
+          sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\nuniform float uL;varying vec3 vOP;\n"+GL_N).replace("#include <alphatest_fragment>","#include <alphatest_fragment>\n{float n=strand(vOP);if(n<uL*.62+.3)discard;diffuseColor.rgb*=.75+.55*n;}")};
+        hm.customProgramCacheKey=()=>"hairshell"+l;docMats.push(hm);
+        const shl=new T.SkinnedMesh(hg,hm);shl.rotation.y=Math.PI;shl.position.copy(body.position);shl.renderOrder=2;doc.add(shl);doc.updateMatrixWorld(true);shl.bind(body.skeleton,body.bindMatrix)}}
     headG=new T.Group();headG.position.set(0,1.099,.395);headG.rotation.x=-.95;doc.add(headG);
     /* яка на престилката и стетоскоп около врата */
     const nk=V(0,.999,.549),ax=V(0,.07,-.088).normalize();const collar=new T.Mesh(new T.TorusGeometry(.068,.016,14,48),new T.MeshStandardMaterial({color:0xeef0f2,roughness:.85,envMapIntensity:.35}));collar.position.copy(nk).addScaledVector(ax,-.01);collar.quaternion.setFromUnitVectors(V(0,0,1),ax);collar.castShadow=true;doc.add(collar);docMats.push(collar.material);collar.material.transparent=true;
@@ -390,8 +404,9 @@ function build(brainG,neuronG,docG){const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z
   setTimeout(()=>{if(!ended&&phase==="intro")setText("office")},2400);
   setTimeout(()=>{if(!ended&&phase==="intro"){setC("hinted");phase="hold"}},4200);
   /* етапи на гмуркането (секунди) */
-  const D={head:2.4,brain:brain?2.6:.3,x1:.55,neu:8.5};
-  const t1=D.head,t2=t1+D.brain,t3=t2+D.x1,t4=t3+D.neu,t6=t4;
+  const D={head:3.6,brain:brain?2.6:0,neu:9};
+  const t1=D.head,t2=t1+D.brain,t3=t2,t4=t3+D.neu,t6=t4;
+  const C1=new T.Color(0x16171a),C0=new T.Color(0x050507),hp0=V(0,0,0);let hpFix=null;
   function frame(n){if(ended)return;raf=requestAnimationFrame(frame);const dt=Math.min(.05,(n-last)/1000);last=n;tt+=dt;
     if(spikeT>0)spikeT=Math.max(0,spikeT-dt*4);
     /* дишане и леко движение на главата */
@@ -400,21 +415,23 @@ function build(brainG,neuronG,docG){const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z
     if(diveT<0){/* кабинетът отгоре */
       const u=ease(cl(tt/DUR,0,1));cam.position.copy(A.p).lerp(B.p,u);const lk=A.l.clone().lerp(B.l,u);const k=u>=1?1:0;cam.position.x+=Math.sin(tt*.3)*.02*k;cam.lookAt(lk);cur=1}
     else{diveT+=dt;const d=diveT;
-      if(d<t2){/* към главата, кратко затъмняване и мозъкът */
-        const hp=headW(),SW=D.head-.45;
-        if(d<SW||!brain){cur=1;const u=ease(cl(d/SW,0,1));const to=hp.clone().add(V(.05,.3,.26));cam.position.copy(B.p).lerp(to,u);cam.lookAt(B.l.clone().lerp(hp,u));setText("office");setMode("ecg")}
-        else{cur=4;const v=cl((d-SW)/(t2-SW),0,1);cam.position.set(Math.sin(v*1.1-.5)*6.5,1.6-.6*v,Math.cos(v*1.1-.5)*6.5);cam.lookAt(0,0,0);brainPivot.rotation.y=.2*v;
-          if(brainM.userData.uW)brainM.userData.uW.value=-3+((d-SW)*2.4%1)*6;setText("brain");setMode("eeg")}
-        if(brain)fade=Math.max(fade,sm(SW-.3,SW,d)*(1-sm(SW,SW+.35,d)))}
-      else{cur=2;const v=cl((d-t3)/D.neu,0,1);/* полет през мрежата */
-        const e=ease(v);cam.position.set(lerp(-9,8,e),lerp(2.5,-.5,e)+Math.sin(v*3)*.6,lerp(9,3.5,e));cam.lookAt(lerp(-3,3,e),0,-6);
-        setText(v<.45?"neuron":"net");setMode(v<.45?"ap":"epsp")}
+      if(d<t1||(brain&&d<t2)){/* плавно спускане към главата; стаята потъва в тъмнина */
+        if(!hpFix)hpFix=headW().clone();const hp=hpFix;
+        if(d<t1){cur=1;const x=cl(d/D.head,0,1),u=x*x*(2-x)*(.4+.6*x)+(1-(.4+.6*x))*x*x*(3-2*x);
+          const to=hp.clone().add(V(.012,.06,.05));cam.position.copy(B.p).lerp(to,u);const lk=B.l.clone().lerp(hp,Math.min(1,u*1.25));cam.lookAt(lk);
+          const k=sm(.45,1,x);S1.background.lerpColors(C1,C0,k);S1.fog.color.copy(S1.background);S1.fog.near=lerp(3.2,.02,k);S1.fog.far=lerp(6.5,.12,Math.pow(k,.7));
+          fade=Math.max(fade,sm(.88,1,x)*.8);setText(x<.86?"office":"neuron")}
+        else{cur=4;const v=cl((d-t1)/D.brain,0,1);cam.position.set(Math.sin(v*1.1-.5)*6.5,1.6-.6*v,Math.cos(v*1.1-.5)*6.5);cam.lookAt(0,0,0);brainPivot.rotation.y=.2*v;
+          if(brainM.userData.uW)brainM.userData.uW.value=-3+((d-t1)*2.4%1)*6;setText("brain");fade=Math.max(fade,(1-sm(0,.35,d-t1))*.85,sm(.85,1,v)*.85)}}
+      else{cur=2;const w=d-t3,v=cl(w/D.neu,0,1);/* мрежата изплува от тъмнината; камерата продължава напред без прекъсване */
+        const e=1-Math.pow(1-v,2.2);cam.position.set(lerp(-9,8,e),lerp(2.5,-.5,e)+Math.sin(v*3)*.6,lerp(11,3.5,e));cam.lookAt(lerp(-3,3,e),0,-6);
+        S2.fog.density=lerp(.2,.042,sm(0,1.5,w));fade=Math.max(fade,(1-sm(0,.35,w))*.8);
+        setText(v<.45?"neuron":"net")}
       if(d>t6&&phase==="dive"){phase="hold2";$(".hint em").textContent="Scroll to enter";setC("hinted")}
-      /* затъмняване между сцените */
-      fade=Math.max(fade,sm(t2-.05,t2+.25,d)*(1-sm(t3-.2,t3+.05,d)))}
+    }
     fadeEl.style.opacity=fade.toFixed(3);
     if(cur===2){if(!netWarm){netWarm=1;for(let w=0;w<70;w++)netStep(.05)}netStep(dt)}
-    R.render(cur===1?S1:cur===2?S2:SB,cam);ecDraw(dt)}
+    R.render(cur===1?S1:cur===2?S2:SB,cam)}
   raf=requestAnimationFrame(frame);
   window.__nxSeek=d=>{if(diveT<0){phase="dive";setC("hinted",false)}diveT=d};
 }
