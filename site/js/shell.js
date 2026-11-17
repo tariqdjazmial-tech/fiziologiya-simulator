@@ -208,12 +208,12 @@ VIEWS.home=function(main){const s=expStats(),last=store.get("lastTopic",null),it
 
   <div class="lp-tick" aria-hidden="true"><div class="lp-tick-in">${(()=>{const x=READY.map(r=>`<span>${r.t.replace(/\s*\(.*?\)\s*$/,"")}</span>`).join("");return x+x})()}</div></div>
   <section class="lp-sect"><div class="lp-w">
-   <header class="lp-h"><h2>${LL("Всичко за изпита на едно място","Everything for the exam in one place")}</h2><p>${LL("Всяка тема е урок, симулация и тест. Учиш, пробваш и се проверяваш, без да сменяш учебник и сборник.","Each topic is a lesson, a simulation and a quiz. Learn, try and check yourself without switching between books.")}</p></header>
+   <header class="lp-h"><h2>${LL("Всичко за изпита на едно място","Everything for the exam in one place")}</h2><p>${LL("Всяка тема е урок, симулация и тест. Учиш, пробваш и се проверяваш, без да сменяш учебник и сборник.","Each topic is a lesson, a simulation and a test. Learn, try and check yourself without switching between books.")}</p></header>
    <ul class="lp-feat">
     ${feat("#0D9488","book",LL("Теория по учебника","Textbook theory"),LL("Кратки уроци по Guyton с фигури, формули и клинични бележки.","Short lessons based on Guyton with figures, formulas and clinical notes."))}
     ${feat("#0284C7","sliders",LL("Интерактивни симулации","Interactive simulations"),LL("Променяш параметрите и виждаш как реагира организмът.","Change the parameters and see how the body responds."))}
     ${feat("#DC2626","box",LL("3D модели","3D models"),LL("Сърце, бели дробове и неврон, които въртиш и разглеждаш отблизо.","A heart, lungs and a neuron you can rotate and inspect up close."))}
-    ${feat("#7C3AED","checks",LL("Тестове с обяснения","Quizzes with explanations"),LL(`${st.q} въпроса. След всеки отговор виждаш защо е верен или грешен.`,`${st.q} questions. After each answer you see why it is right or wrong.`))}
+    ${feat("#7C3AED","checks",LL("Тестове с обяснения","Tests with explanations"),LL(`${st.q} въпроса. След всеки отговор виждаш защо е верен или грешен.`,`${st.q} questions. After each answer you see why it is right or wrong.`))}
     ${feat("#D97706","star",LL("High-Yield обобщения","High-yield summaries"),LL("Най-важното за изпита, събрано в края на всяка тема.","The most important points for the exam at the end of each topic."))}
     ${feat("#DB2777","search",LL(`Речник с ${st.gl} термина`,`Glossary of ${st.gl} terms`),LL("Докосваш подчертан термин в текста и виждаш обяснението му.","Tap an underlined term in the text to see what it means."))}
    </ul>
@@ -229,7 +229,7 @@ VIEWS.home=function(main){const s=expStats(),last=store.get("lastTopic",null),it
    <ol class="steps">
     <li style="--k:#0D9488"><i>${I("book")}</i><b>${LL("Прочети","Read")}</b><p>${LL("Кратък текст по учебника с фигури. Непознатите думи са в речника.","A short text with figures. Unknown words are in the glossary.")}</p></li>
     <li style="--k:#0284C7"><i>${I("sliders")}</i><b>${LL("Пробвай","Try")}</b><p>${LL("Отвори симулацията и промени параметрите, за да видиш ефекта.","Open the simulation and change the parameters to see the effect.")}</p></li>
-    <li style="--k:#E11D48"><i>${I("checks")}</i><b>${LL("Провери се","Check")}</b><p>${LL("Реши теста и прочети обяснението след всеки отговор.","Take the quiz and read the explanation after every answer.")}</p></li>
+    <li style="--k:#E11D48"><i>${I("checks")}</i><b>${LL("Провери се","Check")}</b><p>${LL("Реши теста и прочети обяснението след всеки отговор.","Take the test and read the explanation after every answer.")}</p></li>
    </ol>
   </div></section>
 
@@ -245,7 +245,7 @@ VIEWS.home=function(main){const s=expStats(),last=store.get("lastTopic",null),it
    <div class="lp-price">
     <div class="lp-plan"><h3>${LL("Безплатно","Free")}</h3><p class="lp-amt"><b>0 €</b></p><ul>
      <li>${I("check",18)}${LL(`Раздел I: ${READY.filter(r=>PREMIUM.free.includes(r.id)).length} теми`,`Section I: ${READY.filter(r=>PREMIUM.free.includes(r.id)).length} topics`)}</li>
-     <li>${I("check",18)}${LL("Теория, симулации и тестове в раздела","Theory, simulations and quizzes in it")}</li>
+     <li>${I("check",18)}${LL("Теория, симулации и тестове в раздела","Theory, simulations and tests in it")}</li>
      <li>${I("check",18)}${LL("Целият речник","The full glossary")}</li></ul>
      <a class="b" href="#${READY[0].id}">${LL("Започни","Start")}</a></div>
     <div class="lp-plan pro"><span class="lp-tag">${LL("Всичко","Everything")}</span><h3>${LL("Пълен достъп","Full access")}</h3><p class="lp-amt"><b>${price}</b><span>${LL("еднократно","one-time")}</span></p><ul>
@@ -265,15 +265,15 @@ VIEWS.home=function(main){const s=expStats(),last=store.get("lastTopic",null),it
    </aside>
    <div class="lp-qa-main">${[
     [LL("Съдържание","Content"),[
-     [LL("Какво покрива платформата?","What does the platform cover?"),LL(`Целия конспект по нормална физиология за студенти по медицина: ${st.secs} раздела и ${st.topics} теми, от възбудимите тъкани до централната нервна система. Всяка тема съдържа теория, интерактивна симулация и тест с обяснения.`,`The full normal physiology syllabus for medical students: ${st.secs} sections and ${st.topics} topics, from excitable tissues to the central nervous system. Each topic has theory, an interactive simulation and a quiz with explanations.`)],
+     [LL("Какво покрива платформата?","What does the platform cover?"),LL(`Целия конспект по нормална физиология за студенти по медицина: ${st.secs} раздела и ${st.topics} теми, от възбудимите тъкани до централната нервна система. Всяка тема съдържа теория, интерактивна симулация и тест с обяснения.`,`The full normal physiology syllabus for medical students: ${st.secs} sections and ${st.topics} topics, from excitable tissues to the central nervous system. Each topic has theory, an interactive simulation and a test with explanations.`)],
      [LL("На какъв източник се основава съдържанието?","What is the content based on?"),LL("Теорията следва Guyton and Hall, Textbook of Medical Physiology. Текстовете са написани наново, на ясен език, и са подредени по университетския конспект. Източниците на 3D моделите и изображенията са посочени в раздел „За приложението“.","The theory follows Guyton and Hall, Textbook of Medical Physiology, rewritten in plain language and ordered by the university syllabus. Sources for 3D models and images are listed under About.")],
-     [LL("Достатъчна ли е за подготовка за изпит?","Is it enough to prepare for the exam?"),LL(`Платформата е създадена за подготовка за колоквиуми и изпит: ${st.q} тестови въпроса с обяснения и High-Yield обобщение във всяка тема. Тя допълва лекциите и учебника, но не ги замества.`,`It is built for colloquium and exam preparation: ${st.q} quiz questions with explanations and a high-yield summary in every topic. It complements lectures and the textbook but does not replace them.`)]
+     [LL("Достатъчна ли е за подготовка за изпит?","Is it enough to prepare for the exam?"),LL(`Платформата е създадена за подготовка за колоквиуми и изпит: ${st.q} тестови въпроса с обяснения и High-Yield обобщение във всяка тема. Тя допълва лекциите и учебника, но не ги замества.`,`It is built for colloquium and exam preparation: ${st.q} test questions with explanations and a high-yield summary in every topic. It complements lectures and the textbook but does not replace them.`)]
     ]],
     [LL("Достъп и плащане","Access and payment"),[
-     [LL("Какво мога да използвам безплатно?","What can I use for free?"),LL(`Целия Раздел I: ${READY.filter(r=>PREMIUM.free.includes(r.id)).length} теми с теория, симулации и тестове, както и пълния речник. Не е нужна регистрация.`,`All of Section I: ${READY.filter(r=>PREMIUM.free.includes(r.id)).length} topics with theory, simulations and quizzes, plus the full glossary. No account needed.`)],
+     [LL("Какво мога да използвам безплатно?","What can I use for free?"),LL(`Целия Раздел I: ${READY.filter(r=>PREMIUM.free.includes(r.id)).length} теми с теория, симулации и тестове, както и пълния речник. Не е нужна регистрация.`,`All of Section I: ${READY.filter(r=>PREMIUM.free.includes(r.id)).length} topics with theory, simulations and tests, plus the full glossary. No account needed.`)],
      [LL("Как се отключва пълният достъп?","How do I unlock full access?"),LL(`Създаваш безплатен профил и плащаш еднократно ${price} през Stripe с карта, Apple Pay или Google Pay. Достъпът се отключва автоматично веднага след плащането.`,`Create a free account and pay ${price} once via Stripe by card, Apple Pay or Google Pay. Access unlocks automatically right after payment.`)],
      [LL("Абонамент ли е?","Is it a subscription?"),LL("Не. Плащането е еднократно, без автоматично подновяване и без скрити такси.","No. It is a one-time payment with no renewal and no hidden fees.")],
-     [LL("Имам код за достъп. Как да го използвам?","I have an access code. How do I use it?"),LL("Отвори „Профил“, избери „Имам код за достъп“ и въведи кода. Темите се отключват веднага.","Open Profile, choose “I have an access code” and enter it. The topics unlock right away.")]
+     [LL("Имам код за достъп. Как да го използвам?","I have an access code. How do I use it?"),LL("Отвори „Профил“ и въведи кода в полето „Код за достъп“. Всички теми се отключват веднага, без плащане.","Open Profile and enter the code in the “Access code” field. Every topic unlocks right away, with no payment.")]
     ]],
     [LL("Устройства и профил","Devices and account"),[
      [LL("На какви устройства работи?","Which devices does it work on?"),LL("В браузъра на телефон, таблет и компютър, без инсталиране. За 3D моделите използвай актуална версия на Safari, Chrome или Edge.","In the browser on phone, tablet and computer, nothing to install. For 3D models use a current version of Safari, Chrome or Edge.")],
@@ -286,7 +286,7 @@ VIEWS.home=function(main){const s=expStats(),last=store.get("lastTopic",null),it
 
   <footer class="lp-foot"><div class="lp-w">
    <div class="lp-fb"><b>${"PhysioNova"}</b><p>${LL("Интерактивен симулатор по физиология за студенти по медицина.","Interactive physiology simulator for medical students.")}</p></div>
-   <nav><h4>${LL("Учене","Learn")}</h4><a href="#${READY[0].id}">${LL("Първа тема","First topic")}</a><a href="#test">${LL("Тест по всички теми","Quiz on all topics")}</a><a href="#glossary">${LL("Речник","Glossary")}</a><a href="#me">${LL("Профил","Profile")}</a></nav>
+   <nav><h4>${LL("Учене","Learn")}</h4><a href="#${READY[0].id}">${LL("Първа тема","First topic")}</a><a href="#test">${LL("Тест по всички теми","Test on all topics")}</a><a href="#glossary">${LL("Речник","Glossary")}</a><a href="#me">${LL("Профил","Profile")}</a></nav>
    <nav><h4>${LL("Информация","Info")}</h4><a href="#about">${LL("За приложението и лицензи","About and licences")}</a><a href="#privacy">${LL("Поверителност","Privacy")}</a><a href="#terms">${LL("Условия","Terms")}</a></nav>
    <nav><h4>${LL("Контакт","Contact")}</h4><a href="mailto:${mail}">${mail}</a></nav>
   </div><p class="lp-copy">© ${new Date().getFullYear()} ${"PhysioNova"}</p></footer>`;
@@ -322,7 +322,7 @@ async function claimCode(c){await bkReady();
   try{s=await BK.db.doc("codes/"+h).get();q=s.exists?await BK.db.collection("claims").where("hash","==",h).get():null}catch(e){throw E("code","Кодът не можа да се провери. Опитай пак.")}
   if(!s.exists)throw E("code","Този код не е валиден. Провери го или остави полето празно.");
   if(q.docs.some(d=>d.id!==BK.uid))throw E("code","Този код вече е използван от друг профил.");
-  if(!BK.uid)throw E("code","Кодът не може да се активира от този профил.");
+  if(!BK.uid)throw E("code","Влез в профила си, за да активираш кода.");
   try{await BK.db.doc("claims/"+BK.uid).set({hash:h,at:Date.now()})}catch(e){throw E("code","Кодът не можа да се активира. Опитай пак.")}
   return h}
 function devKind(){const u=navigator.userAgent||"",tp=navigator.maxTouchPoints||0;if(/iPad/.test(u)||(/Macintosh/.test(u)&&tp>1))return "iPad";if(/iPhone|iPod/.test(u))return "iPhone";if(/Android/.test(u))return /Mobile/.test(u)?"Android телефон":"Android таблет";if(/Windows/.test(u))return "Windows";if(/Macintosh/.test(u))return "Mac";if(/Linux/.test(u))return "Linux";return "друго"}
@@ -338,7 +338,7 @@ const AUTH=window.PHYS_AUTH={users:()=>store.get("auth_users",{}),
  async login(email,pass){const u=this.users()[email.trim().toLowerCase()];if(!u||u.hash!==await sha(u.salt+pass))throw E("pass","Имейлът или паролата не са верни.");store.set("auth_session",u.email);sync();pushReg(u)},
  logout(){store.set("auth_session",null);sync()},
  async addCode(c){const u=this.me();if(!u)throw E("code","Първо влез в профила си.");const h=await claimCode(c);const U=this.users();U[u.email].code=normCode(c);U[u.email].codeHash=h;store.set("auth_users",U);sync();pushReg(U[u.email])}};
-if(window.PHYS_SB){const SB=PHYS_SB;const msg=e=>{const m=(e&&e.message)||"";if(/invalid login/i.test(m))return E("pass","Имейлът или паролата не са верни.");if(/already (been )?registered|already exists/i.test(m))return E("email","Вече има профил с този имейл. Влез с него.");if(/password should|weak password/i.test(m))return E("pass","Паролата трябва да е поне 8 знака.");if(/not confirmed/i.test(m))return E("email","Първо потвърди имейла си — изпратихме ти писмо с връзка.");if(/rate limit/i.test(m))return E("email","Твърде много опити. Изчакай малко и опитай пак.");return E("pass","Нещо се обърка. Опитай пак.")};
+if(window.PHYS_SB){const SB=PHYS_SB;const msg=e=>{const m=(e&&e.message)||"";if(/invalid login/i.test(m))return E("pass","Имейлът или паролата не са верни.");if(/already (been )?registered|already exists/i.test(m))return E("email","Вече има профил с този имейл. Влез с него.");if(/password should|weak password/i.test(m))return E("pass","Паролата трябва да е поне 8 знака.");if(/not confirmed/i.test(m))return E("email","Първо потвърди имейла си — изпратихме ти писмо с връзка.");if(/rate limit/i.test(m))return E("email","Твърде много опити. Изчакай малко и опитай пак.");return E("pass","Входът не успя. Провери връзката с интернет и опитай пак.")};
  const after2=()=>{BK.uid=SB.uid;BK.admin=BK.owner=!!SB.admin;sync()};
  Object.assign(AUTH,{users:()=>({}),me:()=>SB.me(),
   async register(d){if(normCode(d.code)){let c;try{c=await SB.check(d.code)}catch(e){throw E("code","Кодът не можа да се провери. Опитай пак или остави полето празно.")}if(c==="used")throw E("code","Този код вече е използван от друг профил.");if(c!=="ok")throw E("code","Този код не е валиден. Провери го или остави полето празно.")}let r;try{r=await SB.signUp(Object.assign({},d,{email:d.email.trim().toLowerCase(),first:d.first.trim(),last:d.last.trim(),inst:d.inst.trim(),other:d.purpose==="other"?(d.other||"").trim():"",code:normCode(d.code)||null}))}catch(e){throw msg(e)}
@@ -369,14 +369,14 @@ VIEWS.auth=function(main){const up=authMode==="up",en=window.PHYS_LANG==="en";
     ${up?fld("inst","Институция","text","organization",'placeholder="университет, училище, организация"')+
      `<label class="fld" for="f_purpose"><span>За какво ще ползваш приложението</span><select id="f_purpose" name="purpose"><option value="">Избери</option>${Object.keys(PURP).map(k=>`<option value="${k}">${PURP[k]}</option>`).join("")}</select><em id="e_purpose" role="alert"></em></label>
      <div id="otherWrap" hidden>${fld("other","Опиши накратко","text","off")}</div>`+
-     fld("code","Код за безплатен достъп","text","off",'autocapitalize="characters" placeholder="ако имаш такъв"')+`<p class="small" style="margin:-4px 0 4px">Без код е отворен първият раздел.</p>`:""}
+     fld("code","Код за достъп","text","off",'autocapitalize="characters" placeholder="ако имаш такъв"')+`<p class="small" style="margin:-4px 0 4px">Без код е отворен първият раздел.</p>`:""}
     <button class="sub" type="submit">${up?"Създай профил":"Влез"}</button>
     ${up?`<p class="small" style="margin-top:10px">Името, имейлът, институцията и целта се изпращат до администратора на приложението. Паролата остава само на това устройство. С регистрацията приемаш <a href="#terms">условията</a> и <a href="#privacy">политиката за поверителност</a>.</p>`:""}</form>
    <p class="small" style="text-align:center;margin-top:14px"><a href="#home">Разгледай без профил</a></p></div>`;
   main.querySelectorAll(".seg:not(.lang) button").forEach(b=>b.onclick=()=>{authMode=b.dataset.m;VIEWS.auth(main)});
   main.querySelectorAll(".seg.lang button").forEach(b=>b.onclick=()=>{if(b.dataset.l!==(en?"en":"bg")&&window.setLang)setLang(b.dataset.l)});
   $("#gbtn").onclick=async()=>{if(window.PHYS_SB){try{await PHYS_SB.google()}catch(e){const m=$("#gmsg");m.textContent=T("Входът с Google не е включен още. Влез с имейл и парола.");m.hidden=false}return}$("#gmsg").hidden=false};
-  if(window.PHYS_SB&&PHYS_SB.oauthErr){const m=$("#gmsg");if(m){m.textContent=T("Входът с Google не успя: ")+PHYS_SB.oauthErr;m.hidden=false}}
+  if(window.PHYS_SB&&PHYS_SB.oauthErr){const m=$("#gmsg");if(m){console.warn("Google OAuth:",PHYS_SB.oauthErr);m.textContent=T("Входът с Google не успя. Опитай пак или влез с имейл и парола.");m.hidden=false}}
   const ps=$("#f_purpose");if(ps)ps.onchange=()=>{$("#otherWrap").hidden=ps.value!=="other"};
   const f=$("#authf"),err=(k,m)=>{const e=$("#e_"+k);if(e){e.textContent=m||"";e.parentNode.classList.toggle("bad",!!m)}};
   f.onsubmit=async ev=>{ev.preventDefault();const d=Object.fromEntries(new FormData(f));["first","last","email","pass","inst","purpose","other","code"].forEach(k=>err(k));let bad=false;const no=(k,m)=>{err(k,m);if(!bad){bad=true;$("#f_"+k).focus()}};
@@ -387,7 +387,7 @@ VIEWS.auth=function(main){const up=authMode==="up",en=window.PHYS_LANG==="en";
    if(bad)return;
    const sb=f.querySelector(".sub");sb.disabled=true;try{up?await AUTH.register(d):await AUTH.login(d.email,d.pass);location.hash="home"}catch(x){sb.disabled=false;if(x&&x.f)no(x.f,x.m);else{console.error(x);no("pass","Нещо се обърка. Опитай пак.")}}}};
 function meHead(){const u=AUTH.me(),adm=BK.admin?`<a class="b" href="#admin">Админ страница</a>`:"";if(!u)return `<h2>Профил</h2><p class="lead">Напредъкът ти се пази на това устройство.</p><div class="card acct"><div><b>Нямаш профил на това устройство</b><span class="small">Регистрирай се с код, за да отключиш всички теми безплатно.</span></div><div class="btns"><a class="b primary" href="#auth" data-m="up">Създай профил</a><a class="b" href="#auth" data-m="in">Вход</a>${adm}</div></div>`;
-  return `<h2>${escH(u.first+" "+u.last)}</h2><p class="lead">${escH(u.email)}</p><div class="card acct"><div><b>${u.codeHash?"Безплатният достъп е активен":"Имаш ли код за безплатен достъп?"}</b><span class="small">${u.codeHash?"Всички теми са отключени с твоя код.":"С него отключваш всички теми. Без код е отворен първият раздел."}</span>${u.codeHash?"":`<form id="codef" class="codef"><input name="code" aria-label="Код за безплатен достъп" autocapitalize="characters" autocomplete="off" placeholder="Код"><button class="b primary">Активирай</button></form><em id="e_code2" role="alert"></em>`}</div><div class="btns">${adm}<button class="b" id="meOut">Изход</button></div></div>`}
+  return `<h2>${escH(u.first+" "+u.last)}</h2><p class="lead">${escH(u.email)}</p><div class="card acct"><div><b>${u.codeHash?"Пълният достъп е активен":"Имаш ли код за достъп?"}</b><span class="small">${u.codeHash?"Всички теми са отключени с твоя код.":"С него отключваш всички теми. Без код е отворен първият раздел."}</span>${u.codeHash?"":`<form id="codef" class="codef"><input name="code" aria-label="Код за достъп" autocapitalize="characters" autocomplete="off" placeholder="Код"><button class="b primary">Активирай</button></form><em id="e_code2" role="alert"></em>`}</div><div class="btns">${adm}<button class="b" id="meOut">Изход</button></div></div>`}
 function meWire(){document.querySelectorAll('.acct a[data-m]').forEach(a=>a.addEventListener("click",()=>{authMode=a.dataset.m}));const o=$("#meOut");if(o)o.onclick=()=>{AUTH.logout();route()};const c=$("#codef");if(c)c.onsubmit=async ev=>{ev.preventDefault();const b=c.querySelector("button");b.disabled=true;try{await AUTH.addCode(new FormData(c).get("code"));route()}catch(x){b.disabled=false;$("#e_code2").textContent=(x&&x.m)||"Нещо се обърка. Опитай пак."}}}
 // ---------- админ: регистрации, статистика и генератор на кодове ----------
 const ALPHA="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -499,13 +499,13 @@ function premiumHTML(){const st=buyStats();
     [L("Абонамент ли е?","Is it a subscription?"),L(`Не. Плащаш веднъж ${PRICE()} и достъпът остава за профила ти, докато приложението се поддържа. Няма автоматични плащания.`,`No. You pay ${PRICE()} once and access stays with your account for as long as the app is maintained. No recurring charges.`)],
     [L("Какво включва цената?","What does the price include?"),L("Цената е 20 € + ДДС. За България това са 24 €. За друга държава Stripe показва точната сума с местния ДДС преди плащане и ти изпраща фактура по имейл.","The price is €20 + VAT, which is €24 in Bulgaria. For other countries Stripe shows the exact total with local VAT before you pay and emails you an invoice.")],
     [L("На какви устройства работи?","Which devices does it work on?"),L("В браузъра на телефон, таблет и компютър. Влизаш със същия профил и напредъкът ти е навсякъде.","In the browser on phone, tablet and computer. Sign in with the same account and your progress follows you.")],
-    [L("Имам код от преподавател или приятел","I have a code from a teacher or friend"),L("Въведи го в полето за код горе в профила. Кодът отключва всичко без плащане.","Enter it in the code field at the top of your profile. The code unlocks everything without payment.")],
-    [L("Ами ако нещо не работи?","What if something doesn't work?"),L("Пиши ни на имейла от Условията. Ако има технически проблем, който не можем да оправим, връщаме парите.","Email us at the address in the Terms. If there is a technical problem we cannot fix, we refund you.")]];
+    [L("Имам код за достъп. Как да го използвам?","I have an access code. How do I use it?"),L("Отвори „Профил“ и въведи кода в полето „Код за достъп“. Всички теми се отключват веднага, без плащане.","Open Profile and enter the code in the “Access code” field. Every topic unlocks right away, with no payment.")],
+    [L("Ами ако нещо не работи?","What if something doesn't work?"),L(`Пиши ни на ${(window.PHYS_CFG||{}).email||"имейла от Условията"}. Ако има технически проблем, който не можем да оправим, връщаме парите.`,`Email us at ${(window.PHYS_CFG||{}).email||"the address in the Terms"}. If there is a technical problem we cannot fix, we refund you.`)]];
   return `<section class="fa" id="premium">
     <div class="fa-hero"><div class="fa-copy">
       <p class="pw-k">${L("Пълен достъп","Full access")}</p>
       <h2 class="fa-h">${L("Целият конспект по физиология. С едно плащане.","The entire physiology syllabus. One payment.")}</h2>
-      <p class="fa-sub">${L("Теория по учебника, симулации, 3D модели и тестове с обяснения за всички раздели. За изпита, за колоквиума и за преговор.","Textbook theory, simulations, 3D models and quizzes with explanations for every section. For the exam, the colloquium and revision.")}</p>
+      <p class="fa-sub">${L("Теория по учебника, симулации, 3D модели и тестове с обяснения за всички раздели. За изпита, за колоквиума и за преговор.","Textbook theory, simulations, 3D models and tests with explanations for every section. For the exam, the colloquium and revision.")}</p>
       <dl class="fa-num"><div><dt>${st.topics}</dt><dd>${L("теми","topics")}</dd></div><div><dt>${st.secs}</dt><dd>${L("раздела","sections")}</dd></div><div><dt>${st.q}</dt><dd>${L("въпроса с обяснения","questions explained")}</dd></div>${st.gl?`<div><dt>${st.gl}</dt><dd>${L("термина в речника","glossary terms")}</dd></div>`:""}</dl>
     </div>${buyCard()}</div>
     <div class="fa-gal">${[["heart3d",L("3D сърце","3D heart")],["lungmech",L("Механика на дишането","Breathing mechanics")],["xb",L("Цикъл на напречните мостове","Cross-bridge cycle")],["gfr",L("Гломерулна филтрация","Glomerular filtration")]].map(([id,t])=>READY.some(r=>r.id===id)?`<a href="#${id}"><img src="img/${BEN?"en":"bg"}_${id}.webp" alt="${t}" loading="lazy" onerror="this.closest('a').remove()"><span>${t}</span></a>`:"").join("")}</div>
@@ -600,7 +600,7 @@ VIEWS.me=function(main){const s=expStats(),opened=READY.filter(r=>status(r.id)!=
      <div class="btns" style="margin-top:12px"><button class="b" id="meReset">Изчисти напредъка</button><a class="b" href="#about">За приложението и лицензи</a></div></div>
    ${PREMIUM.lock&&!PREMIUM.unlocked?"":premiumHTML()}`;meWire();
   wireBuy(main);
-  $("#meReset").onclick=e=>{const b=e.currentTarget;if(!b.dataset.sure){b.dataset.sure=1;b.textContent="Натисни пак, за да изчистиш всичко";setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent="Изчисти напредъка"}},4000);return}Object.keys(localStorage).forEach(k=>{if(/exp_|seen_|days|tab_|lastTopic/.test(k))localStorage.removeItem(k)});route()}};
+  $("#meReset").onclick=e=>{const b=e.currentTarget;if(!b.dataset.sure){b.dataset.sure=1;b.textContent="Натисни пак: отговорите в този браузър ще се изтрият";setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent="Изчисти напредъка"}},4000);return}Object.keys(localStorage).forEach(k=>{if(/exp_|seen_|days|tab_|lastTopic/.test(k))localStorage.removeItem(k)});route()}};
 // ---------- след всяка смяна на страница ----------
 function after(){const v=typeof curView!=="undefined"?curView:"home",it=READY.find(i=>i.id===v),mn=$("#main");touchDay();document.body.classList.toggle("lp",v==="home");
   document.querySelectorAll("#tabbar [data-v],.quick a").forEach(a=>a.classList.toggle("on",a.dataset.v===v||(a.dataset.v==="me"&&v==="auth")||(a.dataset.v==="nav"&&!!it)));
