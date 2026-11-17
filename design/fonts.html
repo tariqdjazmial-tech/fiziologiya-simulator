@@ -1,0 +1,97 @@
+<title>PhysioNova шрифтове</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Wix+Madefor+Display:wght@600;700&family=Wix+Madefor+Text:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Cormorant+Garamond:wght@500;600&family=Commissioner:wght@400;500;600&family=Unbounded:wght@500;600&family=Ysabeau:wght@600;700&family=Ysabeau+Office:wght@400;500&family=Spectral:wght@400;500&family=Geologica:wght@500;600&family=Piazzolla:opsz,wght@8..30,400;8..30,500&display=swap">
+<style>
+/* Layout: a type specimen sheet. One card per pairing; each card shows the same lesson set in its three roles. */
+:root{
+  --bg:#f6f7f9; --card:#ffffff; --ink:#0f1a3a; --muted:#5b6478; --line:#e3e7ee; --red:#c8243b; --chip:#eef1f6; --tint:#fdf1f3;
+  --f-ui:"IBM Plex Sans",system-ui,-apple-system,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0d111a;--card:#151b27;--ink:#e7ebf4;--muted:#9aa3b5;--line:#263043;--red:#ff6b7d;--chip:#1e2636;--tint:#2a1a20;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0d111a;--card:#151b27;--ink:#e7ebf4;--muted:#9aa3b5;--line:#263043;--red:#ff6b7d;--chip:#1e2636;--tint:#2a1a20;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-ui);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:40px 64px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:28px}
+header{display:grid;gap:12px;max-width:72ch}
+.eyebrow{font:600 12px/1 var(--f-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+h1{font:700 clamp(30px,4.4vw,44px)/1.08 "Manrope",var(--f-ui);letter-spacing:-.025em;margin:0;text-wrap:balance}
+header p{margin:0;color:var(--muted)}
+.note{display:grid;gap:6px;padding:14px 16px;border-radius:10px;background:var(--chip);font-size:14px;color:var(--muted)}
+.note b{color:var(--ink)}
+.ctrl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:14px}
+.tog{display:inline-grid;grid-template-columns:1fr 1fr;padding:3px;border-radius:9px;background:var(--chip)}
+.tog button{font:500 13px/1 var(--f-ui);border:0;background:none;color:var(--muted);padding:9px 14px;border-radius:7px;cursor:pointer;min-height:36px}
+.tog button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px #0000001f}
+.tog button:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,540px),1fr));gap:20px}
+.pair{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;display:grid;gap:14px;min-width:0}
+.top{display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap}
+.top h2{margin:0;font:600 13px/1.2 var(--f-ui);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tags span{font:500 11.5px/1 var(--f-ui);padding:5px 8px;border-radius:6px;background:var(--chip);color:var(--muted)}
+.tags .hi{background:var(--tint);color:var(--red)}
+.disp{margin:0;color:var(--ink);text-wrap:balance}
+.txt{margin:0;color:var(--ink);opacity:.9;max-width:62ch}
+.data{display:flex;flex-wrap:wrap;gap:8px 18px;padding:10px 12px;border-radius:8px;background:var(--chip);font:500 13.5px/1.3 var(--f-mono);font-variant-numeric:tabular-nums;color:var(--ink)}
+.data b{color:var(--red);font-weight:500}
+.ui{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{font-size:15px;padding:11px 18px;border-radius:10px;background:var(--ink);color:var(--card)}
+.row{font-size:15px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;display:flex;gap:12px;align-items:center;flex:1;min-width:200px}
+.row i{font-style:normal;width:26px;height:26px;border-radius:6px;background:var(--red);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:600}
+.row s{text-decoration:none;margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums}
+.bg{font-size:22px;letter-spacing:.01em;color:var(--ink);border-top:1px solid var(--line);padding-top:12px}
+.bg small{display:block;font:500 11.5px/1.4 var(--f-ui);color:var(--muted);letter-spacing:0;margin-top:2px}
+.meta{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;display:grid;gap:4px}
+.meta b{color:var(--ink);font-weight:600}
+.foot{color:var(--muted);font-size:13px;max-width:78ch}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">PhysioNova · типография</span>
+    <h1>Двойки шрифтове с български форми</h1>
+    <p>Методът на Fontjoy: заглавен шрифт с ясен характер, неутрален шрифт за дълъг текст, който му отговаря по пропорции, и отделен шрифт за числа и мерни единици. Всички са от Google Fonts, безплатни и с проверени кирилица и български форми на буквите.</p>
+    <div class="note">
+      <span><b>Какво са българските форми.</b> В българската писменост д, л, ж, ю, к, в и други се пишат по-различно от руските. Шрифтът ги показва сам, когато страницата е с език <b>bg</b>.</span>
+      <span><b>Без тях са</b> Inter, Playfair Display, Onest, Geist, Golos Text, Noto Sans и повечето моноширинни. Figtree, Archivo, Hanken Grotesk, Space Grotesk, Sora и Fraunces нямат кирилица изобщо.</span>
+    </div>
+    <div class="ctrl"><span>Покажи буквите като:</span>
+      <span class="tog" role="group" aria-label="Форми на буквите"><button id="lang-bg" aria-pressed="true">български</button><button id="lang-ru" aria-pressed="false">руски</button></span>
+    </div>
+  </header>
+
+  <div class="grid" id="grid" lang="bg"></div>
+
+  <p class="foot">В приложението за iPhone Apple препоръчва за обикновения текст системния шрифт SF Pro, защото той следи Dynamic Type и настройките за достъпност. Затова предлагам избраният заглавен шрифт да е знакът на PhysioNova, а текстът да е или системният, или шрифтът за текст от двойката. Числата са в IBM Plex Mono във всички двойки. В него български форми не са нужни, защото там са само цифри и единици.</p>
+</div>
+
+<script>
+(function(){
+const P=[
+ {n:"Прецизност",d:"'Manrope'",dw:700,dt:"-.03em",t:"'IBM Plex Sans'",tags:["технологичен","ясен"],why:"Геометричен заглавен шрифт срещу строг гротеск. Изглежда като инструмент, чете се леко.",fit:"Посоки „Прецизност“, „Кардиолаб“, „Институт“"},
+ {n:"Като на Apple",d:"'Wix Madefor Display'",dw:700,dt:"-.025em",t:"'Wix Madefor Text'",tags:["технологичен","най-близо до SF Pro"],why:"Едно семейство с версия за заглавия и версия за текст, както SF Pro Display и SF Pro Text. Най-естествено в iOS.",fit:"Всяка посока, ако искаш приложението да изглежда родно за iPhone"},
+ {n:"Научно списание",d:"'Source Serif 4'",dw:600,dt:"-.01em",t:"'IBM Plex Sans'",tags:["научен","луксозен"],why:"Серифен шрифт с оптически размери за заглавията, като в Nature или Lancet. Текстът остава модерен.",fit:"„Институт“, „Бордо“, смесения вариант с тъмносиньо"},
+ {n:"Атлас",d:"'Cormorant Garamond'",dw:600,dt:"0",t:"'Commissioner'",tags:["луксозен","класически"],why:"Изящен гаралд като в анатомичен атлас, срещу спокоен хуманистичен шрифт. Най-луксозната двойка.",fit:"„Бордо“, „Нощен трезор“, „Порцелан и ултрамарин“"},
+ {n:"Лаборатория",d:"'Unbounded'",dw:600,dt:"-.01em",t:"'Wix Madefor Text'",tags:["технологичен","смел"],why:"Широк, модерен заглавен шрифт с характер, срещу тих текст. Запомня се, но иска малко текст в заглавията.",fit:"„Монитор“, „Синият час“, „Корал в нощта“"},
+ {n:"Учебник",d:"'Ysabeau'",dw:700,dt:"0",t:"'Ysabeau Office'",tags:["образователен","топъл"],why:"Едно семейство: по-изразителен вариант за заглавия и спокоен за текст. Дружелюбно, но не детско.",fit:"„Клиника“, „Рецепта“"},
+ {n:"Екранна класика",d:"'Spectral'",dw:500,dt:"-.01em",t:"'Commissioner'",tags:["луксозен","образователен"],why:"Серифен шрифт, създаден специално за екрани, с тънки и елегантни заглавия. Текстът е топъл и четим.",fit:"„Рецепта“, „Бордо“"},
+ {n:"Швейцарска клиника",d:"'Geologica'",dw:600,dt:"-.02em",t:"'Piazzolla'",tags:["медицински","необичаен"],why:"Обратната двойка: строг гротеск за заглавия и серифен шрифт за малки екрани за текста. Звучи като медицински доклад.",fit:"„Клиника“, „Хирургично червено“"}
+];
+const g=document.getElementById("grid");
+g.innerHTML=P.map((p,i)=>`<article class="pair">
+ <div class="top"><h2>${p.n}</h2><div class="tags">${p.tags.map((t,j)=>`<span class="${j?'':'hi'}">${t}</span>`).join("")}</div></div>
+ <h3 class="disp" style="font-family:${p.d},Georgia,serif;font-weight:${p.dw};letter-spacing:${p.dt};font-size:clamp(26px,3vw,32px);line-height:1.12">Акционен потенциал на кардиомиоцита</h3>
+ <p class="txt" style="font-family:${p.t},system-ui,sans-serif;font-size:16.5px;line-height:1.55">Платото (фаза 2) се дължи на бавния вход на калций през L-тип канали. То удължава рефрактерния период и пречи на тетанус, затова сърцето винаги се отпуска между две съкращения.</p>
+ <div class="data"><span>Eₘ <b>−90 mV</b></span><span>K⁺ <b>4,0 mmol/L</b></span><span>ЧСС <b>72 уд./мин</b></span><span>QT <b>0,40 s</b></span></div>
+ <div class="ui" style="font-family:${p.t},system-ui,sans-serif"><span class="btn" style="font-weight:600">Продължи урока</span><span class="row"><i>IV</i>Сърдечно-съдова система<s>62%</s></span></div>
+ <div class="bg" style="font-family:${p.d},Georgia,serif;font-weight:${p.dw}">Дишане, лимфа, жлъчка, юноша, вкус, щитовидна<small>Тук личат българските форми: д, л, ж, ю, к, в, щ</small></div>
+ <div class="meta"><span><b>Заглавия:</b> ${p.d.replace(/'/g,"")} · <b>Текст:</b> ${p.t.replace(/'/g,"")} · <b>Числа:</b> IBM Plex Mono</span><span>${p.why}</span><span><b>Пасва на:</b> ${p.fit}</span></div>
+</article>`).join("");
+const set=l=>{g.setAttribute("lang",l);document.getElementById("lang-bg").setAttribute("aria-pressed",l==="bg");document.getElementById("lang-ru").setAttribute("aria-pressed",l==="ru")};
+document.getElementById("lang-bg").onclick=()=>set("bg");document.getElementById("lang-ru").onclick=()=>set("ru");
+})();
+</script>
