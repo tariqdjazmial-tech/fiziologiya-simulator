@@ -1,0 +1,492 @@
+<title>PhysioNova дизайн посоки</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Manrope:wght@400;500;600;700&family=Figtree:wght@400;500;600&family=Playfair+Display:wght@400;500&family=Space+Grotesk:wght@500;600&family=Geist:wght@400;500;600&family=Hanken+Grotesk:wght@400;500;600&family=Archivo:wdth,wght@112,400;112,500;112,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&family=Onest:wght@300;400;500;600&display=swap">
+<style>
+/* Layout: a review sheet. Each direction is a band: notes on the left, two live phone screens on the right. */
+:root{
+  --bg:#f4f5f7; --panel:#ffffff; --fg:#14161a; --muted:#5d6370; --line:#dfe2e8; --chip:#eceef2; --focus:#2b59ff;
+  --f-ui:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-head:"Space Grotesk","Inter",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1114; --panel:#171a1f; --fg:#eceef2; --muted:#9aa1ad; --line:#2a2f37; --chip:#22262d; --focus:#8aa4ff; color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1114; --panel:#171a1f; --fg:#eceef2; --muted:#9aa1ad; --line:#2a2f37; --chip:#22262d; --focus:#8aa4ff; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--f-ui);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:40px 64px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:28px}
+header.top{display:grid;gap:10px;max-width:70ch}
+header.top .eyebrow{font:600 12px/1 var(--f-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+header.top h1{font:600 clamp(30px,4.4vw,46px)/1.05 var(--f-head);letter-spacing:-.02em;margin:0;text-wrap:balance}
+header.top p{margin:0;color:var(--muted);font-size:16px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--muted);font-size:13px}
+.legend b{color:var(--fg);font-weight:600}
+
+.dir{background:var(--panel);border:1px solid var(--line);border-radius:14px;display:grid;grid-template-columns:minmax(0,360px) minmax(0,1fr);gap:28px;padding:28px}
+@media (max-width:900px){.dir{grid-template-columns:minmax(0,1fr);padding:20px}}
+.notes{display:grid;gap:16px;align-content:start;min-width:0}
+.notes .tag{font:600 12px/1 var(--f-ui);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.notes h2{font:600 28px/1.1 var(--f-head);letter-spacing:-.015em;margin:0}
+.notes p{margin:0;color:var(--muted)}
+.notes .src{font-size:13px;color:var(--muted)}
+.notes .src a{color:var(--fg)}
+.scores{display:grid;gap:6px;font-size:13px}
+.score{display:grid;grid-template-columns:110px auto;align-items:center;gap:10px}
+.dots{display:flex;gap:4px}
+.dots i{width:18px;height:6px;border-radius:3px;background:var(--chip)}
+.dots i.on{background:var(--fg)}
+.sw{display:flex;flex-wrap:wrap;gap:6px}
+.sw span{display:grid;gap:4px;font:500 11px/1.2 var(--f-ui);color:var(--muted);width:64px}
+.sw span::before{content:"";height:34px;border-radius:7px;background:var(--c);border:1px solid var(--line)}
+.fonts{font-size:13px;color:var(--muted)}
+.fonts b{color:var(--fg);font-weight:600}
+.pick{font-size:13px;border-top:1px solid var(--line);padding-top:12px;color:var(--muted)}
+.pick b{color:var(--fg)}
+
+.screens{display:flex;gap:20px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x mandatory;min-width:0}
+.screens figure{margin:0;display:grid;gap:8px;scroll-snap-align:start;flex:0 0 auto}
+.screens figcaption{font-size:12px;color:var(--muted);text-align:center}
+
+/* ---------- iPhone screen built to Apple HIG: 390×844 pt canvas scaled into the frame; Dynamic Type sizes; 44 pt targets ---------- */
+.phone{width:290px;height:609px;border-radius:46px;padding:8px;background:#0b0c0e;box-shadow:0 1px 0 #ffffff14 inset,0 18px 40px -18px #00000066;flex:0 0 auto}
+.vp{width:274px;height:593px;border-radius:39px;overflow:hidden;position:relative}
+.scr{--sys:-apple-system,"SF Pro Text","SF Pro",BlinkMacSystemFont,"Inter",system-ui,sans-serif;
+  position:absolute;left:0;top:0;width:390px;height:844px;transform:scale(.7026);transform-origin:0 0;overflow:hidden;
+  background:var(--p-bg);color:var(--p-ink);font:400 17px/22px var(--sys);letter-spacing:-.41px;-webkit-font-smoothing:antialiased}
+.island{position:absolute;top:11px;left:50%;width:126px;height:37px;margin-left:-63px;border-radius:20px;background:#000;z-index:5}
+.sb{height:54px;display:flex;justify-content:space-between;align-items:center;padding:4px 30px 0 52px;font:600 17px/1 var(--sys);color:var(--p-ink)}
+.sb svg{display:block;fill:currentColor}
+.sb .ic{display:flex;gap:6px;align-items:center}
+.navrow{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+.logo{display:flex;align-items:center;gap:8px;font:600 17px/1 var(--p-display);letter-spacing:-.2px}
+.logo svg{width:30px;height:21px}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font:600 15px/1 var(--sys);background:var(--p-surface2,var(--p-surface));color:var(--p-accent2,var(--p-accent));border:.5px solid var(--p-line)}
+.ltw{padding:2px 16px 8px}
+.date{font:600 13px/18px var(--sys);letter-spacing:-.08px;text-transform:uppercase;color:var(--p-muted)}
+.hi{font:var(--p-ltw,700) 34px/41px var(--p-display);letter-spacing:var(--p-track,.37px);margin:0;color:var(--p-ink)}
+.body{position:absolute;top:98px;left:0;right:0;bottom:0;overflow:hidden;display:flex;flex-direction:column;gap:22px;padding:0 0 100px}
+.pad{padding:0 16px;display:flex;flex-direction:column;gap:22px}
+.cont{border-radius:22px;padding:16px;display:grid;gap:10px;background:var(--p-hero);color:var(--p-hero-ink,var(--p-ink));box-shadow:var(--p-shadow,none);border:var(--p-hero-border,0)}
+.cont .k{font:600 13px/18px var(--sys);letter-spacing:-.08px;text-transform:uppercase;opacity:.72}
+.cont .t{font:var(--p-dw) 28px/34px var(--p-display);letter-spacing:var(--p-track)}
+.cont .s{font:400 15px/20px var(--sys);letter-spacing:-.24px;opacity:.78}
+.bar{height:6px;border-radius:3px;background:var(--p-track-bg)}
+.bar i{display:block;height:100%;border-radius:3px;background:var(--p-bar)}
+.cta{display:flex;justify-content:center;align-items:center;height:50px;border-radius:var(--p-btn-r);background:var(--p-cta);color:var(--p-cta-ink);font:600 17px/22px var(--sys);letter-spacing:-.41px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stats div{border-radius:16px;padding:12px;background:var(--p-surface);border:.5px solid var(--p-line);display:grid;gap:2px}
+.stats b{font:var(--p-ltw,700) 28px/34px var(--p-display);letter-spacing:var(--p-track);font-variant-numeric:tabular-nums;color:var(--p-ink)}
+.stats span{font:400 13px/16px var(--sys);letter-spacing:-.08px;color:var(--p-muted)}
+.hdr{display:flex;justify-content:space-between;align-items:baseline}
+.h3{font:700 22px/28px var(--sys);letter-spacing:.35px;color:var(--p-ink)}
+.hdr a{font:400 17px/22px var(--sys);color:var(--p-accent2,var(--p-accent));text-decoration:none}
+.secs{border-radius:12px;background:var(--p-surface);overflow:hidden;border:var(--p-list-border,0)}
+.sec{display:grid;grid-template-columns:30px 1fr auto auto;align-items:center;gap:0 14px;min-height:52px;padding:0 16px;position:relative}
+.sec+.sec::before{content:"";position:absolute;top:0;left:60px;right:0;border-top:.5px solid var(--p-line)}
+.sec .n{width:30px;height:30px;border-radius:7px;display:grid;place-items:center;background:var(--p-icon-bg,var(--p-accent));color:var(--p-icon-ink,#fff);font:700 12px/1 var(--sys);letter-spacing:0}
+.sec .nm{font:400 17px/22px var(--sys);color:var(--p-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sec .pc{font:400 17px/22px var(--sys);color:var(--p-muted);font-variant-numeric:tabular-nums}
+.chev{width:9px;height:15px;stroke:var(--p-chev,var(--p-muted));stroke-width:2.2;fill:none;opacity:.6}
+.lock{width:18px;height:18px;stroke:var(--p-muted);fill:none;stroke-width:1.8}
+.tabs{position:absolute;left:0;right:0;bottom:0;height:83px;display:grid;grid-template-columns:repeat(5,1fr);padding-top:7px;
+  background:color-mix(in srgb,var(--p-tabbg,var(--p-bg)) 88%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:.5px solid var(--p-line);font:500 10px/12px var(--sys);letter-spacing:.1px;color:var(--p-tabidle,var(--p-muted))}
+.tabs span{display:flex;flex-direction:column;align-items:center;gap:3px}
+.tabs svg{width:28px;height:26px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+.tabs .on{color:var(--p-tabon,var(--p-accent))}
+.tabs .on svg{fill:currentColor;fill-opacity:.18}
+.homebar{position:absolute;bottom:8px;left:50%;width:134px;height:5px;margin-left:-67px;border-radius:3px;background:var(--p-ink);z-index:6}
+/* урок */
+.back{display:flex;align-items:center;gap:4px;font:400 17px/22px var(--sys);color:var(--p-accent2,var(--p-accent))}
+.back svg{width:12px;height:20px;stroke:currentColor;stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.navico{width:24px;height:24px;stroke:var(--p-accent2,var(--p-accent));fill:none;stroke-width:2}
+.lt{font:var(--p-ltw,700) 28px/34px var(--p-display);letter-spacing:var(--p-track,.36px);margin:0;color:var(--p-ink)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);height:32px;padding:2px;border-radius:9px;background:var(--p-segbg,rgba(118,118,128,.12));font:500 13px/18px var(--sys);letter-spacing:-.08px;color:var(--p-ink)}
+.seg span{display:grid;place-items:center;border-radius:7px}
+.seg .on{background:var(--p-seg-on);color:var(--p-seg-ink);font-weight:600;box-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04)}
+.chart{border-radius:12px;background:var(--p-chart-bg,var(--p-surface));border:var(--p-list-border,0);padding:14px 14px 10px;display:grid;gap:6px}
+.chart svg{width:100%;height:auto;display:block}
+.chart .cap{display:flex;justify-content:space-between;font:400 13px/18px var(--sys);color:var(--p-muted)}
+.grp{border-radius:12px;background:var(--p-surface);border:var(--p-list-border,0);padding:11px 16px 14px;display:grid;gap:12px}
+.grp .row{display:flex;justify-content:space-between;font:400 17px/22px var(--sys)}
+.grp .row b{font-weight:400;color:var(--p-muted);font-variant-numeric:tabular-nums}
+.rng{position:relative;height:4px;border-radius:2px;background:var(--p-track-bg);margin:0 2px}
+.rng i{position:absolute;inset:0 55% 0 0;border-radius:2px;background:var(--p-bar)}
+.rng u{position:absolute;left:45%;top:50%;width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:50%;background:var(--p-knob,#fff);box-shadow:0 .5px 4px rgba(0,0,0,.12),0 6px 13px rgba(0,0,0,.12)}
+.key{display:grid;grid-template-columns:24px 1fr;gap:10px;font:400 15px/20px var(--sys);letter-spacing:-.24px;padding:14px 16px;border-radius:12px;background:var(--p-key-bg);color:var(--p-key-ink,var(--p-ink))}
+.key svg{width:24px;height:24px;stroke:var(--p-accent);fill:none;stroke-width:1.8}
+.foot2{font:400 13px/18px var(--sys);color:var(--p-muted);padding:0 16px;margin-top:-14px}
+
+/* ---------- 1. Клиника (Letters) ---------- */
+.d-clinic{--p-bg:#ffffff;--p-surface:#f5f5f5;--p-surface2:#f5f5f5;--p-ink:#070709;--p-muted:#60606c;--p-line:#e9ecf1;
+  --p-accent:#2597d0;--p-cta:#070709;--p-cta-ink:#ffffff;--p-r:18px;--p-btn-r:999px;--p-display:"Manrope",system-ui,sans-serif;--p-body:"Inter",system-ui,sans-serif;
+  --p-dw:600;--p-track:-.035em;--p-hero:linear-gradient(180deg,#8cc3ea 0%,#d7e6f5 58%,#ffffff 100%);--p-hero-ink:#070709;--p-shadow:0 10px 26px -12px #9fc4e6;
+  --p-track-bg:#ffffff99;--p-bar:#2597d0;--p-seg-on:#ffffff;--p-seg-ink:#070709;--p-key-bg:#eef5fb;--p-chart-bg:#ffffff;--p-tabon:#070709}
+/* ---------- 2. Рецепта (Lóvi) ---------- */
+.d-rx{--p-bg:#f6f6fa;--p-surface:#ffffff;--p-surface2:#ffffff;--p-ink:#151581;--p-muted:#8e8ec4;--p-line:#e4e4ee;
+  --p-accent:#9f73e6;--p-accent2:#151581;--p-cta:#151581;--p-cta-ink:#ffffff;--p-r:22px;--p-btn-r:999px;--p-display:"Figtree",system-ui,sans-serif;--p-body:"Figtree",system-ui,sans-serif;
+  --p-dw:500;--p-track:-.03em;--p-hero:#ffffff;--p-hero-border:1px solid #e4e4ee;--p-shadow:0 14px 30px -18px #151581;
+  --p-track-bg:#ececf6;--p-bar:linear-gradient(90deg,#6b4bff,#9f73e6,#de62de);--p-seg-on:#151581;--p-seg-ink:#ffffff;--p-key-bg:#f1edfc;--p-tabon:#151581}
+/* ---------- 3. Прецизност (Stripe) ---------- */
+.d-prec{--p-bg:#ffffff;--p-surface:#f8fafd;--p-surface2:#f8fafd;--p-ink:#061b31;--p-muted:#64748d;--p-line:#e5edf5;
+  --p-accent:#533afd;--p-cta:#533afd;--p-cta-ink:#ffffff;--p-r:10px;--p-btn-r:6px;--p-display:"Inter",system-ui,sans-serif;--p-body:"Inter",system-ui,sans-serif;
+  --p-dw:300;--p-track:-.03em;--p-track-s:-.01em;--p-hero:radial-gradient(120% 90% at 100% 0%,#e8e9ff 0%,#ffffff00 55%),radial-gradient(90% 80% at 0% 100%,#dff3ff 0%,#ffffff00 60%),#ffffff;
+  --p-hero-border:1px solid #e5edf5;--p-shadow:0 12px 28px -16px #182659;--p-track-bg:#e5edf5;--p-bar:#533afd;--p-seg-on:#ffffff;--p-seg-ink:#061b31;--p-key-bg:#f4f4ff;--p-num-w:400;--p-tabon:#533afd}
+/* ---------- 4. Нощен трезор (Slash) ---------- */
+.d-vault{--p-bg:#08080a;--p-surface:#121317;--p-surface2:#121317;--p-ink:#ffffff;--p-muted:#9194a1;--p-line:#1f2026;
+  --p-accent:#cc9166;--p-cta:#ffffff;--p-cta-ink:#08080a;--p-r:14px;--p-btn-r:999px;--p-display:"Playfair Display",Georgia,serif;--p-body:"Inter",system-ui,sans-serif;
+  --p-dw:400;--p-track:.005em;--p-hero:linear-gradient(160deg,#1c1d22 0%,#121317 55%,#0d0d10 100%);--p-hero-ink:#e2e3e9;--p-hero-border:1px solid #2e3038;
+  --p-track-bg:#2e3038;--p-bar:linear-gradient(90deg,#8a5f40,#cc9166,#f1d9b5);--p-seg-on:#e2e3e9;--p-seg-ink:#08080a;--p-key-bg:#121317;--p-key-ink:#c7c9d1;
+  --p-knob:#e2e3e9;--p-tabbg:#08080a;--p-chart-bg:#0d0d10;--p-num-f:"Playfair Display",Georgia,serif;--p-num-w:400;--p-tabon:#ffffff}
+
+/* ---------- 5. Монитор (Sauce Labs) ---------- */
+.d-mon{--p-bg:#132322;--p-surface:#0e1a19;--p-surface2:#0e1a19;--p-ink:#ffffff;--p-muted:#8fa09c;--p-line:#21332f;
+  --p-accent:#3ddc91;--p-cta:#3ddc91;--p-cta-ink:#071210;--p-r:14px;--p-btn-r:8px;--p-display:"Geist",system-ui,sans-serif;--p-body:"Geist",system-ui,sans-serif;
+  --p-dw:400;--p-track:-.025em;--p-hero:#edf7f5;--p-hero-ink:#0e1a19;--p-track-bg:#cfe6df;--p-bar:#167e5a;--p-seg-on:#3ddc91;--p-seg-ink:#071210;
+  --p-key-bg:#0e1a19;--p-key-ink:#d0d3d3;--p-knob:#edf7f5;--p-tabbg:#0e1a19;--p-chart-bg:#070f0f;--p-tabon:#3ddc91}
+.d-mon .cont .cta{background:#132322;color:#3ddc91}
+/* ---------- 6. Порцелан и ултрамарин (Bang & Olufsen) ---------- */
+.d-bo{--p-bg:#ffffff;--p-surface:#fcfaee;--p-surface2:#f4f2e6;--p-ink:#191817;--p-muted:#6b6966;--p-line:#e5e5e5;
+  --p-accent:#060daa;--p-cta:#191817;--p-cta-ink:#fcfaee;--p-r:4px;--p-btn-r:40px;--p-display:"Hanken Grotesk",system-ui,sans-serif;--p-body:"Hanken Grotesk",system-ui,sans-serif;
+  --p-dw:500;--p-track:-.04em;--p-hero:radial-gradient(90% 70% at 80% 10%,#2a33d6 0%,#060daa 45%,#03066a 100%);--p-hero-ink:#fcfaee;
+  --p-track-bg:#ffffff33;--p-bar:#fcfaee;--p-seg-on:#191817;--p-seg-ink:#fcfaee;--p-key-bg:#fcfaee;--p-tabon:#060daa}
+.d-bo .cont .cta{background:#fcfaee;color:#060daa}
+.d-bo .secs,.d-bo .stats div{background:#ffffff}
+/* ---------- 7. Синият час (Mercury) ---------- */
+.d-blue{--p-bg:#171721;--p-surface:#1e1e2a;--p-surface2:#272735;--p-ink:#ededf3;--p-muted:#9d9daa;--p-line:#2a2a38;
+  --p-accent:#5266eb;--p-accent2:#aab4ff;--p-cta:#5266eb;--p-cta-ink:#ffffff;--p-r:16px;--p-btn-r:10px;--p-display:"Archivo",system-ui,sans-serif;--p-body:"Inter",system-ui,sans-serif;
+  --p-dw:500;--p-track:.005em;--p-hero:linear-gradient(170deg,#2b2f63 0%,#1e1e2a 60%);--p-hero-ink:#ededf3;--p-hero-border:1px solid #33335a;
+  --p-track-bg:#33334a;--p-bar:#8b98ff;--p-seg-on:#ededf3;--p-seg-ink:#171721;--p-key-bg:#1e1e2a;--p-key-ink:#c3c3cc;--p-knob:#ededf3;--p-chart-bg:#14141c;--p-tabon:#ededf3}
+.d-blue .hi,.d-blue .lt,.d-blue .cont .t,.d-blue .stats b,.d-blue .logo{font-stretch:112%}
+
+/* ---------- 8. Институт (Column) ---------- */
+.d-inst{--p-bg:#ffffff;--p-surface:#f6f8f9;--p-surface2:#eef2f4;--p-ink:#111a4a;--p-muted:#5b6478;--p-line:#e3e8ee;
+  --p-accent:#167e6c;--p-accent2:#111a4a;--p-cta:#111a4a;--p-cta-ink:#ffffff;--p-r:12px;--p-btn-r:8px;--p-display:"IBM Plex Sans",system-ui,sans-serif;--p-body:"IBM Plex Sans",system-ui,sans-serif;
+  --p-dw:500;--p-track:-.02em;--p-hero:linear-gradient(135deg,#dff7fb 0%,#e9fbf2 100%);--p-hero-border:1px solid #cdeee5;
+  --p-track-bg:#ffffffaa;--p-bar:#44b48b;--p-seg-on:#111a4a;--p-seg-ink:#ffffff;--p-key-bg:#eefaf5;--p-num-f:"IBM Plex Mono",monospace;--p-num-w:500;--p-tabon:#111a4a}
+.d-inst .stats b,.d-inst .sec .pc,.d-inst .sl .row b{font-family:"IBM Plex Mono",monospace;color:#167e6c}
+
+/* ---------- 9. Хирургично червено (Orderful) ---------- */
+.d-surg{--p-bg:#f5f5f5;--p-surface:#ffffff;--p-surface2:#ffffff;--p-ink:#101828;--p-muted:#4a5565;--p-line:#e5e7eb;
+  --p-accent:#e8352a;--p-cta:linear-gradient(90deg,#ff5a1f,#e8352a);--p-cta-ink:#ffffff;--p-r:8px;--p-btn-r:8px;--p-display:"Onest",system-ui,sans-serif;--p-body:"Onest",system-ui,sans-serif;
+  --p-dw:300;--p-track:-.03em;--p-hero:#1f1f1f;--p-hero-ink:#ffffff;--p-track-bg:#3a3a3a;--p-bar:linear-gradient(90deg,#ff5a1f,#e8352a);
+  --p-seg-on:#101828;--p-seg-ink:#ffffff;--p-key-bg:#fff3f0;--p-chart-bg:#ffffff;--p-num-w:500;--p-tabon:#e8352a}
+/* ---------- 10. Бордо (Bang & Olufsen в червено) ---------- */
+.d-oxb{--p-bg:#fbf8f6;--p-surface:#ffffff;--p-surface2:#f4eeea;--p-ink:#1d1416;--p-muted:#7a6a6c;--p-line:#ece4e0;
+  --p-accent:#8c1c2e;--p-cta:#1d1416;--p-cta-ink:#fbf8f6;--p-r:4px;--p-btn-r:40px;--p-display:"Playfair Display",Georgia,serif;--p-body:"Inter",system-ui,sans-serif;
+  --p-dw:400;--p-track:-.01em;--p-hero:radial-gradient(90% 70% at 85% 0%,#a8283d 0%,#7a1426 45%,#4a0b17 100%);--p-hero-ink:#fbf1ee;
+  --p-track-bg:#ffffff33;--p-bar:#f3c9b8;--p-seg-on:#1d1416;--p-seg-ink:#fbf8f6;--p-key-bg:#f7efeb;--p-num-f:"Playfair Display",Georgia,serif;--p-num-w:400;--p-tabon:#8c1c2e}
+.d-oxb .cont .cta{background:#fbf1ee;color:#7a1426}
+/* ---------- 11. Корал в нощта (Raycast) ---------- */
+.d-coral{--p-bg:#040506;--p-surface:#0b0c0e;--p-surface2:#111214;--p-ink:#f2f2f2;--p-muted:#8a8b8c;--p-line:#1b1c1e;
+  --p-accent:#ff6363;--p-cta:#ff6363;--p-cta-ink:#1a0606;--p-r:14px;--p-btn-r:10px;--p-display:"Inter",system-ui,sans-serif;--p-body:"Inter",system-ui,sans-serif;
+  --p-dw:600;--p-track:-.03em;--p-hero:linear-gradient(160deg,#452324 0%,#1a0f10 70%);--p-hero-ink:#f6e9e9;--p-hero-border:1px solid #5a2e30;
+  --p-track-bg:#2f1a1b;--p-bar:#ff6363;--p-seg-on:#f2f2f2;--p-seg-ink:#040506;--p-key-bg:#0b0c0e;--p-key-ink:#b9b9ba;--p-knob:#f2f2f2;--p-tabbg:#040506;--p-chart-bg:#07080a;--p-tabon:#ff6363}
+/* ---------- 12. Кардиолаб (Stripe в червено) ---------- */
+.d-lab{--p-bg:#ffffff;--p-surface:#fbf8f9;--p-surface2:#fbf8f9;--p-ink:#1c0f14;--p-muted:#7a6670;--p-line:#f0e6ea;
+  --p-accent:#d1213c;--p-cta:#d1213c;--p-cta-ink:#ffffff;--p-r:10px;--p-btn-r:6px;--p-display:"Inter",system-ui,sans-serif;--p-body:"Inter",system-ui,sans-serif;
+  --p-dw:300;--p-track:-.03em;--p-track-s:-.01em;--p-hero:radial-gradient(120% 90% at 100% 0%,#fde3e7 0%,#ffffff00 55%),radial-gradient(90% 80% at 0% 100%,#fff0e6 0%,#ffffff00 60%),#ffffff;
+  --p-hero-border:1px solid #f0e6ea;--p-shadow:0 12px 28px -16px #5a0f1d;--p-track-bg:#f5e6ea;--p-bar:#d1213c;--p-seg-on:#ffffff;--p-seg-ink:#1c0f14;--p-key-bg:#fdf1f3;--p-num-w:400;--p-tabon:#d1213c}
+
+.d-vault,.d-mon,.d-blue,.d-coral{--p-segbg:rgba(118,118,128,.24)}
+.d-prec,.d-lab,.d-surg{--p-ltw:500}
+.d-rx{--p-ltw:600}
+.d-vault,.d-oxb{--p-ltw:500}
+.foot{color:var(--muted);font-size:13px;max-width:75ch}
+a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">PhysioNova · избор на визуален стил</span>
+    <h1>Дванадесет посоки за приложението</h1>
+    <p>Всяка посока е взета от истински дизайн в библиотеката Refero Styles и е приложена към PhysioNova: началният екран и екран на урок за акционния потенциал. Съдържанието е примерно.</p>
+    <p>Екраните следват Apple Human Interface Guidelines: размер 390×844 pt, голямо заглавие, лента с табове долу, списъци „inset grouped“, сегментиран контрол, плъзгач и голям бутон с размерите от iOS, шрифтове по скалата Dynamic Type и поне 44 pt за всичко, което се натиска. Различават се само цветовете и шрифтът на заглавията.</p>
+    <div class="legend"><span><b>Медицински</b>: колко клинично и надеждно изглежда</span><span><b>Технологичен</b>: колко прецизно и „продуктово“</span><span><b>Луксозен</b>: колко премиум усещане дава</span></div>
+  </header>
+
+  <!-- 1 -->
+  <section class="dir d-clinic" aria-labelledby="h1">
+    <div class="notes">
+      <span class="tag">Посока 1</span>
+      <h2 id="h1">Клиника</h2>
+      <p>Стерилно бяло, небесен градиент и едно хирургично синьо. Спокойно и чисто като кабинет сутрин. Черните бутони във форма на хапче дават увереност без шум.</p>
+      <div class="scores">
+        <div class="score">Медицински<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+        <div class="score">Технологичен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+        <div class="score">Луксозен<span class="dots"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span></div>
+      </div>
+      <div class="sw"><span style="--c:#2597d0">Хирургично синьо</span><span style="--c:#d7e6f5">Небе</span><span style="--c:#070709">Обсидиан</span><span style="--c:#60606c">Въглен</span><span style="--c:#f5f5f5">Облак</span></div>
+      <div class="fonts">Шрифт: <b>Manrope</b> за заглавия, <b>Inter</b> за текст</div>
+      <div class="src">По стила на <a href="https://styles.refero.design/style/04109c48-f591-4110-9739-622243d4ecc2" rel="noopener">Letters</a>, инструмент за медицински писма</div>
+      <div class="pick"><b>Подходящ, ако</b> искаш PhysioNova да изглежда като надеждна медицинска услуга.</div>
+    </div>
+    <div class="screens" data-dir="clinic"></div>
+  </section>
+
+  <!-- 2 -->
+  <section class="dir d-rx" aria-labelledby="h2">
+    <div class="notes">
+      <span class="tag">Посока 2</span>
+      <h2 id="h2">Рецепта</h2>
+      <p>Порцеланово бяло и индиго мастило вместо черно. Виолетово-розов градиент се появява само в прогреса и в данните. Усещане за премиум продукт с прецизност на аптека.</p>
+      <div class="scores">
+        <div class="score">Медицински<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+        <div class="score">Технологичен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+        <div class="score">Луксозен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+      </div>
+      <div class="sw"><span style="--c:#151581">Индиго мастило</span><span style="--c:#9f73e6">Люляк</span><span style="--c:#de62de">Розов цвят</span><span style="--c:#a1a1cd">Лавандула</span><span style="--c:#f6f6fa">Порцелан</span></div>
+      <div class="fonts">Шрифт: <b>Figtree</b> навсякъде, заглавията са тънки и стегнати</div>
+      <div class="src">По стила на <a href="https://styles.refero.design/style/51a9246f-9238-47dd-b254-48983b8713a2" rel="noopener">Lóvi</a>, дерматологично приложение</div>
+      <div class="pick"><b>Подходящ, ако</b> искаш баланс между медицинско и луксозно, с ясна собствена идентичност.</div>
+    </div>
+    <div class="screens" data-dir="rx"></div>
+  </section>
+
+  <!-- 3 -->
+  <section class="dir d-prec" aria-labelledby="h3">
+    <div class="notes">
+      <span class="tag">Посока 3</span>
+      <h2 id="h3">Прецизност</h2>
+      <p>Като финансов инструмент: студено бяло, тъмносиньо мастило, тънки линии и едно ярко индиго за действие. Заглавията са с тънък шрифт, който звучи уверено, а не крещи.</p>
+      <div class="scores">
+        <div class="score">Медицински<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+        <div class="score">Технологичен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+        <div class="score">Луксозен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+      </div>
+      <div class="sw"><span style="--c:#533afd">Индиго</span><span style="--c:#061b31">Полунощ</span><span style="--c:#64748d">Шисти</span><span style="--c:#e8e9ff">Перивинкъл</span><span style="--c:#f8fafd">Мъгла</span></div>
+      <div class="fonts">Шрифт: <b>Inter</b> с тегло 300 за заглавия (близо до Söhne на Stripe)</div>
+      <div class="src">По стила на <a href="https://styles.refero.design/style/48e5de76-05d5-4c4e-a269-c7c245b291ec" rel="noopener">Stripe</a></div>
+      <div class="pick"><b>Подходящ, ако</b> искаш PhysioNova да изглежда като сериозен технологичен продукт.</div>
+    </div>
+    <div class="screens" data-dir="prec"></div>
+  </section>
+
+  <!-- 4 -->
+  <section class="dir d-vault" aria-labelledby="h4">
+    <div class="notes">
+      <span class="tag">Посока 4</span>
+      <h2 id="h4">Нощен трезор</h2>
+      <p>Обсидианово черно, мед и класически серифен шрифт за заглавията. Най-луксозната посока: всяка тема е като експонат под светлина. Остава близо до сегашния тъмен сайт, но по-изискано.</p>
+      <div class="scores">
+        <div class="score">Медицински<span class="dots"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span></div>
+        <div class="score">Технологичен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+        <div class="score">Луксозен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+      </div>
+      <div class="sw"><span style="--c:#08080a">Обсидиан</span><span style="--c:#121317">Карбон</span><span style="--c:#cc9166">Мед</span><span style="--c:#9194a1">Мъгла</span><span style="--c:#e2e3e9">Кост</span></div>
+      <div class="fonts">Шрифт: <b>Playfair Display</b> за заглавия, <b>Inter</b> за текст</div>
+      <div class="src">По стила на <a href="https://styles.refero.design/style/7c38e84b-aea0-4c8f-b3e9-60b994ee6c6b" rel="noopener">Slash</a>, бизнес банкиране</div>
+      <div class="pick"><b>Подходящ, ако</b> луксът е най-важен и искаш да запазиш тъмния вид.</div>
+    </div>
+    <div class="screens" data-dir="vault"></div>
+  </section>
+
+  <!-- 5 -->
+  <section class="dir d-mon" aria-labelledby="h5">
+    <div class="notes">
+      <span class="tag">Посока 5</span>
+      <h2 id="h5">Монитор</h2>
+      <p>Като монитор за жизнени показатели: тъмно зелено-черно, неоново зелено за сигнала и светли мятови карти за важното. Графиките изглеждат като истински ЕКГ запис. Най-„живата“ посока за физиология.</p>
+      <div class="scores">
+        <div class="score">Медицински<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+        <div class="score">Технологичен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+        <div class="score">Луксозен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+      </div>
+      <div class="sw"><span style="--c:#132322">Обсидиан</span><span style="--c:#3ddc91">Неонов пулс</span><span style="--c:#97ddbc">Мента</span><span style="--c:#edf7f5">Мятов скреж</span><span style="--c:#828786">Шисти</span></div>
+      <div class="fonts">Шрифт: <b>Geist</b> навсякъде (близо до Aeonik)</div>
+      <div class="src">По стила на <a href="https://styles.refero.design/style/d271a6c4-942f-4abf-a3de-66795f15f031" rel="noopener">Sauce Labs</a></div>
+      <div class="pick"><b>Подходящ, ако</b> искаш технологичен, медицински образ, който свързва дизайна с реалните уреди в болницата.</div>
+    </div>
+    <div class="screens" data-dir="d-mon"></div>
+  </section>
+
+  <!-- 6 -->
+  <section class="dir d-bo" aria-labelledby="h6">
+    <div class="notes">
+      <span class="tag">Посока 6</span>
+      <h2 id="h6">Порцелан и ултрамарин</h2>
+      <p>Скандинавска галерия: бял порцелан, топло костено и дълбок ултрамарин, който „поглъща“ цели блокове. Малки главни надписи с разредени букви като на табела в музей. Луксозно и тихо.</p>
+      <div class="scores">
+        <div class="score">Медицински<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+        <div class="score">Технологичен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+        <div class="score">Луксозен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+      </div>
+      <div class="sw"><span style="--c:#060daa">Ултрамарин</span><span style="--c:#191817">Обсидиан</span><span style="--c:#fcfaee">Кост</span><span style="--c:#555555">Графит</span><span style="--c:#e5e5e5">Мъгла</span></div>
+      <div class="fonts">Шрифт: <b>Hanken Grotesk</b> навсякъде (близо до Neue Haas)</div>
+      <div class="src">По стила на <a href="https://styles.refero.design/style/27a4a4fa-4b1a-4e7e-b2c3-3e5bf57f00e5" rel="noopener">Bang &amp; Olufsen</a></div>
+      <div class="pick"><b>Подходящ, ако</b> искаш най-премиум усещане на светъл фон, с един смел цвят.</div>
+    </div>
+    <div class="screens" data-dir="d-bo"></div>
+  </section>
+
+  <!-- 7 -->
+  <section class="dir d-blue" aria-labelledby="h7">
+    <div class="notes">
+      <span class="tag">Посока 7</span>
+      <h2 id="h7">Синият час</h2>
+      <p>Банкиране в планините по здрач: тъмно мастилено-синьо вместо черно, графитени карти и едно кобалтово синьо. Заглавията са с широк шрифт, който изглежда архитектурно и спокойно.</p>
+      <div class="scores">
+        <div class="score">Медицински<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+        <div class="score">Технологичен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+        <div class="score">Луксозен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+      </div>
+      <div class="sw"><span style="--c:#171721">Оникс</span><span style="--c:#1e1e2a">Графит</span><span style="--c:#5266eb">Кобалт</span><span style="--c:#c3c3cc">Пепел</span><span style="--c:#ededf3">Слонова кост</span></div>
+      <div class="fonts">Шрифт: <b>Archivo</b> широк за заглавия, <b>Inter</b> за текст</div>
+      <div class="src">По стила на <a href="https://styles.refero.design/style/3172cd4d-118a-4a16-a259-6b634d32322e" rel="noopener">Mercury</a></div>
+      <div class="pick"><b>Подходящ, ако</b> искаш тъмен, технологичен вид, но по-мек и по-сериозен от „Нощен трезор“.</div>
+    </div>
+    <div class="screens" data-dir="d-blue"></div>
+  </section>
+
+  <!-- 8 -->
+  <section class="dir d-inst" aria-labelledby="h8">
+    <div class="notes">
+      <span class="tag">Посока 8</span>
+      <h2 id="h8">Институт</h2>
+      <p>Институционално доверие: бяло, индиго-тъмносиньо и морско зелено за данните. Числата са с моноширинен шрифт като в лабораторен резултат. Изглежда като продукт на медицински институт.</p>
+      <div class="scores">
+        <div class="score">Медицински<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+        <div class="score">Технологичен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+        <div class="score">Луксозен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+      </div>
+      <div class="sw"><span style="--c:#111a4a">Индиго нейви</span><span style="--c:#44b48b">Морска пяна</span><span style="--c:#167e6c">Дълбоко зелено</span><span style="--c:#88deeb">Небесен циан</span><span style="--c:#f6f8f9">Мъгла</span></div>
+      <div class="fonts">Шрифт: <b>IBM Plex Sans</b>, числата в <b>IBM Plex Mono</b></div>
+      <div class="src">По стила на <a href="https://styles.refero.design/style/a76ec6ba-20b3-495c-9d89-1e58281e79e7" rel="noopener">Column</a>, банкова инфраструктура</div>
+      <div class="pick"><b>Подходящ, ако</b> искаш PhysioNova да изглежда научно и надеждно, с данни на преден план.</div>
+    </div>
+    <div class="screens" data-dir="d-inst"></div>
+  </section>
+
+  <!-- 9 -->
+  <section class="dir d-surg" aria-labelledby="h9">
+    <div class="notes">
+      <span class="tag">Посока 9 · червеникава</span>
+      <h2 id="h9">Хирургично червено</h2>
+      <p>Светло сиво и бяло, тънки заглавия и едно хирургично червено, което преминава към оранжево само в бутоните и прогреса. Тъмната карта отгоре събира вниманието. Прецизно като операционна зала.</p>
+      <div class="scores">
+        <div class="score">Медицински<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+        <div class="score">Технологичен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+        <div class="score">Луксозен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+      </div>
+      <div class="sw"><span style="--c:#e8352a">Вермилион</span><span style="--c:#ff5a1f">Сигнал</span><span style="--c:#101828">Шисти 900</span><span style="--c:#1f1f1f">Карбон</span><span style="--c:#f5f5f5">Велен</span></div>
+      <div class="fonts">Шрифт: <b>Onest</b> с тегло 300 (същият като на сегашния сайт)</div>
+      <div class="src">По стила на <a href="https://styles.refero.design/style/d95a35c2-d3f7-49e7-9ba7-282d52d3211d" rel="noopener">Orderful</a></div>
+      <div class="pick"><b>Подходящ, ако</b> искаш червеното на сегашното лого, но в чист и технологичен вид.</div>
+    </div>
+    <div class="screens" data-dir="d-surg"></div>
+  </section>
+
+  <!-- 10 -->
+  <section class="dir d-oxb" aria-labelledby="h10">
+    <div class="notes">
+      <span class="tag">Посока 10 · червеникава</span>
+      <h2 id="h10">Бордо</h2>
+      <p>Топъл порцелан, дълбоко бордо и класически серифен шрифт. Главната карта е като кадифена кутия за бижу. Най-луксозният светъл вариант, а червеното напомня за кръв и сърце без да крещи.</p>
+      <div class="scores">
+        <div class="score">Медицински<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+        <div class="score">Технологичен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+        <div class="score">Луксозен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+      </div>
+      <div class="sw"><span style="--c:#7a1426">Бордо</span><span style="--c:#a8283d">Кармин</span><span style="--c:#1d1416">Мастило</span><span style="--c:#f3c9b8">Пудра</span><span style="--c:#fbf8f6">Порцелан</span></div>
+      <div class="fonts">Шрифт: <b>Playfair Display</b> за заглавия, <b>Inter</b> за текст</div>
+      <div class="src">Структура от <a href="https://styles.refero.design/style/27a4a4fa-4b1a-4e7e-b2c3-3e5bf57f00e5" rel="noopener">Bang &amp; Olufsen</a>, с бордо вместо ултрамарин</div>
+      <div class="pick"><b>Подходящ, ако</b> луксът е на първо място и искаш светъл, топъл вид.</div>
+    </div>
+    <div class="screens" data-dir="d-oxb"></div>
+  </section>
+
+  <!-- 11 -->
+  <section class="dir d-coral" aria-labelledby="h11">
+    <div class="notes">
+      <span class="tag">Посока 11 · червеникава</span>
+      <h2 id="h11">Корал в нощта</h2>
+      <p>Почти черно, с една топла коралова светлина и карти с тъмен червеникав оттенък. Като пулт на инструмент за професионалисти. Най-близо до сегашния тъмен сайт с червено лого.</p>
+      <div class="scores">
+        <div class="score">Медицински<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+        <div class="score">Технологичен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+        <div class="score">Луксозен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+      </div>
+      <div class="sw"><span style="--c:#ff6363">Коралов пулс</span><span style="--c:#452324">Жарава</span><span style="--c:#040506">Празнота</span><span style="--c:#111214">Обсидиан</span><span style="--c:#9c9c9d">Пепел</span></div>
+      <div class="fonts">Шрифт: <b>Inter</b> навсякъде</div>
+      <div class="src">По стила на <a href="https://styles.refero.design/style/3b6a17f0-3bdf-418c-a95e-0b89e5a8b2f8" rel="noopener">Raycast</a></div>
+      <div class="pick"><b>Подходящ, ако</b> искаш да запазиш тъмния вид и червеното, но по-изчистено и по-скъпо.</div>
+    </div>
+    <div class="screens" data-dir="d-coral"></div>
+  </section>
+
+  <!-- 12 -->
+  <section class="dir d-lab" aria-labelledby="h12">
+    <div class="notes">
+      <span class="tag">Посока 12 · червеникава</span>
+      <h2 id="h12">Кардиолаб</h2>
+      <p>Структурата на „Прецизност“, но с кардиологично червено вместо индиго. Бели повърхности с лек розов отблясък, тънки заглавия и ясни данни. Медицинско, технологично и премиум в равни дози.</p>
+      <div class="scores">
+        <div class="score">Медицински<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+        <div class="score">Технологичен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+        <div class="score">Луксозен<span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+      </div>
+      <div class="sw"><span style="--c:#d1213c">Кардио червено</span><span style="--c:#1c0f14">Мастило</span><span style="--c:#7a6670">Прах</span><span style="--c:#fde3e7">Розов отблясък</span><span style="--c:#fbf8f9">Мъгла</span></div>
+      <div class="fonts">Шрифт: <b>Inter</b> с тегло 300 за заглавия</div>
+      <div class="src">Структура от <a href="https://styles.refero.design/style/48e5de76-05d5-4c4e-a269-c7c245b291ec" rel="noopener">Stripe</a>, с червено вместо индиго</div>
+      <div class="pick"><b>Подходящ, ако</b> искаш и трите качества в баланс, с червено като знак на PhysioNova.</div>
+    </div>
+    <div class="screens" data-dir="d-lab"></div>
+  </section>
+
+  <p class="foot">Можеш да смесваш: например цветовете на „Рецепта“ с тънките заглавия на „Прецизност“. Кажи кои елементи ти харесват и кои не, и ще направя следващия вариант върху истинското приложение.</p>
+</div>
+
+<script>
+(function(){
+const ecg='<svg viewBox="0 0 34 24" aria-hidden="true"><path d="M1 16h8.5l1.6-2.4 1.6 2.4h1.6l2.6-14 3.2 21 2.2-7.5h1.6l1.8 1.5h7.3" fill="none" stroke="var(--p-accent)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+const sb='<div class="island"></div><div class="sb"><span>9:41</span><span class="ic">'+
+ '<svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>'+
+ '<svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 2.2c2.3 0 4.4.9 6 2.4l1.1-1.2A10.2 10.2 0 0 0 8 .6 10.2 10.2 0 0 0 .9 3.4L2 4.6a8.6 8.6 0 0 1 6-2.4zm0 3.3c1.4 0 2.6.5 3.6 1.4l1.1-1.2a6.9 6.9 0 0 0-9.4 0l1.1 1.2c1-.9 2.2-1.4 3.6-1.4zm0 3.2c.6 0 1.1.2 1.5.6L8 11 6.5 9.3c.4-.4.9-.6 1.5-.6z"/></svg>'+
+ '<svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.8" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2.5"/><path d="M25 4.5v4a2 2 0 0 0 0-4z" opacity=".45"/></svg></span></div>';
+const ico={home:'<path d="M4 11.5 14 3l10 8.5V23a1 1 0 0 1-1 1h-6v-7h-6v7H5a1 1 0 0 1-1-1z"/>',
+ topics:'<rect x="4" y="4" width="8" height="8" rx="2"/><rect x="16" y="4" width="8" height="8" rx="2"/><rect x="4" y="16" width="8" height="8" rx="2"/><rect x="16" y="16" width="8" height="8" rx="2"/>',
+ test:'<rect x="6" y="3" width="16" height="21" rx="3"/><path d="m10 14 3 3 5-6"/>',
+ gl:'<path d="M5 5a2 2 0 0 1 2-2h15v18H7a2 2 0 0 0-2 2z"/><path d="M5 23a2 2 0 0 1 2-2h15v3H7a2 2 0 0 1-2-1z"/>',
+ me:'<circle cx="14" cy="9" r="5"/><path d="M4 24c1.6-5 5.4-7 10-7s8.4 2 10 7z"/>'};
+const tabs=on=>'<nav class="tabs">'+[['home','Начало'],['topics','Теми'],['test','Тест'],['gl','Речник'],['me','Профил']].map(([k,l])=>'<span class="'+(k===on?'on':'')+'"><svg viewBox="0 0 28 26">'+ico[k]+'</svg>'+l+'</span>').join('')+'</nav><div class="homebar"></div>';
+const chev='<svg class="chev" viewBox="0 0 9 15"><path d="m1.5 1.5 6 6-6 6"/></svg>';
+const lock='<svg class="lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+const secs=[['I','Обща физиология','100%'],['II','Мускули','80%'],['III','Кръв','45%'],['IV','Сърдечно-съдова','62%'],['V','Дишане',lock]];
+const wrap=inner=>'<div class="phone"><div class="vp"><div class="scr">'+inner+'</div></div></div>';
+function home(){return wrap(sb+
+ '<div class="navrow"><span class="logo">'+ecg+'PhysioNova</span><span class="av">МП</span></div>'+
+ '<div class="body"><div class="ltw"><div class="date">Вторник, 17 ноември</div><h3 class="hi">Начало</h3></div><div class="pad" style="margin-top:-14px">'+
+ '<div class="cont"><span class="k">Продължи · Раздел IV</span><span class="t">Сърдечен цикъл</span><span class="s">Урок 3 от 5 · около 6 минути</span><div class="bar"><i style="width:62%"></i></div><span class="cta">Продължи урока</span></div>'+
+ '<div class="stats"><div><b>38</b><span>завършени теми</span></div><div><b>412</b><span>от 627 въпроса</span></div><div><b>7</b><span>дни поред</span></div></div>'+
+ '<div class="hdr"><span class="h3">Раздели</span><a>Всички</a></div></div>'+
+ '<div class="pad" style="margin-top:-12px"><div class="secs">'+secs.map(s=>'<div class="sec"><span class="n">'+s[0]+'</span><span class="nm">'+s[1]+'</span><span class="pc">'+s[2]+'</span>'+chev+'</div>').join('')+'</div></div>'+
+ '</div>'+tabs('home'))}
+function lesson(){
+ const y=v=>10+(30-v)*(84/120);
+ const pts=[[0,-90],[34,-90],[40,-88],[46,25],[54,8],[64,2],[110,0],[150,-6],[176,-40],[196,-85],[206,-90],[250,-90]];
+ const d='M'+pts.map(p=>p[0]+' '+y(p[1]).toFixed(1)).join(' L');
+ const ph=[[43,'0'],[58,'1'],[100,'2'],[180,'3'],[226,'4']];
+ const t=(x,yy,txt,anchor)=>'<text x="'+x+'" y="'+yy+'" font-size="9" font-family="-apple-system,Inter,sans-serif" fill="var(--p-muted)" text-anchor="'+(anchor||'middle')+'">'+txt+'</text>';
+ const chart='<svg viewBox="0 0 262 104" role="img" aria-label="Акционен потенциал на кардиомиоцит, от −90 до +25 mV">'+
+  '<line x1="0" x2="262" y1="'+y(0).toFixed(1)+'" y2="'+y(0).toFixed(1)+'" stroke="var(--p-line)" stroke-dasharray="3 3"/>'+
+  '<line x1="0" x2="262" y1="'+y(-90).toFixed(1)+'" y2="'+y(-90).toFixed(1)+'" stroke="var(--p-line)"/>'+
+  '<path d="'+d+' L250 '+y(-90).toFixed(1)+' L0 '+y(-90).toFixed(1)+'Z" fill="var(--p-accent)" opacity=".1"/>'+
+  '<path d="'+d+'" fill="none" stroke="var(--p-accent)" stroke-width="2" stroke-linejoin="round"/>'+
+  ph.map(p=>t(p[0],(p[1]==='4'?y(-90)-5:p[1]==='3'?y(-48):y(14)-2).toFixed(1),p[1])).join('')+
+  t(258,(y(0)-3).toFixed(1),'0 mV','end')+t(258,(y(-90)+10).toFixed(1),'−90 mV','end')+'</svg>';
+ return wrap(sb+
+ '<div class="navrow"><span class="back"><svg viewBox="0 0 12 20"><path d="M10 2 2 10l8 8"/></svg>Раздел IV</span><svg class="navico" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg></div>'+
+ '<div class="body" style="top:98px"><div class="pad" style="gap:16px">'+
+ '<h3 class="lt">Акционен потенциал на кардиомиоцита</h3>'+
+ '<div class="seg"><span>Теория</span><span class="on">Симулация</span><span>Тест</span></div>'+
+ '<div class="chart">'+chart+'<div class="cap"><span>Фази 0–4</span><span>≈ 250 ms</span></div></div>'+
+ '<div class="grp"><div class="row"><span>K⁺ извън клетката</span><b>4,0 mmol/L</b></div><div class="rng"><i></i><u></u></div></div>'+
+ '<div class="key"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/></svg><span>Платото (фаза 2) идва от бавния вход на Ca²⁺ през L-тип канали. То удължава рефрактерния период и пречи на тетанус.</span></div>'+
+ '<span class="cta">Към теста · 8 въпроса</span>'+
+ '</div></div>'+tabs('topics'))}
+document.querySelectorAll('.screens').forEach(el=>{el.innerHTML='<figure>'+home()+'<figcaption>Начало</figcaption></figure><figure>'+lesson()+'<figcaption>Урок със симулация</figcaption></figure>'});
+})();
+</script>
