@@ -405,7 +405,7 @@ function gfrCore(p,Ra){// p:{map,Re,prot,pb,kf,hct}
 const GFR_RA0=0.0364,GFR_RE0=0.0382;
 function gfrSolve(p){const Ra0=GFR_RA0*p.aff,base=gfrCore(p,Ra0);if(!p.auto)return base;
   // миогенен отговор + тубулогломерулна обратна връзка: аферентното съпротивление се настройва (в граници)
-  const tgt=125*(1+0.08*(p.map-100)/100)*(p.kf/12.5>1?1:Math.pow(p.kf/12.5,0.15));let lo=Ra0*0.35,hi=Ra0*3.2;
+  /* ауторегулацията не е идеална: компенсира ≈ 75 % от отклонението (иначе ефектът на еферентната артериола и др. изчезва напълно) */const tgt0=125*(1+0.08*(p.map-100)/100)*(p.kf/12.5>1?1:Math.pow(p.kf/12.5,0.15)),tgt=tgt0+(gfrCore(Object.assign({},p,{map:100}),Ra0).GFR-125)*0.25;/* налягането се ауторегулира почти напълно (80–160 mmHg); вътрешните промени (еферентна, Kf, белтъци) — частично */let lo=Ra0*0.35,hi=Ra0*3.2;
   if(gfrCore(p,lo).GFR<tgt)return gfrCore(p,lo);if(gfrCore(p,hi).GFR>tgt)return gfrCore(p,hi);
   for(let i=0;i<40;i++){const m=(lo+hi)/2;gfrCore(p,m).GFR>tgt?lo=m:hi=m}return gfrCore(p,(lo+hi)/2)}
 const GFR_PRE={

@@ -114,14 +114,14 @@ function mkDiaphragm(T){const NR=26,NA=72,P=[],U=[],I=[];for(let r=0;r<=NR;r++)f
 function T3G(P,U,I){const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(P,3));g.setAttribute("uv",new THREE.Float32BufferAttribute(U,2));g.setIndex(I);return g}
 function mkHeart(T){const g=new T.Group();const V3=(x,y,z)=>new T.Vector3(x,y,z);
   const h=MK.blob(T,[[0.05,5.0,0.22,0.36,0xa8323a],[0.22,4.82,0.38,0.38,0xb03a40],[0.38,4.65,0.52,0.3,0xb03a40],[0.5,4.52,0.62,0.18,0xa8323a],[-0.22,4.92,0.3,0.28,0x9c2f36],[0.12,5.12,-0.05,0.25,0x8f2a33],[-0.25,5.1,0.05,0.24,0x7a3b6e]],{res:40});
-  g.add(h);const cor=R3.phys(T,0xf2d27a,{roughness:0.7});[[[0.0,5.18,0.36],[0.3,4.95,0.6],[0.5,4.62,0.72]],[[-0.15,5.1,0.35],[-0.38,4.85,0.42],[-0.3,4.6,0.4]]].forEach(p=>g.add(R3.tube(T,p.map(a=>V3(...a)),0.022,R3.phys(T,0xc0392b),{seg:20,rad:6})));
+  g.add(h);const cor=R3.phys(T,0xe9a7a0,{roughness:0.7});[[[0.0,5.18,0.36],[0.3,4.95,0.6],[0.5,4.62,0.72]],[[-0.15,5.1,0.35],[-0.38,4.85,0.42],[-0.3,4.6,0.4]]].forEach(p=>g.add(R3.tube(T,p.map(a=>V3(...a)),0.022,R3.phys(T,0xc0392b),{seg:20,rad:6})));
   const fat=new T.Mesh(new T.SphereGeometry(0.12,14,10),cor);fat.position.set(0.0,5.1,0.42);fat.scale.set(2,0.6,0.7);g.add(fat);return g}
 /* ---- общ анатомичен фон: кожа, аорта, сънни артерии от анатомичния модел ---- */
 function r3Body(T,sc,o={}){const A=loadArcBin(),body=new T.Group();body.scale.setScalar(10);sc.add(body);const out={body};
   const mk=(g,mat,ro)=>{const d=A[g];const geo=new T.BufferGeometry();geo.setAttribute("position",new T.BufferAttribute(d.P,3));geo.setIndex(new T.BufferAttribute(d.I,1));geo.computeVertexNormals();const me=new T.Mesh(geo,mat);if(ro)me.renderOrder=ro;body.add(me);return me};
   out.skin=mk("skin",R3.glass(T,0xe8b89a,o.skin||0.07,{side:T.FrontSide}),20);
   if(o.vessels!==false){const art=R3.phys(T,0xc92a2a,{roughness:0.4});out.aorta=mk("aorta",art);mk("neckart",art)}
-  if(o.brain){out.cortex=mk("cortex",R3.glass(T,0xf2b6c0,0.13),11);out.cereb=mk("cerebellum",R3.glass(T,0xe39aa6,0.2),11);out.pons=mk("pons",R3.glass(T,0xd59a6a,0.55),9);out.med=mk("medulla",R3.glass(T,0xd8955e,0.6),9);
+  if(o.brain){out.cortex=mk("cortex",R3.glass(T,0xf2b6c0,0.13),11);out.cereb=mk("cerebellum",R3.glass(T,0xe39aa6,0.2),11);out.pons=mk("pons",R3.glass(T,0xc98a7c,0.55),9);out.med=mk("medulla",R3.glass(T,0xc7877a,0.6),9);
     ["cordC","cordT14","cordT58"].forEach(k=>mk(k,R3.phys(T,0xe9c896,{roughness:0.6})))}
   return out}
 // целият гръден кош с дишане; връща {update(V,ptxL,opts)}
@@ -233,7 +233,7 @@ const _vRR=VIEWS.respreg;
 VIEWS.respreg=function(main){_vRR(main);window.__R3=null;
   r3Attach($("#rrC"),470,{r:6.2,th:0.85,phi:1.45,target:[0,6.6,0],fov:38,min:1.2,max:22},(G,ctx)=>{const T=G.T,sc=G.scene,V3=(x,y,z)=>new T.Vector3(x,y,z);G.ren.toneMappingExposure=1.05;
     const bd=r3Body(T,sc,{skin:0.05,brain:true});const th=r3Thorax(T,sc,{op:0.8});
-    const nM=R3.phys(T,0xf5c518,{roughness:0.45,emissive:LIN(T,0xf5c518),emissiveIntensity:0.15});
+    const nM=R3.phys(T,0xe8cbbd,{roughness:0.45,emissive:LIN(T,0xe8cbbd),emissiveIntensity:0.15});
     const nuc=(p,c,r)=>{const g=new T.Mesh(new T.SphereGeometry(r,18,14),R3.glow(T,c,0.7));g.position.copy(p);g.renderOrder=14;sc.add(g);const core=new T.Mesh(new T.SphereGeometry(r*0.5,14,10),R3.phys(T,c));core.position.copy(p);sc.add(core);return g};
     const DRG=[],VRG=[],CC=[],CB=[],PNX=[];
     for(const s of [-1,1]){DRG.push(nuc(V3(s*0.045,7.75,-0.15),0x339af0,0.035));VRG.push(nuc(V3(s*0.1,7.69,-0.06),0x339af0,0.035));CC.push(nuc(V3(s*0.08,7.66,0.04),0xf76707,0.04));PNX.push(nuc(V3(s*0.08,8.14,-0.12),0xae3ec9,0.035));
@@ -286,7 +286,7 @@ function k3GFR(cv,get){
     const affM=R3.phys(T,0xd9363e,{roughness:0.35,clearcoat:0.5,transparent:true,opacity:0.5,depthWrite:false}),effM=R3.phys(T,0xb02a4f,{roughness:0.35,clearcoat:0.5,transparent:true,opacity:0.5,depthWrite:false});
     let aff=null,eff=null,lastA=-1,lastE=-1;const mkArt=(c,r,m)=>{const me=R3.tube(T,c,r,m,{seg:60,rad:16});me.renderOrder=7;sc.add(me);return me};
     // гладкомускулни пръстени по аферентната
-    const ringN=16,rings=new T.InstancedMesh(new T.TorusGeometry(1,0.12,8,24),R3.phys(T,0xf08c00,{roughness:0.5}),ringN*2),m4=new T.Matrix4(),q4=new T.Quaternion();sc.add(rings);
+    const ringN=16,rings=new T.InstancedMesh(new T.TorusGeometry(1,0.12,8,24),R3.phys(T,0xc2565f,{roughness:0.5,clearcoat:0.3}),ringN*2),m4=new T.Matrix4(),q4=new T.Quaternion();sc.add(rings);
     // юкстагломерулни клетки и macula densa
     const jg=[];for(let i=0;i<9;i++){const p=affC.getPointAt(0.82+i*0.018);const m=new T.Mesh(new T.SphereGeometry(0.13,12,10),R3.phys(T,0xe9ecef,{emissive:LIN(T,0xced4da),emissiveIntensity:0.1}));m.position.copy(p).add(V3(0,0.36,0.1*(i%3-1)));sc.add(m);jg.push(m)}
     const dctC=new T.CatmullRomCurve3([V3(-2.0,-1.8,3.6),V3(-2.6,0.6,2.2),V3(-2.15,2.25,0.55),V3(-2.4,4.2,-1.0),V3(-1.5,6,-2)]);sc.add(Object.assign(R3.vtube(T,dctC,()=>0.3,R3.phys(T,0xcfe2b9,{roughness:0.5,transparent:true,opacity:0.3,depthWrite:false,side:T.DoubleSide}),{seg:60,rad:16}),{renderOrder:6}));
@@ -330,7 +330,7 @@ function k3Tub(cv,get){
     const Y0=4.2,Y1=1.2,Y2=-1.8,Y3=-6.0;// кора | външна медула | вътрешна медула | папила
     // тъканен блок с градиент на осмолалитета
     const tc=document.createElement("canvas");tc.width=16;tc.height=256;const tg=tc.getContext("2d");const ttex=new T.CanvasTexture(tc);ttex.encoding=T.sRGBEncoding;
-    const OC=[[50,[116,192,252]],[300,[255,224,102]],[700,[247,103,7]],[1250,[165,30,40]]],oc=o=>{let i=0;while(i<OC.length-2&&o>OC[i+1][0])i++;const [a,ca]=OC[i],[b,cb]=OC[i+1],u=Math.max(0,Math.min(1,(o-a)/(b-a)));return `rgb(${ca.map((c,k)=>Math.round(c+(cb[k]-c)*u)).join(",")})`};
+    const OC=[[50,[116,192,252]],[300,[236,214,220]],[700,[247,103,7]],[1250,[165,30,40]]],oc=o=>{let i=0;while(i<OC.length-2&&o>OC[i+1][0])i++;const [a,ca]=OC[i],[b,cb]=OC[i+1],u=Math.max(0,Math.min(1,(o-a)/(b-a)));return `rgb(${ca.map((c,k)=>Math.round(c+(cb[k]-c)*u)).join(",")})`};
     let lastMp=0;const paintT=Mp=>{for(let y=0;y<256;y++){const Y=Y0-(Y0-Y3)*y/255,o=Y>Y1?300:300+(Mp-300)*Math.min(1,(Y1-Y)/(Y1-Y3));tg.fillStyle=oc(o);tg.fillRect(0,y,16,1)}ttex.needsUpdate=true};
     const blk=new T.Mesh(new T.BoxGeometry(11,Y0-Y3,4.2),new T.MeshStandardMaterial({map:ttex,transparent:true,opacity:0.16,depthWrite:false,side:T.DoubleSide,roughness:0.9}));blk.position.set(0.5,(Y0+Y3)/2,0);blk.renderOrder=1;sc.add(blk);
     const edges=new T.LineSegments(new T.EdgesGeometry(blk.geometry),new T.LineBasicMaterial({color:0xadb5bd,transparent:true,opacity:0.5}));edges.position.copy(blk.position);sc.add(edges);
@@ -345,7 +345,7 @@ function k3Tub(cv,get){
     path("tal",[V3(0.22,-1.8,0.05),V3(0.25,0,0.05),V3(0.3,1.6,0.05),V3(-1.6,2.85,0.45),V3(-2.55,3.35,0.45)]);
     const dctP=[V3(-2.55,3.35,0.45)];for(let i=1;i<=16;i++){const u=i/16;dctP.push(V3(-2.55+u*4.0+Math.sin(u*14)*0.4,3.35-u*0.2+Math.cos(u*12)*0.3,0.45+Math.sin(u*17)*0.6))}dctP.push(V3(2.5,2.6,0));path("dct",dctP);
     path("cd",[V3(2.5,2.6,0),V3(3.2,2.0,0),V3(3.3,0,0),V3(3.35,-3,0),V3(3.4,-5.4,0),V3(3.45,-6.1,0)]);
-    const SEG=[["pct",0.34,0xf2c49b],["dtl",0.12,0xc5d9f1],["atl",0.12,0xd3e4f5],["tal",0.24,0xf8c98a],["dct",0.24,0xcfe2b9],["cd",0.36,0xe2d4f3]],meshes={};
+    const SEG=[["pct",0.34,0xf2c49b],["dtl",0.12,0xc5d9f1],["atl",0.12,0xd3e4f5],["tal",0.24,0xf0b7a8],["dct",0.24,0xcfe2b9],["cd",0.36,0xe2d4f3]],meshes={};
     SEG.forEach(([k,r,c])=>{const g=new T.TubeGeometry(seg[k],k==="pct"||k==="dct"?160:60,r,14,false);const col=new Float32Array(g.attributes.position.count*3).fill(1);g.setAttribute("color",new T.BufferAttribute(col,3));
       const m=new T.Mesh(g,R3.phys(T,0xffffff,{vertexColors:true,roughness:0.4,clearcoat:0.5}));m.userData.k=k;m.userData.base=c;sc.add(m);meshes[k]=m});
     // гломерул и капсула на Боуман
@@ -390,7 +390,7 @@ function mkKidney(T,s){const g=new T.Group();const V3=(x,y,z)=>new T.Vector3(x,y
   const geo=new T.SphereGeometry(1,48,36),P=geo.attributes.position;for(let i=0;i<P.count;i++){let x=P.getX(i),y=P.getY(i),z=P.getZ(i);const hil=Math.exp(-(y*y)/0.18)*Math.max(0,-x*s)*0.55;x=x*0.55*(1-hil*0.9);P.setXYZ(i,x+s*0.0,y*1.0,z*0.38)}geo.computeVertexNormals();
   const tex=R3.tex(T,512,256,(c,W,H)=>{const R=MK.rnd(s>0?3:8);c.fillStyle="#8f3b2f";c.fillRect(0,0,W,H);for(let i=0;i<400;i++){c.fillStyle=`rgba(${120+R()*50|0},${40+R()*20|0},${35+R()*20|0},.4)`;c.beginPath();c.arc(R()*W,R()*H,3+R()*10,0,7);c.fill()}});
   const k=new T.Mesh(geo,R3.phys(T,0xffffff,{map:tex,roughness:0.35,clearcoat:0.6,emissive:LIN(T,0xe8590c),emissiveIntensity:0}));g.add(k);g.userData.k=k;
-  const adr=new T.Mesh(new T.ConeGeometry(0.32,0.38,4),R3.phys(T,0xf2c14e,{roughness:0.5,emissive:LIN(T,0xf76707),emissiveIntensity:0}));adr.position.set(-s*0.05,1.08,0);adr.scale.set(1,1,0.5);g.add(adr);g.userData.adr=adr;return g}
+  const adr=new T.Mesh(new T.ConeGeometry(0.32,0.38,4),R3.phys(T,0xd9826a,{roughness:0.5,emissive:LIN(T,0xf76707),emissiveIntensity:0}));adr.position.set(-s*0.05,1.08,0);adr.scale.set(1,1,0.5);g.add(adr);g.userData.adr=adr;return g}
 function k3Vol(cv,get){
   r3Attach(cv,520,{r:9.5,th:0.45,phi:1.45,target:[0,5.4,0],fov:38,min:2,max:30},(G,ctx)=>{const T=G.T,sc=G.scene,V3=(x,y,z)=>new T.Vector3(x,y,z);G.ren.toneMappingExposure=1.05;
     const bd=r3Body(T,sc,{skin:0.06,brain:true});
@@ -406,11 +406,11 @@ function k3Vol(cv,get){
     // бъбреци, надбъбреци, уретери, пикочен мехур
     const K={};for(const s of [-1,1]){const k=mkKidney(T,s);k.position.set(s*0.62,s<0?3.55:3.68,-0.55);k.scale.setScalar(0.5);k.rotation.z=s*0.18;sc.add(k);K[s]=k}
     const urM=R3.phys(T,0xf6e7b0,{roughness:0.4});const ureC={};for(const s of [-1,1]){const c=new T.CatmullRomCurve3([V3(s*0.45,(s<0?3.5:3.62),-0.45),V3(s*0.42,3.2,-0.3),V3(s*0.35,2.9,0.05),V3(s*0.15,2.72,0.45)]);ureC[s]=c;sc.add(R3.tube(T,c,0.03,urM,{seg:30,rad:6}))}
-    const blad=new T.Group();blad.position.set(0,2.7,0.55);sc.add(blad);{const ph=new T.Mesh(new T.SphereGeometry(0.32,24,18),R3.glass(T,0xf6d365,0.55));blad.add(ph);
+    const blad=new T.Group();blad.position.set(0,2.7,0.55);sc.add(blad);{const ph=new T.Mesh(new T.SphereGeometry(0.32,24,18),R3.glass(T,0xe7b0a3,0.55));blad.add(ph);
       if(typeof zGlb==="function")zGlb("blad").then(raw=>{if(G.dead)return;const mn=[1e9,1e9,1e9],mx=[-1e9,-1e9,-1e9];raw.forEach(r=>{for(let q=0;q<r.P.length;q++){const d=q%3;if(r.P[q]<mn[d])mn[d]=r.P[q];if(r.P[q]>mx[d])mx[d]=r.P[q]}});const c=mn.map((v,d)=>(v+mx[d])/2),k=0.8/Math.max(mx[0]-mn[0],mx[1]-mn[1],mx[2]-mn[2]),W=new T.Group();
         raw.forEach(r=>{const ge=new T.BufferGeometry(),P=new Float32Array(r.P.length);for(let q=0;q<P.length;q++)P[q]=(r.P[q]-c[q%3])*k;ge.setAttribute("position",new T.BufferAttribute(P,3));if(r.idx)ge.setIndex(new T.BufferAttribute(r.idx,1));ge.computeVertexNormals();const main=/dome|base/.test(r.nm);
           W.add(new T.Mesh(ge,new T.MeshPhysicalMaterial({color:LIN(T,main?0xe6a48f:/trigone/.test(r.nm)?0xc97b7b:0x9c4f4f),roughness:0.42,clearcoat:0.45,side:T.DoubleSide,transparent:main,opacity:main?0.9:1})))});
-        const ur=new T.Mesh(new T.SphereGeometry(0.2,20,14),R3.glass(T,0xf6d365,0.7));ur.position.y=-0.02;W.add(ur);blad.remove(ph);blad.add(W)}).catch(e=>console.error(e))}
+        const ur=new T.Mesh(new T.SphereGeometry(0.2,20,14),R3.glass(T,0xe7b0a3,0.7));ur.position.y=-0.02;W.add(ur);blad.remove(ph);blad.add(W)}).catch(e=>console.error(e))}
     const rv=R3.phys(T,0xc92a2a,{roughness:0.4});for(const s of [-1,1])sc.add(R3.tube(T,[V3(0.08,3.68,-0.42),V3(s*0.3,3.64,-0.5),V3(s*0.5,3.6,-0.55)],0.035,rv,{seg:16,rad:6}));
     sc.add(R3.tube(T,[V3(0.12,4.1,-0.38),V3(0.11,3.6,-0.4),V3(0.1,3.0,-0.35)],0.08,rv,{seg:20,rad:10}));
     // хипоталамус и хипофиза
