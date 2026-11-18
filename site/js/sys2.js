@@ -252,6 +252,16 @@ ZK.x={mito:(T,o)=>{const col=o.col||0xe8590c,g=new T.Group(),A=4.6,B=2.05,rr=x=>
    const dn=new T.Mesh(new T.TorusGeometry(0.42,0.07,6,20),MK.mat(T,0x5f3dc4));dn.position.set(1.3,0.2,1.3);dn.rotation.x=1;g.add(dn);const gg=new T.SphereGeometry(0.11,6,5),gmm=MK.mat(T,0x5c3d2e),R=MK.rnd(17);for(let k=0;k<14;k++){const q=new T.Mesh(gg,gmm);q.position.set((R()-0.5)*6.5,(R()-0.2)*1.6,0.6+R()*0.9);g.add(q)}
    g.material=cm;return g},
  slab:(T,o)=>new T.Mesh(new T.BoxGeometry(36,3.4,9),MK.mat(T,o.col||0xe9dcc0,{roughness:0.8,clearcoat:0})),
+ /* сноп миофибрили (вместо плоча): успоредни цилиндри с напречна набразденост — Z-линия, светъл I диск, тъмен A диск с по-светла H зона;
+    размерите са като на плочата (36 × 3,4 × 9), за да работят мащабирането и светенето при съкращение */
+ myofib:(T,o)=>{const geos=[],r=0.78;for(const [y,zo] of [[-0.86,0],[0.86,0.8]])for(let z=-3.6+zo;z<=3.7;z+=1.6){const c=new T.CylinderGeometry(r,r,36,18,1,false);c.rotateZ(Math.PI/2);c.translate(0,y,z);geos.push(c.toNonIndexed())}
+   const tot=geos.reduce((a,g)=>a+g.attributes.position.count,0),P=new Float32Array(tot*3),N=new Float32Array(tot*3),U=new Float32Array(tot*2);let o3=0,o2=0;
+   geos.forEach(g=>{P.set(g.attributes.position.array,o3);N.set(g.attributes.normal.array,o3);U.set(g.attributes.uv.array,o2);o3+=g.attributes.position.array.length;o2+=g.attributes.uv.array.length});
+   const geo=new T.BufferGeometry();geo.setAttribute("position",new T.BufferAttribute(P,3));geo.setAttribute("normal",new T.BufferAttribute(N,3));geo.setAttribute("uv",new T.BufferAttribute(U,2));
+   const cv=document.createElement("canvas");cv.width=8;cv.height=256;const x=cv.getContext("2d"),band=(a,b,c)=>{x.fillStyle=c;x.fillRect(0,a*256,8,(b-a)*256)};
+   band(0,1,"#f2e4e2");band(0.27,0.73,"#b98b88");band(0.45,0.55,"#cfa7a4");band(0.495,0.505,"#a07370");band(0,0.012,"#5e3b39");band(0.988,1,"#5e3b39");
+   const tx=new T.CanvasTexture(cv);tx.wrapS=tx.wrapT=T.RepeatWrapping;tx.repeat.set(1,16);tx.anisotropy=4;if(T.sRGBEncoding)tx.encoding=T.sRGBEncoding;
+   return new T.Mesh(geo,MK.mat(T,o.col||0xf4a3a3,{map:tx,roughness:0.6,clearcoat:0.15}))},
  nuc:(T,o)=>{const g=new T.Group();g.add(new T.Mesh(new T.SphereGeometry(o.r||3.4,28,20),new T.MeshPhysicalMaterial({color:LIN(T,0x9775fa),transparent:true,opacity:0.3,roughness:0.3,depthWrite:false})));const h=MK.helix(T,new T.Vector3(-1.8,-0.6,0),new T.Vector3(1.8,0.6,0),{color:0x5f3dc4,rad:0.5,tube:0.12,pitch:1.1});g.add(h);return g},
  cellA:(T,o)=>{const b=[];for(let k=0;k<6;k++)b.push([-3.2+k*1.3,0.3*Math.sin(k),0.6*Math.cos(k*1.3),1.5]);return MK.blob(T,b,{res:36,mat:MK.mat(T,o.col,{emissive:LIN(T,o.col),emissiveIntensity:0})})},
  cellB:(T,o)=>{const b=[];for(let k=0;k<8;k++)b.push([-4.2+k*1.2,0.9*Math.sin(k*0.45+0.2)+0.4,0.8*Math.cos(k*1.1),1.9+0.5*Math.sin(k*0.45)]);return MK.blob(T,b,{res:40,mat:MK.mat(T,o.col,{emissive:LIN(T,o.col),emissiveIntensity:0})})}};
@@ -1198,7 +1208,7 @@ const STG_MYOCH=zCellStg({id:"stgMyo",title:"Основните йонни ка�
    {t:"Целият цикъл и какво следва от него",short:"Целият цикъл",badge:"дълъг рефрактерен период",d:"Акционният потенциал трае 250–300 ms — почти колкото съкращението. Докато Na⁺ каналите са инактивирани, нов импулс е невъзможен: сърцето <b>не може да изпадне в тетанус</b>. Антиаритмичните лекарства са насочени към тези канали: клас I — Na⁺, клас III — K⁺ (удължават потенциала), клас IV — Ca²⁺. В синусовия възел I<sub>K1</sub> липсва, а фаза 0 се дължи на Ca²⁺."}],
    spec:{cyto:[],mem:[{y:6,ext:1,holes:[ZH(-15),ZH(-10.5),ZH(-6),ZH(-1.5),ZH(2.5),ZH(6.5),ZH(11),ZH(15)]},{y:-6,x:-4,w:16,ext:0,holes:[[-4,0,1.7],[4,0,1.5]]}],
     it:[{k:"nav",kind:"chan",col:0x1c7ed6,p:[-15,6,0],s:1.15},{k:"ito",kind:"chan",col:0xae3ec9,p:[-10.5,6,0]},{k:"cal",kind:"chan",col:0x15aabf,p:[-6,6,0],s:1.15},{k:"kr",kind:"chan",col:0x7950f2,p:[-1.5,6,0]},{k:"ks",kind:"chan",col:0x9775fa,p:[2.5,6,0]},{k:"k1",kind:"chan",col:0x5f3dc4,p:[6.5,6,0]},{k:"ncx",kind:"chan",col:0xe8590c,p:[11,6,0]},{k:"nka",kind:"pump",col:0xf06595,p:[15,6,0]},
-     {k:"ryr",kind:"chan",col:0xe03131,p:[-8,-6,0],s:1.35},{k:"ser",kind:"pump",col:0x1c7ed6,p:[0,-6,0],flip:true},{k:"mf",kind:"slab",col:0xf4a3a3,p:[11.5,-3,-2]}],
+     {k:"ryr",kind:"chan",col:0xe03131,p:[-8,-6,0],s:1.35},{k:"ser",kind:"pump",col:0x1c7ed6,p:[0,-6,0],flip:true},{k:"mf",kind:"myofib",col:0xf8c4c0,p:[11.5,-3,-2]}],
     pools:{na:[0xf06595,0.28,60],ca:[0x74c0fc,0.28,90],k:[0x7950f2,0.28,70]}},
    init(G,T,C){C.B.mf.scale.set(0.34,1,0.6)},
    upd(C,i,u,t,sg,R){const ph=i<6?MYO_R[i][0]+(MYO_R[i][1]-MYO_R[i][0])*(i===0?0.5:u):(t*0.13)%1,w=(a,b,r=0.02)=>Z.cl((ph-a)/r,0,1)*Z.cl((b-ph)/r,0,1),nav=w(0.1,0.14,0.008),ito=w(0.15,0.22),cal=w(0.2,0.6,0.03),kr=w(0.45,0.8,0.1),ks=Z.cl((ph-0.25)/0.3,0,1)*Z.cl((0.8-ph)/0.04,0,1),k1=1-w(0.11,0.68,0.03),ryr=w(0.23,0.42,0.03),cai=Z.cl((ph-0.24)/0.08,0,1)*Z.cl((0.92-ph)/0.2,0,1),rem=w(0.5,0.97,0.06);

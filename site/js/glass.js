@@ -22,5 +22,7 @@ ${R} .mdl-sw button.on{${DARK}}
 ${R} #langBtn{${GL};color:#1D1D1F!important}
 ${R} .ft-fab,${R} #testbadge{${DARK}}
 ${R} #tabbar{background:rgba(247,247,249,.8)!important;-webkit-backdrop-filter:blur(30px) saturate(180%)!important;backdrop-filter:blur(30px) saturate(180%)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.7)!important}
+/* надписите за лиценз на 3D моделите: връзките в цвета на текста (не жълти) */
+${R} .credit3d a{color:inherit!important;text-decoration:underline;text-underline-offset:2px}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){${R} #main .b:not(.primary),${R} .fs-btn,${R} .mdl-sw,${R} #langBtn{background:#fff!important}}
 `;document.head.appendChild(st)})();
