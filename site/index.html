@@ -3863,6 +3863,13 @@ const MK={
   // басейн от еднакви сфери (йони, молекули)
   pool(T,hex,r,n,o={}){const im=new T.InstancedMesh(new T.SphereGeometry(r,o.seg||18,o.seg?Math.round(o.seg*0.7):12),o.mat||MK.mat(T,hex,{roughness:0.25,clearcoat:0.6,emissive:LIN(T,hex),emissiveIntensity:o.glow||0.12}),n);im.count=0;im.frustumCulled=false;
     const m=new T.Matrix4();im.put=(pts)=>{let k=0;for(const p of pts){if(k>=n)break;m.makeTranslation(p.x,p.y,p.z);if(p.s!=null){m.elements[0]=m.elements[5]=m.elements[10]=p.s}im.setMatrixAt(k++,m)}im.count=k;im.instanceMatrix.needsUpdate=true};return im},
+  /* плавно поставяне: всяка частица пази самоличност и се плъзга към новата цел; новите „израстват“, излишните се свиват */
+  smoothPut(pool,targets,dt,rate=9){const L=pool._sm||(pool._sm=[]),k=1-Math.exp(-rate*dt),used=new Array(targets.length).fill(false);
+    for(const q of L){let bi=-1,bd=1e9;for(let j=0;j<targets.length;j++){if(used[j])continue;const d=q.p.distanceToSquared(targets[j]);if(d<bd){bd=d;bi=j}}
+      if(bi>=0&&bd<4){used[bi]=true;q.p.lerp(targets[bi],k);q.a+=(1-q.a)*k*1.4;q.dead=false}else{q.a-=dt*3;q.dead=true}}
+    for(let j=0;j<targets.length;j++)if(!used[j])L.push({p:targets[j].clone(),a:0,dead:false});
+    for(let j=L.length-1;j>=0;j--)if(L[j].dead&&L[j].a<=0)L.splice(j,1);
+    pool.put(L.map(q=>{const p=q.p.clone();p.s=Math.max(.001,Math.min(1,q.a));return p}))},
   // малки молекули като групи сфери
   mol(T,kind){const g=new T.Group();const S=(x,y,z,r,h)=>{const me=new T.Mesh(new T.SphereGeometry(r,14,10),MK.mat(T,h,{roughness:0.3,clearcoat:0.6}));me.position.set(x,y,z);g.add(me);return me};
     if(kind==="atp"){S(-0.55,0.15,0,0.28,0x4dabf7);S(-0.3,0.42,0,0.24,0x4dabf7);S(-0.05,0.1,0,0.27,0xfab005);[0.4,0.8,1.2].forEach((x,i)=>{S(x,0.0,0,0.2,0xfd7e14);S(x,0.22,0.12,0.11,0xfa5252);S(x,-0.2,-0.1,0.11,0xfa5252)})}
@@ -4222,11 +4229,11 @@ const STG_CH={id:"stgCH",foc:[[0,0.3,0,12.5],[0,-2,0,8],[0,-0.5,0,7.5],[0,1.3,0,
     return {g,low,ox,open:a=>low.quaternion.setFromAxisAngle(ax,-a)}};
   ctx.subs=[sub(0,false),sub(2,false)];ctx.ghost=[sub(1,true),sub(3,true)];
   [...ctx.subs,...ctx.ghost].forEach(s=>sc.add(s.g));
-  ctx.K=MK.pool(T,0x9c36b5,0.165,12,{glow:0.2});ctx.Na=MK.pool(T,0xf76707,0.12,3,{glow:0.2});ctx.WO=MK.pool(T,0xfa5252,0.13,60,{glow:0.02});ctx.WH=MK.pool(T,0xf1f3f5,0.065,120,{glow:0});[ctx.K,ctx.Na,ctx.WO,ctx.WH].forEach(m=>sc.add(m));
+  ctx.K=MK.pool(T,0x9c36b5,0.165,24,{glow:0.2});ctx.Na=MK.pool(T,0xf76707,0.12,6,{glow:0.2});ctx.WO=MK.pool(T,0xfa5252,0.13,100,{glow:0.02});ctx.WH=MK.pool(T,0xf1f3f5,0.065,200,{glow:0});[ctx.K,ctx.Na,ctx.WO,ctx.WH].forEach(m=>sc.add(m));
   ctx.sites=[1.88,1.58,1.28,0.98].map(y=>y-0.15);ctx.last=-1;
   ctx.shell=(c,n,r,ph)=>{const a=[];for(let k=0;k<n;k++){const th=Math.acos(1-2*(k+0.5)/n),pp=k*2.4+ph;a.push(V(c.x+r*Math.sin(th)*Math.cos(pp),c.y+r*Math.cos(th),c.z+r*Math.sin(th)*Math.sin(pp)))}return a}},
  update(ctx,i,u,dt,t){const T=ctx.T,V=(x,y,z)=>new T.Vector3(x,y,z),e=easeIO(u);
-  const gate=[0,e,1,1,1,1][i];[...ctx.subs,...ctx.ghost].forEach(s=>s.open(0.42*gate));
+  const gt=[0,e,1,1,1,1-e*0][i];ctx.gs=ctx.gs==null?gt:ctx.gs+(gt-ctx.gs)*(1-Math.exp(-5*dt));const gate=ctx.gs;[...ctx.subs,...ctx.ghost].forEach(s=>s.open(0.42*gate));
   const glow=i===3?Math.sin(Math.PI*u)*0.8:0;ctx.subs.forEach(s=>s.ox.forEach(o=>o.material.emissiveIntensity=glow));
   const S=ctx.sites,K=[],WO=[],WH=[],Na=[];const water=(p,ang=0)=>{WO.push(p);WH.push(V(p.x+0.08,p.y+0.07,p.z+0.03),V(p.x-0.08,p.y+0.07,p.z-0.03))};
   const shell=(c,n,r,ph,keep=1)=>ctx.shell(c,n,r,ph).forEach((p,k)=>{if(k<n*keep)water(p)});
@@ -4246,7 +4253,7 @@ const STG_CH={id:"stgCH",foc:[[0,0.3,0,12.5],[0,-2,0,8],[0,-0.5,0,7.5],[0,1.3,0,
   if(i===4){K.push(V(0,S[2]+e*0.6+0.3,0));if(out){K.push(out);shell(out,8,0.42,t*0.3,outKeep)}}
   // разтвор: няколко хидратирани K⁺ отвън/отвътре
   [[2.8,4.3,0.5],[-3.2,4.6,-0.8],[3.0,-4.4,0.8],[-2.6,-4.8,-0.4]].forEach((p,k)=>{const c=V(p[0]+0.2*Math.sin(t+k),p[1],p[2]);K.push(c);shell(c,8,0.42,t*0.2+k,1)});
-  ctx.K.put(K);ctx.Na.put(Na);ctx.WO.put(WO);ctx.WH.put(WH)},
+  const sp=MK.smoothPut;sp(ctx.K,K,dt,8);sp(ctx.Na,Na,dt,8);sp(ctx.WO,WO,dt,10);sp(ctx.WH,WH,dt,10)},
  labels(ctx,i){const V=(x,y,z)=>new ctx.T.Vector3(x,y,z);const L=[["селективен филтър",V(-1.9,1.5,0.6)],["кухина",V(0.9,0.0,0.6)],["врата",V(-1.0,-2.6,0.3)],["извън клетката",V(-4.6,3.3,0.5)],["в клетката",V(-4.6,-3.5,0.5)]];
   if(i===0)L.push(["порна спирала",V(2.5,0.6,0.8)],["M1",V(1.9,0.6,0.2)]);if(i===5)L.push(["Na⁺ се връща",V(0.9,0.6,0.3)]);return L},
  stats(ctx,i){return [["Пора във филтъра","≈ 0,3 nm"],["Радиус K⁺ / Na⁺","0,133 / 0,095 nm"],["Скорост","≈ 10⁸ йона/s"],["Вратата",i===0?"затворена":"отворена"]]}};
