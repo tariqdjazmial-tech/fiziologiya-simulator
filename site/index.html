@@ -786,7 +786,7 @@ function viewNeuron3D(main){
 
   function buildScenes(){
     const T=THREE;
-    function mkR(cv){const r=new T.WebGLRenderer({canvas:cv,antialias:true,alpha:true});if(cv.parentElement)cv.parentElement.classList.add("v3d");r.setPixelRatio(Math.min(2,window.devicePixelRatio||1));return r}
+    function mkR(cv){const r=new T.WebGLRenderer({canvas:cv,antialias:!LOWGPU,alpha:true});if(cv.parentElement)cv.parentElement.classList.add("v3d");r.setPixelRatio(Math.min(LOWGPU?1.5:2,window.devicePixelRatio||1));return r}
     function fit(r,cam,cv){const w=cv.clientWidth,h=cv.clientHeight;if(r._w!==w||r._h!==h){r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();r._w=w;r._h=h}}
     function orbit(cam,dom,tg,o){const s=Object.assign({},o);const pts=new Map();let pd=0;
       const up=()=>{const sp=Math.sin(s.phi);cam.position.set(tg.x+s.r*sp*Math.sin(s.th),tg.y+s.r*Math.cos(s.phi),tg.z+s.r*sp*Math.cos(s.th));cam.lookAt(tg)};
@@ -1143,6 +1143,8 @@ function viewChannels(main){
 }
 
 /* ================= Общи 3D помощници ================= */
+/* телефони и таблети (iPhone затваря страницата, ако 3D сцената изисква твърде много памет/GPU): по-ниска резолюция, без изглаждане, по-леки липиди */
+const LOWGPU=(()=>{try{return matchMedia("(pointer:coarse)").matches||Math.min(screen.width,screen.height)<820||/iPhone|iPad|Android/i.test(navigator.userAgent)}catch(e){return false}})();window.LOWGPU=LOWGPU;
 function vcolor(T,v,out){const cA=new T.Color("#7f8fc9"),cB=new T.Color("#c98a84"),cC=new T.Color("#ff6b6b"),cD=new T.Color("#c8102e");const t=Math.max(0,Math.min(1,(v+90)/120));
   if(t<0.25)out.copy(cA).lerp(cB,t/0.25);else if(t<0.6)out.copy(cB).lerp(cC,(t-0.25)/0.35);else out.copy(cC).lerp(cD,(t-0.6)/0.4);return out}
 /* съобщение в 3D прозореца, когато сцената не може да тръгне — с причината и бутон за повторен опит */
@@ -1153,7 +1155,7 @@ function show3DError(wrap,err){if(!wrap)return;const msg=String(err&&err.message
 function make3D(wrap,o){
   const T=THREE;const cv=document.createElement("canvas");cv.style.cssText="width:100%;height:100%;display:block;touch-action:none";wrap.appendChild(cv);
   const lb=document.createElement("div");lb.style.cssText="position:absolute;inset:0;pointer-events:none;overflow:hidden";wrap.appendChild(lb);
-  const ren=new T.WebGLRenderer({canvas:cv,antialias:true,alpha:true});ren.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+  const ren=new T.WebGLRenderer({canvas:cv,antialias:!LOWGPU,alpha:true,powerPreference:LOWGPU?"default":"high-performance"});ren.setPixelRatio(Math.min(LOWGPU?1.5:2,window.devicePixelRatio||1));
   const scene=new T.Scene(),cam=new T.PerspectiveCamera(o.fov||40,1,0.05,500);
   if(o.hq){ren.outputEncoding=T.sRGBEncoding;ren.toneMapping=T.ACESFilmicToneMapping;ren.toneMappingExposure=1.1;
     scene.add(new T.HemisphereLight(0xffffff,0x5a6270,0.75));const k=new T.DirectionalLight(0xfff4e6,1.25);k.position.set(5,10,8);scene.add(k);
@@ -3860,10 +3862,10 @@ const MK={
   bilayer(T,o){const w=o.w||30,d=o.d||14,z0=o.z0||0,sp=o.sp||0.86,holes=o.holes||[],g=new T.Group();const H=[],Tl=[];
     for(const side of [1,-1])for(let iz=0;iz*sp*0.866<=d;iz++)for(let ix=0;ix*sp<=w;ix++){const x=-w/2+ix*sp+(iz%2)*sp/2,z=z0-d/2+iz*sp*0.866;if(holes.some(h=>Math.hypot(x-h[0],z-h[1])<h[2]))continue;
       const j=()=>((Math.sin(x*12.9898+z*78.233+side*3.1)*43758.5453)%1)*0.18;H.push([x+j(),side*(2.05+j()*0.6),z+j(),side]);Tl.push([x-0.17,side,z],[x+0.17,side,z+0.08])}
-    const sg=o.seg||[14,10],hm=new T.InstancedMesh(new T.SphereGeometry(0.43,sg[0],sg[1]),MK.mat(T,0xffffff,{roughness:0.35,clearcoat:0.5}),H.length);const m=new T.Matrix4(),c=new T.Color();
+    const sg=o.seg||(LOWGPU?[6,4]:[10,7]),hm=new T.InstancedMesh(new T.SphereGeometry(0.43,sg[0],sg[1]),MK.mat(T,0xffffff,{roughness:0.35,clearcoat:0.5}),H.length);const m=new T.Matrix4(),c=new T.Color();
     const pal=o.pal||[[0xf0a39b,0xf3b6ad,0xe58f88],[0xf0a39b,0xd8807b,0xf3b6ad]];
     H.forEach((h,i)=>{m.makeTranslation(h[0],h[1],h[2]);hm.setMatrixAt(i,m);const p=pal[h[3]>0?0:1];c.copy(LIN(T,p[i%p.length]));hm.setColorAt(i,c)});g.add(hm);
-    const tm=new T.InstancedMesh(new T.CylinderGeometry(0.11,0.09,1.55,6),MK.mat(T,o.tail||0xf3e6c4,{roughness:0.7,clearcoat:0}),Tl.length);
+    const tm=new T.InstancedMesh(new T.CylinderGeometry(0.11,0.09,1.55,LOWGPU?3:5,1,true),MK.mat(T,o.tail||0xf3e6c4,{roughness:0.7,clearcoat:0}),Tl.length);
     Tl.forEach((t,i)=>{m.makeTranslation(t[0],t[1]*1.0,t[2]);tm.setMatrixAt(i,m)});g.add(tm);g.userData={heads:hm,tails:tm};return g},
   // белтъчна повърхност от метатопки: balls=[[x,y,z,r,hex?]]
   blob(T,balls,o={}){const res=o.res||44;let mn=[1e9,1e9,1e9],mx=[-1e9,-1e9,-1e9];balls.forEach(b=>{for(let k=0;k<3;k++){mn[k]=Math.min(mn[k],b[k]-b[3]*1.8);mx[k]=Math.max(mx[k],b[k]+b[3]*1.8)}});

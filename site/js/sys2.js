@@ -243,7 +243,7 @@ const ZK={
        for(const f of fps){const a=Math.atan2(q.z-f.c.z,q.x-f.c.x),k=((Math.round(a/(Math.PI*2)*36)%36)+36)%36;if(Math.hypot(q.x-f.c.x,q.z-f.c.z)<f.R[k]+0.18){I.setMatrixAt(i,Z);ch=1;break}}}if(ch)I.instanceMatrix.needsUpdate=true})})},
  build(G,T,ctx,sp){const g=new T.Group();G.scene.add(g);ctx.B={};ctx.P={};ctx.L={};
    const real=sp.nm&&MK.real;ctx.mems=[];
-   (sp.mem||[]).forEach(m=>{const k=real&&m.bk?m.bk:1,b=MK.bilayer(T,{w:(m.w||34)/k,d:(m.d||10)/k,z0:(m.z0!=null?m.z0:-5)/k,holes:real&&m.bk?[]:(m.holes||[]),seg:real?[8,6]:null});b.scale.setScalar(k);b.position.set(m.x||0,m.y,0);if(m.rz)b.rotation.z=m.rz;g.add(b);ctx.mems.push({b,y:m.y})});
+   (sp.mem||[]).forEach(m=>{const k=real&&m.bk?m.bk:1,b=MK.bilayer(T,{w:(m.w||34)/k,d:(m.d||10)/k,z0:(m.z0!=null?m.z0:-5)/k,holes:real&&m.bk?[]:(m.holes||[]),seg:real?(window.LOWGPU?[5,4]:[8,6]):null});b.scale.setScalar(k);b.position.set(m.x||0,m.y,0);if(m.rz)b.rotation.z=m.rz;g.add(b);ctx.mems.push({b,y:m.y})});
    const pdbs=[];
    (sp.it||[]).forEach(o=>{const m=ZK.x[o.kind]?ZK.x[o.kind](T,o):o.kind==="gpcr"?ZK.gpcr(T,o.col,o.side||(o.p[1]<=-6?-1:1)):o.kind==="ball"?new T.Mesh(new T.SphereGeometry(o.r||0.7,18,14),MK.mat(T,o.col,{emissive:LIN(T,o.col),emissiveIntensity:0.1})):o.kind==="ves"?new T.Mesh(new T.SphereGeometry(o.r||1.8,24,18),new T.MeshPhysicalMaterial({color:LIN(T,o.col),transparent:true,opacity:0.35,roughness:0.3,depthWrite:false})):ZK.prot(T,o.col,o.kind);
      m.position.set(...o.p);if(o.flip)m.rotation.x=Math.PI;if(o.rz)m.rotation.z=o.rz;if(o.s)m.scale.setScalar(o.s);g.add(m);ctx.B[o.k]=m;m.userData.p0=m.position.clone();
