@@ -92,7 +92,7 @@ function b3Hb(cv){const hf=(()=>{const h=HB_PDB.hem.A,i=h.e.indexOf("F");return 
     const NF=60,fm=new T.InstancedMesh(new T.SphereGeometry(0.09,10,8),new T.MeshPhysicalMaterial({color:LIN(T,0xff4d4d),roughness:0.3,clearcoat:0.7}),NF*2);fm.frustumCulled=false;sc.add(fm);const R=MK.rnd(4),fr=[];for(let i=0;i<NF;i++)fr.push({p:V3((R()-0.5)*12,(R()-0.5)*9,(R()-0.5)*9),v:V3(R()-0.5,R()-0.5,R()-0.5).multiplyScalar(0.8),a:new T.Euler(R()*6,R()*6,R()*6)});
     const M=new T.Matrix4(),Qq=new T.Quaternion(),Sv=V3(1,1,1),ax=V3(0,1,0);let rot=0,t=0;const order=["A","C","B","D"];
     const lab=c=>{const s=surf[c];const b=new T.Box3().setFromObject(s);return b.getCenter(V3(0,0,0)).multiplyScalar(1.25)};const labP={};
-    return dt=>{t+=dt;const H=window.__HB;if(!H){G.render([]);return}const Sx=Math.max(0,Math.min(1,H.Sx||0)),ty=H.ty||"A",bl=H.blocked||0,my=ty==="M";
+    return dt=>{t+=dt;const H=window.__HBS;if(!H){G.render([]);return}const Sx=Math.max(0,Math.min(1,H.Sx||0)),ty=H.ty||"A",bl=H.blocked||0,my=ty==="M";
       // T → R: α2β2 се завърта спрямо α1β1 с ~15°
       const tgt=my?0:0.26*Math.min(1,Math.max(0,(Sx-0.15)/0.7));rot+=(tgt-rot)*Math.min(1,dt*2.5);dim2.rotation.set(0,rot,rot*0.25);
       ["B","C","D"].forEach(c=>{const v=!my;surf[c].visible=v;rib[c].tb.visible=v;heme[c].hg.visible=v;if(!v)oxy[c].visible=false});
@@ -152,6 +152,6 @@ const HB_PDB={"ch":{"A":[14.6,-4.6,-11.9,15.9,-4.2,-12.6,15.5,-3.6,-14.0,14.6,-4
 /* ---- закачане на 3D моделите към уроците по кръв ---- */
 {const _a=VIEWS.hemost,_b=VIEWS.hbcurve,_c=VIEWS.bgroups;
  if(_a)VIEWS.hemost=function(m){_a(m);window.__HS=null;b3Hemost($("#hsC"))};
- if(_b)VIEWS.hbcurve=function(m){_b(m);window.__HB=null;b3Hb($("#hbC"))};
+ if(_b)VIEWS.hbcurve=function(m){_b(m);window.__HBS=null;b3Hb($("#hbC"))};
  if(_c)VIEWS.bgroups=function(m){_c(m);window.__BG=null;b3BgCard($("#bgC"));b3BgTrans($("#bgT"))};}
 try{route()}catch(e){console.error(e)}

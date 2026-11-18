@@ -213,7 +213,7 @@ function viewHbCurve(main){
   function drawMol(dt){const c=rcv($("#hbC"));
     const Q=q(),M=hbCalc(Q);
     if(run.on){run.u+=dt/8;const ph=(run.u%1);curP=ph<0.5?40+(95-40)*Math.min(1,ph*4):95-(95-S.po2.get())*Math.min(1,(ph-0.5)*4)}else curP=S.po2.get();
-    const Sx=M.S(curP),blocked=ty==="M"?0:Math.round(((Q.co+Q.met)/100)*4*0.999+0.0);window.__HB={Sx,curP,blocked,ty};
+    const Sx=M.S(curP),blocked=ty==="M"?0:Math.round(((Q.co+Q.met)/100)*4*0.999+0.0);window.__HBS={Sx,curP,blocked,ty};
     if(!c)return;const {g,W,H}=c,k=Math.min(W/700,H/300);g.save();g.translate((W-700*k)/2,(H-300*k)/2);g.scale(k,k);
     // фон: среда с O₂ (гъстота ∝ P)
     g.fillStyle=run.on?(curP>70?"rgba(224,49,49,.10)":"rgba(36,86,164,.10)"):"rgba(134,142,150,.07)";g.beginPath();g.roundRect?g.roundRect(10,10,420,280,14):g.rect(10,10,420,280);g.fill();

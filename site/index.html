@@ -59,6 +59,7 @@ header.bar{position:sticky;top:0;z-index:40;height:var(--barH);background:var(--
 .navhead h2{font:600 26px/1 var(--cond);margin:0 0 10px}
 .navhead input{width:100%;font:inherit;font-size:15px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
 .navhead input::placeholder{color:var(--muted)}
+.mdlsw{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:13px}.mdlsw span{color:var(--muted);margin-right:auto}.mdlsw button{font:inherit;font-size:12.5px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}.mdlsw button.on{background:#1f2329;color:#fff;border-color:#1f2329}
 #navlist{flex:1;overflow:auto;padding:6px 0 16px;overscroll-behavior:contain}
 .nsec{padding:12px 16px 4px;display:grid;grid-template-columns:30px 1fr auto;align-items:baseline;gap:6px}
 .nsec .n{font:600 19px/1 var(--cond);color:var(--accent)}
@@ -263,7 +264,7 @@ details.tb summary{cursor:pointer}
 </header>
 <div class="layout">
   <aside id="nav" aria-label="Конспект">
-    <div class="navhead"><h2>Конспект</h2><input id="navq" type="search" placeholder="Търси тема" autocomplete="off" aria-label="Търси тема"></div>
+    <div class="navhead"><h2>Конспект</h2><input id="navq" type="search" placeholder="Търси тема" autocomplete="off" aria-label="Търси тема"><div class="mdlsw" role="group" aria-label="3D модели"><span>3D модели</span><button type="button" data-m="real">Реалистични</button><button type="button" data-m="simple">Опростени</button></div></div>
     <div id="navlist"></div>
     <div class="navfoot" id="navfoot"></div>
   </aside>
@@ -4014,7 +4015,9 @@ MK.ptube=function(T,curve,rf,o={}){const seg=o.seg||40,rad=o.rad||10;const geo=n
   geo.computeVertexNormals();if(o.colors)geo.setAttribute("color",new T.BufferAttribute(new Float32Array(pos.count*3).fill(1),3));const m=new T.Mesh(geo,o.mat);m.userData.seg=seg;m.userData.rad=rad;return m};
 // молекулни повърхности от PDB (design/tools/pdbsurf.py → m/mol/*.txt): зареждане и материал
 MK._mc={};
-MK.loadMesh=function(T,url){if(MK._mc[url])return MK._mc[url];return MK._mc[url]=fetch(url).then(r=>{if(!r.ok)throw new Error(url);return r.text()}).then(b64=>{const bin=atob(b64.trim()),u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
+/* избор в менюто: „реалистични“ (истински структури от PDB) или „опростени“ (схематичните модели) */
+MK.real=(()=>{try{return localStorage.getItem("fizsim_models")!=="simple"}catch(e){return true}})();
+MK.loadMesh=function(T,url){if(!MK.real&&/\/mol\//.test(url))return new Promise(()=>{});if(MK._mc[url])return MK._mc[url];return MK._mc[url]=fetch(url).then(r=>{if(!r.ok)throw new Error(url);return r.text()}).then(b64=>{const bin=atob(b64.trim()),u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
   const dv=new DataView(u8.buffer),nv=dv.getUint32(0,true),nf=dv.getUint32(4,true),mn=[0,1,2].map(k=>dv.getFloat32(8+4*k,true)),sz=[0,1,2].map(k=>dv.getFloat32(20+4*k,true));
   let o=32;const q=new Uint16Array(u8.buffer,o,nv*3);o+=nv*6;o=(o+3)&~3;const idx=new Uint32Array(u8.buffer.slice(o,o+nf*12));const pos=new Float32Array(nv*3);for(let i=0;i<nv*3;i++)pos[i]=mn[i%3]+q[i]/65535*sz[i%3];
   const g=new T.BufferGeometry();g.setAttribute("position",new T.BufferAttribute(pos,3));g.setIndex(new T.BufferAttribute(idx,1));const co=o+nf*12;
@@ -4245,7 +4248,16 @@ const STG_CH={id:"stgCH",foc:[[0,0.3,0,12.5],[0,-2,0,8],[0,-0.5,0,7.5],[0,1.3,0,
           if(k0>=hi){m.geometry.translate(-hinge.x,-hinge.y,-hinge.z);low.add(m)}else g.add(m)}k0=k}}
     const ox=[];if(!ghost)KD.ox[ci].forEach(p=>{const o=new T.Mesh(new T.SphereGeometry(0.11,14,10),MK.mat(T,0xfa5252,{emissive:LIN(T,0xfa5252),emissiveIntensity:0.0}));o.position.set(...p);g.add(o);ox.push(o)});
     return {g,low,ox,open:a=>low.quaternion.setFromAxisAngle(ax,-a)}};
-  ctx.subs=[sub(0,false),sub(2,false)];ctx.ghost=[sub(1,true),sub(3,true)];
+  /* опростен модел (схематичните спирали) */
+  const subS=(sx,ghost)=>{const g=new T.Group();const op=ghost?{transparent:true,opacity:0.13,depthWrite:false}:{};
+    g.add(MK.helix(T,V(sx*2.3,-2.4,0.2),V(sx*1.6,2.1,0.1),{color:0x748ffc,mat:MK.mat(T,0x748ffc,op)}));
+    g.add(MK.helix(T,V(sx*2.0,0.4,0.6),V(sx*1.05,1.05,0.25),{color:0xe599f7,mat:MK.mat(T,0xe599f7,op),rad:0.2}));
+    g.add(MK.helix(T,V(sx*1.15,1.6,-0.2),V(sx*0.95,-0.35,-0.1),{mat:MK.mat(T,0x4dabf7,op)}));
+    const low=new T.Group();low.position.set(sx*0.95,-0.35,-0.1);low.add(MK.helix(T,V(0,0,0),V(sx*-0.35,-2.3,0),{mat:MK.mat(T,0x4dabf7,op)}));g.add(low);
+    g.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3([V(sx*1.0,0.95,0.2),V(sx*0.62,1.0,0),V(sx*0.6,1.45,0),V(sx*0.62,1.9,0),V(sx*0.75,2.3,0.2),V(sx*1.4,2.55,0.3),V(sx*1.6,2.2,0.1)]),40,0.09,8,false),MK.mat(T,0xff8787,op)));
+    const ox=[];if(!ghost)for(const y of [0.98,1.28,1.58,1.88]){const o=new T.Mesh(new T.SphereGeometry(0.135,14,10),MK.mat(T,0xfa5252,{emissive:LIN(T,0xfa5252),emissiveIntensity:0.0}));o.position.set(sx*0.42,y,0);g.add(o);ox.push(o)}
+    if(ghost)g.rotation.y=Math.PI/2;return {g,low,ox,open:a=>{low.rotation.z=-sx*0.62*a/0.42}}};
+  if(MK.real){ctx.subs=[sub(0,false),sub(2,false)];ctx.ghost=[sub(1,true),sub(3,true)]}else{ctx.subs=[subS(1,false),subS(-1,false)];ctx.ghost=[subS(1,true),subS(-1,true)]}
   [...ctx.subs,...ctx.ghost].forEach(s=>sc.add(s.g));
   ctx.K=MK.pool(T,0x9c36b5,0.165,24,{glow:0.2});ctx.Na=MK.pool(T,0xf76707,0.12,6,{glow:0.2});ctx.WO=MK.pool(T,0xfa5252,0.13,100,{glow:0.02});ctx.WH=MK.pool(T,0xf1f3f5,0.065,200,{glow:0});[ctx.K,ctx.Na,ctx.WO,ctx.WH].forEach(m=>sc.add(m));
   ctx.sites=[1.88,1.58,1.28,0.98].map(y=>y-0.15);ctx.last=-1;
@@ -4392,7 +4404,7 @@ return {id:"stgTR",title:"Как работят дифузията, пренос
   const bx=xp+2.9;{const bb=MK.blob(T,[[bx,-1.6,-0.9,0.5,0xadb5bd],[bx,0,-0.9,0.55,0xadb5bd],[bx,1.6,-0.9,0.55,0xadb5bd],[bx-0.2,3.3,-0.7,1.2,0xadb5bd],[bx-1.1,4.0,-0.6,1.0,0xadb5bd],[bx+0.6,4.1,-0.2,0.9,0xadb5bd]],{res:36});sc.add(bb);ctx.pumpStatic.push(bb)}
   [[bx+1.1,4.9,0.2],[bx+1.6,5.6,0.4],[bx+2.1,6.1,0.1],[bx-1.4,5.0,-0.2],[bx-1.0,5.8,0.1]].forEach(p=>{const m=new T.Mesh(new T.SphereGeometry(0.28,12,8),MK.mat(T,0xe9ecef));m.position.set(...p);sc.add(m);ctx.pumpStatic.push(m)});
   /* истински структури (RCSB PDB): GLUT1 4PYP, vSGLT 3DH4, Na⁺/K⁺-ATP-аза 3B8E — половините се люлеят като преди */
-  {const S=.62,S2=.78;const real=(rk,x,a,b)=>{rk.L.position.x=x;rk.R.position.x=x;MK.swapMol(T,rk.L,a,{s:S2});MK.swapMol(T,rk.R,b,{s:S2})};
+  if(MK.real){const S=.62,S2=.78;const real=(rk,x,a,b)=>{rk.L.position.x=x;rk.R.position.x=x;MK.swapMol(T,rk.L,a,{s:S2});MK.swapMol(T,rk.R,b,{s:S2})};
    real(ctx.glut,xf,"m/mol/glut1_n.txt","m/mol/glut1_c.txt");real(ctx.sglt,xg,"m/mol/sglt_n.txt","m/mol/sglt_c.txt");
    const PR=Math.PI;ctx.nka.L.position.x=xp;ctx.nka.R.position.x=xp;ctx.nka.R.children.forEach(c=>c.visible=false);
    MK.swapMol(T,ctx.nka.L,"m/mol/nka_tm.txt",{s:S,ry:PR});ctx.pumpStatic.forEach(m=>m.visible=false);
@@ -7597,6 +7609,10 @@ function lessonParts(mn,v){const tp=$("#tab_tst",mn),gp=$("#tab_gl",mn);
   const ids=linkTerms(mn).sort((a,b)=>GL[a].t.localeCompare(GL[b].t,"bg"));
   gp.innerHTML=ids.length?`<div class="card"><h3 style="margin-top:0">Речник на урока</h3><p class="small" style="margin:0 0 8px;color:var(--muted)">${ids.length} термина от теорията и теста. Подчертаните думи в текста също се отварят с докосване.</p>`+ids.map(i=>`<details class="gl"><summary>${GL[i].t}</summary><div>${GL[i].d}</div></details>`).join("")+`</div>`:`<div class="card">Няма термини за този урок.</div>`}
 /* <</BOOK>> */
+/* превключвател „3D модели“ в менюто: изборът се пази и страницата се презарежда на същата тема */
+(function(){const box=document.querySelector(".mdlsw");if(!box)return;const cur=MK.real?"real":"simple";
+  box.querySelectorAll("button").forEach(b=>{b.classList.toggle("on",b.dataset.m===cur);b.setAttribute("aria-pressed",b.dataset.m===cur);
+    b.onclick=()=>{if(b.dataset.m===cur)return;try{localStorage.setItem("fizsim_models",b.dataset.m)}catch(e){}location.reload()}})})();
 const VIEWS={home:viewHome,about:viewAbout,glossary:viewGlossary,test:viewTest,ghk:viewGHK,ap:viewAP,neuron3d:viewNeuron3D,channels:viewChannels,transport:viewTransport,nka:viewNKA,synapse:viewSynapse,skeletal:viewSkeletal,smooth:viewSmooth,heart3d:viewHeartSwitch,ecg:viewECG,cardap:viewCardiacAP,hemo:viewHemo,baro:viewBaro,starling:viewStarling,lungmech:viewLungMech,gasx:viewGasX,respreg:viewRespReg,xb:viewXB,chemsyn:viewChemSyn,elecsyn:viewElecSyn,cardio:viewCardio};
 let curView="home";
 function buildNav(cur){
