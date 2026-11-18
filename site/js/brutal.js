@@ -47,7 +47,7 @@ html body:not(#nb) header.bar button:not(.iconbtn){background:var(--nb-bl)!impor
 html body:not(#nb) .b:hover,html body:not(#nb) .btns button:hover,html body:not(#nb) .buy-cta:hover,html body:not(#nb) .cont2:hover .cg,html body:not(#nb) .sub:hover,html body:not(#nb) .quick a.prem:hover,html body:not(#nb) header.bar button:not(.iconbtn):hover,html body:not(#nb) .lp-ghost:hover,html body:not(#nb) .hero-alt:hover{
  transform:translate(-2px,-2px)!important;box-shadow:var(--nb-sh-h)!important}
 html body:not(#nb) .b:not(.primary):not(.pri):hover,html body:not(#nb) .btns button:not(.on):hover{background:var(--nb-y-50)!important}
-html body:not(#nb) .b.primary:hover,html body:not(#nb) .buy-cta:hover,html body:not(#nb) .cont2:hover .cg,html body:not(#nb) .sub:hover{background:#FFE066!important}
+html body:not(#nb) .b.primary:hover,html body:not(#nb) .buy-cta:hover,html body:not(#nb) .cont2:hover .cg,html body:not(#nb) .sub:hover{background:#FFA8A8!important}
 html body:not(#nb) .b:active,html body:not(#nb) .btns button:active,html body:not(#nb) .buy-cta:active,html body:not(#nb) .cont2:active .cg,html body:not(#nb) .sub:active,html body:not(#nb) .quick a.prem:active,html body:not(#nb) header.bar button:not(.iconbtn):active,html body:not(#nb) .lp-ghost:active{
  transform:translate(4px,4px)!important;box-shadow:0 0 0 var(--nb-ink)!important;transition-duration:.04s!important}
 html body:not(#nb) .b::after,html body:not(#nb) .buy-cta::after,html body:not(#nb) .cont2 .cg::after,html body:not(#nb) .sub::after{display:none!important}

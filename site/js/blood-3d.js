@@ -68,7 +68,7 @@ function b3Hemost(cv){r3Attach(cv,460,{r:135,th:0.35,phi:1.15,target:[0,-10,0],f
 /* ---- III.2 Хемоглобин: реална структура PDB 1GZX (тетрамер α2β2 с 4 хема и O₂) ---- */
 function b3Hb(cv){const hf=(()=>{const h=HB_PDB.hem.A,i=h.e.indexOf("F");return [h.p[3*i]*0.1,h.p[3*i+1]*0.1,h.p[3*i+2]*0.1]})();r3Attach(cv,460,{r:15,th:0.4,phi:1.35,target:[0,0,0],fov:36,min:4,max:40},(G,ctx)=>{const T=G.T,sc=G.scene,V3=(x,y,z)=>new T.Vector3(x,y,z);G.ren.toneMappingExposure=1.0;
     if(window.THREE&&THREE.RoomEnvironment&&!sc.environment){const pm=new T.PMREMGenerator(G.ren);sc.environment=pm.fromScene(new THREE.RoomEnvironment(),0.04).texture}
-    const K=0.1,D=HB_PDB,COL={A:0xe8590c,B:0x4263eb,C:0xf08c3c,D:0x5c7cfa},GAM={B:0x2f9e44,D:0x51cf66};
+    const K=0.1,D=HB_PDB,COL={A:0xe8590c,B:0x4263eb,C:0xf08c3c,D:0x5c7cfa},GAM={B:0x1c7ed6,D:0x74c0fc};
     // α1β1 (A,B) неподвижни; α2β2 (C,D) се завъртат при прехода T → R
     const dim1=new T.Group(),dim2=new T.Group();sc.add(dim1,dim2);const piv=V3(0,0,0);
     const surf={},rib={},heme={},oxy={};

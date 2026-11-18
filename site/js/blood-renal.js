@@ -102,7 +102,7 @@ function viewHemost(main){
     // съд: лумен, стена с ендотел, рана
     g.fillStyle="rgba(224,49,49,.10)";g.fillRect(0,30,330,130);g.fillStyle="#f1c7c7";g.fillRect(0,160,330,26);
     for(let x=0;x<330;x+=30){if(x>=120&&x<210)continue;g.fillStyle="#f8dada";g.strokeStyle="#d08a8a";g.lineWidth=1;g.beginPath();g.ellipse(x+15,164,14,5,0,0,7);g.fill();g.stroke()}
-    g.fillStyle="#fff3bf";g.fillRect(120,160,90,26);g.strokeStyle="#e0a800";g.lineWidth=1.3;for(let i=0;i<7;i++){g.beginPath();g.moveTo(122+i*12,186);g.bezierCurveTo(128+i*12,176,118+i*12,170,128+i*12,161);g.stroke()}
+    g.fillStyle="#ffe3e3";g.fillRect(120,160,90,26);g.strokeStyle="#e0a800";g.lineWidth=1.3;for(let i=0;i<7;i++){g.beginPath();g.moveTo(122+i*12,186);g.bezierCurveTo(128+i*12,176,118+i*12,170,128+i*12,161);g.stroke()}
     g.fillStyle="#e9ecef";g.fillRect(0,186,330,40);g.fillStyle=css("--muted");g.font=RFONT(10.5,600);g.textAlign="left";g.fillText("лумен",6,44);g.fillText("ендотел",6,176);g.fillText("тъкан",6,214);g.textAlign="center";g.fillText("колаген + TF",165,200);
     // вазоконстрикция в първите минути
     const vc=Math.max(0,1-s.t/120)*0.5;if(vc>0.02){g.strokeStyle=css("--accent5");g.lineWidth=2;rArrow(g,60,22,60,34+vc*14,css("--accent5"),2);rArrow(g,270,22,270,34+vc*14,css("--accent5"),2);g.fillStyle=css("--accent5");g.font=RFONT(10.5,700);g.fillText("вазоконстрикция",165,20)}
@@ -229,7 +229,7 @@ function viewHbCurve(main){
     const cx=220,cy=150,gap=8+Rst*10,rot=Rst*0.26;
     const pos=ty==="M"?[[0,0]]:[[-1,-1],[1,-1],[-1,1],[1,1]];
     pos.forEach(([a,b],i)=>{const s=sub[i],x=cx+a*(42+gap),y=cy+b*(42+gap);g.save();g.translate(x,y);g.rotate(a*b*rot);
-      g.fillStyle=ty==="M"?"#c2255c":(ty==="F"&&i>=2?"#2b8a3e":s.c);g.globalAlpha=0.85;g.beginPath();g.roundRect?g.roundRect(-38,-38,76,76,Rst>0.5?30:10):g.rect(-38,-38,76,76);g.fill();g.globalAlpha=1;
+      g.fillStyle=ty==="M"?"#c2255c":(ty==="F"&&i>=2?"#1971c2":s.c);g.globalAlpha=0.85;g.beginPath();g.roundRect?g.roundRect(-38,-38,76,76,Rst>0.5?30:10):g.rect(-38,-38,76,76);g.fill();g.globalAlpha=1;
       // хем
       g.fillStyle="#fff";g.globalAlpha=0.9;g.beginPath();g.moveTo(-14,0);g.lineTo(0,-14);g.lineTo(14,0);g.lineTo(0,14);g.closePath();g.fill();g.globalAlpha=1;
       g.fillStyle=s.k==="met"?"#5c3d2e":"#7a4a00";g.beginPath();g.arc(0,0,5,0,7);g.fill();
@@ -349,7 +349,7 @@ function viewBloodGroups(main){
     g.fillStyle=css("--ink");g.font=RFONT(12,700);g.textAlign="left";g.fillText("вена на реципиента ("+nm(r)+")",8,30);g.textAlign="right";g.fillText((prod==="rbc"?"еритроцити":"плазма")+" на донора ("+nm(d)+") →",692,30);
     const an=bgAnt(d),rn=bgAnt(r);
     for(let i=0;i<30;i++){const x=((i*53+performance.now()/30)%700),y=50+(i*37)%50,don=i%3===0,hem=!C.ok&&don&&prod==="rbc"&&u>0.6;
-      if(prod==="pl"&&don){g.fillStyle="#f59f00";g.beginPath();g.moveTo(x,y-5);g.lineTo(x+4,y+4);g.lineTo(x-4,y+4);g.closePath();g.fill();continue}
+      if(prod==="pl"&&don){g.fillStyle="#f76707";g.beginPath();g.moveTo(x,y-5);g.lineTo(x+4,y+4);g.lineTo(x-4,y+4);g.closePath();g.fill();continue}
       const col=don?"#862e9c":"#c92a2a";if(hem){g.strokeStyle=col;g.setLineDash([2,2]);g.beginPath();g.arc(x,y,6,0,7);g.stroke();g.setLineDash([]);continue}
       g.fillStyle=col;g.beginPath();g.ellipse(x,y,7,4.5,0,0,7);g.fill();
       if(!C.ok&&u>0.3&&(prod==="rbc"?don:!don)){g.strokeStyle="#f08c00";g.lineWidth=1.5;for(let j=0;j<3;j++){const a=j*2.1;g.beginPath();g.moveTo(x+Math.cos(a)*7,y+Math.sin(a)*5);g.lineTo(x+Math.cos(a)*12,y+Math.sin(a)*9);g.stroke()}}}
@@ -503,7 +503,7 @@ function viewGFR(main){
     g.fillStyle="rgba(250,176,5,.08)";g.strokeStyle="#c47f0e";g.lineWidth=3;g.beginPath();g.arc(330,170,128,0.35*Math.PI,2.65*Math.PI);g.stroke();g.beginPath();g.arc(330,170,128,0,7);g.fill();
     // тубул
     g.strokeStyle="#c47f0e";g.lineWidth=3;g.beginPath();g.moveTo(330+128*Math.cos(0.35*Math.PI),170+128*Math.sin(0.35*Math.PI));g.lineTo(420,330);g.moveTo(330+128*Math.cos(2.65*Math.PI)+0,170+128*Math.sin(2.65*Math.PI));g.lineTo(520,320);g.stroke();
-    g.fillStyle="#fff3bf";g.beginPath();g.moveTo(330+128*Math.cos(0.35*Math.PI),170+128*Math.sin(0.35*Math.PI));g.lineTo(420,330);g.lineTo(520,320);g.lineTo(330+128*Math.cos(0.65*Math.PI-2*Math.PI),170+128*Math.sin(0.65*Math.PI));g.closePath();
+    g.fillStyle="#ffe3e3";g.beginPath();g.moveTo(330+128*Math.cos(0.35*Math.PI),170+128*Math.sin(0.35*Math.PI));g.lineTo(420,330);g.lineTo(520,320);g.lineTo(330+128*Math.cos(0.65*Math.PI-2*Math.PI),170+128*Math.sin(0.65*Math.PI));g.closePath();
     g.fillStyle=css("--muted");g.font=RFONT(11,700);g.textAlign="center";g.fillText("капсула на Боуман  P_B = "+fmt(p.pb,0)+" mmHg",330,28);g.fillText("→ проксимален тубул",520,336);
     // аферентна (отляво отгоре) и еферентна
     const vess=(x1,y1,x2,y2,w,col)=>{g.strokeStyle=col;g.lineWidth=w;g.lineCap="round";g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke()};
@@ -518,7 +518,7 @@ function viewGFR(main){
     // стрелки на филтрация, намаляващи по дължината
     loops.forEach(([x,y],i)=>{const u=i/(loops.length-1),q=R.prof[Math.round(u*(R.prof.length-1))],net=Math.max(0,q[3]),L=4+net*2.2,ang=Math.atan2(y-170,x-330),x0=330+Math.cos(ang)*85,y0=170+Math.sin(ang)*85;if(net>0.3)rArrow(g,x0,y0,x0+Math.cos(ang)*L,y0+Math.sin(ang)*L,"#2b8a5a",2.2)});
     // поток на филтрата
-    if(Math.random()<dt*R.GFR/8)fil.push({u:0});fil=fil.filter(f=>{f.u+=dt*0.45;const x=330+(470-330)*f.u,y=260+(325-260)*f.u;g.fillStyle="#f59f00";g.beginPath();g.arc(x,y,3,0,7);g.fill();return f.u<1});
+    if(Math.random()<dt*R.GFR/8)fil.push({u:0});fil=fil.filter(f=>{f.u+=dt*0.45;const x=330+(470-330)*f.u,y=260+(325-260)*f.u;g.fillStyle="#f76707";g.beginPath();g.arc(x,y,3,0,7);g.fill();return f.u<1});
     // кръв
     if(Math.random()<dt*R.RBF/60)parts.push({u:0,lane:Math.random()});parts=parts.filter(q=>{q.u+=dt*0.35*Math.min(2,R.RBF/1100+0.2);let x,y;if(q.u<0.5){const v=q.u/0.5;x=20+(250-20)*v;y=100+(150-100)*v+(q.lane-0.5)*wA*0.6}else{const v=(q.u-0.5)/0.5;x=250+(40-250)*v;y=190+(250-190)*v+(q.lane-0.5)*wE*0.6}g.fillStyle="#fff";g.globalAlpha=0.8;g.beginPath();g.arc(x,y,2.4,0,7);g.fill();g.globalAlpha=1;return q.u<1});
     rTag(g,560,30,["GFR "+fmt(R.GFR,0)+" mL/min","кръвоток "+fmt(R.RBF,0)+" mL/min"],{fs:12.5,c:R.GFR<60?css("--accent"):css("--ink")});

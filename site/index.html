@@ -713,7 +713,7 @@ function viewNeuron3D(main){
     </div>
     <div class="stats" id="gst" style="margin-top:10px"></div>
     <div class="note" id="phase"></div>
-    <div class="legend"><span><i style="background:#ff8c1a;height:10px"></i>Na⁺ канал (m порта + h топче)</span><span><i style="background:#4c6ef5;height:10px"></i>K⁺ канал (n порта)</span><span><i style="background:#37b24d;height:10px"></i>Na⁺/K⁺ ATP-аза</span><span><i style="background:#fcc419;height:10px;border-radius:50%;width:10px"></i>Na⁺</span><span><i style="background:#9c36b5;height:10px;border-radius:50%;width:10px"></i>K⁺</span></div>
+    <div class="legend"><span><i style="background:#ff8c1a;height:10px"></i>Na⁺ канал (m порта + h топче)</span><span><i style="background:#4c6ef5;height:10px"></i>K⁺ канал (n порта)</span><span><i style="background:#339af0;height:10px"></i>Na⁺/K⁺ ATP-аза</span><span><i style="background:#ff922b;height:10px;border-radius:50%;width:10px"></i>Na⁺</span><span><i style="background:#9c36b5;height:10px;border-radius:50%;width:10px"></i>K⁺</span></div>
   </div>
   <div class="card"><h3 style="margin-top:0">Последователност</h3>
   <ol style="margin:0;padding-left:20px;font-size:14px">
@@ -866,7 +866,7 @@ function viewNeuron3D(main){
         ch.chainG=new T.BufferGeometry().setFromPoints([new T.Vector3(),new T.Vector3()]);g.add(new T.Line(ch.chainG,new T.LineBasicMaterial({color:0xc92a2a})))}
       sM.add(g);chans.push(ch);return ch}
     chPos.na.forEach(p=>channel(p[0],p[1],"na"));chPos.k.forEach(p=>channel(p[0],p[1],"k"));
-    const pump=new T.Mesh(new T.BoxGeometry(1.1,1.9,1.1),new T.MeshStandardMaterial({color:0x37b24d,roughness:0.5}));pump.position.set(chPos.pump[0][0],0,chPos.pump[0][1]);sM.add(pump);
+    const pump=new T.Mesh(new T.BoxGeometry(1.1,1.9,1.1),new T.MeshStandardMaterial({color:0x339af0,roughness:0.5}));pump.position.set(chPos.pump[0][0],0,chPos.pump[0][1]);sM.add(pump);
     const naMat=new T.MeshStandardMaterial({color:0xf76707,emissive:0x5a2000,emissiveIntensity:0.4}),kMat=new T.MeshStandardMaterial({color:0x9c36b5,emissive:0x2b0a33,emissiveIntensity:0.4});
     const ionG=new T.SphereGeometry(0.14,12,10);const ions=[];
     function ion(type,x,y,z){const m=new T.Mesh(ionG,type==="na"?naMat:kMat);m.position.set(x,y,z);sM.add(m);const o={m,type,v:new T.Vector3(),path:null};ions.push(o);return o}
@@ -890,7 +890,7 @@ function viewNeuron3D(main){
       ring.position.copy(pp);ring.quaternion.setFromUnitVectors(new T.Vector3(0,0,1),pt);ring.scale.setScalar(rr);
       const ei=stt.site==="soma"?null:CAB_NS+48;
       if(ei==null)elec.position.set(-5.8,1.32,0.3);else{const p=NR.pAx((ei-CAB_NS+0.5)/CAB_NA);elec.position.set(p.x,p.y+(stt.myelin?0.36:0.15),p.z)}
-      elecM.emissive.setHex(stimOn?0xffd43b:0x000000);elecM.emissiveIntensity=stimOn?1.2:0;
+      elecM.emissive.setHex(stimOn?0xff8787:0x000000);elecM.emissiveIntensity=stimOn?1.2:0;
       const ls=lblN.slice();if(stt.myelin){ls.push(lblMy,lblNode)}labels(lbN,camN,cvN,ls);
       rN.render(sN,camN);
       /* <</NEUUPD>> */
@@ -1281,11 +1281,11 @@ function viewTransport(main){
     if(m==="simple"||m==="facil"){const xs=[],ys1=[],ys2=[];const k=m==="facil"?Km():1.5,V=m==="facil"?Vf():0.6,P=m==="simple"?S.P.get():0.1;
       for(let x=0;x<=25;x+=0.5){xs.push(x);ys1.push(P*x);ys2.push(V*x/(k+x))}
       const cur=m==="simple"?[S.Co.get(),P*S.Co.get()]:[S.Co.get(),V*S.Co.get()/(k+S.Co.get())];
-      plot($("#pJ"),{xmin:0,xmax:25,ymin:0,ymax:Math.max(1,Math.min(3,Math.max(...ys1,...ys2))),xlabel:"концентрация навън, mmol/L",ylabel:"начален поток",series:[{x:xs,y:ys1,color:"#fa5252"},{x:xs,y:ys2,color:"#12b886"}],marks:[{x:cur[0],y:cur[1],color:css("--ink")}],hlines:m==="facil"?[{y:V,color:"#12b886",label:"Vmax"}]:[]});
-      $("#lgJ").innerHTML=`<span><i style="background:#fa5252"></i>проста дифузия (линейна)</span><span><i style="background:#12b886"></i>улеснена (насищане)</span>`}
+      plot($("#pJ"),{xmin:0,xmax:25,ymin:0,ymax:Math.max(1,Math.min(3,Math.max(...ys1,...ys2))),xlabel:"концентрация навън, mmol/L",ylabel:"начален поток",series:[{x:xs,y:ys1,color:"#fa5252"},{x:xs,y:ys2,color:"#4c6ef5"}],marks:[{x:cur[0],y:cur[1],color:css("--ink")}],hlines:m==="facil"?[{y:V,color:"#4c6ef5",label:"Vmax"}]:[]});
+      $("#lgJ").innerHTML=`<span><i style="background:#fa5252"></i>проста дифузия (линейна)</span><span><i style="background:#4c6ef5"></i>улеснена (насищане)</span>`}
     else if(m==="pump"){const xs=[],ys=[];for(let x=0;x<=60;x+=1){xs.push(x);ys.push(pumpRate(x,S.ATP.get()/100))}
-      plot($("#pJ"),{xmin:0,xmax:60,ymin:0,ymax:0.7,xlabel:"[Na⁺]ᵢ, mmol/L",ylabel:"скорост на помпата",series:[{x:xs,y:ys,color:"#40c057"}],marks:[{x:X.Nai,y:pumpRate(X.Nai,S.ATP.get()/100),color:css("--ink")}]});
-      $("#lgJ").innerHTML=`<span><i style="background:#40c057"></i>активност спрямо [Na⁺]ᵢ (сигмоидна — 3 места за Na⁺)</span>`}
+      plot($("#pJ"),{xmin:0,xmax:60,ymin:0,ymax:0.7,xlabel:"[Na⁺]ᵢ, mmol/L",ylabel:"скорост на помпата",series:[{x:xs,y:ys,color:"#4dabf7"}],marks:[{x:X.Nai,y:pumpRate(X.Nai,S.ATP.get()/100),color:css("--ink")}]});
+      $("#lgJ").innerHTML=`<span><i style="background:#4dabf7"></i>активност спрямо [Na⁺]ᵢ (сигмоидна — 3 места за Na⁺)</span>`}
     else{const xs=[],a1=[],a2=[];for(let x=0;x<=10;x+=0.2){xs.push(x);a1.push(sgltJ(x,0,S.Nao.get(),X.Nai));a2.push(sgltJ(x,0,30,X.Nai))}
       plot($("#pJ"),{xmin:0,xmax:10,ymin:0,ymax:0.5,xlabel:"глюкоза в лумена, mmol/L",ylabel:"начален поток",series:[{x:xs,y:a1,color:"#845ef7"},{x:xs,y:a2,color:css("--ref"),dash:[5,4]}]});
       $("#lgJ").innerHTML=`<span><i style="background:#845ef7"></i>при текущия [Na⁺]</span><span><i style="background:${css("--ref")}"></i>при [Na⁺] = 30 mmol/L</span>`}
@@ -1347,7 +1347,7 @@ function viewNKA(main){
    <div class="btns" id="scn"></div>
    <div class="grid2"><div id="pc"></div><div><canvas id="cell" style="width:100%;height:320px;display:block"></canvas><div class="stats" id="pst" style="margin-top:6px"></div></div></div>
    <div class="note" id="pn"></div>
-   <div class="nka3"><div><canvas class="plot" id="p1" style="height:200px"></canvas><div class="legend"><span><i style="background:#f76707"></i>[Na⁺]ᵢ</span><span><i style="background:#9c36b5"></i>[K⁺]ᵢ</span><span><i style="background:#2f9e44"></i>[Cl⁻]ᵢ</span></div></div>
+   <div class="nka3"><div><canvas class="plot" id="p1" style="height:200px"></canvas><div class="legend"><span><i style="background:#f76707"></i>[Na⁺]ᵢ</span><span><i style="background:#9c36b5"></i>[K⁺]ᵢ</span><span><i style="background:#1c7ed6"></i>[Cl⁻]ᵢ</span></div></div>
     <div><canvas class="plot" id="p2" style="height:200px"></canvas><div class="legend"><span><i style="background:var(--accent)"></i>V<sub>m</sub></span><span><i class="dash" style="border-color:#9c36b5"></i>E<sub>K</sub></span></div></div>
     <div><canvas class="plot" id="p3" style="height:200px"></canvas><div class="legend"><span><i style="background:#1c7ed6"></i>обем на клетката</span></div></div></div></div>
   <h3>Експерименти</h3><div id="ex"></div>`;
@@ -1438,12 +1438,12 @@ function viewNKA(main){
       arr(a-0.11,false,3*Jp,"#f76707",j===0?"3 Na⁺":"");arr(a+0.11,true,2*Jp,"#9c36b5",j===0?"2 K⁺":"")});
     g.font=`600 12px ${F}`;g.fillStyle=css("--ink");g.textAlign="left";g.textBaseline="middle";g.fillText(cell.par.act>0?"помпа":"помпа (блок)",cx+R+14,cy);
     // течове (вляво)
-    arr(Math.PI+0.5,fl.Na>=0,Math.abs(fl.Na),"#f76707","Na⁺ теч");arr(Math.PI,fl.K<0,Math.abs(fl.K),"#9c36b5","K⁺ теч");arr(Math.PI-0.5,fl.Cl>=0,Math.abs(fl.Cl),"#2f9e44","Cl⁻");
+    arr(Math.PI+0.5,fl.Na>=0,Math.abs(fl.Na),"#f76707","Na⁺ теч");arr(Math.PI,fl.K<0,Math.abs(fl.K),"#9c36b5","K⁺ теч");arr(Math.PI-0.5,fl.Cl>=0,Math.abs(fl.Cl),"#1c7ed6","Cl⁻");
     g.textAlign="center";g.textBaseline="middle";g.fillStyle=css("--ink");g.font=`700 20px ${F}`;g.fillText(`${fmt(cell.V,1)} mV`,cx,cy-R*0.4);
     g.font=`13px ${F}`;g.fillText(`Na⁺ ${fmt(c[0],1)}   K⁺ ${fmt(c[1],0)}`,cx,cy-R*0.06);g.fillText(`Cl⁻ ${fmt(c[2],1)} mmol/L`,cx,cy+R*0.16);
     g.fillStyle=css("--muted");g.font=`12px ${F}`;g.fillText("белтъци и фосфати (−)",cx+6,cy+R*0.48);g.fillText("не излизат",cx+6,cy+R*0.48+14)}
   function drawPlots(){const t1=Math.max(60,cell.t),x0=Math.max(0,t1-60),D=H.filter(h=>h[0]>=x0),tx=D.map(h=>h[0]);
-    plot($("#p1"),{xmin:x0,xmax:t1,ymin:0,ymax:160,xlabel:"време, min",ylabel:"mmol/L",series:[{x:tx,y:D.map(h=>h[1]),color:"#f76707"},{x:tx,y:D.map(h=>h[2]),color:"#9c36b5"},{x:tx,y:D.map(h=>h[3]),color:"#2f9e44"}]});
+    plot($("#p1"),{xmin:x0,xmax:t1,ymin:0,ymax:160,xlabel:"време, min",ylabel:"mmol/L",series:[{x:tx,y:D.map(h=>h[1]),color:"#f76707"},{x:tx,y:D.map(h=>h[2]),color:"#9c36b5"},{x:tx,y:D.map(h=>h[3]),color:"#1c7ed6"}]});
     plot($("#p2"),{xmin:x0,xmax:t1,ymin:-110,ymax:0,xlabel:"време, min",ylabel:"mV",series:[{x:tx,y:D.map(h=>h[6]),color:"#9c36b5",dash:[5,4],width:1.5},{x:tx,y:D.map(h=>h[4]),color:css("--accent")}]});
     const wy=D.map(h=>h[5]);plot($("#p3"),{xmin:x0,xmax:t1,ymin:90,ymax:Math.max(120,Math.ceil((Math.max(...wy,100)+5)/10)*10),xlabel:"време, min",ylabel:"% от началния",series:[{x:tx,y:wy,color:"#1c7ed6"}],hlines:[{y:100,color:css("--muted")}]});
     const E=cell.E();$("#pst").innerHTML=statsHTML([["V<sub>m</sub>",fmt(cell.V,1)+" mV"],["E<sub>K</sub> / E<sub>Na</sub>",fmt(E.K,0)+" / +"+fmt(E.Na,0)+" mV"],["Работеща помпа",fmt(cell.v,0)+" цикъла/s"],["Обем",fmt(cell.W*100,1)+" %"],["Време",fmt(cell.t,0)+" min"]])}
@@ -1641,7 +1641,7 @@ const TESTS_SK=[
 function viewSkeletal(main){
   main.innerHTML=`<h2>Скелетен мускул: саркомер и съкращение</h2><p class="lead">3D модел на саркомер: Z-дискове, тънки нишки (актин с тропомиозин и тропонин), дебели нишки (миозин с глави), M-линия и титин. Стимулирай, променяй честотата и дължината и наблюдавай плъзгането на нишките, цикъла на напречните мостове, сумацията и тетануса.</p>
   <div class="card" style="padding:10px"><div class="btns"><button class="b primary" id="demo">■︎ Спри демонстрацията</button><button class="b" id="one">Единичен стимул</button><button class="b" id="run">▶︎ Непрекъсната стимулация</button><button class="b" id="pause">⏸︎ Пауза</button><a class="b" href="#xb" style="text-decoration:none">Близък план: миозин, тропомиозин, ATP</a></div>
-  ${wrap3D("w3",420)}<div class="legend" style="margin-top:6px"><span><i style="background:#f08c00"></i>актин (тънки)</span><span><i style="background:#7048e8"></i>миозин (дебели)</span><span><i style="background:#2f9e44"></i>тропомиозин</span><span><i style="background:#fab005;width:10px;height:10px;border-radius:50%"></i>тропонин (свети при Ca²⁺)</span><span><i style="background:#74c0fc;width:10px;height:10px;border-radius:50%"></i>Ca²⁺</span><span><i style="background:#339af0"></i>T-тубул</span><span><i style="background:#63e6be"></i>СР</span><span><i style="background:#ff6b6b;width:10px;height:10px;border-radius:50%"></i>свързани глави</span></div>
+  ${wrap3D("w3",420)}<div class="legend" style="margin-top:6px"><span><i style="background:#f08c00"></i>актин (тънки)</span><span><i style="background:#7048e8"></i>миозин (дебели)</span><span><i style="background:#1c7ed6"></i>тропомиозин</span><span><i style="background:#f06595;width:10px;height:10px;border-radius:50%"></i>тропонин (свети при Ca²⁺)</span><span><i style="background:#74c0fc;width:10px;height:10px;border-radius:50%"></i>Ca²⁺</span><span><i style="background:#339af0"></i>T-тубул</span><span><i style="background:#91a7ff"></i>СР</span><span><i style="background:#ff6b6b;width:10px;height:10px;border-radius:50%"></i>свързани глави</span></div>
   <div class="stats" id="st"></div><div class="note" id="phase"></div></div>
   <div class="grid2"><div class="card" id="ctl"></div><div class="card"><canvas class="plot" id="pF"></canvas><div class="legend"><span><i style="background:${css("--accent")}"></i>сила</span><span><i style="background:#f76707"></i>Ca²⁺ в саркоплазмата (отн.)</span></div><canvas class="plot" id="pL" style="margin-top:6px"></canvas><div class="legend"><span><i style="background:${css("--accent")}"></i>активна</span><span><i style="background:${css("--accent2")}"></i>пасивна</span><span><i style="background:${css("--ink")}"></i>обща</span></div><canvas class="plot" id="pH" style="margin-top:6px"></canvas><div class="legend"><span><i style="background:${css("--accent5")}"></i>скорост на скъсяване</span><span><i style="background:${css("--accent3")}"></i>мощност</span></div></div></div>
   <h3>Експерименти</h3><div id="ex"></div>`;
@@ -1680,7 +1680,7 @@ function viewSkeletal(main){
     const ml=new T.Mesh(new T.CylinderGeometry(1.0,1.0,0.03,6),new T.MeshStandardMaterial({color:C(0xadb5bd),transparent:true,opacity:0.22,depthWrite:false}));ml.rotation.z=Math.PI/2;mG.add(ml);
     /* --- тънки нишки (две страни) --- */
     const acM=new T.MeshStandardMaterial({color:0xffffff,roughness:0.5});const bG=new T.SphereGeometry(0.04,10,8);
-    const tpM=new T.MeshStandardMaterial({color:C(0x2f9e44),roughness:0.4}),tnM=new T.MeshStandardMaterial({color:C(0xfab005),roughness:0.35,emissive:C(0xf08c00),emissiveIntensity:0});
+    const tpM=new T.MeshStandardMaterial({color:C(0x1c7ed6),roughness:0.4}),tnM=new T.MeshStandardMaterial({color:C(0xf06595),roughness:0.35,emissive:C(0xf08c00),emissiveIntensity:0});
     const pitch=0.74;const sides=[];
     [1,-1].forEach(dir=>{const grp=new T.Group();sc.add(grp);const nb=Math.floor(thinL/0.055);const bI=new T.InstancedMesh(bG,acM,thin.length*nb*2);bI.instanceColor=new T.InstancedBufferAttribute(new Float32Array(thin.length*nb*6),3);let k=0;
       const cA=C(0xf76707),cB=C(0xffc078);
@@ -1701,16 +1701,16 @@ function viewSkeletal(main){
     /* --- T-тубули и саркоплазмен ретикулум (триади на границата A–I) --- */
     const camYZ=Math.atan2(Math.cos(1.22),Math.cos(TH)*Math.sin(1.22)),aStart=-0.75*Math.PI-camYZ,bc=Math.atan2(Math.cos(TH)*Math.sin(1.22),Math.cos(1.22));
     const ring=(r,tube,col,op,xx)=>{const g=new T.Group();g.rotation.y=Math.PI/2;g.position.x=xx;const t=new T.Mesh(new T.TorusGeometry(r,tube,12,90,Math.PI*1.5),new T.MeshPhysicalMaterial({color:C(col),roughness:0.35,transparent:op<1,opacity:op,clearcoat:0.4}));t.rotation.z=aStart;g.add(t);sc.add(g);return t};
-    const tt=[],cis=[];[-1,1].forEach(sd=>{const x0=sd*thickL/2;tt.push(ring(1.62,0.07,0x339af0,1,x0));cis.push(ring(1.62,0.13,0x63e6be,0.75,x0-0.25),ring(1.62,0.13,0x63e6be,0.75,x0+0.25))});
+    const tt=[],cis=[];[-1,1].forEach(sd=>{const x0=sd*thickL/2;tt.push(ring(1.62,0.07,0x339af0,1,x0));cis.push(ring(1.62,0.13,0x91a7ff,0.75,x0-0.25),ring(1.62,0.13,0x91a7ff,0.75,x0+0.25))});
     // надлъжен СР над A-ивицата
     for(let k=0;k<7;k++){const an=bc+0.9+k*(Math.PI*2-1.8)/6;const yy=Math.cos(an)*1.66,zz=Math.sin(an)*1.66;const pts=[];for(let x=-thickL/2+0.3;x<=thickL/2-0.3;x+=0.1)pts.push(new T.Vector3(x,yy+Math.sin(x*3+k)*0.05,zz+Math.cos(x*3+k)*0.05));
-      sc.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),60,0.035,6,false),new T.MeshPhysicalMaterial({color:C(0x63e6be),roughness:0.4,transparent:true,opacity:0.6})))}
+      sc.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),60,0.035,6,false),new T.MeshPhysicalMaterial({color:C(0x91a7ff),roughness:0.4,transparent:true,opacity:0.6})))}
     // Ca²⁺ частици
     const NCa=500,caG=new T.BufferGeometry();caG.setAttribute("position",new T.BufferAttribute(new Float32Array(NCa*3),3));caG.setDrawRange(0,0);
     sc.add(new T.Points(caG,new T.PointsMaterial({color:0x74c0fc,size:0.07,transparent:true,opacity:0.95,depthWrite:false,blending:T.AdditiveBlending})));
     const bar=(col,y,h=0.07)=>{const m=new T.Mesh(new T.BoxGeometry(1,h,0.12),new T.MeshStandardMaterial({color:C(col),roughness:0.5}));m.position.y=y;sc.add(m);return m};
     const bars={A:bar(0x7048e8,-2.15),IL:bar(0xf76707,-2.15),IR:bar(0xf76707,-2.15),H:bar(0xadb5bd,-2.32,0.05),ZL:bar(0x343a40,-2.15,0.35),ZR:bar(0x343a40,-2.15,0.35)};bars.ZL.scale.x=bars.ZR.scale.x=0.05;
-    const arM=new T.MeshStandardMaterial({color:C(0x12b886),emissive:C(0x0ca678),emissiveIntensity:0.5});const arrows=[0,1].map(()=>{const g=new T.Group();const c1=new T.Mesh(new T.ConeGeometry(0.13,0.3,16),arM);c1.position.y=0.15;const c2=new T.Mesh(new T.CylinderGeometry(0.04,0.04,0.35,10),arM);c2.position.y=-0.15;g.add(c1,c2);g.position.y=1.85;sc.add(g);return g});
+    const arM=new T.MeshStandardMaterial({color:C(0x4c6ef5),emissive:C(0x3b5bdb),emissiveIntensity:0.5});const arrows=[0,1].map(()=>{const g=new T.Group();const c1=new T.Mesh(new T.ConeGeometry(0.13,0.3,16),arM);c1.position.y=0.15;const c2=new T.Mesh(new T.CylinderGeometry(0.04,0.04,0.35,10),arM);c2.position.y=-0.15;g.add(c1,c2);g.position.y=1.85;sc.add(g);return g});
     return {G,heads,hI,sides,caG,cas:[],tnM,thickL,thinL,U,bc,bars,arrows}},
   (ctx,dtr)=>{const {G,U}=ctx,T=G.T;const ty=typ();
     if(!st.paused){const sim=dtr*1000/S.slow.get(),n=Math.ceil(sim/0.2);const iso=$("#iso").checked;for(let i=0;i<n;i++){const dt=sim/n;
@@ -1777,7 +1777,7 @@ const TESTS_SM=[
 function viewSmooth(main){
   main.innerHTML=`<h2>Гладък мускул: Ca²⁺–калмодулин, MLCK и латч</h2><p class="lead">Отгоре — молекулната каскада на съкращението по етапи. Отдолу — 3D модел на гладкомускулни клетки (едноединичен тип): плътни телца и плаки, косо разположени контрактилни единици от актин и странично-полярен миозин, кавеоли, СР, митохондрии и междуклетъчни връзки. Кинетиката е по модела на Hai–Murphy с 4 състояния на миозина: M, Mp, AMp, AM. Той показва фосфорилирането, силата, разхода на ATP и латч механизма.</p>
   <div class="card" style="padding:10px"><div class="btns"><button class="b" data-p="k">KCl деполяризация</button><button class="b" data-p="ne">Норадреналин (α₁, IP₃)</button><button class="b" data-p="st">Разтягане (миогенен)</button><button class="b" data-p="wash">Измий (покой)</button><button class="b" id="pause">⏸︎ Пауза</button></div>
-  ${wrap3D("w3",400)}<div class="legend" style="margin-top:6px"><span><i class="dot" style="background:#343a40"></i>плътни телца и плаки</span><span><i class="box" style="background:#82c91e"></i>актин</span><span><i class="box" style="background:#9c36b5"></i>миозин (глави → оранжеви при циклиране)</span><span><i class="dot" style="background:#74c0fc"></i>Ca²⁺</span><span><i class="box" style="background:#8ce99a"></i>СР</span><span><i class="dot" style="background:#8f3b34"></i>кавеоли</span><span><i class="dot" style="background:#ff8787"></i>митохондрии</span><span><i class="box" style="background:#20c997"></i>gap junctions</span></div>
+  ${wrap3D("w3",400)}<div class="legend" style="margin-top:6px"><span><i class="dot" style="background:#343a40"></i>плътни телца и плаки</span><span><i class="box" style="background:#adb5bd"></i>актин</span><span><i class="box" style="background:#9c36b5"></i>миозин (глави → оранжеви при циклиране)</span><span><i class="dot" style="background:#74c0fc"></i>Ca²⁺</span><span><i class="box" style="background:#a5d8ff"></i>СР</span><span><i class="dot" style="background:#8f3b34"></i>кавеоли</span><span><i class="dot" style="background:#ff8787"></i>митохондрии</span><span><i class="box" style="background:#5c7cfa"></i>gap junctions</span></div>
   <div class="stats" id="st"></div><div class="note" id="phase"></div></div>
   <div class="grid2"><div class="card" id="ctl"></div><div class="card"><canvas class="plot tall" id="pS"></canvas><div class="legend"><span><i style="background:#1c7ed6"></i>Ca²⁺ (µM)</span><span><i style="background:#f76707"></i>фосфорилиране на MLC</span><span><i style="background:${css("--accent")}"></i>сила</span><span><i style="background:${css("--accent3")}"></i>разход на ATP (отн.)</span></div><canvas class="numline" id="pHM" style="height:150px;margin-top:6px"></canvas></div></div>
   <h3>Експерименти</h3><div id="ex"></div>`;
@@ -1828,7 +1828,7 @@ function viewSmooth(main){
     const dbM=MK.mat(T,0x343a40,{roughness:0.55,clearcoat:0.1}),dbI=new T.InstancedMesh(new T.SphereGeometry(0.075,12,8),dbM,db.length);cell.g.add(dbI);
     // контрактилни единици: актин от двете телца + странично-полярен миозинов филамент с глави
     const pairs=[];db.forEach((d,i)=>{let best=-1,bd=9;db.forEach((e,j)=>{if(j===i)return;const du=e.u-d.u;if(du<0.06||du>0.24)return;const da=Math.abs(Math.atan2(Math.sin(e.ang-d.ang),Math.cos(e.ang-d.ang)));const rr=Math.abs(e.p.length()-d.p.length());const s_=Math.abs(da-0.8)+Math.abs(du-0.14)*3+rr*0.5;if(s_<bd){bd=s_;best=j}});if(best>=0&&bd<1.6)pairs.push({a:i,b:best,l0:d.p.distanceTo(db[best].p),ph:R()})});
-    const aM=new T.MeshStandardMaterial({color:C(0x82c91e),roughness:0.45,emissive:C(0x5c940d),emissiveIntensity:0.15}),mM=new T.MeshStandardMaterial({color:C(0x9c36b5),roughness:0.4,emissive:C(0x862e9c),emissiveIntensity:0.1});
+    const aM=new T.MeshStandardMaterial({color:C(0xadb5bd),roughness:0.45,emissive:C(0x495057),emissiveIntensity:0.15}),mM=new T.MeshStandardMaterial({color:C(0x9c36b5),roughness:0.4,emissive:C(0x862e9c),emissiveIntensity:0.1});
     const acI=new T.InstancedMesh(new T.CylinderGeometry(0.014,0.014,1,6),aM,pairs.length*4),myI=new T.InstancedMesh(new T.CylinderGeometry(0.032,0.032,1,8),mM,pairs.length);
     const hdM=new T.MeshStandardMaterial({color:C(0xf76707),roughness:0.4,emissive:C(0xe8590c),emissiveIntensity:0});const hdI=new T.InstancedMesh(new T.SphereGeometry(0.026,8,6),hdM,pairs.length*8);cell.g.add(acI,myI,hdI);
     // междинни филаменти (десмин) между съседни телца
@@ -1838,7 +1838,7 @@ function viewSmooth(main){
     const cav=[];for(let s=0;s<7;s++){const ang=cutS+0.6+s*(cutL-1.2)/6+0.25;for(let u=0.1;u<0.9;u+=0.022){if(R()<0.25)continue;cav.push({u,ang:ang+(R()-0.5)*0.12})}}
     const cvI=new T.InstancedMesh(new T.SphereGeometry(0.045,8,6),MK.mat(T,0x8f3b34,{roughness:0.7,clearcoat:0}),cav.length);cell.g.add(cvI);
     // саркоплазмен ретикулум: периферни тръбички
-    const srB=[];const srM=new T.MeshPhysicalMaterial({color:C(0x8ce99a),roughness:0.4,clearcoat:0.3,emissive:C(0x40c057),emissiveIntensity:0});
+    const srB=[];const srM=new T.MeshPhysicalMaterial({color:C(0xa5d8ff),roughness:0.4,clearcoat:0.3,emissive:C(0x4dabf7),emissiveIntensity:0});
     for(let s=0;s<5;s++){const a0=angIn(),pts=[];for(let k=0;k<=24;k++){const u=0.12+0.76*k/24;pts.push(P(u,0.8,a0+0.25*Math.sin(k*0.7+s)))}const geo=new T.TubeGeometry(new T.CatmullRomCurve3(pts),72,0.028,6,false);const m=new T.Mesh(geo,srM);cell.g.add(m);srB.push({geo,base:Float32Array.from(geo.attributes.position.array)})}
     // митохондрии
     const mito=[];[[0.3,0.45],[0.35,0.4],[0.66,0.45],[0.7,0.5],[0.22,0.6],[0.78,0.6]].forEach(([u,rr])=>{const g=new T.Group();const b=new T.Mesh(new T.SphereGeometry(0.075,16,10),MK.mat(T,0xff8787,{roughness:0.5}));b.scale.set(1,2.6,1);g.add(b);for(let k=-2;k<=2;k++){const r_=new T.Mesh(new T.TorusGeometry(0.068,0.008,6,16),new T.MeshBasicMaterial({color:C(0xc92a2a)}));r_.rotation.x=Math.PI/2;r_.position.y=k*0.06;g.add(r_)}g.rotation.z=(R()-0.5)*0.4;cell.g.add(g);mito.push({g,p:P(u,rr,angIn())})});
@@ -1846,7 +1846,7 @@ function viewSmooth(main){
     const caI=new T.InstancedMesh(new T.SphereGeometry(0.034,8,6),MK.mat(T,0x339af0,{emissive:C(0x1c7ed6),emissiveIntensity:0.5}),260);caI.count=0;cell.g.add(caI);
     const caP=[];for(let i=0;i<260;i++)caP.push({u:0.05+R()*0.9,rr:Math.sqrt(R())*0.85,ang:angIn(),f:R()*6});
     // междуклетъчни връзки (плаки от коннексони)
-    const gjs=[[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7]].map(pr=>{const g=new T.Group();for(let k=0;k<7;k++){const a=k*Math.PI/3,m=new T.Mesh(new T.CylinderGeometry(0.035,0.035,0.22,10),MK.mat(T,0x20c997,{emissive:C(0x0ca678),emissiveIntensity:0.4}));if(k)m.position.set(Math.cos(a)*0.08,0,Math.sin(a)*0.08);g.add(m)}sc.add(g);return {g,pr}});
+    const gjs=[[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7]].map(pr=>{const g=new T.Group();for(let k=0;k<7;k++){const a=k*Math.PI/3,m=new T.Mesh(new T.CylinderGeometry(0.035,0.035,0.22,10),MK.mat(T,0x5c7cfa,{emissive:C(0x3b5bdb),emissiveIntensity:0.4}));if(k)m.position.set(Math.cos(a)*0.08,0,Math.sin(a)*0.08);g.add(m)}sc.add(g);return {g,pr}});
     return {G,cells,cell,nuc,nG,nBase,db,dbI,pairs,acI,myI,hdI,hdM,ifs,ifI,cav,cvI,srB,srM,mito,caI,caP,gjs,D,def,rad,LEN,fr:0}},
   (ctx,dtr)=>{const {G}=ctx,T=G.T,LEN=ctx.LEN;
     if(!st.paused){const sim=S.speed.get()*dtr,n=Math.ceil(sim/0.01);for(let i=0;i<n;i++)step(sim/n);
@@ -1893,7 +1893,7 @@ function viewSmooth(main){
       :"<b>Покой:</b> Ca²⁺ ≈ 0,1 µM, MLCK е неактивна. Избери стимул: KCl деполяризация (L-тип канали), норадреналин (α₁ → IP₃) или разтягане.";
   });
   function stateBars(cv){const dpr=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);
-    const items=[["M","свободен, дефосф.",X.M,"#adb5bd"],["Mp","свободен, фосф.",X.Mp,"#ffd43b"],["AMp","свързан, фосф. (цикли)",X.AMp,"#f76707"],["AM","свързан, дефосф. (латч)",X.AM,"#c92a2a"]];
+    const items=[["M","свободен, дефосф.",X.M,"#adb5bd"],["Mp","свободен, фосф.",X.Mp,"#ff8787"],["AMp","свързан, фосф. (цикли)",X.AMp,"#f76707"],["AM","свързан, дефосф. (латч)",X.AM,"#c92a2a"]];
     const bw=(W-40)/4;g.font="11px -apple-system,Segoe UI,Arial";items.forEach((it,i)=>{const x=20+i*bw,h=(H-50)*it[2];g.fillStyle=css("--chip");g.fillRect(x+8,10,bw-16,H-50);g.fillStyle=it[3];g.fillRect(x+8,10+(H-50)-h,bw-16,h);
       g.fillStyle=css("--ink");g.textAlign="center";g.font="bold 12px -apple-system,Segoe UI,Arial";g.fillText(it[0]+" "+Math.round(it[2]*100)+"%",x+bw/2,H-26);g.font="10.5px -apple-system,Segoe UI,Arial";g.fillStyle=css("--muted");g.fillText(it[1],x+bw/2,H-11)})}
 }
@@ -1920,7 +1920,7 @@ const TESTS_CS=[
 function viewChemSyn(main){
   main.innerHTML=`<h2>Химичен синапс (ЦНС): EPSP, IPSP и сумация</h2><p class="lead">3D модел на глутаматергичен синапс върху дендритен шип (с AMPA и NMDA рецептори и астроцитен израстък с транспортери за обратно захващане) и на GABA-ергичен синапс върху дендритния ствол. Постсинаптичният неврон (τ = 15 ms, праг −50 mV) интегрира EPSP и IPSP.</p>
   <div class="card" style="padding:10px"><div class="btns"><button class="b primary" id="go">Стимулирай</button><select id="mode" style="width:auto"><option value="E">Възбуден (глутамат)</option><option value="I">Задръжен (GABA)</option><option value="EI">Смесен: възбуден + задръжен</option></select><button class="b" id="pause">⏸︎ Пауза</button></div>
-  ${wrap3D("w3",440)}<div class="legend" style="margin-top:6px"><span><i style="background:#51cf66;width:10px;height:10px;border-radius:50%"></i>глутамат</span><span><i style="background:#cc5de8;width:10px;height:10px;border-radius:50%"></i>GABA</span><span><i style="background:#ffd43b;width:10px;height:10px;border-radius:50%"></i>Na⁺</span><span><i style="background:#4dabf7;width:10px;height:10px;border-radius:50%"></i>Ca²⁺</span><span><i style="background:#e9ecef;border:1px solid #adb5bd;width:10px;height:10px;border-radius:50%"></i>Cl⁻ / Mg²⁺</span><span><i style="background:#15aabf"></i>AMPA</span><span><i style="background:#f76707"></i>NMDA</span><span><i style="background:#9c36b5"></i>GABA_A</span><span>t = <b id="tsim">0</b> ms</span></div>
+  ${wrap3D("w3",440)}<div class="legend" style="margin-top:6px"><span><i style="background:#74c0fc;width:10px;height:10px;border-radius:50%"></i>глутамат</span><span><i style="background:#cc5de8;width:10px;height:10px;border-radius:50%"></i>GABA</span><span><i style="background:#ff8787;width:10px;height:10px;border-radius:50%"></i>Na⁺</span><span><i style="background:#4dabf7;width:10px;height:10px;border-radius:50%"></i>Ca²⁺</span><span><i style="background:#e9ecef;border:1px solid #adb5bd;width:10px;height:10px;border-radius:50%"></i>Cl⁻ / Mg²⁺</span><span><i style="background:#15aabf"></i>AMPA</span><span><i style="background:#f76707"></i>NMDA</span><span><i style="background:#9c36b5"></i>GABA_A</span><span>t = <b id="tsim">0</b> ms</span></div>
   <div class="stats" id="st"></div><div class="note" id="phase"></div></div>
   <div class="grid2"><div class="card" id="ctl"></div><div class="card"><canvas class="plot tall" id="pV"></canvas><div class="legend"><span><i style="background:${css("--accent")}"></i>мембранен потенциал (аксонно хълмче)</span></div><canvas class="plot" id="pI" style="margin-top:6px"></canvas><div class="legend"><span><i style="background:#15aabf"></i>AMPA</span><span><i style="background:#f76707"></i>NMDA</span><span><i style="background:#9c36b5"></i>GABA_A</span></div></div></div>
   <h3>Експерименти</h3><div id="ex"></div>`;
@@ -1975,16 +1975,16 @@ function viewChemSyn(main){
     rec.forEach((o,i)=>{for(let k=0;k<4;k++){const a=k*Math.PI/2+0.4;m4.makeTranslation(o.x+Math.cos(a)*0.05,0.08,o.z+Math.sin(a)*0.05);rI.setMatrixAt(i*4+k,m4);rI.setColorAt(i*4+k,C(o.type==="N"?0xf76707:0x15aabf))}});sc.add(rI);
     const mgI=new T.InstancedMesh(new T.SphereGeometry(0.045,10,8),new T.MeshStandardMaterial({color:C(0xf1f3f5),emissive:C(0xadb5bd),emissiveIntensity:0.3}),rec.length);sc.add(mgI);
     // везикули (кръгли)
-    const vesI=new T.InstancedMesh(new T.SphereGeometry(0.15,14,10),new T.MeshPhysicalMaterial({color:C(0xf1f3f5),roughness:0.25,clearcoat:0.8,emissive:C(0x2b8a3e),emissiveIntensity:0.12}),60);sc.add(vesI);
+    const vesI=new T.InstancedMesh(new T.SphereGeometry(0.15,14,10),new T.MeshPhysicalMaterial({color:C(0xf1f3f5),roughness:0.25,clearcoat:0.8,emissive:C(0x1971c2),emissiveIntensity:0.12}),60);sc.add(vesI);
     const ves=[];for(let i=0;i<60;i++){let p,tr=0;do{const y=0.6+Math.random()*2.3,R=Math.max(0,profR(y)-0.3),a=cutS+0.2+Math.random()*(Math.PI*1.5-0.4),rr=Math.sqrt(Math.random())*R;p=new T.Vector3(Math.sin(a)*rr,y,Math.cos(a)*rr);tr++}while(tr<5&&false);ves.push({home:p,s:0,t:0})}
     for(let i=0;i<8;i++){const a=cutS+0.3+i*0.5;ves[i].home=new T.Vector3(Math.sin(a)*0.6,0.5,Math.cos(a)*0.6)}
     // активна зона
     const azI=new T.InstancedMesh(new T.ConeGeometry(0.09,0.2,8),new T.MeshStandardMaterial({color:C(0x495057)}),8);const qd=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),Math.PI);
     for(let i=0;i<8;i++){const a=cutS+0.3+i*0.5;m4.compose(new T.Vector3(Math.sin(a)*0.9,0.42,Math.cos(a)*0.9),qd,new T.Vector3(1,1,1));azI.setMatrixAt(i,m4)}sc.add(azI);
     // астроцит
-    const astM=new T.MeshPhysicalMaterial({color:C(0x8ce99a),roughness:0.5,transparent:true,opacity:0.5,depthWrite:false,side:T.DoubleSide});
+    const astM=new T.MeshPhysicalMaterial({color:C(0xa5d8ff),roughness:0.5,transparent:true,opacity:0.5,depthWrite:false,side:T.DoubleSide});
     const ast=new T.Mesh(new T.TorusGeometry(2.4,0.45,20,80,Math.PI*1.25),astM);ast.rotation.x=Math.PI/2;ast.rotation.z=cutS+Math.PI*0.35;ast.position.y=0.15;ast.scale.set(1,1,0.55);sc.add(ast);
-    const eaI=new T.InstancedMesh(new T.SphereGeometry(0.05,8,6),new T.MeshStandardMaterial({color:C(0x2b8a3e)}),40);for(let i=0;i<40;i++){const a=-(cutS+Math.PI*0.35)+Math.random()*Math.PI*1.25;const an=Math.PI/2-a;m4.makeTranslation(Math.sin(an)*1.98,0.15+(Math.random()-0.5)*0.4,Math.cos(an)*1.98);eaI.setMatrixAt(i,m4)}sc.add(eaI);
+    const eaI=new T.InstancedMesh(new T.SphereGeometry(0.05,8,6),new T.MeshStandardMaterial({color:C(0x1971c2)}),40);for(let i=0;i<40;i++){const a=-(cutS+Math.PI*0.35)+Math.random()*Math.PI*1.25;const an=Math.PI/2-a;m4.makeTranslation(Math.sin(an)*1.98,0.15+(Math.random()-0.5)*0.4,Math.cos(an)*1.98);eaI.setMatrixAt(i,m4)}sc.add(eaI);
     // задръжен бутон върху ствола
     const ibM=new T.MeshPhysicalMaterial({color:C(0xe599f7),roughness:0.45,clearcoat:0.3,side:T.DoubleSide,emissive:0x000000});
     const ib=lathe([[0,0.25],[1.0,0.27],[1.45,0.6],[1.5,1.2],[1.1,1.8],[0.45,2.1],[0.35,3.2]],60,ibM);const ibG=new T.Group();ibG.add(ib);ibG.position.set(4.6,-3.85,0);sc.add(ibG);
@@ -1994,7 +1994,7 @@ function viewChemSyn(main){
     const gpos=[];for(let i=0;i<12;i++){const x=4.6+(Math.random()-0.5)*1.4,z=(Math.random()-0.5)*1.4;gpos.push([x,z]);for(let k=0;k<5;k++){const a=k*1.2566;m4.makeTranslation(x+Math.cos(a)*0.05,-3.88+0.0,z+Math.sin(a)*0.05);gI.setMatrixAt(i*5+k,m4);gI.setColorAt(i*5+k,C(0x9c36b5))}}sc.add(gI);
     // частици
     const mkPts=(n,col,size)=>{const g=new T.BufferGeometry();g.setAttribute("position",new T.BufferAttribute(new Float32Array(n*3),3));g.setDrawRange(0,0);sc.add(new T.Points(g,new T.PointsMaterial({color:col,size,transparent:true,depthWrite:false,blending:T.AdditiveBlending})));return {g,n,list:[]}};
-    const P={glu:mkPts(400,0x51cf66,0.12),gaba:mkPts(300,0xcc5de8,0.12),na:mkPts(240,0xffd43b,0.09),ca:mkPts(160,0x4dabf7,0.11),cl:mkPts(200,0xf1f3f5,0.09)};
+    const P={glu:mkPts(400,0x74c0fc,0.12),gaba:mkPts(300,0xcc5de8,0.12),na:mkPts(240,0xff8787,0.09),ca:mkPts(160,0x4dabf7,0.11),cl:mkPts(200,0xf1f3f5,0.09)};
     return {G,preMat,ibM,ibG,postMat,rI,mgI,rec,vesI,ves,gI,gpos,P,C,ivI,ivs}},
   (ctx,dtr)=>{const {G}=ctx,T=G.T;
     if(!st.paused){const sim=Math.pow(10,S.speed.get())*dtr,n=Math.max(1,Math.ceil(sim/0.02));for(let i=0;i<n;i++){stepM(sim/n);const L=M.hist[M.hist.length-1];if(!L||M.t-L[0]>=Math.max(0.05,sim/4)){M.hist.push([M.t,M.V,M.iA,M.iN,M.iG]);if(M.hist.length>2500)M.hist.shift()}}}
@@ -2137,7 +2137,7 @@ function viewXB(main){
   main.innerHTML=`<h2>Цикъл на напречните мостове: близък план</h2><p class="lead">Една миозинова глава върху актинова нишка, стъпка по стъпка (модел на Lymn–Taylor). Следи <b>къде е ATP</b>, <b>дали главата е свързана</b> и <b>накъде се завърта лостовото рамо</b>. Тропомиозинът (тъмнозелен) покрива червените места за свързване, докато Ca²⁺ не го отмести.</p>
   <div class="card" style="padding:10px"><div class="btns"><button class="b primary" id="play">⏸︎ Пауза</button><button class="b" id="prev">⏮︎ Назад</button><button class="b" id="next">⏭︎ Следваща стъпка</button><button class="b" id="ca">Ca²⁺: има</button><button class="b" id="atpB">ATP: има</button><button class="b" id="mate">Втора глава: скрита</button><a class="b" href="#skeletal" style="text-decoration:none">← към саркомера</a></div>
   ${wrap3D("w3",500)}
-  <div class="legend" style="margin-top:6px"><span><i style="background:#f08c00;width:10px;height:10px;border-radius:50%"></i>актин</span><span><i style="background:#fa5252;width:10px;height:10px;border-radius:50%"></i>място за миозина</span><span><i style="background:#2b8a3e"></i>тропомиозин</span><span><i style="background:#fcc419;width:10px;height:10px;border-radius:50%"></i>тропонин C</span><span><i style="background:#4dabf7;width:10px;height:10px;border-radius:50%"></i>Ca²⁺</span><span><i style="background:#6741d9"></i>моторен домен</span><span><i style="background:#cc5de8"></i>лостово рамо</span><span><i style="background:#f783ac;width:10px;height:10px;border-radius:50%"></i>ELC</span><span><i style="background:#66d9e8;width:10px;height:10px;border-radius:50%"></i>RLC</span><span><i style="background:#fd7e14;width:10px;height:10px;border-radius:50%"></i>фосфат</span></div></div>
+  <div class="legend" style="margin-top:6px"><span><i style="background:#f08c00;width:10px;height:10px;border-radius:50%"></i>актин</span><span><i style="background:#fa5252;width:10px;height:10px;border-radius:50%"></i>място за миозина</span><span><i style="background:#1971c2"></i>тропомиозин</span><span><i style="background:#ff922b;width:10px;height:10px;border-radius:50%"></i>тропонин C</span><span><i style="background:#4dabf7;width:10px;height:10px;border-radius:50%"></i>Ca²⁺</span><span><i style="background:#6741d9"></i>моторен домен</span><span><i style="background:#cc5de8"></i>лостово рамо</span><span><i style="background:#f783ac;width:10px;height:10px;border-radius:50%"></i>ELC</span><span><i style="background:#66d9e8;width:10px;height:10px;border-radius:50%"></i>RLC</span><span><i style="background:#fd7e14;width:10px;height:10px;border-radius:50%"></i>фосфат</span></div></div>
   <div class="grid2"><div class="card"><canvas id="cyc" style="width:100%;height:330px;display:block"></canvas></div><div class="card"><div id="stx" style="font-size:15px"></div><div class="stats" id="st" style="margin-top:10px"></div><div class="ctrl" id="sp" style="margin-top:8px"></div></div></div>
   <h3>Експерименти</h3><div id="ex"></div>`;
   const S={};S.dur=slider($("#sp"),{label:"Продължителност на стъпка",min:0.8,max:6,step:0.1,value:2.8,d:1,unit:"s"},()=>{});
@@ -2173,13 +2173,13 @@ function viewXB(main){
     act.add(aI);
     const sI=new T.InstancedMesh(new T.SphereGeometry(0.11,14,10),new T.MeshStandardMaterial({color:C(0xfa5252),emissive:C(0xe03131),emissiveIntensity:0.5}),sites.length);sites.forEach((s,i)=>{m4.makeTranslation(s.p.x,s.p.y,s.p.z);sI.setMatrixAt(i,m4)});act.add(sI);
     /* тропомиозин (долу — регулира местата; горе — симетричен) */
-    const tpMat=mat(0x2b8a3e,{roughness:0.35});
+    const tpMat=mat(0x1971c2,{roughness:0.35});
     const coil=(len,y)=>{const g=new T.Group();for(const c of [0,Math.PI]){const pts=[];for(let x=-len/2;x<=len/2;x+=0.1){const w=x*4+c;pts.push(new T.Vector3(x,y+Math.cos(w)*0.055,Math.sin(w)*0.055))}g.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),400,0.065,10,false),tpMat))}return g};
     const tpLow=new T.Group();tpLow.add(coil(NM*rise,0));tpLow.position.y=-0.66;act.add(tpLow);const tpHi=coil(NM*rise,0.66);act.add(tpHi);
     const tns=[];for(let x=x0+1.8;x<-x0-0.5;x+=7*rise){const g=new T.Group();g.position.x=x;
-      const tnc=new T.Mesh(new T.SphereGeometry(0.21,18,14),mat(0xfcc419,{emissive:C(0xf08c00),emissiveIntensity:0}));tnc.position.set(0,-0.18,0.22);
+      const tnc=new T.Mesh(new T.SphereGeometry(0.21,18,14),mat(0xff922b,{emissive:C(0xf08c00),emissiveIntensity:0}));tnc.position.set(0,-0.18,0.22);
       const tni=new T.Mesh(new T.SphereGeometry(0.14,14,10),mat(0xf783ac));tni.position.set(0.28,-0.08,0.2);
-      const tnt=new T.Mesh(new T.CylinderGeometry(0.075,0.075,1.0,12),mat(0x63e6be));tnt.rotation.z=Math.PI/2;tnt.position.set(-0.35,0,0.08);
+      const tnt=new T.Mesh(new T.CylinderGeometry(0.075,0.075,1.0,12),mat(0x91a7ff));tnt.rotation.z=Math.PI/2;tnt.position.set(-0.35,0,0.08);
       const cas=[-0.12,0.12].map(dx=>{const c_=new T.Mesh(new T.SphereGeometry(0.08,12,10),new T.MeshStandardMaterial({color:C(0x4dabf7),emissive:C(0x1c7ed6),emissiveIntensity:0.8}));c_.position.set(dx,-0.36,0.34);g.add(c_);return c_});
       g.add(tnc,tni,tnt);tpLow.add(g);tns.push({g,tnc,cas})}
     /* дебела нишка */
@@ -2212,7 +2212,7 @@ function viewXB(main){
       const ex=Math.sin(end)*1.55,ey=Math.cos(end)*1.55;g.userData.c.position.set(ex,ey,0);g.userData.c.rotation.z=dir>0?-end-Math.PI/2:-end+Math.PI/2};
     setArc(powA,1);setArc(recA,-1);
     const lin=(col)=>{const g=new T.Group(),m=arrM(col);const b=new T.Mesh(new T.CylinderGeometry(0.05,0.05,1,10),m);const c=new T.Mesh(new T.ConeGeometry(0.13,0.3,14),m);c.position.y=0.62;g.add(b,c);sc.add(g);return g};
-    const slideA=lin(0x2f9e44);slideA.rotation.z=-Math.PI/2;slideA.position.set(0.2,1.35,0);slideA.scale.set(1,1.2,1);
+    const slideA=lin(0x1c7ed6);slideA.rotation.z=-Math.PI/2;slideA.position.set(0.2,1.35,0);slideA.scale.set(1,1.2,1);
     const vA=lin(0x1971c2);
     const ring=new T.Mesh(new T.TorusGeometry(0.22,0.035,10,30),arrM(0xfa5252));sc.add(ring);
     return {G,act,tpLow,tns,my,mate,P,L,nuc,pi,powA,recA,slideA,vA,ring,sites}},
@@ -2566,10 +2566,10 @@ function viewHeartReal(main){
     const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);g.fillStyle="rgba(20,22,27,0.72)";g.fillRect(0,0,W,H);
     const Tc=b.Tc,X=x=>8+(x/Tc)*(W-16),cols=["rgba(77,171,247,.22)","rgba(252,196,25,.25)","rgba(250,82,82,.25)","rgba(81,207,102,.22)"];
     let s0=0;for(let k=1;k<=b.t.length;k++){if(k===b.t.length||b.ph[k]!==b.ph[s0]){g.fillStyle=cols[b.ph[s0]];g.fillRect(X(b.t[s0]),0,X(b.t[Math.min(k,b.t.length-1)])-X(b.t[s0]),H);s0=k}}
-    g.strokeStyle="#69db7c";g.lineWidth=1.8;g.beginPath();for(let k=0;k<=200;k++){const x=k/200*Tc,y=H*0.62-ecg(x,Tc)*H*0.42;k?g.lineTo(X(x),y):g.moveTo(X(x),y)}g.stroke();
+    g.strokeStyle="#b197fc";g.lineWidth=1.8;g.beginPath();for(let k=0;k<=200;k++){const x=k/200*Tc,y=H*0.62-ecg(x,Tc)*H*0.42;k?g.lineTo(X(x),y):g.moveTo(X(x),y)}g.stroke();
     g.fillStyle="#e9ecef";g.font="bold 11px -apple-system,Segoe UI,Arial";g.textAlign="center";
     const lab=(x,txt,y)=>g.fillText(txt,X(((x%Tc)+Tc)%Tc),y);lab(Tc-0.16,"P",H*0.62-0.2*H*0.42-6);lab(0.0,"QRS",H*0.62-H*0.42-4);lab(0.2+0.15*Tc+0.02,"T",H*0.62-0.3*H*0.42-8);
-    const s1=b.t[b.ph.indexOf(1)],s2i=b.ph.lastIndexOf(2),s2=b.t[Math.max(0,s2i)];g.fillStyle="#ffd43b";g.font="10px -apple-system,Segoe UI,Arial";g.fillText("S1",X(s1),H-5);g.fillText("S2",X(s2),H-5);
+    const s1=b.t[b.ph.indexOf(1)],s2i=b.ph.lastIndexOf(2),s2=b.t[Math.max(0,s2i)];g.fillStyle="#ff8787";g.font="10px -apple-system,Segoe UI,Arial";g.fillText("S1",X(s1),H-5);g.fillText("S2",X(s2),H-5);
     g.textAlign="left";g.fillStyle="#fff";g.font="bold 11px -apple-system,Segoe UI,Arial";g.fillText("ЕКГ · "+["пълнене","изоволумно съкращение","изтласкване","изоволумно отпускане"][ph],10,13);
     g.strokeStyle="#fff";g.lineWidth=2;g.beginPath();g.moveTo(X(t),2);g.lineTo(X(t),H-2);g.stroke()}
 }
@@ -2878,7 +2878,7 @@ function viewECG(main){
       const arr=new T.Group();arr.add(shaft,head);arr.position.copy(c);G.scene.add(arr);ctx.arr={g:arr,shaft,head};
       const lg=new T.BufferGeometry();lg.setAttribute("position",new T.BufferAttribute(new Float32Array(90*3),3));lg.setAttribute("color",new T.BufferAttribute(new Float32Array(90*3),3));lg.setDrawRange(0,0);
       const line=new T.Line(lg,new T.LineBasicMaterial({vertexColors:true,depthTest:false,transparent:true}));line.renderOrder=9;G.scene.add(line);ctx.loop=lg;ctx.hist=[];
-      const dot=new T.Mesh(new T.SphereGeometry(0.07,10,8),new T.MeshBasicMaterial({color:0xffe066,depthTest:false}));dot.renderOrder=11;dot.position.copy(c);G.scene.add(dot);
+      const dot=new T.Mesh(new T.SphereGeometry(0.07,10,8),new T.MeshBasicMaterial({color:0xffa8a8,depthTest:false}));dot.renderOrder=11;dot.position.copy(c);G.scene.add(dot);
       ctx.views={ant:[0.05,1.52],left:[Math.PI/2,1.45],apex:[0.3,2.45]};ctx.ready=true}).catch(e=>{if(G.dead||e&&e.dead)return;console.error(e);msg.textContent="Моделът не се зареди — нужна е интернет връзка за библиотеките."});
     document.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{ctx.view=ctx.views&&ctx.views[b.dataset.v]});
     return ctx},
@@ -2985,16 +2985,16 @@ function viewCardiacAP(main){
   main.innerHTML=`<h2>Акционни потенциали на сърцето и автоматия</h2><p class="lead">Два истински йонни модела работят в реално време: пейсмейкърна клетка на синусовия възел и камерен кардиомиоцит (Luo–Rudy). Всеки синусов импулс минава по проводната система на реалистичното 3D сърце: междувъзлови пътища, AV възел (забавяне), сноп на His, бедра и Пуркинье влакна. После възбужда камерите и сърцето се съкращава. Долу се виждат АП във всяка част на проводната система (както във фигурата на Guyton) и ЕКГ.</p>
   <div class="card" style="padding:10px"><div class="btns"><button class="b primary" id="pl">⏸︎ Пауза</button><select id="rh" style="width:auto;max-width:100%"></select><select id="dr" style="width:auto;max-width:100%"></select><button class="b" id="csB">Проводна система: вкл.</button><button class="b" id="actB">Възбуждане: вкл.</button><button class="b" id="trB">Прозрачно сърце: вкл.</button><button class="b" data-v="ant">Отпред</button><button class="b" data-v="left">Отляво</button><button class="b" data-v="right">Отдясно</button></div>
   ${wrap3D("w3",450)}
-  <div class="legend" style="margin-top:6px"><span><i style="background:#ffd43b"></i>SA и AV възел</span><span><i style="background:#a9e34b"></i>междувъзлови пътища, сноп на Bachmann</span><span><i style="background:#51cf66"></i>сноп на His и бедра</span><span><i style="background:#20c997"></i>Пуркинье влакна</span><span><i style="background:#ffffff;border:1px solid var(--line)"></i>фронт на импулса</span><span><i style="background:#ff922b"></i>деполяризирана тъкан</span></div>
+  <div class="legend" style="margin-top:6px"><span><i style="background:#ff8787"></i>SA и AV възел</span><span><i style="background:#dee2e6"></i>междувъзлови пътища, сноп на Bachmann</span><span><i style="background:#74c0fc"></i>сноп на His и бедра</span><span><i style="background:#5c7cfa"></i>Пуркинье влакна</span><span><i style="background:#ffffff;border:1px solid var(--line)"></i>фронт на импулса</span><span><i style="background:#ff922b"></i>деполяризирана тъкан</span></div>
   <canvas id="tl" style="width:100%;height:360px;display:block;margin-top:6px;border-radius:8px;background:#0f1418"></canvas>
   <div class="stats" id="ems"></div>
   <div class="note" id="ph" style="min-height:6.8em"></div>
   <div class="grid2" style="grid-template-columns:1fr 1fr;margin-top:6px"><div id="c1"></div><div id="c2"></div></div>
   <div class="btns"><button class="b" id="s2B">Подай S2 екстрастимул на камерата</button><button class="b" id="rsB">↺ Нулирай</button></div></div>
   <div class="grid2" style="grid-template-columns:1fr 1fr"><div class="card"><h3 style="margin-top:0">Пейсмейкърна клетка (SA възел)</h3><canvas class="plot" id="pSA" style="height:200px"></canvas><canvas class="plot" id="iSA" style="height:150px"></canvas>
-   <div class="legend"><span><i style="background:#e8590c"></i>I<sub>f</sub></span><span><i style="background:#ae3ec9"></i>I<sub>CaT</sub></span><span><i style="background:#e03131"></i>I<sub>CaL</sub></span><span><i style="background:#1c7ed6"></i>I<sub>K</sub></span><span><i style="background:#0ca678"></i>I<sub>K,ACh</sub></span><span>навътре &lt; 0 (пиковете на I<sub>CaL</sub> и I<sub>K</sub> са отрязани, за да се вижда фаза 4)</span></div><div class="stats" id="sSA"></div></div>
+   <div class="legend"><span><i style="background:#e8590c"></i>I<sub>f</sub></span><span><i style="background:#ae3ec9"></i>I<sub>CaT</sub></span><span><i style="background:#e03131"></i>I<sub>CaL</sub></span><span><i style="background:#1c7ed6"></i>I<sub>K</sub></span><span><i style="background:#3b5bdb"></i>I<sub>K,ACh</sub></span><span>навътре &lt; 0 (пиковете на I<sub>CaL</sub> и I<sub>K</sub> са отрязани, за да се вижда фаза 4)</span></div><div class="stats" id="sSA"></div></div>
   <div class="card"><h3 style="margin-top:0">Работен кардиомиоцит (камера)</h3><canvas class="plot" id="pV" style="height:200px"></canvas><canvas class="plot" id="iV" style="height:150px"></canvas>
-   <div class="legend"><span><i style="background:#f76707"></i>I<sub>Na</sub> ÷ 100</span><span><i style="background:#e03131"></i>I<sub>CaL</sub></span><span><i style="background:#1c7ed6"></i>I<sub>K</sub></span><span><i style="background:#0ca678"></i>I<sub>K1</sub></span><span><i style="background:#7048e8"></i>I<sub>to</sub></span><span><i style="background:rgba(224,49,49,.35)"></i>абсолютен рефр. период</span><span><i style="background:rgba(245,159,0,.35)"></i>относителен</span></div><div class="stats" id="sV"></div></div></div>
+   <div class="legend"><span><i style="background:#f76707"></i>I<sub>Na</sub> ÷ 100</span><span><i style="background:#e03131"></i>I<sub>CaL</sub></span><span><i style="background:#1c7ed6"></i>I<sub>K</sub></span><span><i style="background:#3b5bdb"></i>I<sub>K1</sub></span><span><i style="background:#7048e8"></i>I<sub>to</sub></span><span><i style="background:rgba(224,49,49,.35)"></i>абсолютен рефр. период</span><span><i style="background:rgba(245,159,0,.35)"></i>относителен</span></div><div class="stats" id="sV"></div></div></div>
   <div class="card"><h3 style="margin-top:0">Фази на АП и йонни токове</h3><table class="t"><tr><th>Фаза</th><th>Работен миокард (камера, предсърдие, Пуркинье)</th><th>SA и AV възел</th></tr>
    <tr><td>0</td><td>Бърз I<sub>Na</sub> навътре; dV/dt 200–400 V/s</td><td>Бавен I<sub>CaL</sub> навътре; dV/dt ≈ 5–10 V/s</td></tr>
    <tr><td>1</td><td>Инактивация на Na⁺; I<sub>to</sub> (K⁺ навън)</td><td>—</td></tr>
@@ -3073,7 +3073,7 @@ function viewCardiacAP(main){
   experiments($("#ex"),EXP_CAP,"cardap",p=>{if(p.ans!=null)S.ans.set(p.ans);else S.ans.set(0);if(p.Ko!=null)S.ko.set(p.Ko);else S.ko.set(5.4);
     st.drug=p.drug||"none";$("#dr").value=st.drug;S.dose.set(p.dose!=null?p.dose:100);setRh(p.rh||"sinus");if(p.s2){S.s2.set(p.s2);if(p.fire)armS2=p.s2}upd()});
   // ---- времева лента (Guyton) ----
-  const ROWS=[["Синусов възел","sa","#ffd43b"],["Предсърдие","at","#a9e34b"],["AV възел","av","#ffa94d"],["His–Пуркинье","his","#38d9a9"],["Камерен миоцит","ven","#ff8787"],["ЕКГ (II)","ecg","#e9ecef"]];
+  const ROWS=[["Синусов възел","sa","#ff8787"],["Предсърдие","at","#dee2e6"],["AV възел","av","#ffa94d"],["His–Пуркинье","his","#748ffc"],["Камерен миоцит","ven","#ff8787"],["ЕКГ (II)","ecg","#e9ecef"]];
   const siteV=(k,t)=>{const o=CAP_SITE[k],L=ev[k];let ta=null,tn=null;for(let i=L.length-1;i>=0;i--){if(L[i]<=t){ta=L[i];tn=i<L.length-1?L[i+1]:null;break}}
     if(ta==null)return o.rest;const x=t-ta;if(x<o.apd)return apShape(x,o);
     const esc=(k==="av"&&st.rh==="arrest")||(k==="his"&&st.rh==="av3");if(esc&&tn==null)tn=nextEsc;
@@ -3105,9 +3105,9 @@ function viewCardiacAP(main){
     for(let q=hb.k-n;q<hb.k;q+=2){const i=q%HN,t=hb.t[i];if(t<tS-TW||t>tS)continue;xs.push(t-tS);sv.push(hb.sv[i]);vv.push(hb.vv[i]);for(let j=0;j<5;j++){si[j].push(Math.max(-1.6,Math.min(1.6,hb.si[i*5+j])));vi[j].push(Math.max(-4,Math.min(4,j===0?hb.vi[i*5]/100:hb.vi[i*5+j])))}}
     const xo={xmin:-TW,xmax:0,xlabel:"време, s (0 = сега)"};
     plot($("#pSA"),Object.assign({},xo,{ymin:-80,ymax:50,ylabel:"mV",hlines:[{y:-40,color:"#e8590c",label:"праг ≈ −40"}],series:[{x:xs,y:sv,color:"#f08c00",width:2.2}]}));
-    plot($("#iSA"),Object.assign({},xo,{ymin:-1.5,ymax:1.5,ylabel:"µA/cm²",hlines:[{y:0,color:css("--muted"),dash:[2,3]}],series:["#e8590c","#ae3ec9","#e03131","#1c7ed6","#0ca678"].map((c,j)=>({x:xs,y:si[j],color:c,width:j<2?2.4:1.6}))}));
+    plot($("#iSA"),Object.assign({},xo,{ymin:-1.5,ymax:1.5,ylabel:"µA/cm²",hlines:[{y:0,color:css("--muted"),dash:[2,3]}],series:["#e8590c","#ae3ec9","#e03131","#1c7ed6","#3b5bdb"].map((c,j)=>({x:xs,y:si[j],color:c,width:j<2?2.4:1.6}))}));
     plot($("#pV"),Object.assign({},xo,{ymin:-100,ymax:60,ylabel:"mV",shade:shades(),series:[{x:xs,y:vv,color:"#e03131",width:2.2}],texts:phaseTexts()}));
-    plot($("#iV"),Object.assign({},xo,{ymin:-4,ymax:4,ylabel:"µA/cm²",hlines:[{y:0,color:css("--muted"),dash:[2,3]}],series:["#f76707","#e03131","#1c7ed6","#0ca678","#7048e8"].map((c,j)=>({x:xs,y:vi[j],color:c,width:1.6}))}))}
+    plot($("#iV"),Object.assign({},xo,{ymin:-4,ymax:4,ylabel:"µA/cm²",hlines:[{y:0,color:css("--muted"),dash:[2,3]}],series:["#f76707","#e03131","#1c7ed6","#3b5bdb","#7048e8"].map((c,j)=>({x:xs,y:vi[j],color:c,width:1.6}))}))}
   const phaseTexts=()=>{if(!lastMeas)return [];const a=lastMeas.t0-tS;if(a<-2)return [];return [{x:a-0.025,text:"0"},{x:a+0.045,text:"1"},{x:a+(lastMeas.t90||0.29)*0.5,text:"2"},{x:a+(lastMeas.t90||0.29)*0.93,text:"3"},{x:Math.min(-0.03,a+(lastMeas.t90||0.29)+0.18),text:"4"}].filter(t=>t.x>-2&&t.x<0)};
   const vPhase=()=>{const V=ven.V;if(!lastV)return 4;const x=tS-lastV;if(x<0)return 4;if(x<0.004)return 0;if(x<0.03)return 1;if(V>-20&&x<0.5)return 2;if(V>-80&&x<0.6)return 3;return 4};
   const sPhase=()=>{if(st.rh==="arrest")return 9;const n=Math.min(hb.k,HN);const i=(hb.k-1)%HN,i2=(hb.k-6+HN)%HN;const V=hb.sv[i],dv=hb.sv[i]-hb.sv[i2];if(V<-40&&dv>=0)return 4;if(dv>0)return 0;return 3};
@@ -3194,7 +3194,7 @@ function buildConduction(H,T){const {apex,ax,e1,e2,Lp,avC,avN}=H;
   // връзка с най-близкия връх
   const V=[];H.items.forEach((it,k)=>{for(let i=0;i<it.B.length;i+=9)V.push(k,i)});
   beads.forEach(b=>{let bd=1e9,bk=0,bi=0;for(let q=0;q<V.length;q+=2){const it=H.items[V[q]],i=V[q+1],B=it.B;const dx=B[i]-b.p.x,dy=B[i+1]-b.p.y,dz=B[i+2]-b.p.z,d=dx*dx+dy*dy+dz*dz;if(d<bd){bd=d;bk=V[q];bi=i}}b.k=bk;b.i=bi;const B=H.items[bk].B;b.o=[b.p.x-B[bi],b.p.y-B[bi+1],b.p.z-B[bi+2]]});
-  const base={sa:"#ffd43b",avn:"#ffd43b",av:"#ffc61a",in:"#a9e34b",bm:"#a9e34b",his:"#51cf66",bb:"#51cf66",pk:"#20c997"};const BC={};for(const k in base)BC[k]=new T.Color(base[k]);
+  const base={sa:"#ff8787",avn:"#ff8787",av:"#ffc61a",in:"#dee2e6",bm:"#dee2e6",his:"#74c0fc",bb:"#74c0fc",pk:"#5c7cfa"};const BC={};for(const k in base)BC[k]=new T.Color(base[k]);
   const OR=new T.Color("#ff922b"),WH=new T.Color("#ffffff");
   const im=new T.InstancedMesh(new T.SphereGeometry(1,10,8),new T.MeshBasicMaterial({color:0xffffff,depthTest:false,transparent:true,opacity:0.95,toneMapped:false}),beads.length);im.renderOrder=20;im.frustumCulled=false;
   const M=new T.Matrix4(),c=new T.Color();beads.forEach((b,i)=>{im.setColorAt(i,BC[b.g])});
@@ -3287,7 +3287,7 @@ function viewHemo(main){
    <div class="note">Комплайънс C = ΔV/ΔP. Вените са ≈ 8 пъти по-разтегливи и имат ≈ 3 пъти по-голям обем от артериите, затова комплайънсът им е ≈ 24 пъти по-голям (Guyton). Те са резервоар на кръвта (≈ 64 % от обема). Пулсовото налягане ≈ УО / C<sub>арт</sub>. Тук сърцето е нормално (72/min), а съпротивлението идва от плъзгача за артериолите — така се вижда само ефектът на комплайънса.</div></div>
   <div class="card" style="padding:10px"><h3 style="margin:4px 4px 6px">4. Кривите на Guyton: венозно връщане и сърдечен дебит</h3>
    <div class="btns"><select id="pre" style="width:auto;max-width:100%"></select><button class="b" id="actB">Възбуждане: вкл.</button><button class="b" data-v="ant">Отпред</button><button class="b" data-v="left">Отляво</button></div>
-   <div class="grid2" style="grid-template-columns:1fr 1fr;gap:10px"><div>${wrap3D("w2",380)}<div class="legend" style="margin-top:4px"><span><i class="box" style="background:#ffd43b"></i>фронт на възбуждането</span><span><i class="box" style="background:#8c9eea"></i>деполяризиран миокард</span></div></div><canvas id="gy" style="width:100%;height:380px;display:block"></canvas></div>
+   <div class="grid2" style="grid-template-columns:1fr 1fr;gap:10px"><div>${wrap3D("w2",380)}<div class="legend" style="margin-top:4px"><span><i class="box" style="background:#ff8787"></i>фронт на възбуждането</span><span><i class="box" style="background:#8c9eea"></i>деполяризиран миокард</span></div></div><canvas id="gy" style="width:100%;height:380px;display:block"></canvas></div>
    <div class="legend" style="margin-top:6px"><span><i style="background:#1c7ed6"></i>крива на венозното връщане</span><span><i style="background:#e03131"></i>крива на сърдечната функция</span><span><i class="dash" style="border-color:var(--ref)"></i>нормални криви</span><span><i class="dot" style="background:var(--ink)"></i>работна точка (и пътят ѝ при промяна)</span><span><i class="dot" style="background:#1c7ed6"></i>Pms — пресечна точка с оста</span><span><i class="box" style="background:rgba(120,120,120,.18)"></i>зона на колапс на вените</span></div>
    <div class="stats" id="gs" style="margin-top:8px"></div>
    <div class="note" id="gi" style="min-height:5.6em"></div>
@@ -3505,7 +3505,7 @@ function viewBaro(main){
    <div class="btns"><button class="b" id="denB">Барорецептори: свързани</button><button class="b" id="atrB">Атропин: не</button><button class="b" id="bbB">β-блокер: не</button><button class="b" id="pl">⏸︎ Пауза</button></div>
    ${wrap3D("w3",520)}
    <div class="btns" style="margin-top:6px"><button class="b" data-av="ov">Изглед: шия и гръден кош</button><button class="b" data-av="br">Мозъчен ствол</button><button class="b" data-av="cs">Каротиден синус</button><button class="b" data-av="ht">Сърце</button><button class="b" data-av="lat">Отляво</button><button class="b" id="skB">Кожа: вкл.</button></div>
-   <div class="legend"><span><i class="dot" style="background:#4dabf7"></i>аферентни импулси от барорецепторите (n. IX — нерв на Hering, n. X)</span><span><i class="dot" style="background:#40c057"></i>вагус към SA възела</span><span><i class="dot" style="background:#fd7e14"></i>симпатикус (RVLM → IML → ганглии → сърце и артериоли)</span><span><i class="dot" style="background:#ffd43b"></i>симпатиков ствол (ганглии)</span><span><i class="box" style="background:#d9363e"></i>артерии; барорецепторните зони светят синьо според импулсацията</span><span><i class="box" style="background:#ffd8a8"></i>продълговат мозък (NTS, n. ambiguus, RVLM)</span><span><i class="box" style="background:#f7e3c0;border:1px solid #fd7e14"></i>гръбначен мозък; T1–T4 светят при симпатикова активност</span><span><i class="box" style="background:#ffd43b"></i>фронт на възбуждането в сърцето</span><span>гъстотата на точките = честотата на импулсите</span></div>
+   <div class="legend"><span><i class="dot" style="background:#4dabf7"></i>аферентни импулси от барорецепторите (n. IX — нерв на Hering, n. X)</span><span><i class="dot" style="background:#4dabf7"></i>вагус към SA възела</span><span><i class="dot" style="background:#fd7e14"></i>симпатикус (RVLM → IML → ганглии → сърце и артериоли)</span><span><i class="dot" style="background:#ff8787"></i>симпатиков ствол (ганглии)</span><span><i class="box" style="background:#d9363e"></i>артерии; барорецепторните зони светят синьо според импулсацията</span><span><i class="box" style="background:#ffc9c9"></i>продълговат мозък (NTS, n. ambiguus, RVLM)</span><span><i class="box" style="background:#f7e3c0;border:1px solid #fd7e14"></i>гръбначен мозък; T1–T4 светят при симпатикова активност</span><span><i class="box" style="background:#ff8787"></i>фронт на възбуждането в сърцето</span><span>гъстотата на точките = честотата на импулсите</span></div>
    <div class="small" style="color:var(--muted)">Анатомия: Human Reference Atlas (HuBMAP; мозък — по Allen Human Reference Atlas – 3D, HRA v1.3), CC BY 4.0; сърце: „Realistic Human Heart“ от neshallads (Sketchfab), CC BY 4.0. Нервите са схематични.</div>
    <canvas id="bs" style="width:100%;height:330px;display:block;margin-top:8px;border-radius:8px;background:#0f1418"></canvas>
    <div class="stats" id="bst"></div>
@@ -3539,7 +3539,7 @@ function viewBaro(main){
   function drawStrip(){const cv=$("#bs"),dpr=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;if(!W)return;if(cv.width!==Math.round(W*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
     const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle="#0f1418";g.fillRect(0,0,W,H);
     const TW=W<620?25:40,L=W<620?70:96,R=34,top=6,bot=18,t1=m.t,t0=t1-TW,X=t=>L+(t-t0)/TW*(W-L-R);
-    const rows=[["Артериално налягане","mmHg",30,170,"#ff8787"],["ЧСС","/min",30,170,"#ffd43b"],["Барорецептори","имп.",0,1.25,"#74c0fc"],["Вагус / симпатикус","",0,1,"#69db7c"]],rh=(H-top-bot)/rows.length;
+    const rows=[["Артериално налягане","mmHg",30,170,"#ff8787"],["ЧСС","/min",30,170,"#ff8787"],["Барорецептори","имп.",0,1.25,"#74c0fc"],["Вагус / симпатикус","",0,1,"#b197fc"]],rh=(H-top-bot)/rows.length;
     // фази на Валсалва
     if(m.valsT>t0-30){const v0=m.valsT;[[0,3,"I"],[3,15,"II"],[15,18,"III"],[18,28,"IV"]].forEach(([a,b,l],i)=>{const xa=X(Math.max(t0,v0+a)),xb=X(Math.min(t1,v0+b));if(xb<=xa)return;g.fillStyle=i%2?"rgba(255,255,255,.05)":"rgba(116,192,252,.09)";g.fillRect(xa,top,xb-xa,H-top-bot);g.fillStyle="rgba(255,255,255,.7)";g.font="600 11px -apple-system,Segoe UI,Arial";g.textAlign="center";g.fillText(l,(xa+xb)/2,top+11)})}
     evs.forEach(e=>{if(e.t<t0)return;const x=X(e.t);g.strokeStyle="rgba(255,255,255,.35)";g.setLineDash([3,3]);g.beginPath();g.moveTo(x,top);g.lineTo(x,H-bot);g.stroke();g.setLineDash([]);g.fillStyle="#fff";g.font="10.5px -apple-system,Segoe UI,Arial";g.textAlign="left";g.fillText(e.l,x+3,H-bot-3)});
@@ -3549,7 +3549,7 @@ function viewBaro(main){
       if(r===0){line(h=>h.Pa,"rgba(255,135,135,.55)",1);line(h=>h.MAP,"#ff6b6b",2.2);[60,100,140].forEach(v=>{g.fillStyle="rgba(255,255,255,.35)";g.textAlign="right";g.fillText(v,W-4,Y(v)+3)})}
       if(r===1){line(h=>h.HR,c,2);[50,100,150].forEach(v=>{g.fillStyle="rgba(255,255,255,.35)";g.textAlign="right";g.fillText(v,W-4,Y(v)+3)})}
       if(r===2)line(h=>h.n,c,1.4);
-      if(r===3){line(h=>h.Vg,"#69db7c",2);line(h=>h.Sy,"#ff922b",2);g.fillStyle="#69db7c";g.textAlign="right";g.fillText("вагус",W-4,Y(0.8));g.fillStyle="#ff922b";g.fillText("симп.",W-4,Y(0.25))}});
+      if(r===3){line(h=>h.Vg,"#b197fc",2);line(h=>h.Sy,"#ff922b",2);g.fillStyle="#b197fc";g.textAlign="right";g.fillText("вагус",W-4,Y(0.8));g.fillStyle="#ff922b";g.fillText("симп.",W-4,Y(0.25))}});
     g.strokeStyle="rgba(116,192,252,.8)";g.lineWidth=1.5;g.beginPath();g.moveTo(X(t1),top);g.lineTo(X(t1),H-bot);g.stroke();
     g.fillStyle="rgba(255,255,255,.45)";g.font="10px -apple-system,Segoe UI,Arial";g.textAlign="center";for(let t=Math.ceil(t0/10)*10;t<=t1;t+=10)g.fillText(fmt(t,0)+" s",X(t),H-5)}
   // ---- сигмоида на барорецепторите ----
@@ -3582,7 +3582,7 @@ function viewBaro(main){
     // ядра в продълговатия мозък
     const nuc=(p,c,r)=>{const me=new T.Mesh(new T.SphereGeometry(r,16,12),glowM(c));me.material.opacity=0.8;me.position.copy(p);me.renderOrder=13;body.add(me);return me};
     const NTS=V(0.004,0.775,-0.0145),NA=V(0.0105,0.770,-0.006),RV=V(0.009,0.765,0.0015);
-    const CV=V(0.0085,0.7605,-0.0025);ctx.nNTS=nuc(NTS,0x339af0,0.0026);ctx.nNA=nuc(NA,0x37b24d,0.0024);ctx.nRV=nuc(RV,0xf76707,0.0024);ctx.nCV=nuc(CV,0x339af0,0.0019);
+    const CV=V(0.0085,0.7605,-0.0025);ctx.nNTS=nuc(NTS,0x339af0,0.0026);ctx.nNA=nuc(NA,0x339af0,0.0024);ctx.nRV=nuc(RV,0xf76707,0.0024);ctx.nCV=nuc(CV,0x339af0,0.0019);
     // симпатиков ствол
     const chain=[[0.022,0.735,0.015,1.5],[0.022,0.70,0.013,0],[0.023,0.685,0.011,1],[0.023,0.665,0.009,0],[0.023,0.642,0.0,1.4],[0.023,0.61,-0.012,0.8],[0.022,0.585,-0.025,0.8],[0.022,0.56,-0.035,0.8]];
     const gangM=std(0xf5c518,{emissive:0x000000});tube(chain.map(c=>V(c[0],c[1],c[2])),0.0008,gangM);ctx.gang=[];
@@ -3597,14 +3597,14 @@ function viewBaro(main){
     const h2b=p=>p.clone().multiplyScalar(hs).applyQuaternion(hq).add(hPos);
     // нерви и импулси
     const nerves=[];const nerveM=c=>std(c,{roughness:0.45});
-    const addNerve=(key,pts,c,rate,r=0.0016)=>{const t=tube(pts,r,nerveM(c===0x4dabf7?0x1971c2:c===0x40c057?0x2b8a3e:0xd9480f));const im=new T.InstancedMesh(new T.SphereGeometry(0.0028,10,8),new T.MeshBasicMaterial({color:new T.Color(c).convertSRGBToLinear(),toneMapped:false}),40);im.count=0;body.add(im);
+    const addNerve=(key,pts,c,rate,r=0.0016)=>{const t=tube(pts,r,nerveM(c===0x4dabf7?0x1971c2:c===0x4dabf7?0x1971c2:0xd9480f));const im=new T.InstancedMesh(new T.SphereGeometry(0.0028,10,8),new T.MeshBasicMaterial({color:new T.Color(c).convertSRGBToLinear(),toneMapped:false}),40);im.count=0;body.add(im);
       const nv={key,c:t.c,mesh:t.m,im,rate,dots:[],acc:0,len:t.c.getLength(),col:c,orig:t.m.material.color.clone()};nerves.push(nv);return nv};
     const SA0=h2b(V(-1.35,1.45,0.1));
     const aff1=addNerve("aff",[V(0.034,0.689,0.026),V(0.037,0.71,0.018),V(0.034,0.74,0.008),V(0.026,0.758,0.0),V(0.012,0.772,-0.008),NTS],0x4dabf7,()=>m.den?0:m.n);
     const aff2=addNerve("aff",[V(0.012,0.573,0.012),V(0.03,0.60,0.011),V(0.039,0.64,0.012),V(0.042,0.68,0.012),V(0.039,0.72,0.006),V(0.029,0.754,-0.001),V(0.012,0.771,-0.009),NTS],0x4dabf7,()=>m.den?0:m.n);
     const mkVag=sa=>[NA,V(0.014,0.766,-0.002),V(0.031,0.752,0.004),V(0.043,0.72,0.013),V(0.044,0.68,0.018),V(0.041,0.64,0.018),V(0.03,0.60,0.016),V(0.008,0.548,0.004),V(-0.012,0.525,0.02),sa];
     addNerve("aff",[NTS,V(0.008,0.773,-0.011),NA],0x4dabf7,()=>m.den?0:m.n*0.7,0.0008);addNerve("aff",[NTS,V(0.007,0.768,-0.009),CV],0x4dabf7,()=>m.den?0:m.n*0.7,0.0008);addNerve("aff",[CV,V(0.0095,0.763,-0.0005),RV],0x4dabf7,()=>m.den?0:m.n*0.7,0.0008);
-    const vag=addNerve("vag",mkVag(SA0),0x40c057,()=>m.Vg);
+    const vag=addNerve("vag",mkVag(SA0),0x4dabf7,()=>m.Vg);
     addNerve("sy",[RV,V(0.0,0.756,-0.006),V(-0.003,0.74,-0.0075),V(-0.004,0.70,-0.0097),V(-0.005,0.66,-0.0145),V(-0.0065,0.625,-0.029),V(-0.007,0.61,-0.036)],0xfd7e14,()=>m.SyH,0.0012);
     addNerve("sy",[V(-0.007,0.61,-0.036),V(0.008,0.611,-0.03),V(0.02,0.618,-0.016),V(0.023,0.642,0.0)],0xfd7e14,()=>m.SyH,0.0012);
     const syH=addNerve("sy",[V(0.023,0.642,0.0),V(0.02,0.60,0.006),V(0.008,0.55,0.006),h2b(V(0.4,-0.6,0.9))],0xfd7e14,()=>m.SyH);
@@ -3620,7 +3620,7 @@ function viewBaro(main){
     makeRealHeart(G).then(H=>{msg.remove();ctx.H=H;H.actOn=true;body.add(H.root);
       H.items.forEach(it=>{const ix=it.mesh.geometry.index;if(!ix)return;const a=ix.array,keep=[];for(let t=0;t<a.length;t+=3){if(it.kind[a[t]]&&it.kind[a[t+1]]&&it.kind[a[t+2]])keep.push(a[t],a[t+1],a[t+2])}it.mesh.geometry.setIndex(keep)});H.root.scale.setScalar(hs);H.root.quaternion.copy(hq);H.root.position.copy(hPos);
       const sa=h2b(H.sa);vag.mesh.geometry.dispose();const c=new T.CatmullRomCurve3(mkVag(sa));vag.mesh.geometry=new T.TubeGeometry(c,60,0.0016,10,false);vag.c=c;vag.len=c.getLength();
-      ctx.saG=new T.Mesh(new T.SphereGeometry(0.004,16,12),glowM(0x40c057));ctx.saG.position.copy(sa);body.add(ctx.saG);ctx.ready=true})
+      ctx.saG=new T.Mesh(new T.SphereGeometry(0.004,16,12),glowM(0x4dabf7));ctx.saG.position.copy(sa);body.add(ctx.saG);ctx.ready=true})
      .catch(e=>{if(G.dead||e&&e.dead)return;console.error(e);msg.textContent="Сърцето не се зареди."});
     ctx.M=new T.Matrix4();ctx.vv=new T.Vector3();ctx.cGray=new T.Color(0x868e96).convertSRGBToLinear();ctx.cBlue=new T.Color(0x4dabf7).convertSRGBToLinear();ctx.cOr=new T.Color(0xfd7e14).convertSRGBToLinear();
     return ctx},
@@ -3692,7 +3692,7 @@ function viewStarling(main){
   main.innerHTML=`<h2>Микроциркулация: сили на Starling, лимфа и оток</h2><p class="lead">Отгоре — силите на Starling на нивото на капилярната стена, по етапи. Отдолу — моделът на микроциркулаторното русло: артериола с гладка мускулатура и прекапилярен сфинктер, капиляр от ендотелни клетки с перицити, венула, интерстициум с колаген и лимфен капиляр с клапи. Той е свързан с модела на цялото тяло (интерстициален обем, лимфа, белтъци), който се развива за часове: една секунда е 10 минути.</p>
   <div class="card" style="padding:10px"><div class="btns"><select id="pre" style="width:auto;max-width:100%"></select><button class="b" id="pl">⏸︎ Пауза</button><button class="b" id="rs">↺ Нулирай времето</button></div>
    ${wrap3D("w3",440)}
-   <div class="legend" style="margin-top:6px"><span><i class="dot" style="background:#c92a2a"></i>еритроцит</span><span><i class="dot" style="background:#fab005"></i>албумин</span><span><i class="dot" style="background:#339af0"></i>вода</span><span><b class="ar" style="color:#e03131">↑</b>филтрация</span><span><b class="ar" style="color:#1c7ed6">↓</b>реабсорбция</span><span><i class="box" style="background:#f3b3ad"></i>ендотел на капиляра</span><span><i class="box" style="background:#d9480f"></i>гладкомускулни клетки</span><span><i class="box" style="background:#cc5de8"></i>перицити</span><span><i class="box" style="background:#d0bfff"></i>венула</span><span><i class="box" style="background:#b2f2bb"></i>лимфен капиляр</span><span><i class="box" style="background:#e9d8a6"></i>колаген</span><span><i class="dot" style="background:#74c0fc"></i>лимфа / свободна течност</span></div>
+   <div class="legend" style="margin-top:6px"><span><i class="dot" style="background:#c92a2a"></i>еритроцит</span><span><i class="dot" style="background:#f06595"></i>албумин</span><span><i class="dot" style="background:#339af0"></i>вода</span><span><b class="ar" style="color:#e03131">↑</b>филтрация</span><span><b class="ar" style="color:#1c7ed6">↓</b>реабсорбция</span><span><i class="box" style="background:#f3b3ad"></i>ендотел на капиляра</span><span><i class="box" style="background:#d9480f"></i>гладкомускулни клетки</span><span><i class="box" style="background:#cc5de8"></i>перицити</span><span><i class="box" style="background:#d0bfff"></i>венула</span><span><i class="box" style="background:#d0ebff"></i>лимфен капиляр</span><span><i class="box" style="background:#e9d8a6"></i>колаген</span><span><i class="dot" style="background:#74c0fc"></i>лимфа / свободна течност</span></div>
    <div class="stats" id="sst" style="margin-top:8px"></div>
    <div class="grid2" style="grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:12px"><canvas id="sp" style="width:100%;height:260px;display:block"></canvas><div id="ft"></div></div>
    <div class="note" id="si" style="min-height:6.2em"></div>
@@ -3753,7 +3753,7 @@ function viewStarling(main){
     const endoM=MK.mat(T,0xf3b3ad,{roughness:0.5,clearcoat:0.3,side:T.DoubleSide});ctx.capT=[];
     for(let a=0;a<2;a++)for(let k=0;k<5;k++){const x0=-LC/2+k*2+0.03,x1=x0+1.94,th0=CUT0+CUTL+0.04+a*(2*Math.PI-CUTL)/2,thL=(2*Math.PI-CUTL)/2-0.06,thc=th0+thL/2,ph=R()*0.5-0.25;
       const m=tube(x0,x1,(u,th)=>{const d=((u-0.5-ph*0.3)/0.22)**2+((th-thc)/0.45)**2;return rc-0.11*Math.exp(-d)},{th0,thL,seg:16,rad:14,mat:endoM});sc.add(m);ctx.capT.push(m)}
-    sc.add(tube(-LC/2,LC/2,()=>rc-0.035,{mat:new T.MeshPhysicalMaterial({color:LIN(T,0x96f2d7),transparent:true,opacity:0.28,roughness:0.6,side:T.DoubleSide,depthWrite:false})}));
+    sc.add(tube(-LC/2,LC/2,()=>rc-0.035,{mat:new T.MeshPhysicalMaterial({color:LIN(T,0xbac8ff),transparent:true,opacity:0.28,roughness:0.6,side:T.DoubleSide,depthWrite:false})}));
     sc.add(tube(-LC/2,LC/2,()=>rc+0.045,{mat:new T.MeshPhysicalMaterial({color:LIN(T,0xdee2e6),transparent:true,opacity:0.3,roughness:0.8,side:T.DoubleSide,depthWrite:false})}));
     // перицити с израстъци около капиляра
     [[-2.2,2.6],[2.6,3.6]].forEach(([x,a])=>{const p=V(x,Math.sin(a)*(rc+0.12),Math.cos(a)*(rc+0.12));sc.add(MK.blob(T,[[p.x,p.y,p.z,0.2,0xcc5de8],[p.x+0.25,p.y,p.z,0.15,0xcc5de8],[p.x-0.25,p.y,p.z,0.15,0xcc5de8]],{res:22}));
@@ -3777,7 +3777,7 @@ function viewStarling(main){
     // свободна течност при оток
     ctx.pool=[];[[-3,1.3,-0.9],[0.5,-1.1,-1.0],[3.2,1.2,-0.9],[-1.2,0.4,-1.8],[4.4,-1.0,-1.2]].forEach(p=>{const m=MK.blob(T,[[0,0,0,0.3],[0.24,0.08,0.1,0.22],[-0.22,-0.06,-0.08,0.21]],{res:20,mat:new T.MeshPhysicalMaterial({color:LIN(T,0x74c0fc),transparent:true,opacity:0.35,roughness:0.1,clearcoat:1,depthWrite:false})});m.position.add(V(...p));m.visible=false;ctx.itg.add(m);ctx.pool.push(m)});
     // лимфен капиляр: сляп край, клапи от припокриващи се клетки, закотвящи филаменти
-    const ly0=V(0,-1.6,-1.45),lr=0.42;ctx.flaps=[];const lyM=new T.MeshPhysicalMaterial({color:LIN(T,0x8ce99a),roughness:0.45,clearcoat:0.3,side:T.DoubleSide});
+    const ly0=V(0,-1.6,-1.45),lr=0.42;ctx.flaps=[];const lyM=new T.MeshPhysicalMaterial({color:LIN(T,0xa5d8ff),roughness:0.45,clearcoat:0.3,side:T.DoubleSide});
     for(let j=0;j<6;j++)for(let k=0;k<6;k++){const x0=-3.4+j*1.75,a0=k*Math.PI/3+j*0.5,da=Math.PI/3+0.22;const g=new T.CylinderGeometry(lr,lr,1.85,8,1,true,a0,da);g.rotateZ(Math.PI/2);
       const piv=new T.Group();const m=new T.Mesh(g,lyM);const edge=V(0,lr*Math.sin(a0),lr*Math.cos(a0));m.position.set(0,-edge.y,-edge.z);piv.add(m);piv.position.set(x0+0.92+ly0.x,ly0.y+edge.y,ly0.z+edge.z);piv.userData.ax=V(1,0,0);sc.add(piv);ctx.flaps.push(piv);
       if(k%2===0){const am=a0+da/2,dir=V(0,Math.sin(am),Math.cos(am));const p0=V(x0+0.9,ly0.y,ly0.z).addScaledVector(dir,lr),p1=p0.clone().addScaledVector(dir,0.75).add(V(0.2,0,0));sc.add(MK.taper(T,new T.LineCurve3(p0,p1),0.012,0.012,{seg:2,rad:4,color:0x868e96}))}}
@@ -3786,7 +3786,7 @@ function viewStarling(main){
     const prof=[];for(let i=0;i<=12;i++){const rr=Math.sin(i/12*Math.PI/2);const h=0.5*Math.sqrt(Math.max(0,1-rr*rr))*(0.207+2.003*rr*rr-1.123*rr**4);prof.push(new T.Vector2(rr,h+0.02))}for(let i=12;i>=0;i--){const p=prof[i];prof.push(new T.Vector2(p.x,-p.y))}
     const NR=46,rbc=new T.InstancedMesh(new T.LatheGeometry(prof,24),MK.mat(T,0xc92a2a,{roughness:0.4,clearcoat:0.4}),NR);sc.add(rbc);const RB=[];
     for(let i=0;i<NR;i++){const zone=i<12?0:i<29?1:2;RB.push({zone,x:zone===0?-LC/2+i*LC/12:zone===1?-9.4+R()*4.2:5.2+R()*4.6,a:R()*6.28,r:R(),tw:R()*6,sp:0.8+R()*0.4})}
-    const NP=60,prot=new T.InstancedMesh(new T.IcosahedronGeometry(0.055,1),MK.mat(T,0xfab005,{roughness:0.35,emissive:LIN(T,0xf76707),emissiveIntensity:0.2}),NP);sc.add(prot);
+    const NP=60,prot=new T.InstancedMesh(new T.IcosahedronGeometry(0.055,1),MK.mat(T,0xf06595,{roughness:0.35,emissive:LIN(T,0xf76707),emissiveIntensity:0.2}),NP);sc.add(prot);
     const PP=[];for(let i=0;i<NP;i++)PP.push({x:(R()-0.5)*LC,r:R()*0.42,a:R()*6.28,out:0});
     const NW=320,wat=new T.InstancedMesh(new T.SphereGeometry(0.045,6,5),new T.MeshStandardMaterial({color:LIN(T,0x339af0),emissive:LIN(T,0x1c7ed6),emissiveIntensity:0.3}),NW);sc.add(wat);const W=[];for(let i=0;i<NW;i++)W.push({on:0});
     const NL=70,lw=new T.InstancedMesh(new T.SphereGeometry(0.05,6,5),new T.MeshStandardMaterial({color:LIN(T,0x74c0fc),emissive:LIN(T,0x339af0),emissiveIntensity:0.3}),NL);sc.add(lw);const LW=[];for(let i=0;i<NL;i++)LW.push({x:-3.3+R()*10,a:R()*6.28,r:R()*0.3});
@@ -3990,7 +3990,7 @@ MK.nachr=function(T,o={}){const g=new T.Group(),cols=o.col||[0xe64980,0x4dabf7,0
     const b=[P(2.1,3.0,0,1.0),P(2.6,4.2,0.15,1.05),P(2.1,5.5,-0.1,0.9),P(2.9,3.4,-0.3,0.75),P(1.95,1.3,0,0.68),P(1.95,0,0.05,0.68),P(1.95,-1.3,0,0.68),P(2.7,0.6,0.3,0.6),P(2.7,-0.8,-0.25,0.6),P(1.7,-3.0,0,0.5),P(1.4,-4.0,0.1,0.42)];
     const piv=new T.Group();piv.position.set(ca*2.0,2.4,sa*2.0);g.add(piv);const me=MK.blob(T,b,{res:o.res||34});me.position.x-=ca*2.0;me.position.y-=2.4;me.position.z-=sa*2.0;piv.add(me);
     if(o.cut&&sa>0.8){me.material.transparent=true;me.material.opacity=0.2;me.material.depthWrite=false;me.renderOrder=5}
-    const gb=new T.Mesh(new T.SphereGeometry(0.3,12,8),MK.mat(T,0xffd43b,{emissive:LIN(T,0xfab005),emissiveIntensity:0.2}));g.add(gb);subs.push({piv,ca,sa,gb,a})}
+    const gb=new T.Mesh(new T.SphereGeometry(0.3,12,8),MK.mat(T,0xff8787,{emissive:LIN(T,0xf06595),emissiveIntensity:0.2}));g.add(gb);subs.push({piv,ca,sa,gb,a})}
   const api={g,subs,set(open){subs.forEach(s=>{s.piv.setRotationFromAxisAngle(new T.Vector3(-s.sa,0,s.ca),open*0.12);const r=lerp(0.55,1.2,open);s.gb.position.set(Math.cos(s.a)*r,0.2,Math.sin(s.a)*r)})},
     site(j){const a=(18+72*(j===0?0.5:2.5))*Math.PI/180;return new T.Vector3(Math.cos(a)*2.85,4.1,Math.sin(a)*2.85)}};api.set(0);return api};
 // преносител с променлив достъп (две половини, „люлка“); a>0 — отворен към +y
@@ -4012,6 +4012,12 @@ MK.loadMesh=function(T,url){if(MK._mc[url])return MK._mc[url];return MK._mc[url]
   if(u8.length>=co+nv*3){const c=new Float32Array(nv*3);for(let i=0;i<nv*3;i++){const v=u8[co+i]/255;c[i]=v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4)}g.setAttribute("color",new T.BufferAttribute(c,3))}
   g.computeVertexNormals();return g})};
 MK.molMat=function(T,o={}){return MK.skin(T,new T.MeshPhysicalMaterial(Object.assign({vertexColors:true,roughness:.55,clearcoat:.25,clearcoatRoughness:.5,sheen:new T.Color(0x222222)},o)),{rim:0xffffff,rimI:.35,pow:2.2,env:.45})};
+/* вписва реална многочастна структура на мястото на стар модел: еднаква височина, мембраната на y=0 в групата */
+MK.realize=function(T,grp,urls,o={}){const vis=grp.children.slice(),bx=new T.Box3();vis.forEach(c=>bx.expandByObject(c));
+  return Promise.all(urls.map(u=>MK.loadMesh(T,u))).then(gs=>{const sc=grp.getWorldScale(new T.Vector3()).y||1;grp.updateMatrixWorld(true);const b2=new T.Box3().setFromObject(grp);const H0=(b2.max.y-b2.min.y)/sc;
+    let lo=1e9,hi=-1e9;gs.forEach(g=>{g.computeBoundingBox();lo=Math.min(lo,g.boundingBox.min.y);hi=Math.max(hi,g.boundingBox.max.y)});const s=(o.s||1)*H0/(hi-lo);
+    const R=new T.Group();if(o.flip)R.rotation.x=Math.PI;R.scale.setScalar(s);if(o.ry)R.rotation.y=o.ry;vis.forEach(c=>c.visible=false);
+    gs.forEach((g,i)=>{const m=new T.Mesh(g,MK.molMat(T,(o.cutFront&&i===0)?{transparent:true,opacity:.45,depthWrite:false}:{}));R.add(m)});grp.add(R);return R}).catch(()=>null)};
 /* добавя центрирана реална структура в група (по желание скрива старите деца) */
 MK.addCentered=function(T,grp,url,o={}){return MK.loadMesh(T,url).then(g0=>{const g=g0.clone();g.computeBoundingBox();const c=g.boundingBox.getCenter(new T.Vector3());g.translate(-c.x,o.keepY?0:-c.y,-c.z);
   const m=new T.Mesh(g,MK.molMat(T,o.mat));m.scale.setScalar(o.s||1);if(o.ry)m.rotation.y=o.ry;if(o.p)m.position.set(...o.p);if(o.hide)grp.children.forEach(ch=>ch.visible=false);grp.add(m);return m}).catch(()=>null)};
@@ -4331,7 +4337,7 @@ const S=(t,short,badge,d,tag)=>({t,short,badge,d,tag});
 return {id:"stgTR",title:"Как работят дифузията, преносителите и помпите — стъпка по стъпка",h:490,dur:3.6,
  intro:"Участък от плазмената мембрана с три транспортни белтъка (в разрез отпред). Избери механизъм — камерата отива при него. Белтъците преносители никога не са отворени едновременно от двете страни: редуват „отворен навън“ и „отворен навътре“.",
  cam:{r:22,th:0.3,phi:1.33,target:[X.simple,-0.3,0],min:6,max:70},
- legend:[["#e03131","O₂"],["#dee2e6","глюкоза"],["#f76707","Na⁺"],["#9c36b5","K⁺"],["#4dabf7","ATP / ADP"],["#fd7e14","фосфат (Pᵢ)"],["#12b886","GLUT1","box"],["#f08c00","Na⁺/K⁺-ATPаза (α); домени A, N, P","box"],["#2f9e44","β-субединица","box"],["#7950f2","SGLT1","box"]],
+ legend:[["#e03131","O₂"],["#dee2e6","глюкоза"],["#f76707","Na⁺"],["#9c36b5","K⁺"],["#4dabf7","ATP / ADP"],["#fd7e14","фосфат (Pᵢ)"],["#4c6ef5","GLUT1","box"],["#f08c00","Na⁺/K⁺-ATPаза (α); домени A, N, P","box"],["#1c7ed6","β-субединица","box"],["#7950f2","SGLT1","box"]],
  onMech:k=>{if(window.__trSetMode)window.__trSetMode(k)},
  mechs:[
   {key:"simple",label:"Проста дифузия (O₂)",center:"без белтък",stages:[
@@ -4364,14 +4370,14 @@ return {id:"stgTR",title:"Как работят дифузията, пренос
   const half=(sx,c1,c2,W)=>{const b=[];for(const y of [-1.8,-0.6,0.6,1.8]){for(const z of [-1.1,0])b.push([-sx*0.3*W,y,z*W,0.7*W,c1]);for(const z of [-1.1,0,1.1])b.push([sx*0.45*W,y*0.96,z*0.85*W,0.66*W,c2])}
     b.push([-sx*0.25*W,1.85,0.85*W,0.55*W,c1],[-sx*0.25*W,-1.85,0.85*W,0.55*W,c1],[0,2.55,0.3,0.55,c2],[0,-2.55,-0.2,0.55,c2]);return MK.blob(T,b,{res:40})};
   const rocker=(x,c,W)=>{const L=new T.Group(),Rr=new T.Group();L.position.set(x-W,0,0);Rr.position.set(x+W,0,0);L.add(half(-1,c[0],c[1],W));Rr.add(half(1,c[2],c[3],W));sc.add(L,Rr);return {L,R:Rr,set(a){L.rotation.z=a;Rr.rotation.z=-a}}};
-  ctx.glut=rocker(xf,[0x0ca678,0x20c997,0x38d9a9,0x63e6be],1);ctx.glut.set(0.34);
+  ctx.glut=rocker(xf,[0x3b5bdb,0x5c7cfa,0x748ffc,0x91a7ff],1);ctx.glut.set(0.34);
   ctx.sglt=rocker(xg,[0x6741d9,0x7950f2,0x9775fa,0xb197fc],1.05);ctx.sglt.set(0.34);
   ctx.nka=rocker(xp,[0xe8590c,0xf08c00,0xf76707,0xff922b],1.2);ctx.nka.set(-0.22);
   // Na⁺/K⁺-ATPаза: P-домен (под мембраната), подвижни N- и A-домен, β-субединица
   ctx.pumpStatic=[];{const pd=MK.blob(T,[[xp,-3.2,0,1.15,0x1c7ed6],[xp+0.3,-4.0,0.2,1.2,0x1c7ed6],[xp-0.4,-3.7,-0.5,1.0,0x1c7ed6],[xp,-2.4,-0.3,0.8,0xf08c00]],{res:40});sc.add(pd);ctx.pumpStatic.push(pd)}
   const dom=(balls,col)=>{const g=new T.Group();g.add(MK.blob(T,balls.map(b=>[b[0],b[1],b[2],b[3],col]),{res:36}));sc.add(g);return g};
   ctx.N=dom([[0,0,0,1.15],[0.8,-0.5,0.2,0.95],[0.3,0.6,-0.4,0.8],[1.2,0.4,-0.2,0.7]],0xe03131);
-  ctx.A=dom([[0,0,0,1.0],[-0.8,-0.4,0.3,0.9],[-0.3,0.6,-0.3,0.75]],0xfab005);
+  ctx.A=dom([[0,0,0,1.0],[-0.8,-0.4,0.3,0.9],[-0.3,0.6,-0.3,0.75]],0xf06595);
   ctx.Nop=V(xp+2.9,-4.6,0.3);ctx.Ncl=V(xp+1.75,-4.15,0.5);ctx.Aout=V(xp-2.8,-3.6,0.1);ctx.Ain=V(xp-1.7,-4.3,0.9);
   const lk=(a,b)=>{const m=MK.taper(T,new T.LineCurve3(a,b),0.22,0.22,{seg:6,rad:8,color:0xf08c00});sc.add(m);ctx.pumpStatic.push(m)};lk(V(xp+1.2,-2.4,-0.6),V(xp+2.6,-3.9,-0.4));lk(V(xp-1.1,-2.4,-0.4),V(xp-2.5,-3.3,-0.2));
   const bx=xp+2.9;{const bb=MK.blob(T,[[bx,-1.6,-0.9,0.5,0xadb5bd],[bx,0,-0.9,0.55,0xadb5bd],[bx,1.6,-0.9,0.55,0xadb5bd],[bx-0.2,3.3,-0.7,1.2,0xadb5bd],[bx-1.1,4.0,-0.6,1.0,0xadb5bd],[bx+0.6,4.1,-0.2,0.9,0xadb5bd]],{res:36});sc.add(bb);ctx.pumpStatic.push(bb)}
@@ -4542,7 +4548,7 @@ return {id:"stgNKA",title:"Цикълът на Na⁺/K⁺-ATP-азата (Post�
   ctx.pi=MK.mol(T,"pi");ctx.pi.scale.setScalar(1.3);sc.add(ctx.pi);ctx.piOff=V(-1.56,0,0);ctx.far=V(5.2,-7.6,3.2);ctx.piFar=V(-0.6,-8.0,3.6);
   // уабаин: стероидно ядро (4 пръстена), лактон, захар (рамноза)
   const ou=new T.Group(),ring=(x,y,n,r,col)=>{const m=new T.Mesh(new T.CylinderGeometry(r,r,0.24,n),MK.mat(T,col,{emissive:LIN(T,col),emissiveIntensity:0.15}));m.rotation.x=Math.PI/2;m.position.set(x,y,0);ou.add(m);return m};
-  ctx.ouR=[ring(0,0,6,0.34,0xc2255c),ring(0.59,0.34,6,0.34,0xc2255c),ring(1.18,0,6,0.34,0xc2255c),ring(1.72,0.3,5,0.3,0xc2255c),ring(2.32,0.55,5,0.28,0xe8590c),ring(-0.78,-0.4,6,0.33,0xfff3bf)];
+  ctx.ouR=[ring(0,0,6,0.34,0xc2255c),ring(0.59,0.34,6,0.34,0xc2255c),ring(1.18,0,6,0.34,0xc2255c),ring(1.72,0.3,5,0.3,0xc2255c),ring(2.32,0.55,5,0.28,0xe8590c),ring(-0.78,-0.4,6,0.33,0xffe3e3)];
   ou.rotation.set(-0.35,0,-Math.PI/2);ou.userData.k=1.2;sc.add(ou);ctx.ou=ou;ctx.ouP=[V(1.8,7.6,3.9),V(1.0,5.7,3.3),V(0.15,3.35,2.05)];
   // йони
   ctx.siteNa=[V(-0.3,0.15,0.95),V(0.35,0.35,0.8),V(0.25,-0.4,0.45)];ctx.siteK=[V(-0.25,0.15,0.95),V(0.35,0.3,0.8)];
@@ -4738,14 +4744,14 @@ function iglur(T,o){const g=new T.Group(),c=o.col,c2=o.col2,parts=[],V=(x,y,z)=>
     const r=2.7,ax=ca*r,az=sa*r;const d1=MK.blob(T,[[ax,4.9,az,0.95,col],[ax-sa*0.6,5.2,az+ca*0.6,0.75,col]],{res:22});g.add(d1);
     const d2p=new T.Group();d2p.position.set(ax,4.2,az);g.add(d2p);d2p.add(MK.blob(T,[[0,-0.7,0,0.9,c2[k%2]],[-sa*0.6,-0.95,ca*0.6,0.7,c2[k%2]]],{res:22}));
     g.add(MK.taper(T,new T.LineCurve3(V(ca*1.9,2.2,sa*1.9),V(ax*0.9,3.3,az*0.9)),0.17,0.17,{seg:4,rad:8,color:col}));
-    const gb=new T.Mesh(new T.SphereGeometry(0.3,12,8),MK.mat(T,0xffd43b,{emissive:LIN(T,0xfab005),emissiveIntensity:0.2}));g.add(gb);
+    const gb=new T.Mesh(new T.SphereGeometry(0.3,12,8),MK.mat(T,0xff8787,{emissive:LIN(T,0xf06595),emissiveIntensity:0.2}));g.add(gb);
     parts.push({a,ca,sa,d2p,gb,site:V(ax*1.12,4.1,az*1.12)})}
   [[0,1],[2,3]].forEach(([p,q])=>{const a=(parts[p].a+parts[q].a)/2,ca=Math.cos(a),sa=Math.sin(a);const m=MK.blob(T,[[ca*1.5,6.8,sa*1.5,1.15,c[0]],[ca*1.5-sa*1.0,7.4,sa*1.5+ca*1.0,0.9,c[1]],[ca*1.5+sa*1.0,7.4,sa*1.5-ca*1.0,0.9,c[0]]],{res:26});if(o.cut&&sa>0.5)glass(m);g.add(m)});
   const api={g,parts,set(close,open){parts.forEach(p=>{p.d2p.position.y=4.2+0.35*close;const r=lerp(0.5,1.15,open);p.gb.position.set(Math.cos(p.a)*r,2.1,Math.sin(p.a)*r)})},site:k=>parts[k].site.clone()};api.set(0,0);return api}
 return {id:"stgCS",title:"Химичен синапс в ЦНС — стъпка по стъпка",h:500,dur:4,
  intro:"Молекулен модел на два синапса (цепката е съкратена): глутаматергичен — с AMPA и NMDA рецептори, скеле PSD-95 и астроцит с EAAT преносител, и GABA-ергичен — с GABA_A рецептор и GAT-1. Предните субединици на рецепторите са полупрозрачни.",
  cam:{r:28,th:0.25,phi:1.38,target:[GX,5,0],min:8,max:90},
- legend:[["#51cf66","глутамат"],["#cc5de8","GABA"],["#f76707","Na⁺"],["#74c0fc","Ca²⁺"],["#e9ecef","Mg²⁺"],["#2f9e44","Cl⁻"],["#15aabf","AMPA рецептор","box"],["#f76707","NMDA рецептор (GluN1/GluN2)","box"],["#37b24d","EAAT (астроцит)","box"],["#9775fa","GABA_A рецептор","box"],["#ffd43b","врата на канала","box"]],
+ legend:[["#74c0fc","глутамат"],["#cc5de8","GABA"],["#f76707","Na⁺"],["#74c0fc","Ca²⁺"],["#e9ecef","Mg²⁺"],["#1c7ed6","Cl⁻"],["#15aabf","AMPA рецептор","box"],["#f76707","NMDA рецептор (GluN1/GluN2)","box"],["#339af0","EAAT (астроцит)","box"],["#9775fa","GABA_A рецептор","box"],["#ff8787","врата на канала","box"]],
  onMech:null,
  mechs:[
   {key:"glu",label:"Възбуден (глутамат)",center:"EPSP",stages:[
@@ -4766,23 +4772,27 @@ return {id:"stgCS",title:"Химичен синапс в ЦНС — стъпка
   const post=MK.bilayer(T,{w:22,d:9,z0:-3.0,holes:[[AX-GX,0,2.6],[NX-GX,0,2.6]],pal:[[0x8fd3e8,0xa5d8ff,0x74c0fc],[0x8fd3e8,0x66a8d9,0xa5d8ff]],tail:0xe7f5ff});post.position.set(GX,-6,0);sc.add(post);
   ctx.ampa=iglur(T,{col:[0x15aabf,0x0c8599],col2:[0x66d9e8,0x3bc9db],cut:true});ctx.ampa.g.scale.setScalar(RS);ctx.ampa.g.position.set(AX,-6,0);sc.add(ctx.ampa.g);
   ctx.nmda=iglur(T,{col:[0xf76707,0xe8590c],col2:[0xffa94d,0xff922b],cut:true});ctx.nmda.g.scale.setScalar(RS);ctx.nmda.g.position.set(NX,-6,0);sc.add(ctx.nmda.g);
+  /* истински структури: AMPA GluA2 (3KG2), NMDA GluN1/GluN2B (4PE5) — извънклетъчните домени към цепката */
+  MK.realize(T,ctx.ampa.g,["a","b","c","d"].map(k=>"m/mol/ampa_"+k+".txt"),{flip:true,cutFront:true});MK.realize(T,ctx.nmda.g,["a","b","c","d"].map(k=>"m/mol/nmda_"+k+".txt"),{flip:true,cutFront:true});
   // PSD-95 скеле и CaMKII в шипа
   [[AX,-9.3,-0.5],[AX+2.2,-9.6,0.6],[NX-1.6,-9.4,0.2],[NX+1.4,-9.2,-0.6],[GX,-9.8,-0.2]].forEach(p=>sc.add(MK.blob(T,[[p[0],p[1],p[2],0.7,0x9775fa],[p[0]+0.8,p[1]-0.4,p[2]+0.3,0.55,0xb197fc],[p[0]-0.7,p[1]-0.3,p[2]-0.3,0.5,0x9775fa]],{res:22})));
-  const ck=[];for(let k=0;k<12;k++){const a=(k%6)*Math.PI/3,y=k<6?0.45:-0.45;ck.push([NX+0.5+Math.cos(a)*1.25,-12.2+y,0.6+Math.sin(a)*1.25,0.55,0xfab005])}ck.push([NX+0.5,-12.2,0.6,0.7,0xf08c00]);ctx.camk=MK.blob(T,ck,{res:30,mo:{emissive:LIN(T,0xffa94d),emissiveIntensity:0}});sc.add(ctx.camk);
+  const ck=[];for(let k=0;k<12;k++){const a=(k%6)*Math.PI/3,y=k<6?0.45:-0.45;ck.push([NX+0.5+Math.cos(a)*1.25,-12.2+y,0.6+Math.sin(a)*1.25,0.55,0xf06595])}ck.push([NX+0.5,-12.2,0.6,0.7,0xc2255c]);ctx.camk=MK.blob(T,ck,{res:30,mo:{emissive:LIN(T,0xf783ac),emissiveIntensity:0}});sc.add(ctx.camk);
   // астроцит: мембрана (вертикална) с EAAT; вътрешността е вдясно
-  const ast=MK.bilayer(T,{w:11,d:9,z0:-3.0,holes:[[0,0,2.4]],pal:[[0xb2f2bb,0xd3f9d8,0x8ce99a],[0xb2f2bb,0x69db7c,0xd3f9d8]],tail:0xebfbee});ast.rotation.z=Math.PI/2;ast.position.set(EX,0,0);sc.add(ast);
-  ctx.eaat=MK.rocker(T,[0x2b8a3e,0x37b24d,0x40c057,0x69db7c],0.9);ctx.eaat.rotation.z=Math.PI/2;ctx.eaat.position.set(EX,0,0);sc.add(ctx.eaat);ctx.eaat.set(0.3);
+  const ast=MK.bilayer(T,{w:11,d:9,z0:-3.0,holes:[[0,0,2.4]],pal:[[0xd0bfff,0xe5dbff,0xb197fc],[0xd0bfff,0x9775fa,0xe5dbff]],tail:0xf3f0ff});ast.rotation.z=Math.PI/2;ast.position.set(EX,0,0);sc.add(ast);
+  ctx.eaat=MK.rocker(T,[0x5f3dc4,0x7048e8,0x7950f2,0x9775fa],0.9);ctx.eaat.rotation.z=Math.PI/2;ctx.eaat.position.set(EX,0,0);sc.add(ctx.eaat);ctx.eaat.set(0.3);
+  {const eg=new T.Group();eg.rotation.z=Math.PI/2;eg.position.set(EX,0,0);sc.add(eg);MK.loadMesh(T,"m/mol/eaat_a.txt").then(()=>Promise.all(["a","b","c"].map(k=>MK.addCentered(T,eg,"m/mol/eaat_"+k+".txt",{s:.62,keepY:true})))).then(()=>{ctx.eaat.visible=false;eg.children.forEach(m=>{m.geometry.translate(0,0,0)})}).catch(()=>{})}
   // GABA-ергичен синапс
   const preB=MK.bilayer(T,{w:20,d:9,z0:-3.0,holes:[[5.5,0,2.3]]});preB.position.set(BX,6,0);sc.add(preB);
   const postB=MK.bilayer(T,{w:20,d:9,z0:-3.0,holes:[[0,0,2.5]],pal:[[0x8fd3e8,0xa5d8ff,0x74c0fc],[0x8fd3e8,0x66a8d9,0xa5d8ff]],tail:0xe7f5ff});postB.position.set(BX,-6,0);sc.add(postB);
   ctx.gabaR=MK.nachr(T,{col:[0xcc5de8,0x845ef7,0xcc5de8,0x845ef7,0x5c7cfa],cut:true});ctx.gabaR.g.scale.setScalar(0.78);ctx.gabaR.g.position.set(BX,-6,0);sc.add(ctx.gabaR.g);
+  MK.realize(T,ctx.gabaR.g,["a","b","c","d","e"].map(k=>"m/mol/gaba_"+k+".txt"),{flip:true,cutFront:true});
   ctx.gat=MK.rocker(T,[0x862e9c,0x9c36b5,0xae3ec9,0xcc5de8],0.9);ctx.gat.rotation.z=Math.PI;ctx.gat.position.set(BX+5.5,6,0);sc.add(ctx.gat);
   // везикули
   ctx.vG=MK.vesicle(T,2.4);ctx.vB=MK.vesicle(T,2.3);sc.add(ctx.vG,ctx.vB);ctx.dG=V(GX-0.4,11.6,0.4);ctx.dB=V(BX-0.4,11.4,0.4);ctx.vG.position.copy(ctx.dG);ctx.vB.position.copy(ctx.dB);
   [[GX-6,13.8,-4.5],[GX+4.5,14.6,-5],[GX-1.5,16.6,-6],[BX-5,13.6,-4.5],[BX+2.5,15.4,-5]].forEach(p=>{const v=MK.vesicle(T,2.0,{cut:2});v.position.set(...p);sc.add(v)});
   // молекули и йони
-  ctx.gl1=MK.pool(T,0x51cf66,0.22,40,{glow:0.2});ctx.gl2=MK.pool(T,0xfa5252,0.15,40);ctx.ga1=MK.pool(T,0xcc5de8,0.22,30,{glow:0.2});ctx.ga2=MK.pool(T,0x4dabf7,0.15,30);
-  ctx.naP=MK.pool(T,0xf76707,0.28,60);ctx.caP=MK.pool(T,0x74c0fc,0.3,30,{glow:0.35});ctx.clP=MK.pool(T,0x2f9e44,0.38,40);ctx.kP=MK.pool(T,0x9c36b5,0.32,20);
+  ctx.gl1=MK.pool(T,0xb197fc,0.22,40,{glow:0.2});ctx.gl2=MK.pool(T,0xfa5252,0.15,40);ctx.ga1=MK.pool(T,0xcc5de8,0.22,30,{glow:0.2});ctx.ga2=MK.pool(T,0x4dabf7,0.15,30);
+  ctx.naP=MK.pool(T,0xf76707,0.28,60);ctx.caP=MK.pool(T,0x74c0fc,0.3,30,{glow:0.35});ctx.clP=MK.pool(T,0x7048e8,0.38,40);ctx.kP=MK.pool(T,0x9c36b5,0.32,20);
   [ctx.gl1,ctx.gl2,ctx.ga1,ctx.ga2,ctx.naP,ctx.caP,ctx.clP,ctx.kP].forEach(m=>sc.add(m));
   ctx.mg=new T.Mesh(new T.SphereGeometry(0.34,18,12),MK.mat(T,0xe9ecef,{emissive:LIN(T,0xadb5bd),emissiveIntensity:0.2}));sc.add(ctx.mg);ctx.mgIn=V(NX,-6-0.3*RS,0.15);ctx.mgOut=V(NX+1.6,0.9,1.4);
   const amb=(n,x0,x1,y0,y1)=>{const a=[];for(let k=0;k<n;k++)a.push({b:V(lerp(x0,x1,R()),lerp(y0,y1,R()),lerp(-6,2.4,R())),f:[R()*6,R()*6,R()*6]});return a};
@@ -4836,7 +4846,7 @@ return {id:"stgCS",title:"Химичен синапс в ЦНС — стъпка
 const STG_ES=(()=>{const CH=[[0,0],[5.8,-3.4],[-5.8,-3.4],[0,-6.8]],H=3.45;return {id:"stgES",title:"Електричен синапс (gap junction) — стъпка по стъпка",h:480,dur:4,
  intro:"Две съседни клетки с плака от междуклетъчни канали (в разрез отпред). Всеки канал е от два коннексона — по един от всяка клетка, а всеки коннексон е от 6 коннексина. Предните коннексини на средния канал са полупрозрачни, за да се вижда порът.",
  cam:{r:34,th:0.3,phi:1.35,target:[0,0,-2],min:6,max:70},
- legend:[["#0ca678","коннексон на клетка 1","box"],["#1098ad","коннексон на клетка 2","box"],["#9c36b5","K⁺ (основен носител на тока)"],["#f76707","Na⁺"],["#74c0fc","Ca²⁺"],["#ff6b6b","H⁺"],["#4dabf7","cAMP / IP₃"],["#adb5bd","белтък (> 1 kDa)"],["#ffd43b","деполяризация / ток","box"]],
+ legend:[["#3b5bdb","коннексон на клетка 1","box"],["#1098ad","коннексон на клетка 2","box"],["#9c36b5","K⁺ (основен носител на тока)"],["#f76707","Na⁺"],["#74c0fc","Ca²⁺"],["#ff6b6b","H⁺"],["#4dabf7","cAMP / IP₃"],["#adb5bd","белтък (> 1 kDa)"],["#ff8787","деполяризация / ток","box"]],
  stages:[
   {t:"Плака от коннексони между две клетки",short:"Плака от коннексони",badge:"цепка 2–4 nm",d:"При електричния синапс мембраните на двете клетки са само на 2–4 nm една от друга (при химичния — 20–40 nm). В тях има плаки от стотици до хиляди канали (gap junctions). Срещат се в сърцето (интеркаларните дискове), гладката мускулатура, епителите, глията и някои неврони (долната олива, ретината, хипоталамуса)."},
   {t:"Два коннексона се скачват",short:"Скачване на два коннексона",badge:"6 + 6 коннексина",d:"Всяка клетка изгражда <b>коннексон</b> (хемиканал) от 6 <b>коннексина</b> (Cx43 в сърцето, Cx36 в невроните). Извънклетъчните бримки на двата коннексона се закачват и образуват непрекъснат воден канал с пора ≈ 1,2–1,5 nm, изолиран от междуклетъчната течност."},
@@ -4849,8 +4859,8 @@ const STG_ES=(()=>{const CH=[[0,0],[5.8,-3.4],[-5.8,-3.4],[0,-6.8]],H=3.45;retur
   // един коннексин (4 TM спирали, извънклетъчни бримки за скачване, цитоплазмени краища)
   const cb=[];for(const y of [-1.6,-0.5,0.6,1.6])cb.push([1.3,y,-0.35,0.55],[1.3,y,0.4,0.52],[2.15,y*0.95,-0.3,0.55],[2.15,y*0.95,0.45,0.52]);
   cb.push([1.5,2.5,0,0.62],[2.0,2.75,0.3,0.55],[1.3,3.0,-0.2,0.48],[2.3,-2.4,0.4,0.5],[2.4,-3.0,0.2,0.42],[1.6,-2.4,-0.2,0.45]);
-  const proto=MK.blob(T,cb,{res:30});const mats=[MK.mat(T,0x0ca678),MK.mat(T,0x1098ad)];const glass=mats.map(m=>{const c=m.clone();c.transparent=true;c.opacity=0.2;c.depthWrite=false;return c});
-  const plugM=MK.mat(T,0xffd43b,{emissive:LIN(T,0xfab005),emissiveIntensity:0.25});
+  const proto=MK.blob(T,cb,{res:30});const mats=[MK.mat(T,0x3b5bdb),MK.mat(T,0x1098ad)];const glass=mats.map(m=>{const c=m.clone();c.transparent=true;c.opacity=0.2;c.depthWrite=false;return c});
+  const plugM=MK.mat(T,0xff8787,{emissive:LIN(T,0xf06595),emissiveIntensity:0.25});
   const hemi=(x,z,top,cut)=>{const g=new T.Group(),tw=new T.Group();g.add(tw);g.position.set(x,top?H:-H,z);if(top)g.rotation.x=Math.PI;sc.add(g);const cons=[];
     for(let k=0;k<6;k++){const a=k*Math.PI/3+(top?0:Math.PI/6),piv=new T.Group();piv.rotation.y=-a;tw.add(piv);const tl=new T.Group();tl.position.x=1.75;piv.add(tl);
       const m=proto.clone();m.position.x-=1.75;const front=(top?-1:1)*Math.sin(a)>0.45;m.material=cut&&front?glass[top?0:1]:mats[top?0:1];if(cut&&front)m.renderOrder=5;tl.add(m);
@@ -4858,8 +4868,8 @@ const STG_ES=(()=>{const CH=[[0,0],[5.8,-3.4],[-5.8,-3.4],[0,-6.8]],H=3.45;retur
     return {g,tw,cons,y0:top?H:-H,top,set(c,sep){tw.rotation.y=0.5*c;cons.forEach(o=>{o.tl.rotation.x=0.32*c;o.pl.position.x=lerp(1.05,0.32,c)});g.position.y=this.y0+(this.top?1:-1)*(sep||0)}}};
   ctx.ch=CH.map((c,k)=>({t:hemi(c[0],c[1],true,k===0),b:hemi(c[0],c[1],false,k===0)}));
   // пора: светеща колона при ток
-  ctx.pore=new T.Mesh(new T.CylinderGeometry(0.5,0.5,8.2,18,1,true),new T.MeshBasicMaterial({color:LIN(T,0xffd43b),transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide}));sc.add(ctx.pore);
-  const band=()=>{const m=new T.Mesh(new T.BoxGeometry(28,5,10.2),new T.MeshBasicMaterial({color:LIN(T,0xffd43b),transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending}));m.position.z=-3.4;sc.add(m);return m};ctx.b1=band();ctx.b1.position.y=H;ctx.b2=band();ctx.b2.position.y=-H;
+  ctx.pore=new T.Mesh(new T.CylinderGeometry(0.5,0.5,8.2,18,1,true),new T.MeshBasicMaterial({color:LIN(T,0xff8787),transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide}));sc.add(ctx.pore);
+  const band=()=>{const m=new T.Mesh(new T.BoxGeometry(28,5,10.2),new T.MeshBasicMaterial({color:LIN(T,0xff8787),transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending}));m.position.z=-3.4;sc.add(m);return m};ctx.b1=band();ctx.b1.position.y=H;ctx.b2=band();ctx.b2.position.y=-H;
   // йони и молекули
   ctx.kP=MK.pool(T,0x9c36b5,0.34,60);ctx.naP=MK.pool(T,0xf76707,0.29,20);ctx.caP=MK.pool(T,0x74c0fc,0.3,20,{glow:0.35});ctx.hP=MK.pool(T,0xff6b6b,0.16,30,{glow:0.4});[ctx.kP,ctx.naP,ctx.caP,ctx.hP].forEach(m=>sc.add(m));
   const amb=(n,y0,y1,x0=-13,x1=13)=>{const a=[];for(let k=0;k<n;k++)a.push({b:V(lerp(x0,x1,R()),lerp(y0,y1,R()),lerp(-7.5,2.4,R())),f:[R()*6,R()*6,R()*6]});return a};
@@ -4906,7 +4916,7 @@ const S=(t,short,tag,badge,d)=>({t,short,tag,badge,d});
 return {id:"stgSM",title:"Как се съкращава и отпуска гладкият мускул — стъпка по стъпка",h:500,dur:4.2,cycle:true,center:"секунди",
  intro:"Молекулен модел на гладкомускулна клетка: плазмена мембрана с α₁ рецептор, Gq, PLCβ и L-тип Ca²⁺ канал; саркоплазмен ретикулум (СР) с IP₃ рецептор и SERCA; калмодулин, MLCK, актин, закрепен към плътно телце, миозин II, MLC фосфатаза и Rho-киназа.",
  cam:{r:34,th:0.22,phi:1.38,target:[4,2,0],min:8,max:90},
- legend:[["#74c0fc","Ca²⁺"],["#4c6ef5","α₁ рецептор","box"],["#f08c00","Gαq","box"],["#1098ad","PLCβ","box"],["#7950f2","IP₃ рецептор (СР)","box"],["#339af0","L-тип Ca²⁺ канал","box"],["#2f9e44","SERCA","box"],["#ffc078","калмодулин","box"],["#e64980","MLCK","box"],["#94d82d","актин","box"],["#e8590c","миозин II (RLC — тюркоазена)","box"],["#1c7ed6","MLC фосфатаза","box"],["#c92a2a","Rho-киназа","box"],["#fd7e14","фосфат"]],
+ legend:[["#74c0fc","Ca²⁺"],["#4c6ef5","α₁ рецептор","box"],["#f08c00","Gαq","box"],["#1098ad","PLCβ","box"],["#7950f2","IP₃ рецептор (СР)","box"],["#339af0","L-тип Ca²⁺ канал","box"],["#1c7ed6","SERCA","box"],["#ffc078","калмодулин","box"],["#e64980","MLCK","box"],["#ced4da","актин","box"],["#e8590c","миозин II (RLC — тюркоазена)","box"],["#1c7ed6","MLC фосфатаза","box"],["#c92a2a","Rho-киназа","box"],["#fd7e14","фосфат"]],
  stages:[
   S("Норадреналин активира α₁ рецептора и Gq","α₁ → Gq","α₁","фармакомеханично","Норадреналинът от симпатиковите окончания се свързва с <b>α₁-адренергичния рецептор</b> (7 трансмембранни спирали). Рецепторът активира G-белтъка <b>Gq</b>: GDP се заменя с GTP и α-субединицата се отделя от βγ. Това е <b>фармакомеханично свързване</b> — съкращение и без промяна на потенциала (така действат и ангиотензин II, ендотелин, ACh чрез M₃)."),
   S("PLCβ → IP₃ → Ca²⁺ излиза от СР","IP₃ → Ca²⁺ от СР","IP₃","IP₃ рецептор","Gαq-GTP активира <b>фосфолипаза Cβ</b>, която разцепва PIP₂ на <b>IP₃</b> и <b>DAG</b>. IP₃ дифундира до IP₃ рецепторите в саркоплазмения ретикулум и ги отваря — Ca²⁺ излиза от СР в цитоплазмата. DAG остава в мембраната и активира протеин киназа C."),
@@ -4919,7 +4929,7 @@ return {id:"stgSM",title:"Как се съкращава и отпуска гл�
  build(G,T,ctx){const sc=G.scene,V=(x,y,z)=>new T.Vector3(x,y,z),R=MK.rnd(41);ctx.V=V;
   const glow=(o)=>({emissive:LIN(T,o),emissiveIntensity:0});
   const pm=MK.bilayer(T,{w:46,d:9,z0:-3.2,holes:[[XA-4,0,1.9],[XL-4,0,3.6],[6.5-4,0,1.5]]});pm.position.set(4,PMY,0);sc.add(pm);
-  const sr=MK.bilayer(T,{w:22,d:9,z0:-3.2,holes:[[XI+5.5,0,2.4],[XS+5.5,0,1.9]],pal:[[0xb2f2bb,0xd3f9d8,0x8ce99a],[0xb2f2bb,0x69db7c,0xd3f9d8]],tail:0xebfbee});sr.position.set(-5.5,SRY,0);sc.add(sr);
+  const sr=MK.bilayer(T,{w:22,d:9,z0:-3.2,holes:[[XI+5.5,0,2.4],[XS+5.5,0,1.9]],pal:[[0xd0ebff,0xe7f5ff,0xa5d8ff],[0xd0ebff,0xb197fc,0xe7f5ff]],tail:0xf1f8ff});sr.position.set(-5.5,SRY,0);sc.add(sr);
   // α₁ рецептор (7 TM спирали)
   const rb=[];for(let k=0;k<7;k++){const a=k*2*Math.PI/7;for(const y of [-1.7,-0.55,0.6,1.7])rb.push([Math.cos(a)*1.2,y,Math.sin(a)*1.2,0.6,k%2?0x5c7cfa:0x4c6ef5])}
   rb.push([0.3,2.6,0.4,0.6,0x748ffc],[-0.6,2.5,-0.3,0.5,0x748ffc],[0.9,-2.7,0.5,0.6,0x4263eb],[1.3,-3.2,0.2,0.45,0x4263eb],[-0.8,-2.8,0.3,0.45,0x4263eb]);
@@ -4929,14 +4939,14 @@ return {id:"stgSM",title:"Как се съкращава и отпуска гл�
   [[0.55,0.25,0xfa5252],[0.5,-0.32,0xfa5252],[-0.52,0.05,0xadb5bd],[-0.82,0.2,0xadb5bd],[-1.1,0.05,0x4dabf7]].forEach(p=>{const s=new T.Mesh(new T.SphereGeometry(0.13,12,8),MK.mat(T,p[2]));s.position.set(p[0],p[1],0);ctx.ne.add(s)});ctx.ne.scale.setScalar(1.3);sc.add(ctx.ne);
   ctx.neA=V(XA+1.6,12.6,1.5);ctx.neB=V(XA+0.2,9.6,1.0);
   // Gq: βγ (статични) и Gα (подвижна) с GDP/GTP
-  sc.add(MK.blob(T,[...Array.from({length:7},(_,k)=>{const a=k*2*Math.PI/7;return [XA+2.4+Math.cos(a)*0.6,3.3,-0.3+Math.sin(a)*0.6,0.45,0x37b24d]}),[XA+1.8,4.2,-0.5,0.35,0x94d82d],[XA+1.4,4.6,-0.4,0.3,0x94d82d]],{res:32}));
+  sc.add(MK.blob(T,[...Array.from({length:7},(_,k)=>{const a=k*2*Math.PI/7;return [XA+2.4+Math.cos(a)*0.6,3.3,-0.3+Math.sin(a)*0.6,0.45,0x339af0]}),[XA+1.8,4.2,-0.5,0.35,0xced4da],[XA+1.4,4.6,-0.4,0.3,0xced4da]],{res:32}));
   ctx.ga=new T.Group();ctx.ga.add(MK.blob(T,[[0,0,0,0.85,0xf08c00],[0.7,-0.5,0.3,0.7,0xf08c00],[-0.3,0.6,0.2,0.55,0xfd7e14]],{res:30,mo:glow(0xffa94d)}));
-  ctx.nt=new T.Group();[[0,0,0,0x4dabf7],[0.3,0.05,0,0xfab005],[0.55,0,0,0xfd7e14],[0.78,0,0,0xfd7e14],[1.0,0,0,0xfd7e14]].forEach((p,k)=>{const s=new T.Mesh(new T.SphereGeometry(k?0.12:0.16,10,8),MK.mat(T,p[3]));s.position.set(p[0],p[1],p[2]);ctx.nt.add(s)});ctx.nt.position.set(-0.3,0.1,0.8);ctx.ga.add(ctx.nt);
+  ctx.nt=new T.Group();[[0,0,0,0x4dabf7],[0.3,0.05,0,0xf06595],[0.55,0,0,0xfd7e14],[0.78,0,0,0xfd7e14],[1.0,0,0,0xfd7e14]].forEach((p,k)=>{const s=new T.Mesh(new T.SphereGeometry(k?0.12:0.16,10,8),MK.mat(T,p[3]));s.position.set(p[0],p[1],p[2]);ctx.nt.add(s)});ctx.nt.position.set(-0.3,0.1,0.8);ctx.ga.add(ctx.nt);
   ctx.gaR=V(XA+1.3,3.5,0.9);ctx.gaP=V(XP-1.4,3.5,1.1);ctx.ga.position.copy(ctx.gaR);sc.add(ctx.ga);
   // PLCβ и PIP₂ (→ IP₃ + DAG)
   ctx.plc=MK.blob(T,[[0,0,0,1.0,0x1098ad],[1.0,0.3,-0.3,0.8,0x15aabf],[-0.9,-0.3,0.2,0.75,0x1098ad],[0.3,-0.9,0.4,0.6,0x0c8599],[0.2,0.8,0.3,0.6,0x15aabf]],{res:32,mo:glow(0x66d9e8)});ctx.plc.position.add(V(XP,3.4,0));sc.add(ctx.plc);
   ctx.ip3=new T.Group();for(let k=0;k<6;k++){const a=k*Math.PI/3,s=new T.Mesh(new T.SphereGeometry(0.12,10,8),MK.mat(T,0xf1f3f5));s.position.set(0.25*Math.cos(a),0,0.25*Math.sin(a));ctx.ip3.add(s)}[0,2,4].forEach(k=>{const a=k*Math.PI/3,p=new T.Mesh(new T.SphereGeometry(0.16,10,8),MK.mat(T,0xfd7e14));p.position.set(0.52*Math.cos(a),0,0.52*Math.sin(a));ctx.ip3.add(p)});ctx.ip3.scale.setScalar(1.3);sc.add(ctx.ip3);
-  ctx.dag=new T.Group();const gly=new T.Mesh(new T.SphereGeometry(0.2,12,8),MK.mat(T,0xffd43b));ctx.dag.add(gly);[-0.15,0.15].forEach(x=>{const c=new T.Mesh(new T.CylinderGeometry(0.07,0.07,1.3,6),MK.mat(T,0xf3e6c4));c.position.set(x,0.75,0);ctx.dag.add(c)});ctx.dag.position.set(XP+0.9,4.85,1.5);sc.add(ctx.dag);
+  ctx.dag=new T.Group();const gly=new T.Mesh(new T.SphereGeometry(0.2,12,8),MK.mat(T,0xff8787));ctx.dag.add(gly);[-0.15,0.15].forEach(x=>{const c=new T.Mesh(new T.CylinderGeometry(0.07,0.07,1.3,6),MK.mat(T,0xf3e6c4));c.position.set(x,0.75,0);ctx.dag.add(c)});ctx.dag.position.set(XP+0.9,4.85,1.5);sc.add(ctx.dag);
   ctx.ip3H=V(XP+0.9,4.35,1.5);ctx.ip3S=V(XI+1.5,1.4,1.9);ctx.ip3Path=[ctx.ip3H,V(XP,2.0,2.0),V(XI+2.4,1.9,2.0),ctx.ip3S];
   // IP₃ рецептор (тетрамер с голям цитоплазмен домен); предните субединици — полупрозрачни
   for(let k=0;k<4;k++){const a=k*Math.PI/2+Math.PI/4,ca=Math.cos(a),sa=Math.sin(a),col=k%2?0x9775fa:0x7950f2,b=[];
@@ -4951,12 +4961,12 @@ return {id:"stgSM",title:"Как се съкращава и отпуска гл�
   ctx.cav=MK.vgChan(T,{col:[0x339af0,0x4dabf7,0x1c7ed6,0x74c0fc],vsd:0xd0ebff,cut:true,seed:4});ctx.cav.g.scale.setScalar(0.9);ctx.cav.g.position.set(XL,PMY,0);sc.add(ctx.cav.g);
   sc.add(MK.blob(T,[[XL+0.5,3.7,-1.6,0.7,0x74c0fc],[XL+1.2,3.4,-1.2,0.55,0x74c0fc]],{res:24}));sc.add(MK.blob(T,[[XL+1.6,10.3,-1.6,0.8,0xa5d8ff],[XL+2.4,10.9,-1.2,0.6,0xa5d8ff],[XL+1.0,11.0,-1.8,0.55,0xa5d8ff]],{res:24}));
   // SERCA (TM + домени A, P, N) и фосфоламбан
-  const sb=[];for(let k=0;k<10;k++){const a=k*2*Math.PI/10;for(const y of [-1.5,0,1.5])sb.push([XS+Math.cos(a)*1.1,SRY+y,Math.sin(a)*0.9,0.55,0x2f9e44])}
-  sb.push([XS,SRY+2.1,0,0.55,0x2f9e44]);ctx.serca=MK.blob(T,sb,{res:40});sc.add(ctx.serca);sc.add(MK.blob(T,[[XS,SRY+2.85,0,0.95,0x1c7ed6],[XS+0.3,SRY+2.6,0.5,0.6,0x1c7ed6]],{res:26}));sc.add(MK.blob(T,[[XS-1.45,SRY+3.0,0.3,0.8,0xfab005],[XS-1.8,SRY+3.5,-0.2,0.6,0xfab005]],{res:24}));
+  const sb=[];for(let k=0;k<10;k++){const a=k*2*Math.PI/10;for(const y of [-1.5,0,1.5])sb.push([XS+Math.cos(a)*1.1,SRY+y,Math.sin(a)*0.9,0.55,0x1c7ed6])}
+  sb.push([XS,SRY+2.1,0,0.55,0x1c7ed6]);ctx.serca=MK.blob(T,sb,{res:40});sc.add(ctx.serca);sc.add(MK.blob(T,[[XS,SRY+2.85,0,0.95,0x1c7ed6],[XS+0.3,SRY+2.6,0.5,0.6,0x1c7ed6]],{res:26}));sc.add(MK.blob(T,[[XS-1.45,SRY+3.0,0.3,0.8,0xf06595],[XS-1.8,SRY+3.5,-0.2,0.6,0xf06595]],{res:24}));
   ctx.sN=MK.blob(T,[[0,0,0,0.85,0xe03131],[0.5,0.45,0.2,0.6,0xe03131]],{res:24});ctx.sN.position.add(V(XS+1.35,SRY+3.5,0.4));sc.add(ctx.sN);ctx.sN0=ctx.sN.position.clone();
   sc.add(MK.helix(T,V(XS+1.5,SRY-1.6,1.0),V(XS+1.7,SRY+2.4,1.1),{color:0xff8787,rad:0.16,tube:0.11}));
   // PMCA (изнася Ca²⁺)
-  const pb=[];for(let k=0;k<8;k++){const a=k*Math.PI/4;for(const y of [-1.4,0,1.4])pb.push([6.5+Math.cos(a)*0.8,PMY+y,Math.sin(a)*0.7,0.5,0x63e6be])}pb.push([6.5,PMY-2.4,0,0.7,0x38d9a9],[7.2,PMY-3.0,0.3,0.55,0x38d9a9]);sc.add(MK.blob(T,pb,{res:32}));
+  const pb=[];for(let k=0;k<8;k++){const a=k*Math.PI/4;for(const y of [-1.4,0,1.4])pb.push([6.5+Math.cos(a)*0.8,PMY+y,Math.sin(a)*0.7,0.5,0x91a7ff])}pb.push([6.5,PMY-2.4,0,0.7,0x748ffc],[7.2,PMY-3.0,0.3,0.55,0x748ffc]);sc.add(MK.blob(T,pb,{res:32}));
   // калмодулин (2 дяла + централна спирала)
   ctx.cam=new T.Group();ctx.camN=MK.blob(T,[[0,0,0,0.55,0xffc078],[-0.3,0.3,0.2,0.42,0xffc078]],{res:22,mo:glow(0xffa94d)});ctx.camC=MK.blob(T,[[0,0,0,0.55,0xffa94d],[0.3,-0.3,0.2,0.42,0xffa94d]],{res:22,mo:glow(0xffa94d)});ctx.cam.add(ctx.camN,ctx.camC);
   ctx.camH=new T.Group();ctx.cam.add(ctx.camH);sc.add(ctx.cam);ctx.camR=V(XC,2.6,1.4);ctx.camK=V(XK+1.3,4.5,1.5);ctx.cam.position.copy(ctx.camR);ctx.camSp=-1;
@@ -4968,7 +4978,7 @@ return {id:"stgSM",title:"Как се съкращава и отпуска гл�
   ctx.atp=MK.mol(T,"atp");ctx.atp.scale.setScalar(1.2);sc.add(ctx.atp);ctx.atpA=V(XK+4,6.0,2.2);ctx.atpB=V(XK+0.2,2.6,1.7);
   // актин (двойна спирала) с тропомиозин и плътно телце — подвижна група
   ctx.act=new T.Group();sc.add(ctx.act);const am=new T.InstancedMesh(new T.SphereGeometry(0.28,12,8),MK.mat(T,0xffffff,{roughness:0.4}),80);let n=0;const m4=new T.Matrix4(),col=new T.Color();
-  for(let k=0;k<40;k++)for(let s=0;s<2;s++){const x=7.2+k*0.5+s*0.25,a=k*0.42+s*Math.PI;m4.makeTranslation(x,AY+0.24*Math.cos(a),0.24*Math.sin(a));am.setMatrixAt(n,m4);col.copy(LIN(T,s?0x94d82d:0x82c91e));am.setColorAt(n,col);n++}ctx.act.add(am);
+  for(let k=0;k<40;k++)for(let s=0;s<2;s++){const x=7.2+k*0.5+s*0.25,a=k*0.42+s*Math.PI;m4.makeTranslation(x,AY+0.24*Math.cos(a),0.24*Math.sin(a));am.setMatrixAt(n,m4);col.copy(LIN(T,s?0xced4da:0xadb5bd));am.setColorAt(n,col);n++}ctx.act.add(am);
   [0,1].forEach(s=>{const pts=[];for(let k=0;k<40;k++){const a=k*0.42+s*Math.PI+Math.PI/2;pts.push(V(7.2+k*0.5,AY+0.42*Math.cos(a),0.42*Math.sin(a)))}ctx.act.add(MK.taper(T,new T.CatmullRomCurve3(pts),0.06,0.06,{seg:120,rad:5,color:0x868e96}))});
   ctx.act.add(MK.blob(T,[[6.3,AY,0,0.95,0x495057],[6.6,AY+0.8,0.3,0.6,0x343a40],[6.2,AY-0.8,-0.2,0.6,0x343a40],[6.7,AY,-0.7,0.55,0x495057]],{res:28}));
   // дебел миозинов филамент (странично-полярен) с декоративни глави
@@ -4977,8 +4987,8 @@ return {id:"stgSM",title:"Как се съкращава и отпуска гл�
   // активни миозинови молекули: опашка + лостово рамо с ELC/RLC + моторен домен
   ctx.my=MX.map((xb,k)=>{const B=V(xb,-1.55,0.7),J=V(xb-0.4,-0.6,0.85);sc.add(MK.taper(T,new T.CatmullRomCurve3([B.clone().add(V(0.9,-0.2,-0.2)),B,J]),0.14,0.14,{seg:12,rad:6,color:0xb35d6b}));
     const g=new T.Group();g.position.copy(J);sc.add(g);const heads=[];
-    [[0,0,0],[0.15,0,-0.55]].forEach(([dx,dy,dz],h)=>{const hg=new T.Group();hg.position.set(dx,dy,dz);g.add(hg);hg.add(MK.taper(T,new T.LineCurve3(V(0,0,0),V(0,1.1,0)),0.13,0.13,{seg:4,rad:8,color:0xfab005}));
-      hg.add(MK.blob(T,[[0.13,0.78,0.12,0.3,0xfab005],[0.13,0.3,0.15,0.28,0x20c997],[-0.1,0.4,-0.08,0.22,0x20c997]],{res:20}));
+    [[0,0,0],[0.15,0,-0.55]].forEach(([dx,dy,dz],h)=>{const hg=new T.Group();hg.position.set(dx,dy,dz);g.add(hg);hg.add(MK.taper(T,new T.LineCurve3(V(0,0,0),V(0,1.1,0)),0.13,0.13,{seg:4,rad:8,color:0xf06595}));
+      hg.add(MK.blob(T,[[0.13,0.78,0.12,0.3,0xf06595],[0.13,0.3,0.15,0.28,0x5c7cfa],[-0.1,0.4,-0.08,0.22,0x5c7cfa]],{res:20}));
       hg.add(MK.blob(T,[[0,1.75,0,0.55,0xe8590c],[0.25,2.1,0.1,0.42,0xf76707],[-0.2,2.05,-0.1,0.38,0xe8590c]],{res:24,mo:glow(0xff922b)}));if(h)hg.rotation.z=0.12;heads.push(hg)});
     const P=MK.mol(T,"pi");P.scale.setScalar(0.95);P.position.set(0.45,0.32,0.42);g.add(P);P.visible=false;return {g,J,P,heads}});
   // MLC фосфатаза (PP1c + MYPT1) и RhoA / Rho-киназа
@@ -4986,8 +4996,8 @@ return {id:"stgSM",title:"Как се съкращава и отпуска гл�
   ctx.mlcpP=MK.mol(T,"pi");ctx.mlcpP.scale.setScalar(0.95);ctx.mlcpP.position.set(2.0,0.1,0.4);ctx.mlcp.add(ctx.mlcpP);ctx.mlcpR=V(22.5,-0.4,1.6);ctx.mlcp.position.copy(ctx.mlcpR);sc.add(ctx.mlcp);
   ctx.rock=MK.blob(T,[[24.6,3.3,0.6,0.85,0xc92a2a],[25.2,3.9,0.4,0.6,0xe03131],[23.9,3.0,0.9,0.55,0xc92a2a]],{res:28,mo:glow(0xff6b6b)});sc.add(ctx.rock);sc.add(MK.blob(T,[[25.6,4.5,0.1,0.5,0xff8787],[25.9,4.9,-0.2,0.35,0xff8787]],{res:20}));
   // NO и разтворима гуанилат циклаза
-  ctx.sgc=MK.blob(T,[[-4.6,3.4,-0.6,0.75,0x0ca678],[-3.9,3.8,-0.4,0.6,0x12b886],[-5.2,3.9,-0.9,0.55,0x0ca678]],{res:26,mo:glow(0x63e6be)});sc.add(ctx.sgc);
-  ctx.noA=MK.pool(T,0x4dabf7,0.17,12,{glow:0.3});ctx.noB=MK.pool(T,0xfa5252,0.16,12,{glow:0.3});ctx.cg=MK.pool(T,0x20c997,0.2,10,{glow:0.4});sc.add(ctx.noA,ctx.noB,ctx.cg);
+  ctx.sgc=MK.blob(T,[[-4.6,3.4,-0.6,0.75,0x3b5bdb],[-3.9,3.8,-0.4,0.6,0x4c6ef5],[-5.2,3.9,-0.9,0.55,0x3b5bdb]],{res:26,mo:glow(0x91a7ff)});sc.add(ctx.sgc);
+  ctx.noA=MK.pool(T,0x4dabf7,0.17,12,{glow:0.3});ctx.noB=MK.pool(T,0xfa5252,0.16,12,{glow:0.3});ctx.cg=MK.pool(T,0x5c7cfa,0.2,10,{glow:0.4});sc.add(ctx.noA,ctx.noB,ctx.cg);
   // Ca²⁺
   ctx.caP=MK.pool(T,0x74c0fc,0.27,140,{glow:0.4});sc.add(ctx.caP);
   const amb=(n,x0,x1,y0,y1,z0=-6.5,z1=2.6)=>{const a=[];for(let k=0;k<n;k++)a.push({b:V(lerp(x0,x1,R()),lerp(y0,y1,R()),lerp(z0,z1,R())),f:[R()*6,R()*6,R()*6]});return a};
@@ -5063,7 +5073,7 @@ const VAL=[null,{Pc:30,pc:0,pif:0,piif:0},{Pc:30,pc:28,pif:-3,piif:8},{Pc:10,pc:
 return {id:"stgST",title:"Как течността излиза от капиляра и се връща — стъпка по стъпка",h:500,dur:4.5,
  intro:"Разрез през стената на капиляр в нанометров мащаб: кръвната плазма с албумин отгоре, ендотелни клетки с междуклетъчна цепка, гликокаликс и базална мембрана, а отдолу интерстициум с колагенови влакна и протеогликани. Вдясно е лимфен капиляр с клапи от припокриващи се клетки.",
  cam:{r:30,th:0.22,phi:1.4,target:[0,0,0],min:8,max:90},
- legend:[["#4dabf7","вода"],["#fab005","албумин"],["#f4b6b0","ендотелна клетка","box"],["#748ffc","ядро","box"],["#96f2d7","гликокаликс","box"],["#f08c00","междуклетъчни връзки","box"],["#ced4da","базална мембрана","box"],["#e9d8a6","колаген","box"],["#b2f2bb","лимфен капиляр","box"],["#e03131","сила навън","box"],["#1c7ed6","сила навътре","box"]],
+ legend:[["#4dabf7","вода"],["#f06595","албумин"],["#f4b6b0","ендотелна клетка","box"],["#748ffc","ядро","box"],["#bac8ff","гликокаликс","box"],["#f08c00","междуклетъчни връзки","box"],["#ced4da","базална мембрана","box"],["#e9d8a6","колаген","box"],["#d0ebff","лимфен капиляр","box"],["#e03131","сила навън","box"],["#1c7ed6","сила навътре","box"]],
  stages:[
   S("Стената на капиляра","Устройство на стената","стена","цепки ≈ 6–7 nm","Капилярът е само един слой <b>ендотелни клетки</b> върху <b>базална мембрана</b>. Между клетките има тесни <b>междуклетъчни цепки</b>, частично затворени от междуклетъчни връзки. Луминалната повърхност е покрита с <b>гликокаликс</b> — гъста мрежа от протеогликани. Вода и малки разтворени вещества минават свободно, а албуминът почти не минава."),
   S("Хидростатичното налягане изтласква водата навън","Pc изтласква водата","Pc","Pc ≈ 30 mmHg","На артериоларния край кръвното налягане в капиляра (P<sub>c</sub> ≈ 30 mmHg) притиска плазмата към стената и изтласква вода и малки молекули през цепките към интерстициума — <b>филтрация</b>."),
@@ -5084,8 +5094,8 @@ return {id:"stgST",title:"Как течността излиза от капил
   ctx.jn=[];for(let z=Z0+0.4;z<ZF;z+=0.45){if(z>-1.3&&z<0.7)continue;const b=new T.Mesh(new T.CylinderGeometry(0.13,0.13,0.8,8),MK.mat(T,0xf08c00));b.rotation.z=Math.PI/2;b.position.set(0,0.65,z);sc.add(b);ctx.jn.push(b)}
   // гликокаликс
   const hairs=[];for(let x=-14.6;x<14.6;x+=0.42)for(let z=Z0+0.3;z<ZF-0.2;z+=0.5){if(Math.abs(x)<0.5)continue;const y0=1.6+(Math.abs(Math.abs(x)-8)<3.2&&z<1&&z>-4.6?0.35:0);hairs.push({x:x+R()*0.2,z:z+R()*0.2,y0,l:1.1+R()*0.6,tx:(R()-0.5)*0.4,tz:(R()-0.5)*0.4,sh:R()})}
-  ctx.hairs=hairs;ctx.gly=new T.InstancedMesh(new T.CylinderGeometry(0.035,0.05,1,5),new T.MeshStandardMaterial({color:LIN(T,0x96f2d7),roughness:0.6}),hairs.length);sc.add(ctx.gly);
-  ctx.glyTip=new T.InstancedMesh(new T.SphereGeometry(0.08,6,5),new T.MeshStandardMaterial({color:LIN(T,0x63e6be),roughness:0.5}),hairs.length);sc.add(ctx.glyTip);ctx.shed=-1;
+  ctx.hairs=hairs;ctx.gly=new T.InstancedMesh(new T.CylinderGeometry(0.035,0.05,1,5),new T.MeshStandardMaterial({color:LIN(T,0xbac8ff),roughness:0.6}),hairs.length);sc.add(ctx.gly);
+  ctx.glyTip=new T.InstancedMesh(new T.SphereGeometry(0.08,6,5),new T.MeshStandardMaterial({color:LIN(T,0x91a7ff),roughness:0.5}),hairs.length);sc.add(ctx.glyTip);ctx.shed=-1;
   // базална мембрана
   const bc=document.createElement("canvas");bc.width=bc.height=128;const bg=bc.getContext("2d");bg.fillStyle="#e9ecef";bg.fillRect(0,0,128,128);bg.strokeStyle="#adb5bd";bg.lineWidth=1.5;for(let k=0;k<26;k++){bg.beginPath();bg.moveTo(R()*128,R()*128);bg.lineTo(R()*128,R()*128);bg.stroke()}
   const bt=new T.CanvasTexture(bc);bt.wrapS=bt.wrapT=T.RepeatWrapping;bt.repeat.set(8,3);const bm=new T.Mesh(new T.BoxGeometry(30,0.45,ZL+0.2),new T.MeshPhysicalMaterial({map:bt,roughness:0.8,transparent:true,opacity:0.85}));bm.position.set(0,-1.45,Z0+ZL/2);sc.add(bm);
@@ -5100,11 +5110,11 @@ return {id:"stgST",title:"Как течността излиза от капил
   // лимфен капиляр: припокриващи се клетки-клапи + закотвящи филаменти
   ctx.flaps=[];const NF=8;for(let k=0;k<NF;k++){const a0=k*2*Math.PI/NF,da=2*Math.PI/NF+0.22;const g=new T.CylinderGeometry(LR,LR,ZL,10,1,true,a0,da);g.rotateX(Math.PI/2);
     const ex=V(Math.sin(a0)*LR,0,Math.cos(a0)*LR).applyAxisAngle(V(1,0,0),Math.PI/2);g.translate(-ex.x,-ex.y,-ex.z);const piv=new T.Group();piv.position.set(LX+ex.x,LY+ex.y,Z0+ZL/2+ex.z);
-    const m=new T.Mesh(g,new T.MeshPhysicalMaterial({color:LIN(T,0xb2f2bb),roughness:0.45,clearcoat:0.3,side:T.DoubleSide}));piv.add(m);sc.add(piv);ctx.flaps.push(piv);
+    const m=new T.Mesh(g,new T.MeshPhysicalMaterial({color:LIN(T,0xd0ebff),roughness:0.45,clearcoat:0.3,side:T.DoubleSide}));piv.add(m);sc.add(piv);ctx.flaps.push(piv);
     const am=(a0+da/2),dir=V(Math.sin(am),0,Math.cos(am)).applyAxisAngle(V(1,0,0),Math.PI/2);for(const z of [-3.5,0.5]){const p0=V(LX,LY,z).addScaledVector(dir,LR),p1=V(LX,LY,z).addScaledVector(dir,LR+2.3).add(V(0,0,0.6));sc.add(MK.taper(T,new T.LineCurve3(p0,p1),0.035,0.035,{seg:2,rad:4,color:0x868e96}))}}
   // молекули
   const ab=MK.blob(T,[[0,0,0,0.42],[0.42,0.22,0.1,0.34],[-0.38,0.25,-0.05,0.34],[0.05,-0.36,0.1,0.3]],{res:20});const ag=ab.geometry.clone();ag.scale(ab.scale.x,ab.scale.y,ab.scale.z);ag.translate(ab.position.x,ab.position.y,ab.position.z);
-  ctx.alb=new T.InstancedMesh(ag,MK.mat(T,0xfab005,{roughness:0.35,emissive:LIN(T,0xf76707),emissiveIntensity:0.15}),60);ctx.alb.count=0;ctx.alb.frustumCulled=false;sc.add(ctx.alb);
+  ctx.alb=new T.InstancedMesh(ag,MK.mat(T,0xf06595,{roughness:0.35,emissive:LIN(T,0xf76707),emissiveIntensity:0.15}),60);ctx.alb.count=0;ctx.alb.frustumCulled=false;sc.add(ctx.alb);
   ctx.wat=MK.pool(T,0x4dabf7,0.15,120,{glow:0.25});sc.add(ctx.wat);
   const amb=(n,x0,x1,y0,y1)=>{const a=[];for(let k=0;k<n;k++)a.push({b:V(lerp(x0,x1,R()),lerp(y0,y1,R()),lerp(Z0+0.5,ZF-0.3,R())),f:[R()*6,R()*6,R()*6],r:R()*6});return a};
   ctx.amb={albL:amb(30,-14,14,3.4,9.5),albI:amb(7,-14,14,-2.5,-9.5),albLeak:amb(10,-6,6,-2.6,-6),wL:amb(26,-14,14,3.2,9.8),wI:amb(18,-14,14,-2.2,-9.8),wLy:amb(14,LX-1.8,LX+1.8,LY-1.8,LY+1.8)};
@@ -6032,7 +6042,7 @@ function lungThorax(wrapSel,st,opt={}){
       let Ev=0,ph=0;ctx.beats.forEach(b=>{const x=ctx.tS-b-0.2;if(x<0||x>1.2)return;const r=vtAt(x);if(r.E>Ev){Ev=r.E;ph=r.ph}});const lb2=ctx.beats[ctx.beats.length-1];let Kk=0;if(lb2!=null){const x=ctx.tS-lb2-0.07;if(x>0&&x<0.13)Kk=Math.sin(Math.PI*x/0.13)**2}
       ctx.springs.step({E:Ev,K:Kk,S:0,T:ph===2?Ev:0},dt);const sp=ctx.springs.sp;H.deform({Es:sp.E.x,Ks:sp.K.x,Ss:sp.S.x,Ts:sp.T.x,Amp:1.2,P0:[0.6,0.6,0.6,0.6]});H.root.position.y=ctx.hBaseY==null?(ctx.hBaseY=H.root.position.y):ctx.hBaseY-dd*0.35}
     // въздух в трахеята
-    const pa=ctx.parts,tr=ctx.trach;if(tr&&tr.length>2){const f=s.flow||0,n=Math.min(40,Math.round(Math.abs(f)*30));pa.count=n;const M=new T.Matrix4();for(let i=0;i<n;i++){const p=ctx.pp[i];p.u=(p.u+dt*f*0.9+1)%1;const t=p.u*(tr.length-1),k=Math.floor(t),q=tr[k].clone().lerp(tr[Math.min(tr.length-1,k+1)],t-k);q.x+=(p.j-0.5)*0.25;q.z+=(((p.j*7)%1)-0.5)*0.25;M.makeTranslation(q.x,q.y,q.z);pa.setMatrixAt(i,M)}pa.instanceMatrix.needsUpdate=true;pa.material.color.set(f>0?0x40c057:0xfab005)}
+    const pa=ctx.parts,tr=ctx.trach;if(tr&&tr.length>2){const f=s.flow||0,n=Math.min(40,Math.round(Math.abs(f)*30));pa.count=n;const M=new T.Matrix4();for(let i=0;i<n;i++){const p=ctx.pp[i];p.u=(p.u+dt*f*0.9+1)%1;const t=p.u*(tr.length-1),k=Math.floor(t),q=tr[k].clone().lerp(tr[Math.min(tr.length-1,k+1)],t-k);q.x+=(p.j-0.5)*0.25;q.z+=(((p.j*7)%1)-0.5)*0.25;M.makeTranslation(q.x,q.y,q.z);pa.setMatrixAt(i,M)}pa.instanceMatrix.needsUpdate=true;pa.material.color.set(f>0?0x4dabf7:0xf06595)}
     const L=[];if(opt.labels!==false&&s.lab){const lb=ctx.lb;L.push([s.lab.pl,new T.Vector3(lb.min.x*1.02,0.6,0.3)]);L.push([s.lab.al,new T.Vector3(lb.max.x*0.6,-1.2,lb.max.z)]);L.push(["Диафрагма",new T.Vector3(lb.min.x*0.5,lb.min.y-dd*0.9-0.2,lb.max.z*0.6)]);if(tr&&tr.length)L.push(["Трахея",tr[0].clone().add(new T.Vector3(0.9,-0.3,0))])}
     G.render(L);
     if(s.ov!=null)ctx.ov.innerHTML=s.ov});
@@ -6639,7 +6649,7 @@ const BF=(()=>{
     b+=t(160,214,"средно артериално налягане, mmHg",{fs:11,c:"var(--muted)"})+t(14,100,"импулси в нерва",{fs:11,r:-90,c:"var(--muted)"});
     return S(300,222,b,"Честота на импулсите от каротидния синус спрямо налягането")};
   // сили на Starling по капиляра
-  F.star=()=>{let b="";b+=`<rect x="10" y="62" width="420" height="104" rx="10" fill="color-mix(in srgb,#2f9e44 7%,var(--panel))" stroke="none"/>`+t(220,160,"интерстициум",{fs:11,c:GRN});
+  F.star=()=>{let b="";b+=`<rect x="10" y="62" width="420" height="104" rx="10" fill="color-mix(in srgb,#1c7ed6 7%,var(--panel))" stroke="none"/>`+t(220,160,"интерстициум",{fs:11,c:GRN});
     b+=`<rect x="40" y="96" width="360" height="36" rx="18" fill="color-mix(in srgb,#e03131 12%,var(--panel))" stroke="${RED}" stroke-width="1.6"/>`+ar([[150,114],[290,114]],{c:RED,w:2})+t(220,108,"кръв",{fs:10.5,c:RED});
     b+=t(16,186,"артериален край",{fs:11.5,a:"start",w:700})+t(430,186,"венозен край",{fs:11.5,a:"end",w:700});
     [[70,95,70,66],[100,95,100,66],[70,133,70,162],[100,133,100,162]].forEach(([x1,y1,x2,y2])=>b+=ar([[x1,y1],[x2,y2]],{c:RED,w:2.2}));
@@ -6739,10 +6749,10 @@ const BF=(()=>{
   b+=ar([[160,170],[380,170]],{c:"var(--accent)",w:2})+t(270,188,"посока на импулса",{fs:11,c:"var(--accent)",w:600});return S(440,196,b,"Части на неврона")};
  // непрекъснато и скачащо провеждане
  F.salt=()=>{let b="";b+=t(10,20,"без миелин: непрекъснато, бавно",{fs:11.5,a:"start",w:700});b+=rect(20,40,400,16,"color-mix(in srgb,#e7ad9c 60%,var(--panel))",{rx:8});
-  for(let k=0;k<10;k++)b+=ar([[30+k*40,48],[58+k*40,48]],{c:NA,w:1.6,h:5});b+=`<rect x="140" y="40" width="70" height="16" rx="8" fill="#ffd43b" opacity="0.8"/>`;
+  for(let k=0;k<10;k++)b+=ar([[30+k*40,48],[58+k*40,48]],{c:NA,w:1.6,h:5});b+=`<rect x="140" y="40" width="70" height="16" rx="8" fill="#ff8787" opacity="0.8"/>`;
   b+=t(10,86,"с миелин: скачащо (салтаторно), бързо",{fs:11.5,a:"start",w:700});b+=rect(20,124,400,10,"color-mix(in srgb,#e7ad9c 60%,var(--panel))",{rx:5});
   for(let k=0;k<4;k++)b+=rect(30+k*100,116,84,26,"#fbf5ea",{rx:13,s:"#cdb79e"});
-  [[118,"#ffd43b"],[218,"#ffd43b"]].forEach(([x,c])=>b+=circ(x,129,9,c));
+  [[118,"#ff8787"],[218,"#ff8787"]].forEach(([x,c])=>b+=circ(x,129,9,c));
   for(let k=0;k<3;k++)b+=`<path d="M${118+k*100},112 Q${168+k*100},${94} ${214+k*100},112" stroke="${BLUE}" stroke-width="1.8" fill="none" stroke-dasharray="${k?"4 3":""}"/>`;
   b+=ar([[208,104],[216,112]],{c:BLUE,w:1.8,h:6});b+=t(220,164,"АП възниква само във възлите на Ранвие",{fs:11,c:"var(--muted)"});return S(440,172,b,"Непрекъснато и скачащо провеждане")};
  // K⁺ канал: филтър за избирателност
@@ -6760,8 +6770,8 @@ const BF=(()=>{
  // начини на транспорт
  F.mech=()=>{let b="";b+=memH(110,8,432,26);const L=(x,l1,l2)=>tt(x,200,[l1,l2],{fs:11,w:700,w2:400,c2:"var(--muted)",fs2:10.5});
   b+=ar([[50,40],[50,180]],{c:RED,w:2})+circ(50,32,6,RED)+L(50,"проста","дифузия");
-  b+=rect(118,80,14,60,"#20c997",{rx:4})+rect(148,80,14,60,"#20c997",{rx:4})+ar([[140,40],[140,180]],{c:K,w:2})+circ(140,32,6,K)+L(140,"канал","(K⁺, Na⁺)");
-  b+=`<path d="M210,78 q20,-6 40,0 l-4,64 q-16,6 -32,0Z" fill="color-mix(in srgb,#12b886 35%,var(--panel))" stroke="#12b886"/>`+ar([[230,40],[230,180]],{c:"var(--ink)",w:2})+circ(230,32,6,"var(--panel)","var(--ink)")+L(230,"улеснена","дифузия");
+  b+=rect(118,80,14,60,"#5c7cfa",{rx:4})+rect(148,80,14,60,"#5c7cfa",{rx:4})+ar([[140,40],[140,180]],{c:K,w:2})+circ(140,32,6,K)+L(140,"канал","(K⁺, Na⁺)");
+  b+=`<path d="M210,78 q20,-6 40,0 l-4,64 q-16,6 -32,0Z" fill="color-mix(in srgb,#4c6ef5 35%,var(--panel))" stroke="#4c6ef5"/>`+ar([[230,40],[230,180]],{c:"var(--ink)",w:2})+circ(230,32,6,"var(--panel)","var(--ink)")+L(230,"улеснена","дифузия");
   b+=`<path d="M298,78 q22,-6 44,0 l-4,64 q-18,6 -36,0Z" fill="color-mix(in srgb,#f08c00 35%,var(--panel))" stroke="#f08c00"/>`+ar([[312,170],[312,40]],{c:NA,w:2})+ar([[330,40],[330,170]],{c:K,w:2})+t(352,160,"ATP",{fs:10.5,c:BLUE,w:700,a:"start"})+L(320,"първичен","активен");
   b+=`<path d="M378,78 q22,-6 44,0 l-4,64 q-18,6 -36,0Z" fill="color-mix(in srgb,#7950f2 30%,var(--panel))" stroke="#7950f2"/>`+ar([[392,40],[392,180]],{c:NA,w:2})+ar([[410,40],[410,180]],{c:"var(--ink)",w:2})+L(400,"вторичен","активен");
   b+=t(10,20,"извън",{fs:10.5,a:"start",c:"var(--muted)"})+t(10,176,"вътре",{fs:10.5,a:"start",c:"var(--muted)"});
@@ -6769,8 +6779,8 @@ const BF=(()=>{
  // насищане при улеснената дифузия
  F.sat=()=>{const X=c=>40+c/10*240,Y=j=>180-j*150;let b="";[0,0.5,1].forEach(j=>b+=ln(40,Y(j),280,Y(j),{c:"var(--grid)"}));
   let d="",e="";for(let c=0;c<=10;c+=0.2){d+=(d?"L":"M")+X(c).toFixed(1)+","+Y(Math.min(1.15,0.11*c)).toFixed(1);e+=(e?"L":"M")+X(c).toFixed(1)+","+Y(c/(1.5+c)).toFixed(1)}
-  b+=pth(d,{c:RED,w:2.4})+pth(e,{c:"#12b886",w:2.4})+ln(40,Y(1),280,Y(1),{dash:"5 4",c:"#12b886"})+t(46,Y(1)-6,"V_max",{fs:11,a:"start",c:"#12b886",w:700});
-  b+=t(X(5.4),Y(0.26),"— проста дифузия",{fs:11,c:RED,w:600,a:"start"})+t(X(5.4),Y(0.13),"— улеснена (насищане)",{fs:11,c:"#12b886",w:600,a:"start"});b+=t(160,198,"концентрация",{fs:11,c:"var(--muted)"})+t(14,110,"скорост",{fs:11,r:-90,c:"var(--muted)"});
+  b+=pth(d,{c:RED,w:2.4})+pth(e,{c:"#4c6ef5",w:2.4})+ln(40,Y(1),280,Y(1),{dash:"5 4",c:"#4c6ef5"})+t(46,Y(1)-6,"V_max",{fs:11,a:"start",c:"#4c6ef5",w:700});
+  b+=t(X(5.4),Y(0.26),"— проста дифузия",{fs:11,c:RED,w:600,a:"start"})+t(X(5.4),Y(0.13),"— улеснена (насищане)",{fs:11,c:"#4c6ef5",w:600,a:"start"});b+=t(160,198,"концентрация",{fs:11,c:"var(--muted)"})+t(14,110,"скорост",{fs:11,r:-90,c:"var(--muted)"});
   return S(300,206,b,"Проста срещу улеснена дифузия")};
  // цикъл на Post–Albers (4 състояния)
  F.post=()=>{let b="";const N=[[180,36,"E1","местата гледат навътре"],[320,130,"E1P","3 Na⁺ затворени"],[180,224,"E2P","местата гледат навън"],[40,130,"E2","2 K⁺ затворени"]];
@@ -6788,22 +6798,22 @@ const BF=(()=>{
   [[128,66,-14],[220,56,0],[312,66,14]].forEach(([x,y,a])=>b+=`<g transform="rotate(${a} ${x} ${y})"><ellipse cx="${x}" cy="${y}" rx="22" ry="9" fill="#e9967a" stroke="#a8482c" stroke-width="1"/><path d="M${x-15},${y-5} v8 M${x-9},${y+6} v-9 M${x-3},${y-7} v9 M${x+3},${y+7} v-9 M${x+9},${y-6} v9 M${x+15},${y+5} v-8" stroke="#a8482c" stroke-width="1.1" fill="none" stroke-linecap="round"/><ellipse cx="${x}" cy="${y}" rx="22" ry="9" fill="url(#aShadeV)"/></g>`);
   const AZ=[150,220,290];AZ.forEach((x,k)=>{[[-13,-12],[0,-15],[13,-12],[-7,-2],[7,-2],[-18,0],[18,0]].forEach(([dx,dy],j)=>{if(k===1&&j===4)return;const vx=x+dx,vy=100+dy;b+=circ(vx,vy,5.6,"color-mix(in srgb,#d7bdf0 75%,var(--panel))",VES,1.1)+circ(vx-1.6,vy-1,1,VES)+circ(vx+1.5,vy-1.4,1,VES)+circ(vx,vy+1.8,1,VES)});
    b+=`<path d="M${x-7},114 L${x},108 L${x+7},114Z" fill="#3b4558"/>`});
-  b+=`<path d="M221,114 C219,104 235,104 233,114" fill="color-mix(in srgb,#d7bdf0 75%,var(--panel))" stroke="${VES}" stroke-width="1.1"/>`;[[226,119],[230,124],[223,126],[228,130],[234,121]].forEach(([x,y])=>b+=sph(x,y,1.9,"#2f9e44",""));
+  b+=`<path d="M221,114 C219,104 235,104 233,114" fill="color-mix(in srgb,#d7bdf0 75%,var(--panel))" stroke="${VES}" stroke-width="1.1"/>`;[[226,119],[230,124],[223,126],[228,130],[234,121]].forEach(([x,y])=>b+=sph(x,y,1.9,"#1c7ed6",""));
   [128,198,268].forEach(x=>{b+=prot(`M${x-6},109 q-3,6 0,11 q3,2 4,0 v-11 q-2,-3 -4,0Z M${x+6},109 q3,6 0,11 q-3,2 -4,0 v-11 q2,-3 4,0Z`,"#5b9bd5","#2a5f96",{sh:0});b+=sph(x,124,2.3,BLUE,"")+sph(x,104,2.3,BLUE,"")});
-  b+=`<path d="M70,128 H370" stroke="#8a97a8" stroke-width="1" stroke-dasharray="1.5 3"/>`;[100,172,256,330].forEach(x=>b+=`<path d="M${x-4},128 a4,4 0 1 1 8,0 l-4,-1Z" fill="#2f9e44"/>`);
+  b+=`<path d="M70,128 H370" stroke="#8a97a8" stroke-width="1" stroke-dasharray="1.5 3"/>`;[100,172,256,330].forEach(x=>b+=`<path d="M${x-4},128 a4,4 0 1 1 8,0 l-4,-1Z" fill="#1c7ed6"/>`);
   const FX=[112,184,256,328];let d="M14,150 C30,146 50,142 80,142";FX.forEach((fx,i)=>{d+=` L${fx-20},142 C${fx-7},142 ${fx-8},150 ${fx-7},160 L${fx-6},178 C${fx-6},190 ${fx+6},190 ${fx+6},178 L${fx+7},160 C${fx+8},150 ${fx+7},142 ${fx+20},142`});d+=" L360,142 C390,142 410,146 426,150 L426,262 L14,262Z";
   b+=prot(d,MUF,MUS,{v:1,sh:0});
   for(let x=18;x<422;x+=34){const w=Math.min(34,422-x);b+=`<rect x="${x}" y="206" width="${w}" height="52" fill="color-mix(in srgb,#e8848f 22%,var(--panel))"/><rect x="${x+8}" y="206" width="${Math.max(0,Math.min(18,w-8))}" height="52" fill="color-mix(in srgb,#b5475a 50%,var(--panel))"/><rect x="${x+15.5}" y="206" width="${w>19?3:0}" height="52" fill="color-mix(in srgb,#e8848f 45%,var(--panel))"/><line x1="${x}" y1="206" x2="${x}" y2="258" stroke="#7d2a3a" stroke-width="1.1"/>`}
   b+=`<path d="M18,223.5 H422 M18,241 H422" stroke="var(--panel)" stroke-width="1.6"/><rect x="18" y="206" width="404" height="52" fill="none" stroke="${MUS}" stroke-width=".8"/>`;
   b+=`<ellipse cx="50" cy="178" rx="22" ry="10" fill="#7e6bb8" stroke="#4d3d85"/><ellipse cx="50" cy="178" rx="22" ry="10" fill="url(#aSph)"/>`;
   FX.forEach(fx=>{[-16,16].forEach(dx=>b+=prot(`M${fx+dx-5},137 q-3,5 0,10 q3,2 3.6,0 v-10 q-1.6,-3 -3.6,0Z M${fx+dx+5},137 q3,5 0,10 q-3,2 -3.6,0 v-10 q1.6,-3 3.6,0Z`,"#e64980","#a61e4d",{sh:0}));b+=`<rect x="${fx-9}" y="174" width="4" height="9" rx="2" fill="${NA}" stroke="#b86e00" stroke-width=".6"/><rect x="${fx+5}" y="174" width="4" height="9" rx="2" fill="${NA}" stroke="#b86e00" stroke-width=".6"/>`});
-  [[148,137],[292,138]].forEach(([x,y])=>b+=sph(x,y,1.9,"#2f9e44",""));
+  [[148,137],[292,138]].forEach(([x,y])=>b+=sph(x,y,1.9,"#1c7ed6",""));
   b+=t(300,12,"окончание на моторния аксон",{fs:11,w:700,a:"start"})+lead(298,9,240,14);
   b+=t(4,40,"Шванова клетка",{fs:10,a:"start",c:"#3f7a4f",w:600})+lead(60,44,74,62);
   b+=t(4,14,"миелин",{fs:10,a:"start",c:"#5b6b82",w:600})+lead(40,11,176,11);
   b+=t(436,56,"везикули с ACh",{fs:10,a:"end",c:VES,w:600})+lead(368,60,309,90);
   b+=t(4,122,"Ca²⁺ канал",{fs:10,a:"start",c:"#2a5f96",w:600})+lead(50,119,121,114);
-  b+=t(436,124,"цепнатина 20–30 nm",{fs:10,a:"end",c:"var(--muted)"})+t(436,136,"AChE",{fs:10,a:"end",c:"#2f9e44",w:700})+lead(410,133,334,127);
+  b+=t(436,124,"цепнатина 20–30 nm",{fs:10,a:"end",c:"var(--muted)"})+t(436,136,"AChE",{fs:10,a:"end",c:"#1c7ed6",w:700})+lead(410,133,334,127);
   b+=t(220,200,"никотинови ACh рецептори по гребените · Na⁺ канали в гънките",{fs:10,c:"#8c1f3d",w:600});
   return S(440,264,b,"Нервно-мускулен синапс")};
  // потенциал на крайната пластинка и праг
@@ -6866,7 +6876,7 @@ const BF=(()=>{
   B(10,10,130,["Ca²⁺ ↑","канали + СР"],{f:"color-mix(in srgb,#1c7ed6 14%,var(--panel))"});B(160,10,120,["Ca²⁺-калмодулин"]);B(300,10,130,["MLCK се активира"]);
   b+=ar([[141,30],[159,30]])+ar([[281,30],[299,30]])+ar([[365,51],[365,79]]);
   B(300,80,130,["миозинът се","фосфорилира"]);B(160,80,120,["напречни мостове","→ съкращение"],{f:"color-mix(in srgb,#e03131 12%,var(--panel))"});b+=ar([[299,100],[281,100]]);
-  B(160,160,120,["MLCP маха","фосфата"]);B(10,160,130,["отпускане или","„латч“ (тонус)"],{f:"color-mix(in srgb,#2f9e44 12%,var(--panel))"});b+=ar([[220,121],[220,159]])+ar([[159,180],[141,180]]);
+  B(160,160,120,["MLCP маха","фосфата"]);B(10,160,130,["отпускане или","„латч“ (тонус)"],{f:"color-mix(in srgb,#1c7ed6 12%,var(--panel))"});b+=ar([[220,121],[220,159]])+ar([[159,180],[141,180]]);
   b+=t(365,172,"без тропонин —",{fs:10.5,c:"var(--muted)"})+t(365,186,"регулира се миозинът",{fs:10.5,c:"var(--muted)"});return S(440,210,b,"Регулация на съкращението на гладкия мускул")};
 })();
 /* ---- схеми за раздел V: Дишане ---- */
