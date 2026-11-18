@@ -18,7 +18,7 @@ const brand=document.querySelector(".brand b,.logo b,.brand");const FONT=brand?g
 
 /* ---------- изглед (същият като при другите въведения) ---------- */
 const css=`
-#hxo{position:fixed;inset:0;z-index:100000;background:radial-gradient(120% 80% at 20% 0%,#FBFBFC 0%,rgba(251,251,252,0) 55%),linear-gradient(115deg,#D9DCE0 0%,#F4F5F6 28%,#C9CDD2 46%,#EEF0F2 64%,#D3D7DB 82%,#F6F7F8 100%);color:#eef0ee;overflow:hidden;font-family:${FONT};transition:opacity .7s ease;touch-action:none}
+#hxo{position:fixed;inset:0;touch-action:none;overscroll-behavior:none;z-index:100000;background:radial-gradient(120% 80% at 20% 0%,#FBFBFC 0%,rgba(251,251,252,0) 55%),linear-gradient(115deg,#D9DCE0 0%,#F4F5F6 28%,#C9CDD2 46%,#EEF0F2 64%,#D3D7DB 82%,#F6F7F8 100%);color:#eef0ee;overflow:hidden;font-family:${FONT};transition:opacity .7s ease;touch-action:none}
 #hxo.out{opacity:0;pointer-events:none}
 #hxo canvas.gl{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity 1.2s ease,transform 1.3s cubic-bezier(.6,0,.2,1)}
 #hxo.ready canvas.gl{opacity:1}
@@ -150,9 +150,9 @@ $(".skip").onclick=finish;$(".hint").onclick=()=>push(phase==="hold2"?1:.34);
 $(".snd").onclick=e=>{e.stopPropagation();if(!AC){sndMuted=false;audioInit().then(()=>setSound(true)).catch(()=>{});return}const on=!sndOn;sndMuted=!on;try{localStorage.setItem("pn_intro_sound",on?"on":"off")}catch(x){}audioInit().then(()=>setSound(on))};
 ov.addEventListener("pointerdown",e=>{if(!e.target.closest(".snd,.skip"))enableFromGesture()});addEventListener("keydown",()=>{if(!ended)enableFromGesture()});
 let ty=null,wheelLock=0;
-addEventListener("wheel",e=>{if(e.deltaY<=0)return;if(phase==="hold2"){if(performance.now()>wheelLock){wheelLock=performance.now()+900;enter()}}else push(Math.min(.25,e.deltaY*.0012))},{passive:true});
+addEventListener("wheel",e=>{if(ended)return;if(e.cancelable)e.preventDefault();if(e.deltaY<=0)return;if(phase==="hold2"){if(performance.now()>wheelLock){wheelLock=performance.now()+900;enter()}}else push(Math.min(.25,Math.max(.03,e.deltaY*.0016)))},{passive:false});
 addEventListener("touchstart",e=>{ty=e.touches[0].clientY},{passive:true});
-addEventListener("touchmove",e=>{if(ty==null)return;const y=e.touches[0].clientY,d=ty-y;ty=y;if(d>0)push(phase==="hold2"?(d>30?1:0):d*.004)},{passive:true});
+addEventListener("touchmove",e=>{if(ended||ty==null)return;if(e.cancelable)e.preventDefault();const y=e.touches[0].clientY,d=ty-y;ty=y;if(d>0)push(phase==="hold2"?(d>30?1:0):d*.005)},{passive:false});
 addEventListener("keydown",e=>{if(ended)return;if(["ArrowDown","PageDown"," ","Enter"].includes(e.key)&&!(e.target&&e.target.closest&&e.target.closest("button"))){e.preventDefault();push(phase==="hold2"?1:.34)}if(e.key==="Escape")finish()});
 
 function noGL(){if(ended||phase!=="pre")return;$(".pre").textContent="";phase="hold2";setC("ready");setC("ecg");setText("lungs");$(".hint em").textContent="Scroll to enter";setC("hinted");
@@ -337,7 +337,9 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*vn(p);p*=2.03;a*=.5;
       if(d>DIVE+.6&&phase==="dive"){phase="hold2";$(".hint em").textContent="Scroll to enter";setC("hinted")}}
     /* въздух: навътре при вдишване, навън при издишване */
     /* лицето остава извън кадър: ако върхът на носа влиза в изгледа, камерата се накланя надолу */
-    {const nose=V(0,OY+.772,.135),q=V(0,0,0);cam.updateMatrixWorld();for(let k=0;k<24;k++){q.copy(nose).project(cam);if(q.z>1||q.y>1.06)break;cam.rotateX(-.012*(1+Math.max(0,1.06-q.y)*2));cam.updateMatrixWorld()}}
+    {/* плавно: точният наклон (бисекция), без стъпки — иначе камерата подскача */const nose=V(0,OY+.772,.135),q=V(0,0,0),q0=cam.quaternion.clone();
+     const yAt=a=>{cam.quaternion.copy(q0);cam.rotateX(-a);cam.updateMatrixWorld();q.copy(nose).project(cam);return q.z>1?9:q.y};
+     if(yAt(0)<1.06){let lo=0,hi=.7;for(let k=0;k<18;k++){const m=(lo+hi)/2;if(yAt(m)<1.06)lo=m;else hi=m}cam.quaternion.copy(q0);cam.rotateX(-hi)}else cam.quaternion.copy(q0);cam.updateMatrixWorld()}
     soundFrame(tt);if(ov.classList.contains("ecg")){ecDraw(dt);rrEl.textContent=String(Math.round(60/BP))}
     R.render(S,cam)}
   raf=requestAnimationFrame(frame);
