@@ -161,7 +161,7 @@ function noGL(){if(ended||phase!=="pre")return;$(".pre").textContent="";phase="h
 
 const getMesh=u=>fetch(u).then(r=>{if(!r.ok)throw new Error(u);return r.text()}).then(decodeMesh).catch(()=>null);
 if(RM){noGL()}else{
-  load(THREE_URL).then(()=>Promise.all([getMesh("m/brain.txt"),Promise.resolve(null),getMesh("m/doctor.txt")])).then(([b,n,d])=>{if(!ended&&phase==="pre")build(b,n,d)}).catch(e=>{console.error(e);noGL()});
+  load(THREE_URL).then(()=>Promise.all([Promise.resolve(null),Promise.resolve(null),getMesh("m/doctor.txt")])).then(([b,n,d])=>{if(!ended&&phase==="pre")build(b,n,d)}).catch(e=>{console.error(e);noGL()});
 }
 setTimeout(()=>{if(phase==="pre")noGL()},20000);
 

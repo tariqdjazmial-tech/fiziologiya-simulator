@@ -867,7 +867,7 @@ function viewNeuron3D(main){
       sM.add(g);chans.push(ch);return ch}
     chPos.na.forEach(p=>channel(p[0],p[1],"na"));chPos.k.forEach(p=>channel(p[0],p[1],"k"));
     const pump=new T.Mesh(new T.BoxGeometry(1.1,1.9,1.1),new T.MeshStandardMaterial({color:0x37b24d,roughness:0.5}));pump.position.set(chPos.pump[0][0],0,chPos.pump[0][1]);sM.add(pump);
-    const naMat=new T.MeshStandardMaterial({color:0xfcc419,emissive:0x664400,emissiveIntensity:0.4}),kMat=new T.MeshStandardMaterial({color:0x9c36b5,emissive:0x2b0a33,emissiveIntensity:0.4});
+    const naMat=new T.MeshStandardMaterial({color:0xf76707,emissive:0x5a2000,emissiveIntensity:0.4}),kMat=new T.MeshStandardMaterial({color:0x9c36b5,emissive:0x2b0a33,emissiveIntensity:0.4});
     const ionG=new T.SphereGeometry(0.14,12,10);const ions=[];
     function ion(type,x,y,z){const m=new T.Mesh(ionG,type==="na"?naMat:kMat);m.position.set(x,y,z);sM.add(m);const o={m,type,v:new T.Vector3(),path:null};ions.push(o);return o}
     for(let i=0;i<70;i++)ion("na",(rnd()-0.5)*11.5,0.9+rnd()*2.6,(rnd()-0.5)*7.5);
@@ -939,7 +939,7 @@ function viewChannels(main){
     <div class="btns"><button class="b primary" id="stim">Стимул</button><button class="b" id="pause">⏸︎ Пауза</button>
       <span class="small" style="align-self:center;margin-left:6px">Лупа:</span><button class="b" data-z="all">Цяла картина</button><button class="b" data-z="na">Na⁺ канал</button><button class="b" data-z="k">K⁺ канал</button><button class="b" data-z="leak">Изтичане</button><button class="b" data-z="pump">Помпа</button></div>
     <canvas id="cv" style="width:100%;display:block;touch-action:none;border-radius:10px;background:var(--panel);border:1px solid var(--line)"></canvas>
-    <div class="legend" style="margin-top:6px"><span><i style="background:#fcc419;height:10px;width:10px;border-radius:50%"></i>Na⁺</span><span><i style="background:#9c36b5;height:10px;width:10px;border-radius:50%"></i>K⁺</span><span><i style="background:#e8590c"></i>химична сила</span><span><i style="background:#1c7ed6"></i>електрична сила</span><span><i style="background:${css("--ink")}"></i>нетна сила (V<sub>m</sub> − E)</span></div>
+    <div class="legend" style="margin-top:6px"><span><i style="background:#f76707;height:10px;width:10px;border-radius:50%"></i>Na⁺</span><span><i style="background:#9c36b5;height:10px;width:10px;border-radius:50%"></i>K⁺</span><span><i style="background:#e8590c"></i>химична сила</span><span><i style="background:#1c7ed6"></i>електрична сила</span><span><i style="background:${css("--ink")}"></i>нетна сила (V<sub>m</sub> − E)</span></div>
     <div class="stats" id="st"></div>
     <div class="note" id="phase"></div>
   </div>
@@ -1064,7 +1064,7 @@ function viewChannels(main){
     const g=cv.getContext("2d"),k=W/LW;g.setTransform(dpr*k,0,0,dpr*k,0,0);g.clearRect(0,0,LW,LH);
     g.save();g.translate(view.tx,view.ty);g.scale(view.s,view.s);
     // фон
-    g.fillStyle="rgba(252,196,25,0.10)";g.fillRect(0,0,LW,mY0);g.fillStyle="rgba(156,54,181,0.08)";g.fillRect(0,mY1,LW,LH-mY1);
+    g.fillStyle="rgba(77,171,247,0.07)";g.fillRect(0,0,LW,mY0);g.fillStyle="rgba(156,54,181,0.08)";g.fillRect(0,mY1,LW,LH-mY1);
     g.font="600 14px -apple-system,Segoe UI,Arial";g.fillStyle=css("--muted");g.textAlign="left";
     g.fillText("ИЗВЪНКЛЕТЪЧНО   [Na⁺] "+S.Nao.get()+"  ·  [K⁺] "+fmt(S.Ko.get(),1)+" mmol/L",14,22);
     g.fillText("ВЪТРЕКЛЕТЪЧНО   [Na⁺] "+S.Nai.get()+"  ·  [K⁺] "+S.Ki.get()+" mmol/L",14,LH-12);
@@ -1081,8 +1081,13 @@ function viewChannels(main){
       g.fillStyle=outPlus?"#e03131":"#1c7ed6";g.fillText(outPlus?"+":"−",x,mY0-6);g.fillStyle=outPlus?"#1c7ed6":"#e03131";g.fillText(outPlus?"−":"+",x,mY1+18)}
     // канали
     const m3=Math.min(1,M.m**3*S.na.get()*2.2),blk=Math.max(0,Math.min(1,(0.55-M.h)/0.4)),n4=Math.min(1,M.n**4*S.k.get()*2.5);
-    const prot=(x,col,lab,pw=14,w=46)=>{g.fillStyle=col;g.strokeStyle="rgba(0,0,0,.25)";g.lineWidth=1.5;
-      rr(g,x-pw-w,mY0-28,w,(mY1-mY0)+56,16);g.fill();g.stroke();rr(g,x+pw,mY0-28,w,(mY1-mY0)+56,16);g.fill();g.stroke();
+    /* белтъчна субединица: заоблен „лоб“ със сенки, трансмембранни спирали и извънклетъчна бримка */
+    const shade=(c,f)=>{const n=parseInt(c.slice(1),16),r=n>>16,gg=n>>8&255,b=n&255,m=v=>Math.max(0,Math.min(255,Math.round(v*f)));return `rgb(${m(r)},${m(gg)},${m(b)})`};
+    const lobe=(x0,w,col)=>{const y0=mY0-30,h=(mY1-mY0)+60;g.save();g.beginPath();g.moveTo(x0+w*.2,y0);g.bezierCurveTo(x0-w*.12,y0+h*.12,x0+w*.06,y0+h*.5,x0-w*.04,y0+h*.86);g.quadraticCurveTo(x0+w*.1,y0+h*1.02,x0+w*.5,y0+h);g.quadraticCurveTo(x0+w*1.04,y0+h*1.02,x0+w*1.02,y0+h*.84);g.bezierCurveTo(x0+w*.94,y0+h*.5,x0+w*1.1,y0+h*.14,x0+w*.8,y0);g.quadraticCurveTo(x0+w*.5,y0-h*.07,x0+w*.2,y0);g.closePath();
+      const gr=g.createLinearGradient(x0,0,x0+w,0);gr.addColorStop(0,shade(col,.72));gr.addColorStop(.38,shade(col,1.12));gr.addColorStop(1,shade(col,.8));g.fillStyle=gr;g.fill();g.strokeStyle=shade(col,.55);g.lineWidth=1.2;g.stroke();g.clip();
+      g.strokeStyle=shade(col,.78);g.lineWidth=1.6;g.globalAlpha=.7;for(let k=0;k<3;k++){const hx=x0+w*(.24+k*.26);g.beginPath();for(let yy=mY0-14;yy<=mY1+14;yy+=2){const xx=hx+Math.sin(yy*.32+k)*w*.07;yy===mY0-14?g.moveTo(xx,yy):g.lineTo(xx,yy)}g.stroke()}
+      g.globalAlpha=.35;const hl=g.createRadialGradient(x0+w*.35,y0+h*.2,2,x0+w*.35,y0+h*.2,w*.9);hl.addColorStop(0,"rgba(255,255,255,.9)");hl.addColorStop(1,"rgba(255,255,255,0)");g.fillStyle=hl;g.fillRect(x0-10,y0-10,w+20,h+20);g.restore()};
+    const prot=(x,col,lab,pw=14,w=46)=>{lobe(x-pw-w,w,col);lobe(x+pw,w,col);
       g.font="600 12px -apple-system,Segoe UI,Arial";g.fillStyle=css("--ink");g.textAlign="center";const ll=lab.split("|");g.fillText(ll[0],x,mY1+60);g.font="11px -apple-system,Segoe UI,Arial";g.fillStyle=css("--muted");if(ll[1])g.fillText(ll[1],x,mY1+74)};
     // Na
     {const x=CH.na.x;prot(x,S.na.get()<0.05?"#adb5bd":"#ff922b",CH.na.lab);
@@ -1105,15 +1110,16 @@ function viewChannels(main){
     // Leak
     {const x=CH.leak.x;prot(x,"#91a7ff",CH.leak.lab,10,30)}
     // Pump
-    {const x=CH.pump.x;g.fillStyle=st.ouab?"#adb5bd":"#51cf66";g.strokeStyle="rgba(0,0,0,.25)";g.lineWidth=1.5;rr(g,x-52,mY0-34,104,(mY1-mY0)+68,22);g.fill();g.stroke();
+    {const x=CH.pump.x,pc=st.ouab?"#adb5bd":"#c2255c";lobe(x-54,52,pc);lobe(x+2,52,pc);
+      /* цитоплазмени домени A, N, P */[[x-30,mY1+46,20,"#e64980"],[x+18,mY1+56,24,"#a61e4d"],[x+2,mY1+32,16,"#d6336c"]].forEach(([cx,cy,r,c])=>{const gr=g.createRadialGradient(cx-r*.3,cy-r*.3,2,cx,cy,r);gr.addColorStop(0,st.ouab?"#ced4da":shade(c,1.25));gr.addColorStop(1,st.ouab?"#868e96":shade(c,.75));g.fillStyle=gr;g.beginPath();g.arc(cx,cy,r,0,7);g.fill()});
       g.fillStyle=css("--panel");const openUp=pumpPh===1;g.beginPath();if(openUp){g.moveTo(x-16,mY0-34);g.lineTo(x+16,mY0-34);g.lineTo(x+8,mC+10);g.lineTo(x-8,mC+10)}else{g.moveTo(x-16,mY1+34);g.lineTo(x+16,mY1+34);g.lineTo(x+8,mC-10);g.lineTo(x-8,mC-10)}g.closePath();g.fill();
       g.font="600 12px -apple-system,Segoe UI,Arial";g.fillStyle=css("--ink");g.textAlign="center";g.fillText(CH.pump.lab,x,mY1+64);
       g.font="11px -apple-system,Segoe UI,Arial";g.fillStyle=css("--muted");g.fillText(st.ouab?"блокирана (уабаин)":"3 Na⁺ навън · 2 K⁺ навътре",x,mY1+80);
-      if(atpFlash>0){g.globalAlpha=atpFlash;g.fillStyle="#2b8a3e";g.font="bold 12px -apple-system,Segoe UI,Arial";g.fillText("ATP → ADP + Pᵢ",x,mY1+100);g.globalAlpha=1}}
+      if(atpFlash>0){g.globalAlpha=atpFlash;g.fillStyle="#a61e4d";g.font="bold 12px -apple-system,Segoe UI,Arial";g.fillText("ATP → ADP + Pᵢ",x,mY1+100);g.globalAlpha=1}}
     // йони
     const det=view.s>1.8;
-    ions.forEach(o=>{g.fillStyle=o.type==="na"?"#fcc419":"#9c36b5";g.beginPath();g.arc(o.x,o.y,o.type==="na"?6.5:7.5,0,7);g.fill();
-      if(det){g.fillStyle=o.type==="na"?"#5c3d00":"#fff";g.font="bold 5.5px -apple-system,Segoe UI,Arial";g.textAlign="center";g.fillText(o.type==="na"?"Na⁺":"K⁺",o.x,o.y+2)}});
+    ions.forEach(o=>{const r=o.type==="na"?6.5:7.5,gr=g.createRadialGradient(o.x-r*.35,o.y-r*.4,r*.1,o.x,o.y,r);gr.addColorStop(0,o.type==="na"?"#ffc89a":"#e3a8f0");gr.addColorStop(.55,o.type==="na"?"#f76707":"#9c36b5");gr.addColorStop(1,o.type==="na"?"#b84a05":"#5f1f70");g.fillStyle=gr;g.beginPath();g.arc(o.x,o.y,r,0,7);g.fill();
+      if(det){g.fillStyle="#fff";g.font="bold 5.5px -apple-system,Segoe UI,Arial";g.textAlign="center";g.fillText(o.type==="na"?"Na⁺":"K⁺",o.x,o.y+2)}});
     g.restore();
     // мащаб
     g.font="11px -apple-system,Segoe UI,Arial";g.fillStyle=css("--muted");g.textAlign="right";g.fillText("×"+fmt(view.s,1),LW-8,16);
@@ -1268,8 +1274,8 @@ function viewTransport(main){
     if((cnt++)%4)return;
     // графики и показатели
     const H=st.hist,tx=H.map(h=>h[0]),t1=Math.max(60,st.t);
-    if(m==="pump"){plot($("#pC"),{xmin:Math.max(0,t1-300),xmax:Math.max(t1,60),ymin:0,ymax:160,ylabel:"mmol/L",xlabel:"време, s",series:[{x:tx,y:H.map(h=>h[2]),color:"#f59f00"},{x:tx,y:H.map(h=>h[3]),color:"#9c36b5"}],hlines:[{y:142,color:"#f59f00",label:"[Na⁺]ₑ"},{y:4,color:"#9c36b5",label:"[K⁺]ₑ"}]});
-      $("#lgC").innerHTML=`<span><i style="background:#f59f00"></i>[Na⁺]ᵢ</span><span><i style="background:#9c36b5"></i>[K⁺]ᵢ</span>`}
+    if(m==="pump"){plot($("#pC"),{xmin:Math.max(0,t1-300),xmax:Math.max(t1,60),ymin:0,ymax:160,ylabel:"mmol/L",xlabel:"време, s",series:[{x:tx,y:H.map(h=>h[2]),color:"#f76707"},{x:tx,y:H.map(h=>h[3]),color:"#9c36b5"}],hlines:[{y:142,color:"#f76707",label:"[Na⁺]ₑ"},{y:4,color:"#9c36b5",label:"[K⁺]ₑ"}]});
+      $("#lgC").innerHTML=`<span><i style="background:#f76707"></i>[Na⁺]ᵢ</span><span><i style="background:#9c36b5"></i>[K⁺]ᵢ</span>`}
     else{const y=m==="sglt"?H.map(h=>h[4]):H.map(h=>h[1]),Co=S.Co.get();plot($("#pC"),{xmin:Math.max(0,t1-300),xmax:Math.max(t1,60),ymin:0,ymax:Math.max(Co*1.2,...y.slice(-300),1),ylabel:"mmol/L",xlabel:"време, s",series:[{x:tx,y,color:css("--accent")}],hlines:[{y:Co,color:css("--accent2"),label:"навън"}]});
       $("#lgC").innerHTML=`<span><i style="background:${css("--accent")}"></i>концентрация вътре</span><span><i style="background:${css("--accent2")}"></i>навън</span>`}
     if(m==="simple"||m==="facil"){const xs=[],ys1=[],ys2=[];const k=m==="facil"?Km():1.5,V=m==="facil"?Vf():0.6,P=m==="simple"?S.P.get():0.1;
@@ -1341,7 +1347,7 @@ function viewNKA(main){
    <div class="btns" id="scn"></div>
    <div class="grid2"><div id="pc"></div><div><canvas id="cell" style="width:100%;height:320px;display:block"></canvas><div class="stats" id="pst" style="margin-top:6px"></div></div></div>
    <div class="note" id="pn"></div>
-   <div class="nka3"><div><canvas class="plot" id="p1" style="height:200px"></canvas><div class="legend"><span><i style="background:#f59f00"></i>[Na⁺]ᵢ</span><span><i style="background:#9c36b5"></i>[K⁺]ᵢ</span><span><i style="background:#2f9e44"></i>[Cl⁻]ᵢ</span></div></div>
+   <div class="nka3"><div><canvas class="plot" id="p1" style="height:200px"></canvas><div class="legend"><span><i style="background:#f76707"></i>[Na⁺]ᵢ</span><span><i style="background:#9c36b5"></i>[K⁺]ᵢ</span><span><i style="background:#2f9e44"></i>[Cl⁻]ᵢ</span></div></div>
     <div><canvas class="plot" id="p2" style="height:200px"></canvas><div class="legend"><span><i style="background:var(--accent)"></i>V<sub>m</sub></span><span><i class="dash" style="border-color:#9c36b5"></i>E<sub>K</sub></span></div></div>
     <div><canvas class="plot" id="p3" style="height:200px"></canvas><div class="legend"><span><i style="background:#1c7ed6"></i>обем на клетката</span></div></div></div></div>
   <h3>Експерименти</h3><div id="ex"></div>`;
@@ -1373,7 +1379,7 @@ function viewNKA(main){
     if(inh>0.004){const x=P[2][0]+R*0.95,y=P[2][1]-4,rr=10+30*Math.sqrt(inh);g.setLineDash([4,3]);g.strokeStyle=css("--muted");g.beginPath();g.moveTo(P[2][0]+rad[2],P[2][1]);g.lineTo(x-rr,y);g.stroke();g.setLineDash([]);
       g.strokeStyle="#868e96";g.beginPath();g.arc(x,y,rr,0,7);g.globalAlpha=0.45;g.fillStyle="#868e96";g.fill();g.globalAlpha=1;g.stroke();g.fillStyle=css("--ink");g.textAlign="center";g.textBaseline="top";g.font=`600 12px ${F}`;g.fillText("E2P·гликозид",x,y+rr+4);g.font=`12px ${F}`;g.fillText(fmt(inh*100,0)+" %",x,y+rr+18)}
     const mx=occ.indexOf(Math.max(...occ));
-    for(let i=0;i<4;i++){const [x,y]=P[i],col=i<2?"#f59f00":"#9c36b5";g.strokeStyle=col;g.lineWidth=i===mx?3:1.5;g.beginPath();g.arc(x,y,rad[i],0,7);g.globalAlpha=i===mx?0.5:0.25;g.fillStyle=col;g.fill();g.globalAlpha=1;g.stroke();
+    for(let i=0;i<4;i++){const [x,y]=P[i],col=i<2?"#f76707":"#9c36b5";g.strokeStyle=col;g.lineWidth=i===mx?3:1.5;g.beginPath();g.arc(x,y,rad[i],0,7);g.globalAlpha=i===mx?0.5:0.25;g.fillStyle=col;g.fill();g.globalAlpha=1;g.stroke();
       g.fillStyle=css("--ink");g.textAlign="center";g.textBaseline="middle";g.font=`700 13px ${F}`;g.fillText(ST[i][0],x,y-(i===0||i===2?0:0));g.font=`12px ${F}`;
       const ly=i===0?y-rad[i]-14:i===2?y+rad[i]+14:y+rad[i]+12;g.fillText(fmt(occ[i]*100,0)+" % · "+ST[i][1],i===1?Math.min(W-70,x):i===3?Math.max(70,x):x,ly)}
     g.fillStyle=css("--ink");g.textAlign="center";g.textBaseline="middle";g.font=`700 22px ${F}`;g.fillText(fmt(r.vE,0),cx,cy-8);g.font=`12px ${F}`;g.fillStyle=css("--muted");g.fillText("цикъла в секунда",cx,cy+12)}
@@ -1429,15 +1435,15 @@ function viewNKA(main){
       if(lab){const lx=cx+(R+48)*Math.cos(a),ly=cy+(R+48)*Math.sin(a);g.font=`600 12px ${F}`;g.fillStyle=col;g.textAlign=Math.cos(a)>0.2?"left":Math.cos(a)<-0.2?"right":"center";g.textBaseline="middle";g.fillText(lab,lx,ly)}};
     // помпи (вдясно)
     [-0.42,0.42].forEach((a0,j)=>{const a=a0,px=cx+R*Math.cos(a),py=cy+R*Math.sin(a);g.save();g.translate(px,py);g.rotate(a);g.fillStyle=cell.par.act>0?"#e8590c":"#868e96";g.beginPath();g.roundRect?g.roundRect(-9,-13,18,26,5):g.rect(-9,-13,18,26);g.fill();g.restore();
-      arr(a-0.11,false,3*Jp,"#f59f00",j===0?"3 Na⁺":"");arr(a+0.11,true,2*Jp,"#9c36b5",j===0?"2 K⁺":"")});
+      arr(a-0.11,false,3*Jp,"#f76707",j===0?"3 Na⁺":"");arr(a+0.11,true,2*Jp,"#9c36b5",j===0?"2 K⁺":"")});
     g.font=`600 12px ${F}`;g.fillStyle=css("--ink");g.textAlign="left";g.textBaseline="middle";g.fillText(cell.par.act>0?"помпа":"помпа (блок)",cx+R+14,cy);
     // течове (вляво)
-    arr(Math.PI+0.5,fl.Na>=0,Math.abs(fl.Na),"#f59f00","Na⁺ теч");arr(Math.PI,fl.K<0,Math.abs(fl.K),"#9c36b5","K⁺ теч");arr(Math.PI-0.5,fl.Cl>=0,Math.abs(fl.Cl),"#2f9e44","Cl⁻");
+    arr(Math.PI+0.5,fl.Na>=0,Math.abs(fl.Na),"#f76707","Na⁺ теч");arr(Math.PI,fl.K<0,Math.abs(fl.K),"#9c36b5","K⁺ теч");arr(Math.PI-0.5,fl.Cl>=0,Math.abs(fl.Cl),"#2f9e44","Cl⁻");
     g.textAlign="center";g.textBaseline="middle";g.fillStyle=css("--ink");g.font=`700 20px ${F}`;g.fillText(`${fmt(cell.V,1)} mV`,cx,cy-R*0.4);
     g.font=`13px ${F}`;g.fillText(`Na⁺ ${fmt(c[0],1)}   K⁺ ${fmt(c[1],0)}`,cx,cy-R*0.06);g.fillText(`Cl⁻ ${fmt(c[2],1)} mmol/L`,cx,cy+R*0.16);
     g.fillStyle=css("--muted");g.font=`12px ${F}`;g.fillText("белтъци и фосфати (−)",cx+6,cy+R*0.48);g.fillText("не излизат",cx+6,cy+R*0.48+14)}
   function drawPlots(){const t1=Math.max(60,cell.t),x0=Math.max(0,t1-60),D=H.filter(h=>h[0]>=x0),tx=D.map(h=>h[0]);
-    plot($("#p1"),{xmin:x0,xmax:t1,ymin:0,ymax:160,xlabel:"време, min",ylabel:"mmol/L",series:[{x:tx,y:D.map(h=>h[1]),color:"#f59f00"},{x:tx,y:D.map(h=>h[2]),color:"#9c36b5"},{x:tx,y:D.map(h=>h[3]),color:"#2f9e44"}]});
+    plot($("#p1"),{xmin:x0,xmax:t1,ymin:0,ymax:160,xlabel:"време, min",ylabel:"mmol/L",series:[{x:tx,y:D.map(h=>h[1]),color:"#f76707"},{x:tx,y:D.map(h=>h[2]),color:"#9c36b5"},{x:tx,y:D.map(h=>h[3]),color:"#2f9e44"}]});
     plot($("#p2"),{xmin:x0,xmax:t1,ymin:-110,ymax:0,xlabel:"време, min",ylabel:"mV",series:[{x:tx,y:D.map(h=>h[6]),color:"#9c36b5",dash:[5,4],width:1.5},{x:tx,y:D.map(h=>h[4]),color:css("--accent")}]});
     const wy=D.map(h=>h[5]);plot($("#p3"),{xmin:x0,xmax:t1,ymin:90,ymax:Math.max(120,Math.ceil((Math.max(...wy,100)+5)/10)*10),xlabel:"време, min",ylabel:"% от началния",series:[{x:tx,y:wy,color:"#1c7ed6"}],hlines:[{y:100,color:css("--muted")}]});
     const E=cell.E();$("#pst").innerHTML=statsHTML([["V<sub>m</sub>",fmt(cell.V,1)+" mV"],["E<sub>K</sub> / E<sub>Na</sub>",fmt(E.K,0)+" / +"+fmt(E.Na,0)+" mV"],["Работеща помпа",fmt(cell.v,0)+" цикъла/s"],["Обем",fmt(cell.W*100,1)+" %"],["Време",fmt(cell.t,0)+" min"]])}
@@ -1637,7 +1643,7 @@ function viewSkeletal(main){
   <div class="card" style="padding:10px"><div class="btns"><button class="b primary" id="demo">■︎ Спри демонстрацията</button><button class="b" id="one">Единичен стимул</button><button class="b" id="run">▶︎ Непрекъсната стимулация</button><button class="b" id="pause">⏸︎ Пауза</button><a class="b" href="#xb" style="text-decoration:none">Близък план: миозин, тропомиозин, ATP</a></div>
   ${wrap3D("w3",420)}<div class="legend" style="margin-top:6px"><span><i style="background:#f08c00"></i>актин (тънки)</span><span><i style="background:#7048e8"></i>миозин (дебели)</span><span><i style="background:#2f9e44"></i>тропомиозин</span><span><i style="background:#fab005;width:10px;height:10px;border-radius:50%"></i>тропонин (свети при Ca²⁺)</span><span><i style="background:#74c0fc;width:10px;height:10px;border-radius:50%"></i>Ca²⁺</span><span><i style="background:#339af0"></i>T-тубул</span><span><i style="background:#63e6be"></i>СР</span><span><i style="background:#ff6b6b;width:10px;height:10px;border-radius:50%"></i>свързани глави</span></div>
   <div class="stats" id="st"></div><div class="note" id="phase"></div></div>
-  <div class="grid2"><div class="card" id="ctl"></div><div class="card"><canvas class="plot" id="pF"></canvas><div class="legend"><span><i style="background:${css("--accent")}"></i>сила</span><span><i style="background:#f59f00"></i>Ca²⁺ в саркоплазмата (отн.)</span></div><canvas class="plot" id="pL" style="margin-top:6px"></canvas><div class="legend"><span><i style="background:${css("--accent")}"></i>активна</span><span><i style="background:${css("--accent2")}"></i>пасивна</span><span><i style="background:${css("--ink")}"></i>обща</span></div><canvas class="plot" id="pH" style="margin-top:6px"></canvas><div class="legend"><span><i style="background:${css("--accent5")}"></i>скорост на скъсяване</span><span><i style="background:${css("--accent3")}"></i>мощност</span></div></div></div>
+  <div class="grid2"><div class="card" id="ctl"></div><div class="card"><canvas class="plot" id="pF"></canvas><div class="legend"><span><i style="background:${css("--accent")}"></i>сила</span><span><i style="background:#f76707"></i>Ca²⁺ в саркоплазмата (отн.)</span></div><canvas class="plot" id="pL" style="margin-top:6px"></canvas><div class="legend"><span><i style="background:${css("--accent")}"></i>активна</span><span><i style="background:${css("--accent2")}"></i>пасивна</span><span><i style="background:${css("--ink")}"></i>обща</span></div><canvas class="plot" id="pH" style="margin-top:6px"></canvas><div class="legend"><span><i style="background:${css("--accent5")}"></i>скорост на скъсяване</span><span><i style="background:${css("--accent3")}"></i>мощност</span></div></div></div>
   <h3>Експерименти</h3><div id="ex"></div>`;
   const c=$("#ctl");const S={};
   c.innerHTML=`<div class="ctrl"><label><span>Тип влакно</span></label><select id="type"><option value="fast">Бързо (тип II, гликолитично)</option><option value="slow">Бавно (тип I, оксидативно)</option></select></div>`;
@@ -1677,7 +1683,7 @@ function viewSkeletal(main){
     const tpM=new T.MeshStandardMaterial({color:C(0x2f9e44),roughness:0.4}),tnM=new T.MeshStandardMaterial({color:C(0xfab005),roughness:0.35,emissive:C(0xf08c00),emissiveIntensity:0});
     const pitch=0.74;const sides=[];
     [1,-1].forEach(dir=>{const grp=new T.Group();sc.add(grp);const nb=Math.floor(thinL/0.055);const bI=new T.InstancedMesh(bG,acM,thin.length*nb*2);bI.instanceColor=new T.InstancedBufferAttribute(new Float32Array(thin.length*nb*6),3);let k=0;
-      const cA=C(0xf59f00),cB=C(0xffc078);
+      const cA=C(0xf76707),cB=C(0xffc078);
       thin.forEach(p=>{for(let s=0;s<2;s++)for(let i=0;i<nb;i++){const x=0.03+i*0.055,an=2*Math.PI*x/pitch+s*Math.PI;m4.makeTranslation(dir*x,p[0]+Math.cos(an)*0.034,p[1]+Math.sin(an)*0.034);bI.setMatrixAt(k,m4);bI.setColorAt(k,(i+s)%2?cA:cB);k++}});grp.add(bI);
       const tps=[];thin.forEach(p=>{const tg=new T.Group();tg.position.set(0,p[0],p[1]);grp.add(tg);
         for(const g0 of [Math.PI/2,Math.PI*1.5]){const pts=[];for(let x=0;x<=thinL;x+=0.02){const an=2*Math.PI*x/pitch+g0;pts.push(new T.Vector3(dir*x,Math.cos(an)*0.058,Math.sin(an)*0.058))}
@@ -1703,7 +1709,7 @@ function viewSkeletal(main){
     const NCa=500,caG=new T.BufferGeometry();caG.setAttribute("position",new T.BufferAttribute(new Float32Array(NCa*3),3));caG.setDrawRange(0,0);
     sc.add(new T.Points(caG,new T.PointsMaterial({color:0x74c0fc,size:0.07,transparent:true,opacity:0.95,depthWrite:false,blending:T.AdditiveBlending})));
     const bar=(col,y,h=0.07)=>{const m=new T.Mesh(new T.BoxGeometry(1,h,0.12),new T.MeshStandardMaterial({color:C(col),roughness:0.5}));m.position.y=y;sc.add(m);return m};
-    const bars={A:bar(0x7048e8,-2.15),IL:bar(0xf59f00,-2.15),IR:bar(0xf59f00,-2.15),H:bar(0xadb5bd,-2.32,0.05),ZL:bar(0x343a40,-2.15,0.35),ZR:bar(0x343a40,-2.15,0.35)};bars.ZL.scale.x=bars.ZR.scale.x=0.05;
+    const bars={A:bar(0x7048e8,-2.15),IL:bar(0xf76707,-2.15),IR:bar(0xf76707,-2.15),H:bar(0xadb5bd,-2.32,0.05),ZL:bar(0x343a40,-2.15,0.35),ZR:bar(0x343a40,-2.15,0.35)};bars.ZL.scale.x=bars.ZR.scale.x=0.05;
     const arM=new T.MeshStandardMaterial({color:C(0x12b886),emissive:C(0x0ca678),emissiveIntensity:0.5});const arrows=[0,1].map(()=>{const g=new T.Group();const c1=new T.Mesh(new T.ConeGeometry(0.13,0.3,16),arM);c1.position.y=0.15;const c2=new T.Mesh(new T.CylinderGeometry(0.04,0.04,0.35,10),arM);c2.position.y=-0.15;g.add(c1,c2);g.position.y=1.85;sc.add(g);return g});
     return {G,heads,hI,sides,caG,cas:[],tnM,thickL,thinL,U,bc,bars,arrows}},
   (ctx,dtr)=>{const {G,U}=ctx,T=G.T;const ty=typ();
@@ -1738,7 +1744,7 @@ function viewSkeletal(main){
     G.render([["A-ивица 1,60 µm (постоянна)",Lb([0,-2.55,0])],["½ I "+fmt(Iband/2,2),Lb([-(half+ctx.thickL/2)/2,-2.5,0])],["½ I "+fmt(Iband/2,2),Lb([(half+ctx.thickL/2)/2,-2.5,0])],["H "+fmt(Hz,2)+" µm",Lb([0,-2.0,0.5])],["саркомер "+fmt(SLcur,2)+" µm",Lb([0,2.35,0])],["Z-диск",Lb([-half,1.55,0])],["Z-диск",Lb([half,1.55,0])],["M-линия",Lb([0,-1.25,0])],["актин + тропомиозин + тропонин",Lb([half-0.55,-1.0,0.3])],["титин",Lb([-half+0.25,-0.65,0.5])],["T-тубул",Lb([ctx.thickL/2,2.0,0])],["терминални цистерни (СР)",Lb([-ctx.thickL/2-0.3,1.95,0.6])]]);
     if((cnt++)%3)return;
     const H=st.hist,t1=Math.max(1000,st.t);
-    plot($("#pF"),{xmin:t1-1000,xmax:t1,ymin:0,ymax:1.1,ylabel:"сила (отн.)",xlabel:"време, ms (забавено ×4)",series:[{x:H.map(h=>h[0]),y:H.map(h=>Math.min(1.5,h[2])/1.5),color:"#f59f00",width:1.4},{x:H.map(h=>h[0]),y:H.map(h=>h[1]),color:css("--accent"),width:2.2}]});
+    plot($("#pF"),{xmin:t1-1000,xmax:t1,ymin:0,ymax:1.1,ylabel:"сила (отн.)",xlabel:"време, ms (забавено ×4)",series:[{x:H.map(h=>h[0]),y:H.map(h=>Math.min(1.5,h[2])/1.5),color:"#f76707",width:1.4},{x:H.map(h=>h[0]),y:H.map(h=>h[1]),color:css("--accent"),width:2.2}]});
     const xs=[],ya=[],yp=[],yt=[];for(let x=1.2;x<=3.9;x+=0.02){xs.push(x);ya.push(LT(x));yp.push(Math.min(1.4,PT(x)));yt.push(Math.min(1.4,LT(x)+PT(x)))}
     plot($("#pL"),{xmin:1.2,xmax:3.9,ymin:0,ymax:1.4,xlabel:"дължина на саркомера, µm",ylabel:"сила",series:[{x:xs,y:ya,color:css("--accent")},{x:xs,y:yp,color:css("--accent2")},{x:xs,y:yt,color:css("--ink"),width:1.4,dash:[4,3]}],marks:[{x:SLcur,y:LT(SLcur),color:css("--accent"),label:fmt(SLcur,2)+" µm"}]});
     const fx=[],vy=[],py=[];for(let F=0;F<=1;F+=0.01){fx.push(F);vy.push(hill(F));py.push(hill(F)*F*4)}const L_=S.load.get();
@@ -1773,7 +1779,7 @@ function viewSmooth(main){
   <div class="card" style="padding:10px"><div class="btns"><button class="b" data-p="k">KCl деполяризация</button><button class="b" data-p="ne">Норадреналин (α₁, IP₃)</button><button class="b" data-p="st">Разтягане (миогенен)</button><button class="b" data-p="wash">Измий (покой)</button><button class="b" id="pause">⏸︎ Пауза</button></div>
   ${wrap3D("w3",400)}<div class="legend" style="margin-top:6px"><span><i class="dot" style="background:#343a40"></i>плътни телца и плаки</span><span><i class="box" style="background:#82c91e"></i>актин</span><span><i class="box" style="background:#9c36b5"></i>миозин (глави → оранжеви при циклиране)</span><span><i class="dot" style="background:#74c0fc"></i>Ca²⁺</span><span><i class="box" style="background:#8ce99a"></i>СР</span><span><i class="dot" style="background:#8f3b34"></i>кавеоли</span><span><i class="dot" style="background:#ff8787"></i>митохондрии</span><span><i class="box" style="background:#20c997"></i>gap junctions</span></div>
   <div class="stats" id="st"></div><div class="note" id="phase"></div></div>
-  <div class="grid2"><div class="card" id="ctl"></div><div class="card"><canvas class="plot tall" id="pS"></canvas><div class="legend"><span><i style="background:#1c7ed6"></i>Ca²⁺ (µM)</span><span><i style="background:#f59f00"></i>фосфорилиране на MLC</span><span><i style="background:${css("--accent")}"></i>сила</span><span><i style="background:${css("--accent3")}"></i>разход на ATP (отн.)</span></div><canvas class="numline" id="pHM" style="height:150px;margin-top:6px"></canvas></div></div>
+  <div class="grid2"><div class="card" id="ctl"></div><div class="card"><canvas class="plot tall" id="pS"></canvas><div class="legend"><span><i style="background:#1c7ed6"></i>Ca²⁺ (µM)</span><span><i style="background:#f76707"></i>фосфорилиране на MLC</span><span><i style="background:${css("--accent")}"></i>сила</span><span><i style="background:${css("--accent3")}"></i>разход на ATP (отн.)</span></div><canvas class="numline" id="pHM" style="height:150px;margin-top:6px"></canvas></div></div>
   <h3>Експерименти</h3><div id="ex"></div>`;
   const c=$("#ctl");const S={};
   S.mlcp=slider(c,{label:"Активност на MLC фосфатазата",min:0.3,max:3,step:0.05,value:1,d:2,show:v=>"×"+fmt(v,2),hint:"↓ от Rho-киназа (Ca²⁺ сенсибилизация), ↑ от NO/cGMP"},()=>{});
@@ -1876,7 +1882,7 @@ function viewSmooth(main){
     G.render([["гладкомускулна клетка (разрез)",V(-2.8*L,1.25,0.4)],["ядро (тирбушон при съкращение)",V(0.4,-0.6,0.7)],["плътни телца + актин–миозин",V(2.1*L,-1.05,1.4)],["кавеоли",V(-1.6*L,-1.0,1.2)],["СР (Ca²⁺ депо)",V(1.4*L,1.05,1.3)],["междуклетъчна връзка",ctx.gjs[0].g.position.clone().add(V(0.6,0.45,0))]]);
     if((cnt++)%4)return;
     const H=st.hist,t1=Math.max(150,st.t);
-    plot($("#pS"),{xmin:t1-150,xmax:t1,ymin:0,ymax:1,xlabel:"време, s",ylabel:"отн. стойност",series:[{x:H.map(h=>h[0]),y:H.map(h=>h[1]),color:"#1c7ed6",width:1.8},{x:H.map(h=>h[0]),y:H.map(h=>h[2]),color:"#f59f00",width:1.8},{x:H.map(h=>h[0]),y:H.map(h=>h[4]/0.3),color:css("--accent3"),width:1.4,dash:[4,3]},{x:H.map(h=>h[0]),y:H.map(h=>h[3]),color:css("--accent"),width:2.6}]});
+    plot($("#pS"),{xmin:t1-150,xmax:t1,ymin:0,ymax:1,xlabel:"време, s",ylabel:"отн. стойност",series:[{x:H.map(h=>h[0]),y:H.map(h=>h[1]),color:"#1c7ed6",width:1.8},{x:H.map(h=>h[0]),y:H.map(h=>h[2]),color:"#f76707",width:1.8},{x:H.map(h=>h[0]),y:H.map(h=>h[4]/0.3),color:css("--accent3"),width:1.4,dash:[4,3]},{x:H.map(h=>h[0]),y:H.map(h=>h[3]),color:css("--accent"),width:2.6}]});
     stateBars($("#pHM"));
     const econ=X.atp>0.005?F/X.atp:0;
     $("#st").innerHTML=statsHTML([["Ca²⁺",fmt(X.Ca,2)+" µM"],["Фосфорилиране MLC",fmt((X.Mp+X.AMp)*100,0)+" %"],["Сила",fmt(F*100,0)+" %"],["Разход на ATP",fmt(X.atp*100,1)],["Икономичност (сила/ATP)",fmt(econ,1)],["Дължина на клетката",fmt(L*100,0)+" %"]]);
@@ -2988,7 +2994,7 @@ function viewCardiacAP(main){
   <div class="grid2" style="grid-template-columns:1fr 1fr"><div class="card"><h3 style="margin-top:0">Пейсмейкърна клетка (SA възел)</h3><canvas class="plot" id="pSA" style="height:200px"></canvas><canvas class="plot" id="iSA" style="height:150px"></canvas>
    <div class="legend"><span><i style="background:#e8590c"></i>I<sub>f</sub></span><span><i style="background:#ae3ec9"></i>I<sub>CaT</sub></span><span><i style="background:#e03131"></i>I<sub>CaL</sub></span><span><i style="background:#1c7ed6"></i>I<sub>K</sub></span><span><i style="background:#0ca678"></i>I<sub>K,ACh</sub></span><span>навътре &lt; 0 (пиковете на I<sub>CaL</sub> и I<sub>K</sub> са отрязани, за да се вижда фаза 4)</span></div><div class="stats" id="sSA"></div></div>
   <div class="card"><h3 style="margin-top:0">Работен кардиомиоцит (камера)</h3><canvas class="plot" id="pV" style="height:200px"></canvas><canvas class="plot" id="iV" style="height:150px"></canvas>
-   <div class="legend"><span><i style="background:#f59f00"></i>I<sub>Na</sub> ÷ 100</span><span><i style="background:#e03131"></i>I<sub>CaL</sub></span><span><i style="background:#1c7ed6"></i>I<sub>K</sub></span><span><i style="background:#0ca678"></i>I<sub>K1</sub></span><span><i style="background:#7048e8"></i>I<sub>to</sub></span><span><i style="background:rgba(224,49,49,.35)"></i>абсолютен рефр. период</span><span><i style="background:rgba(245,159,0,.35)"></i>относителен</span></div><div class="stats" id="sV"></div></div></div>
+   <div class="legend"><span><i style="background:#f76707"></i>I<sub>Na</sub> ÷ 100</span><span><i style="background:#e03131"></i>I<sub>CaL</sub></span><span><i style="background:#1c7ed6"></i>I<sub>K</sub></span><span><i style="background:#0ca678"></i>I<sub>K1</sub></span><span><i style="background:#7048e8"></i>I<sub>to</sub></span><span><i style="background:rgba(224,49,49,.35)"></i>абсолютен рефр. период</span><span><i style="background:rgba(245,159,0,.35)"></i>относителен</span></div><div class="stats" id="sV"></div></div></div>
   <div class="card"><h3 style="margin-top:0">Фази на АП и йонни токове</h3><table class="t"><tr><th>Фаза</th><th>Работен миокард (камера, предсърдие, Пуркинье)</th><th>SA и AV възел</th></tr>
    <tr><td>0</td><td>Бърз I<sub>Na</sub> навътре; dV/dt 200–400 V/s</td><td>Бавен I<sub>CaL</sub> навътре; dV/dt ≈ 5–10 V/s</td></tr>
    <tr><td>1</td><td>Инактивация на Na⁺; I<sub>to</sub> (K⁺ навън)</td><td>—</td></tr>
@@ -3101,7 +3107,7 @@ function viewCardiacAP(main){
     plot($("#pSA"),Object.assign({},xo,{ymin:-80,ymax:50,ylabel:"mV",hlines:[{y:-40,color:"#e8590c",label:"праг ≈ −40"}],series:[{x:xs,y:sv,color:"#f08c00",width:2.2}]}));
     plot($("#iSA"),Object.assign({},xo,{ymin:-1.5,ymax:1.5,ylabel:"µA/cm²",hlines:[{y:0,color:css("--muted"),dash:[2,3]}],series:["#e8590c","#ae3ec9","#e03131","#1c7ed6","#0ca678"].map((c,j)=>({x:xs,y:si[j],color:c,width:j<2?2.4:1.6}))}));
     plot($("#pV"),Object.assign({},xo,{ymin:-100,ymax:60,ylabel:"mV",shade:shades(),series:[{x:xs,y:vv,color:"#e03131",width:2.2}],texts:phaseTexts()}));
-    plot($("#iV"),Object.assign({},xo,{ymin:-4,ymax:4,ylabel:"µA/cm²",hlines:[{y:0,color:css("--muted"),dash:[2,3]}],series:["#f59f00","#e03131","#1c7ed6","#0ca678","#7048e8"].map((c,j)=>({x:xs,y:vi[j],color:c,width:1.6}))}))}
+    plot($("#iV"),Object.assign({},xo,{ymin:-4,ymax:4,ylabel:"µA/cm²",hlines:[{y:0,color:css("--muted"),dash:[2,3]}],series:["#f76707","#e03131","#1c7ed6","#0ca678","#7048e8"].map((c,j)=>({x:xs,y:vi[j],color:c,width:1.6}))}))}
   const phaseTexts=()=>{if(!lastMeas)return [];const a=lastMeas.t0-tS;if(a<-2)return [];return [{x:a-0.025,text:"0"},{x:a+0.045,text:"1"},{x:a+(lastMeas.t90||0.29)*0.5,text:"2"},{x:a+(lastMeas.t90||0.29)*0.93,text:"3"},{x:Math.min(-0.03,a+(lastMeas.t90||0.29)+0.18),text:"4"}].filter(t=>t.x>-2&&t.x<0)};
   const vPhase=()=>{const V=ven.V;if(!lastV)return 4;const x=tS-lastV;if(x<0)return 4;if(x<0.004)return 0;if(x<0.03)return 1;if(V>-20&&x<0.5)return 2;if(V>-80&&x<0.6)return 3;return 4};
   const sPhase=()=>{if(st.rh==="arrest")return 9;const n=Math.min(hb.k,HN);const i=(hb.k-1)%HN,i2=(hb.k-6+HN)%HN;const V=hb.sv[i],dv=hb.sv[i]-hb.sv[i2];if(V<-40&&dv>=0)return 4;if(dv>0)return 0;return 3};
@@ -3780,7 +3786,7 @@ function viewStarling(main){
     const prof=[];for(let i=0;i<=12;i++){const rr=Math.sin(i/12*Math.PI/2);const h=0.5*Math.sqrt(Math.max(0,1-rr*rr))*(0.207+2.003*rr*rr-1.123*rr**4);prof.push(new T.Vector2(rr,h+0.02))}for(let i=12;i>=0;i--){const p=prof[i];prof.push(new T.Vector2(p.x,-p.y))}
     const NR=46,rbc=new T.InstancedMesh(new T.LatheGeometry(prof,24),MK.mat(T,0xc92a2a,{roughness:0.4,clearcoat:0.4}),NR);sc.add(rbc);const RB=[];
     for(let i=0;i<NR;i++){const zone=i<12?0:i<29?1:2;RB.push({zone,x:zone===0?-LC/2+i*LC/12:zone===1?-9.4+R()*4.2:5.2+R()*4.6,a:R()*6.28,r:R(),tw:R()*6,sp:0.8+R()*0.4})}
-    const NP=60,prot=new T.InstancedMesh(new T.IcosahedronGeometry(0.055,1),MK.mat(T,0xfab005,{roughness:0.35,emissive:LIN(T,0xf59f00),emissiveIntensity:0.2}),NP);sc.add(prot);
+    const NP=60,prot=new T.InstancedMesh(new T.IcosahedronGeometry(0.055,1),MK.mat(T,0xfab005,{roughness:0.35,emissive:LIN(T,0xf76707),emissiveIntensity:0.2}),NP);sc.add(prot);
     const PP=[];for(let i=0;i<NP;i++)PP.push({x:(R()-0.5)*LC,r:R()*0.42,a:R()*6.28,out:0});
     const NW=320,wat=new T.InstancedMesh(new T.SphereGeometry(0.045,6,5),new T.MeshStandardMaterial({color:LIN(T,0x339af0),emissive:LIN(T,0x1c7ed6),emissiveIntensity:0.3}),NW);sc.add(wat);const W=[];for(let i=0;i<NW;i++)W.push({on:0});
     const NL=70,lw=new T.InstancedMesh(new T.SphereGeometry(0.05,6,5),new T.MeshStandardMaterial({color:LIN(T,0x74c0fc),emissive:LIN(T,0x339af0),emissiveIntensity:0.3}),NL);sc.add(lw);const LW=[];for(let i=0;i<NL;i++)LW.push({x:-3.3+R()*10,a:R()*6.28,r:R()*0.3});
@@ -3839,7 +3845,7 @@ const MK={
     for(const side of [1,-1])for(let iz=0;iz*sp*0.866<=d;iz++)for(let ix=0;ix*sp<=w;ix++){const x=-w/2+ix*sp+(iz%2)*sp/2,z=z0-d/2+iz*sp*0.866;if(holes.some(h=>Math.hypot(x-h[0],z-h[1])<h[2]))continue;
       const j=()=>((Math.sin(x*12.9898+z*78.233+side*3.1)*43758.5453)%1)*0.18;H.push([x+j(),side*(2.05+j()*0.6),z+j(),side]);Tl.push([x-0.17,side,z],[x+0.17,side,z+0.08])}
     const hm=new T.InstancedMesh(new T.SphereGeometry(0.43,14,10),MK.mat(T,0xffffff,{roughness:0.35,clearcoat:0.5}),H.length);const m=new T.Matrix4(),c=new T.Color();
-    const pal=o.pal||[[0xf2a65a,0xf6bd60,0xe9c46a],[0xf2a65a,0xe76f51,0xf6bd60]];
+    const pal=o.pal||[[0xf0a39b,0xf3b6ad,0xe58f88],[0xf0a39b,0xd8807b,0xf3b6ad]];
     H.forEach((h,i)=>{m.makeTranslation(h[0],h[1],h[2]);hm.setMatrixAt(i,m);const p=pal[h[3]>0?0:1];c.copy(LIN(T,p[i%p.length]));hm.setColorAt(i,c)});g.add(hm);
     const tm=new T.InstancedMesh(new T.CylinderGeometry(0.11,0.09,1.55,6),MK.mat(T,o.tail||0xf3e6c4,{roughness:0.7,clearcoat:0}),Tl.length);
     Tl.forEach((t,i)=>{m.makeTranslation(t[0],t[1]*1.0,t[2]);tm.setMatrixAt(i,m)});g.add(tm);g.userData={heads:hm,tails:tm};return g},
@@ -4179,10 +4185,11 @@ const STG_AP={id:"stgAP",foc:[[0,-0.6,0,30],[-6,1,0,20],[-6,0,0,18],[0,-1,0,26],
 
 
 /* --- I.4 K⁺ канал отблизо: селективен филтър и врата (по структурата на KcsA) --- */
+const KCSA={"res":[23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119],"chains":[[[1.533,-1.705,-0.506],[1.296,-1.443,-0.649],[1.031,-1.307,-0.414],[1.329,-1.202,-0.201],[1.56,-1.108,-0.488],[1.319,-0.959,-0.74],[1.269,-0.689,-0.477],[1.614,-0.61,-0.341],[1.7,-0.555,-0.707],[1.395,-0.364,-0.83],[1.47,-0.083,-0.591],[1.799,-0.038,-0.777],[1.554,0.035,-1.06],[1.343,0.297,-0.881],[1.656,0.485,-0.778],[1.742,0.509,-1.145],[1.39,0.642,-1.211],[1.448,0.905,-0.947],[1.777,1.036,-1.083],[1.624,0.977,-1.426],[1.31,1.181,-1.368],[1.505,1.437,-1.167],[1.742,1.539,-1.444],[1.458,1.526,-1.697],[1.17,1.709,-1.533],[1.406,2.001,-1.481],[1.497,2.028,-1.849],[1.12,2.023,-1.901],[1.04,2.303,-1.657],[1.369,2.497,-1.638],[1.237,2.752,-1.887],[0.876,2.834,-1.803],[0.617,2.978,-1.554],[0.682,2.67,-1.34],[0.808,2.622,-0.987],[1.164,2.543,-0.877],[1.157,2.225,-1.088],[1.413,2.435,-1.272],[1.71,2.296,-1.079],[1.848,1.944,-1.089],[1.935,1.943,-0.715],[1.57,2.038,-0.661],[1.401,1.79,-0.892],[1.565,1.516,-0.683],[1.389,1.596,-0.357],[1.081,1.615,-0.579],[1.132,1.274,-0.734],[1.162,1.136,-0.382],[0.85,1.305,-0.238],[0.661,1.213,-0.554],[0.792,0.855,-0.559],[0.705,0.809,-0.193],[0.383,0.983,-0.296],[0.365,1.223,-0.007],[0.315,1.529,-0.226],[0.438,1.806,-0.0],[0.315,2.057,-0.253],[0.636,2.252,-0.202],[0.717,2.147,-0.559],[0.542,2.007,-0.869],[0.552,2.014,-1.251],[0.347,2.254,-1.463],[0.501,2.154,-1.794],[0.28,1.904,-1.976],[0.588,1.684,-2.009],[0.711,1.76,-1.659],[0.373,1.62,-1.553],[0.441,1.301,-1.746],[0.776,1.251,-1.575],[0.576,1.293,-1.255],[0.334,1.011,-1.338],[0.625,0.782,-1.419],[0.827,0.864,-1.109],[0.501,0.798,-0.928],[0.413,0.443,-1.032],[0.782,0.36,-1.002],[0.725,0.416,-0.633],[0.377,0.267,-0.588],[0.523,-0.028,-0.773],[0.886,-0.055,-0.663],[0.748,-0.051,-0.309],[0.466,-0.294,-0.381],[0.711,-0.571,-0.462],[0.885,-0.521,-0.128],[0.545,-0.574,0.029],[0.489,-0.876,-0.194],[0.826,-1.015,-0.094],[0.731,-0.979,0.271],[0.379,-1.115,0.214],[0.524,-1.447,0.1],[0.818,-1.462,0.342],[0.54,-1.479,0.599],[0.374,-1.764,0.412],[0.714,-1.934,0.39],[0.628,-2.03,0.745],[0.336,-2.26,0.666],[0.541,-2.574,0.727]],[[0.491,-1.699,1.547],[0.636,-1.438,1.311],[0.404,-1.302,1.043],[0.189,-1.196,1.337],[0.473,-1.102,1.572],[0.728,-0.954,1.333],[0.465,-0.684,1.279],[0.326,-0.603,1.622],[0.691,-0.548,1.711],[0.817,-0.359,1.407],[0.578,-0.077,1.478],[0.762,-0.031,1.808],[1.046,0.04,1.566],[0.87,0.302,1.353],[0.764,0.49,1.663],[1.131,0.515,1.752],[1.2,0.646,1.401],[0.936,0.91,1.455],[1.068,1.042,1.785],[1.413,0.982,1.635],[1.358,1.185,1.32],[1.156,1.441,1.512],[1.431,1.545,1.751],[1.687,1.53,1.47],[1.526,1.712,1.179],[1.472,2.005,1.413],[1.839,2.032,1.508],[1.894,2.025,1.132],[1.652,2.306,1.047],[1.63,2.501,1.376],[1.88,2.755,1.245],[1.8,2.835,0.882],[1.553,2.978,0.62],[1.338,2.672,0.684],[0.984,2.624,0.808],[0.871,2.546,1.162],[1.082,2.23,1.159],[1.263,2.44,1.416],[1.068,2.303,1.712],[1.075,1.95,1.852],[0.701,1.951,1.935],[0.65,2.044,1.569],[0.882,1.795,1.403],[0.671,1.522,1.567],[0.347,1.602,1.387],[0.572,1.62,1.081],[0.726,1.278,1.135],[0.375,1.14,1.162],[0.234,1.308,0.848],[0.551,1.215,0.663],[0.554,0.858,0.796],[0.189,0.812,0.705],[0.295,0.983,0.383],[0.007,1.225,0.362],[0.227,1.53,0.312],[0.0,1.808,0.432],[0.255,2.058,0.31],[0.2,2.255,0.63],[0.557,2.149,0.715],[0.869,2.009,0.543],[1.25,2.014,0.557],[1.464,2.253,0.354],[1.794,2.153,0.51],[1.978,1.902,0.292],[2.007,1.684,0.602],[1.657,1.761,0.721],[1.553,1.619,0.383],[1.744,1.301,0.454],[1.571,1.253,0.787],[1.253,1.294,0.584],[1.338,1.011,0.344],[1.415,0.783,0.637],[1.103,0.866,0.836],[0.927,0.799,0.508],[1.031,0.444,0.423],[0.997,0.362,0.792],[0.628,0.419,0.732],[0.587,0.269,0.384],[0.769,-0.028,0.533],[0.656,-0.052,0.895],[0.304,-0.048,0.753],[0.378,-0.293,0.473],[0.457,-0.568,0.72],[0.121,-0.518,0.891],[-0.033,-0.572,0.549],[0.19,-0.873,0.496],[0.086,-1.011,0.833],[-0.278,-0.976,0.734],[-0.217,-1.113,0.383],[-0.105,-1.445,0.531],[-0.35,-1.459,0.823],[-0.604,-1.476,0.542],[-0.416,-1.762,0.38],[-0.397,-1.93,0.721],[-0.752,-2.027,0.632],[-0.671,-2.257,0.342],[-0.734,-2.571,0.548]],[[-1.524,-1.703,0.492],[-1.289,-1.441,0.637],[-1.023,-1.304,0.404],[-1.319,-1.2,0.189],[-1.553,-1.107,0.474],[-1.315,-0.957,0.728],[-1.264,-0.687,0.465],[-1.607,-0.609,0.327],[-1.696,-0.554,0.692],[-1.394,-0.363,0.818],[-1.468,-0.081,0.578],[-1.798,-0.038,0.763],[-1.555,0.035,1.047],[-1.345,0.299,0.87],[-1.658,0.485,0.764],[-1.746,0.509,1.131],[-1.396,0.643,1.2],[-1.452,0.905,0.936],[-1.783,1.035,1.069],[-1.632,0.976,1.413],[-1.319,1.182,1.358],[-1.514,1.436,1.156],[-1.752,1.538,1.432],[-1.471,1.526,1.687],[-1.182,1.71,1.525],[-1.418,2.002,1.472],[-1.513,2.028,1.839],[-1.137,2.024,1.894],[-1.055,2.305,1.651],[-1.385,2.497,1.629],[-1.256,2.753,1.879],[-0.894,2.836,1.798],[-0.634,2.981,1.551],[-0.695,2.674,1.336],[-0.819,2.625,0.982],[-1.173,2.544,0.869],[-1.168,2.227,1.081],[-1.426,2.436,1.263],[-1.721,2.296,1.068],[-1.857,1.943,1.076],[-1.941,1.943,0.701],[-1.576,2.039,0.65],[-1.408,1.791,0.882],[-1.57,1.516,0.671],[-1.392,1.598,0.347],[-1.085,1.618,0.572],[-1.136,1.276,0.726],[-1.162,1.139,0.374],[-0.85,1.308,0.232],[-0.663,1.217,0.549],[-0.793,0.859,0.553],[-0.703,0.812,0.188],[-0.383,0.988,0.293],[-0.363,1.229,0.005],[-0.316,1.535,0.225],[-0.439,1.812,-0.002],[-0.318,2.063,0.252],[-0.639,2.257,0.198],[-0.723,2.151,0.555],[-0.55,2.012,0.867],[-0.563,2.018,1.247],[-0.361,2.258,1.462],[-0.516,2.157,1.792],[-0.296,1.908,1.976],[-0.604,1.687,2.005],[-0.724,1.763,1.655],[-0.385,1.624,1.551],[-0.454,1.305,1.743],[-0.787,1.254,1.57],[-0.584,1.297,1.251],[-0.342,1.016,1.336],[-0.632,0.786,1.414],[-0.833,0.867,1.103],[-0.504,0.803,0.924],[-0.416,0.448,1.029],[-0.784,0.363,0.995],[-0.726,0.421,0.627],[-0.377,0.273,0.586],[-0.523,-0.024,0.768],[-0.884,-0.052,0.656],[-0.743,-0.047,0.303],[-0.461,-0.288,0.377],[-0.706,-0.566,0.456],[-0.878,-0.518,0.121],[-0.536,-0.569,-0.034],[-0.481,-0.87,0.189],[-0.816,-1.01,0.086],[-0.718,-0.974,-0.278],[-0.366,-1.109,-0.218],[-0.51,-1.442,-0.106],[-0.803,-1.458,-0.35],[-0.523,-1.473,-0.605],[-0.358,-1.757,-0.417],[-0.697,-1.929,-0.397],[-0.608,-2.024,-0.752],[-0.316,-2.253,-0.671],[-0.519,-2.568,-0.734]],[[-0.514,-1.7,-1.538],[-0.657,-1.439,-1.301],[-0.422,-1.303,-1.035],[-0.208,-1.199,-1.332],[-0.493,-1.103,-1.564],[-0.746,-0.953,-1.323],[-0.482,-0.685,-1.272],[-0.345,-0.606,-1.616],[-0.71,-0.549,-1.703],[-0.833,-0.359,-1.398],[-0.593,-0.077,-1.472],[-0.779,-0.031,-1.8],[-1.061,0.041,-1.556],[-0.882,0.303,-1.345],[-0.777,0.49,-1.657],[-1.145,0.517,-1.743],[-1.211,0.649,-1.392],[-0.946,0.911,-1.448],[-1.08,1.043,-1.777],[-1.424,0.985,-1.625],[-1.366,1.188,-1.311],[-1.164,1.443,-1.505],[-1.44,1.548,-1.741],[-1.694,1.535,-1.458],[-1.53,1.717,-1.169],[-1.476,2.009,-1.404],[-1.843,2.037,-1.497],[-1.897,2.032,-1.12],[-1.652,2.311,-1.038],[-1.632,2.505,-1.367],[-1.879,2.761,-1.235],[-1.797,2.842,-0.873],[-1.547,2.984,-0.614],[-1.334,2.676,-0.678],[-0.981,2.627,-0.804],[-0.87,2.548,-1.159],[-1.083,2.232,-1.154],[-1.265,2.442,-1.41],[-1.072,2.304,-1.707],[-1.083,1.951,-1.845],[-0.709,1.949,-1.932],[-0.655,2.043,-1.566],[-0.888,1.796,-1.399],[-0.679,1.521,-1.563],[-0.353,1.6,-1.386],[-0.577,1.619,-1.078],[-0.733,1.279,-1.131],[-0.381,1.139,-1.159],[-0.237,1.306,-0.847],[-0.554,1.215,-0.659],[-0.56,0.858,-0.791],[-0.194,0.811,-0.703],[-0.297,0.984,-0.381],[-0.008,1.224,-0.362],[-0.226,1.53,-0.312],[0.001,1.806,-0.434],[-0.251,2.058,-0.31],[-0.198,2.253,-0.631],[-0.556,2.15,-0.713],[-0.867,2.011,-0.539],[-1.248,2.019,-0.55],[-1.46,2.259,-0.346],[-1.791,2.161,-0.5],[-1.975,1.911,-0.28],[-2.007,1.692,-0.589],[-1.657,1.767,-0.71],[-1.552,1.626,-0.373],[-1.746,1.308,-0.442],[-1.574,1.258,-0.777],[-1.255,1.298,-0.576],[-1.34,1.016,-0.335],[-1.42,0.788,-0.626],[-1.109,0.868,-0.828],[-0.93,0.802,-0.501],[-1.036,0.447,-0.414],[-1.005,0.363,-0.783],[-0.635,0.42,-0.726],[-0.593,0.27,-0.378],[-0.778,-0.025,-0.524],[-0.667,-0.051,-0.888],[-0.314,-0.049,-0.748],[-0.387,-0.292,-0.467],[-0.469,-0.568,-0.713],[-0.134,-0.52,-0.887],[0.022,-0.574,-0.545],[-0.202,-0.874,-0.491],[-0.102,-1.013,-0.828],[0.264,-0.979,-0.732],[0.205,-1.116,-0.38],[0.091,-1.447,-0.526],[0.332,-1.463,-0.82],[0.589,-1.48,-0.541],[0.4,-1.765,-0.377],[0.378,-1.934,-0.717],[0.733,-2.032,-0.63],[0.653,-2.262,-0.339],[0.713,-2.576,-0.544]]],"ox":[[[0.261,0.979,-0.088],[0.237,1.425,0.022],[0.206,1.684,-0.082],[0.3,1.997,0.017]],[[0.088,0.979,0.26],[-0.02,1.426,0.232],[0.084,1.684,0.202],[-0.015,1.998,0.293]],[[-0.26,0.984,0.086],[-0.235,1.431,-0.022],[-0.207,1.691,0.082],[-0.301,2.004,-0.018]],[[-0.09,0.978,-0.258],[0.021,1.425,-0.233],[-0.081,1.684,-0.202],[0.019,1.997,-0.295]]]};
 const STG_CH={id:"stgCH",foc:[[0,0.3,0,12.5],[0,-2,0,8],[0,-0.5,0,7.5],[0,1.3,0,6.5],[0,1.6,0,7.5],[0,0.8,0,8]],title:"K⁺ канал отблизо: как пропуска K⁺, но не и Na⁺",h:480,dur:4.5,
- intro:"Разрез през K⁺ канал (структура тип KcsA, мащаб в nm). Показани са две срещуположни субединици, другите две са прозрачни. Червените сфери са карбонилните кислороди на селективния филтър (последователност TVGYG).",
+ intro:"Разрез през K⁺ канал (истинската структура на KcsA, PDB 1BL8, мащаб в nm). Показани са две срещуположни субединици, другите две са прозрачни. Червените сфери са карбонилните кислороди на селективния филтър (последователност TVGYG).",
  cam:{r:12.5,th:0.25,phi:1.42,target:[0,0.3,0],min:3,max:40},
- legend:[["#9c36b5","K⁺"],["#f59f00","Na⁺"],["#fa5252","кислород (карбонил / вода)"],["#e9ecef","водород (вода)"],["#748ffc","външна спирала","box"],["#20c997","вътрешна спирала (врата)","box"],["#fcc419","порна спирала","box"],["#ff8787","селективен филтър","box"]],
+ legend:[["#9c36b5","K⁺"],["#f76707","Na⁺"],["#fa5252","кислород (карбонил / вода)"],["#e9ecef","водород (вода)"],["#748ffc","външна спирала (M1)","box"],["#4dabf7","вътрешна спирала (M2, врата)","box"],["#e599f7","порна спирала","box"],["#ff8787","селективен филтър (TVGYG)","box"]],
  stages:[
   {t:"Устройство на канала",short:"Устройство: 4 субединици, филтър, кухина, врата",badge:"KcsA / Kv",d:"Четири субединици обграждат централна пора. Отгоре е <b>селективният филтър</b> — тесен (≈ 0,3 nm) и дълъг ≈ 1,2 nm, облицован с карбонилни кислороди. Под него е широка водна <b>кухина</b>. Отдолу вътрешните спирали се кръстосват и образуват <b>вратата</b>. Порните спирали насочват отрицателния си край към кухината и стабилизират K⁺ там."},
   {t:"Вратата се отваря",short:"Вратата се отваря (огъване при глицин)",badge:"вътрешните спирали се огъват",d:"При активиране (деполяризация при Kv, лиганд или pH при други) вътрешните спирали се огъват при глицинова „става“ и отварят пътя от цитоплазмата към кухината. Филтърът остава същият — той определя <b>какво</b> минава, а вратата — <b>кога</b>."},
@@ -4192,21 +4199,23 @@ const STG_CH={id:"stgCH",foc:[[0,0.3,0,12.5],[0,-2,0,8],[0,-0.5,0,7.5],[0,1.3,0,
   {t:"Защо Na⁺ не минава",short:"Na⁺ е твърде малък → не минава",badge:"селективност K⁺:Na⁺ ≈ 1000:1",d:"Na⁺ е по-малък (≈ 0,095 nm). Във филтъра той не може да докосне едновременно всички 8 кислорода, затова загубата на водната обвивка <b>не се компенсира</b>. Енергийната бариера е висока и Na⁺ се връща. Селективността K⁺:Na⁺ е ≈ 1000:1, въпреки че Na⁺ е по-малкият йон."}],
  build(G,T,ctx){const sc=G.scene,V=(x,y,z)=>new T.Vector3(x,y,z);
   sc.add(MK.bilayer(T,{w:16,d:7,z0:-2.6,holes:[[0,0,3.0]],sp:0.82}));
-  const sub=(sx,ghost)=>{const g=new T.Group();const op=ghost?{transparent:true,opacity:0.13,depthWrite:false}:{};
-    g.add(MK.helix(T,V(sx*2.3,-2.4,0.2),V(sx*1.6,2.1,0.1),{color:0x748ffc,mat:MK.mat(T,0x748ffc,op)}));
-    g.add(MK.helix(T,V(sx*2.0,0.4,0.6),V(sx*1.05,1.05,0.25),{color:0xfcc419,mat:MK.mat(T,0xfcc419,op),rad:0.2}));
-    const top=MK.helix(T,V(sx*1.15,1.6,-0.2),V(sx*0.95,-0.35,-0.1),{mat:MK.mat(T,0x20c997,op)});g.add(top);
-    const low=new T.Group();low.position.set(sx*0.95,-0.35,-0.1);const lh=MK.helix(T,V(0,0,0),V(sx*-0.35,-2.3,0),{mat:MK.mat(T,0x20c997,op)});low.add(lh);g.add(low);
-    const fil=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3([V(sx*1.0,0.95,0.2),V(sx*0.62,1.0,0),V(sx*0.6,1.45,0),V(sx*0.62,1.9,0),V(sx*0.75,2.3,0.2),V(sx*1.4,2.55,0.3),V(sx*1.6,2.2,0.1)]),40,0.09,8,false),MK.mat(T,0xff8787,op));g.add(fil);
-    const ox=[];if(!ghost)for(const y of [0.98,1.28,1.58,1.88]){const o=new T.Mesh(new T.SphereGeometry(0.135,14,10),MK.mat(T,0xfa5252,{emissive:LIN(T,0xfa5252),emissiveIntensity:0.0}));o.position.set(sx*0.42,y,0);g.add(o);ox.push(o)}
-    return {g,low,ox,sx}};
-  ctx.subs=[sub(1,false),sub(-1,false)];ctx.ghost=[sub(1,true),sub(-1,true)];ctx.ghost[0].g.rotation.y=Math.PI/2;ctx.ghost[1].g.rotation.y=Math.PI/2;
+  /* истинската структура на KcsA (PDB 1BL8): Cα-следата на всяка субединица; цветове по участъци */
+  const KD=KCSA,RES=KD.res,REG=r=>r<=51?0:r<=61?1:r<=74?2:r<=79?3:4,COLS=[0x748ffc,0xadb5bd,0xe599f7,0xff8787,0x4dabf7];
+  const sub=(ci,ghost)=>{const g=new T.Group();const op=ghost?{transparent:true,opacity:0.13,depthWrite:false}:{};const P=KD.chains[ci].map(p=>V(...p));
+    const hi=RES.indexOf(99),hinge=P[hi].clone(),rad=V(hinge.x,0,hinge.z).normalize(),ax=V(0,1,0).cross(rad).normalize();
+    const low=new T.Group();low.position.copy(hinge);g.add(low);
+    let k0=0;for(let k=1;k<=P.length;k++){if(k===P.length||REG(RES[k])!==REG(RES[k0])||k===hi){const a=Math.max(0,k0-1),b=Math.min(P.length-1,k);const pts=P.slice(a,b+1);
+        if(pts.length>1){const m=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),pts.length*6,REG(RES[k0])===3?0.085:0.07,8,false),MK.mat(T,COLS[REG(RES[k0])],op));
+          if(k0>=hi){m.geometry.translate(-hinge.x,-hinge.y,-hinge.z);low.add(m)}else g.add(m)}k0=k}}
+    const ox=[];if(!ghost)KD.ox[ci].forEach(p=>{const o=new T.Mesh(new T.SphereGeometry(0.11,14,10),MK.mat(T,0xfa5252,{emissive:LIN(T,0xfa5252),emissiveIntensity:0.0}));o.position.set(...p);g.add(o);ox.push(o)});
+    return {g,low,ox,open:a=>low.quaternion.setFromAxisAngle(ax,-a)}};
+  ctx.subs=[sub(0,false),sub(2,false)];ctx.ghost=[sub(1,true),sub(3,true)];
   [...ctx.subs,...ctx.ghost].forEach(s=>sc.add(s.g));
-  ctx.K=MK.pool(T,0x9c36b5,0.165,12,{glow:0.2});ctx.Na=MK.pool(T,0xf59f00,0.12,3,{glow:0.2});ctx.WO=MK.pool(T,0xfa5252,0.13,60,{glow:0.02});ctx.WH=MK.pool(T,0xf1f3f5,0.065,120,{glow:0});[ctx.K,ctx.Na,ctx.WO,ctx.WH].forEach(m=>sc.add(m));
+  ctx.K=MK.pool(T,0x9c36b5,0.165,12,{glow:0.2});ctx.Na=MK.pool(T,0xf76707,0.12,3,{glow:0.2});ctx.WO=MK.pool(T,0xfa5252,0.13,60,{glow:0.02});ctx.WH=MK.pool(T,0xf1f3f5,0.065,120,{glow:0});[ctx.K,ctx.Na,ctx.WO,ctx.WH].forEach(m=>sc.add(m));
   ctx.sites=[1.88,1.58,1.28,0.98].map(y=>y-0.15);ctx.last=-1;
   ctx.shell=(c,n,r,ph)=>{const a=[];for(let k=0;k<n;k++){const th=Math.acos(1-2*(k+0.5)/n),pp=k*2.4+ph;a.push(V(c.x+r*Math.sin(th)*Math.cos(pp),c.y+r*Math.cos(th),c.z+r*Math.sin(th)*Math.sin(pp)))}return a}},
  update(ctx,i,u,dt,t){const T=ctx.T,V=(x,y,z)=>new T.Vector3(x,y,z),e=easeIO(u);
-  const gate=[0,e,1,1,1,1][i];ctx.subs.forEach(s=>{s.low.rotation.z=-s.sx*0.62*gate});ctx.ghost.forEach(s=>{s.low.rotation.z=-s.sx*0.62*gate});
+  const gate=[0,e,1,1,1,1][i];[...ctx.subs,...ctx.ghost].forEach(s=>s.open(0.42*gate));
   const glow=i===3?Math.sin(Math.PI*u)*0.8:0;ctx.subs.forEach(s=>s.ox.forEach(o=>o.material.emissiveIntensity=glow));
   const S=ctx.sites,K=[],WO=[],WH=[],Na=[];const water=(p,ang=0)=>{WO.push(p);WH.push(V(p.x+0.08,p.y+0.07,p.z+0.03),V(p.x-0.08,p.y+0.07,p.z-0.03))};
   const shell=(c,n,r,ph,keep=1)=>ctx.shell(c,n,r,ph).forEach((p,k)=>{if(k<n*keep)water(p)});
@@ -4228,7 +4237,7 @@ const STG_CH={id:"stgCH",foc:[[0,0.3,0,12.5],[0,-2,0,8],[0,-0.5,0,7.5],[0,1.3,0,
   [[2.8,4.3,0.5],[-3.2,4.6,-0.8],[3.0,-4.4,0.8],[-2.6,-4.8,-0.4]].forEach((p,k)=>{const c=V(p[0]+0.2*Math.sin(t+k),p[1],p[2]);K.push(c);shell(c,8,0.42,t*0.2+k,1)});
   ctx.K.put(K);ctx.Na.put(Na);ctx.WO.put(WO);ctx.WH.put(WH)},
  labels(ctx,i){const V=(x,y,z)=>new ctx.T.Vector3(x,y,z);const L=[["селективен филтър",V(-1.9,1.5,0.6)],["кухина",V(0.9,0.0,0.6)],["врата",V(-1.0,-2.6,0.3)],["извън клетката",V(-4.6,3.3,0.5)],["в клетката",V(-4.6,-3.5,0.5)]];
-  if(i===0)L.push(["порна спирала",V(2.5,0.6,0.8)],["S1–S4",V(0.95,1.95,0.2)]);if(i===5)L.push(["Na⁺ се връща",V(0.9,0.6,0.3)]);return L},
+  if(i===0)L.push(["порна спирала",V(2.5,0.6,0.8)],["M1",V(1.9,0.6,0.2)]);if(i===5)L.push(["Na⁺ се връща",V(0.9,0.6,0.3)]);return L},
  stats(ctx,i){return [["Пора във филтъра","≈ 0,3 nm"],["Радиус K⁺ / Na⁺","0,133 / 0,095 nm"],["Скорост","≈ 10⁸ йона/s"],["Вратата",i===0?"затворена":"отворена"]]}};
 
 
@@ -4301,7 +4310,7 @@ const S=(t,short,badge,d,tag)=>({t,short,badge,d,tag});
 return {id:"stgTR",title:"Как работят дифузията, преносителите и помпите — стъпка по стъпка",h:490,dur:3.6,
  intro:"Участък от плазмената мембрана с три транспортни белтъка (в разрез отпред). Избери механизъм — камерата отива при него. Белтъците преносители никога не са отворени едновременно от двете страни: редуват „отворен навън“ и „отворен навътре“.",
  cam:{r:22,th:0.3,phi:1.33,target:[X.simple,-0.3,0],min:6,max:70},
- legend:[["#e03131","O₂"],["#dee2e6","глюкоза"],["#f59f00","Na⁺"],["#9c36b5","K⁺"],["#4dabf7","ATP / ADP"],["#fd7e14","фосфат (Pᵢ)"],["#12b886","GLUT1","box"],["#f08c00","Na⁺/K⁺-ATPаза (α); домени A, N, P","box"],["#2f9e44","β-субединица","box"],["#7950f2","SGLT1","box"]],
+ legend:[["#e03131","O₂"],["#dee2e6","глюкоза"],["#f76707","Na⁺"],["#9c36b5","K⁺"],["#4dabf7","ATP / ADP"],["#fd7e14","фосфат (Pᵢ)"],["#12b886","GLUT1","box"],["#f08c00","Na⁺/K⁺-ATPаза (α); домени A, N, P","box"],["#2f9e44","β-субединица","box"],["#7950f2","SGLT1","box"]],
  onMech:k=>{if(window.__trSetMode)window.__trSetMode(k)},
  mechs:[
   {key:"simple",label:"Проста дифузия (O₂)",center:"без белтък",stages:[
@@ -4350,8 +4359,8 @@ return {id:"stgTR",title:"Как работят дифузията, пренос
   ctx.adp=MK.mol(T,"atp");ctx.adp.children.slice(-3).forEach(c=>c.visible=false);ctx.adp.rotation.y=Math.PI;ctx.adp.scale.setScalar(1.25);sc.add(ctx.adp);
   ctx.pi=MK.mol(T,"pi");ctx.pi.scale.setScalar(1.3);sc.add(ctx.pi);ctx.atpOff=V(-0.5,0.55,1.15);ctx.piOff=V(-1.5,0,0);ctx.Psite=ctx.Ncl.clone().add(ctx.atpOff).add(ctx.piOff);
   // молекули и йони
-  ctx.oA=MK.pool(T,0xe03131,0.17,100);ctx.gW=MK.pool(T,0xf1f3f5,0.16,160);ctx.gR=MK.pool(T,0xfa5252,0.14,60);ctx.naP=MK.pool(T,0xf59f00,0.29,60);ctx.kP=MK.pool(T,0x9c36b5,0.34,40);
-  ctx.naT=MK.pool(T,0xf59f00,0.31,6,{glow:0.45});ctx.kT=MK.pool(T,0x9c36b5,0.36,3,{glow:0.45});ctx.naS=MK.pool(T,0xf59f00,0.31,3,{glow:0.45});
+  ctx.oA=MK.pool(T,0xe03131,0.17,100);ctx.gW=MK.pool(T,0xf1f3f5,0.16,160);ctx.gR=MK.pool(T,0xfa5252,0.14,60);ctx.naP=MK.pool(T,0xf76707,0.29,60);ctx.kP=MK.pool(T,0x9c36b5,0.34,40);
+  ctx.naT=MK.pool(T,0xf76707,0.31,6,{glow:0.45});ctx.kT=MK.pool(T,0x9c36b5,0.36,3,{glow:0.45});ctx.naS=MK.pool(T,0xf76707,0.31,3,{glow:0.45});
   [ctx.oA,ctx.gW,ctx.gR,ctx.naP,ctx.kP,ctx.naT,ctx.kT,ctx.naS].forEach(m=>sc.add(m));
   const glc=()=>{const g=MK.mol(T,"glc");g.scale.setScalar(1.25);const w=new T.Group();g.rotation.x=Math.PI/2;w.add(g);sc.add(w);return w};ctx.gF=glc();ctx.gS=glc();
   ctx.o2=MK.mol(T,"o2");ctx.o2.scale.setScalar(1.35);ctx.o2.children.forEach(c=>{c.material.emissive=LIN(T,0xff6b6b);c.material.emissiveIntensity=0.35});sc.add(ctx.o2);
@@ -4437,7 +4446,7 @@ const OUAB=[
 return {id:"stgNKA",title:"Цикълът на Na⁺/K⁺-ATP-азата (Post–Albers) — стъпка по стъпка",h:530,dur:4,
  intro:"Модел на α-субединицата (10 трансмембранни спирали M1–M10 и цитоплазмените домени A, N и P), β-субединицата с гликани и регулаторния белтък FXYD. Предните спирали са полупрозрачни, за да се виждат местата за йоните. Синкавата „фуния“ показва кой вход е отворен в момента. Помпата никога не е отворена едновременно навън и навътре.",
  cam:{r:22.5,th:0.02,phi:1.42,target:[0.5,-0.7,0.8],min:7,max:60},
- legend:[["#f59f00","Na⁺"],["#9c36b5","K⁺"],["#4dabf7","ATP / ADP"],["#fd7e14","фосфат (Pᵢ)"],["#f06595","M1–M2","box"],["#12b886","M3–M4","box"],["#66d9e8","M5–M6","box"],["#ced4da","M7–M10","box"],["#fab005","A-домен","box"],["#e03131","N-домен","box"],["#1c7ed6","P-домен","box"],["#74b816","β-субединица","box"],["#a5d8ff","FXYD","box"],["#c2255c","уабаин (режим „Уабаин / дигоксин“)"]],
+ legend:[["#f76707","Na⁺"],["#9c36b5","K⁺"],["#4dabf7","ATP / ADP"],["#fd7e14","фосфат (Pᵢ)"],["#f06595","M1–M2","box"],["#12b886","M3–M4","box"],["#66d9e8","M5–M6","box"],["#ced4da","M7–M10","box"],["#fab005","A-домен","box"],["#e03131","N-домен","box"],["#1c7ed6","P-домен","box"],["#74b816","β-субединица","box"],["#a5d8ff","FXYD","box"],["#c2255c","уабаин (режим „Уабаин / дигоксин“)"]],
  mechs:[{key:"norm",label:"Нормален цикъл",center:"цикъл на Post–Albers",stages:NORM},{key:"ouab",label:"Уабаин / дигоксин",center:"блок в E2P",stages:OUAB}],
  build(G,T,ctx){const sc=G.scene,V=(x,y,z)=>new T.Vector3(x,y,z),R=MK.rnd(7);ctx.V=V;ctx.cnt=0;
   const Y0=-2.85,Y1=2.75,HX={M1:[-2.35,1.2],M2:[-3.0,0.0],M3:[-1.6,-0.5],M4:[-1.05,1.75],M5:[0.45,-0.3],M6:[1.0,1.85],M7:[1.6,-1.3],M8:[1.75,0.4],M9:[2.9,0.9],M10:[2.8,-0.6]};ctx.HX=HX;
@@ -4508,7 +4517,7 @@ return {id:"stgNKA",title:"Цикълът на Na⁺/K⁺-ATP-азата (Post�
   const nS=[V(-3.4,-6.4,3.2),V(-2.6,-6.9,3.8),V(-4.1,-5.8,3.6)],nE=[V(-0.4,6.2,3.4),V(1.4,6.6,3.0),V(2.4,5.9,3.8)],kS=[V(-1.0,6.4,3.6),V(1.9,6.9,3.4)],kE=[V(-3.6,-6.3,3.4),V(-2.8,-7.0,4.0)];ctx.nS=nS;ctx.nE=nE;ctx.kS=kS;ctx.kE=kE;
   const rin=ctx.inP.slice().reverse(),rout=ctx.outP.slice().reverse();
   ctx.P={naIn:nS.map((s,k)=>[s,...rin.slice(0,4),ctx.siteNa[k]]),naOut:ctx.siteNa.map((s,k)=>[s,...ctx.outP.slice(1),nE[k]]),kIn:kS.map((s,k)=>[s,...rout.slice(0,4),ctx.siteK[k]]),kOut:ctx.siteK.map((s,k)=>[s,...ctx.inP.slice(1),kE[k]])};
-  ctx.naT=MK.pool(T,0xf59f00,0.32,3,{glow:0.5});ctx.kT=MK.pool(T,0x9c36b5,0.38,2,{glow:0.5});ctx.naA=MK.pool(T,0xf59f00,0.3,50);ctx.kA=MK.pool(T,0x9c36b5,0.36,32);[ctx.naT,ctx.kT,ctx.naA,ctx.kA].forEach(m=>sc.add(m));
+  ctx.naT=MK.pool(T,0xf76707,0.32,3,{glow:0.5});ctx.kT=MK.pool(T,0x9c36b5,0.38,2,{glow:0.5});ctx.naA=MK.pool(T,0xf76707,0.3,50);ctx.kA=MK.pool(T,0x9c36b5,0.36,32);[ctx.naT,ctx.kT,ctx.naA,ctx.kA].forEach(m=>sc.add(m));
   const amb=(n,x0,x1,y0,y1,inside)=>{const a=[];let g=0;while(a.length<n&&g++<4000){const p=V(lerp(x0,x1,R()),lerp(y0,y1,R()),lerp(-6.5,4.4,R()));
     if(inside?(p.x>-4.6&&p.x<5.2&&p.y>-7.2&&p.z>-1.9&&p.z<2.8)||(p.x>-4.4&&p.x<-0.6&&p.z>1.8&&p.z<4.4&&p.y>-6.6):(p.x>-3.6&&p.x<4.9&&p.y<6.8&&p.z>-3.2&&p.z<2.6)||(p.x>-0.8&&p.x<2.0&&p.z>1.6&&p.z<4.2&&p.y<5.4))continue;a.push({b:p,f:[R()*6,R()*6,R()*6]})}return a};
   ctx.amb={naO:amb(24,-9,9,3.3,8.6,0),kO:amb(3,-9,9,3.3,8.6,0),kI:amb(22,-9,9,-9.6,-3.3,1),naI:amb(4,-9,9,-9.6,-3.3,1),naX:amb(16,-9,9,-9.6,-3.3,1)};
@@ -4583,7 +4592,7 @@ return {id:"stgNKA",title:"Цикълът на Na⁺/K⁺-ATP-азата (Post�
 const STG_NMJ=(()=>{const RX=[-8,0,8],RS=0.78;return {id:"stgNMJ",title:"Предаване в нервно-мускулния синапс — стъпка по стъпка",h:500,dur:4,cycle:true,center:"≈ 0,5–1 ms",
  intro:"Активна зона в молекулен мащаб (цепката е съкратена ≈ 5 пъти): Ca²⁺ канал Cav2.1, закачена везикула със синаптотагмин и SNARE комплекс, ацетилхолинестераза в базалната ламина и никотинови рецептори на мускулната мембрана. Предният рецептор е полупрозрачен, за да се вижда порът.",
  cam:{r:34,th:0.25,phi:1.38,target:[0,3,0],min:8,max:90},
- legend:[["#74c0fc","Ca²⁺"],["#f59f00","Na⁺"],["#9c36b5","K⁺"],["#69db7c","ACh (ацетил)"],["#339af0","холин"],["#6c8ebf","Cav2.1 (P/Q) Ca²⁺ канал","box"],["#fab005","синаптотагмин","box"],["#e03131","SNARE: синтаксин / SNAP-25 / синаптобревин","box"],["#ff8787","AChE","box"],["#e64980","nAChR: α (×2), β, δ, ε","box"],["#ffd43b","деполяризация","box"]],
+ legend:[["#74c0fc","Ca²⁺"],["#f76707","Na⁺"],["#9c36b5","K⁺"],["#69db7c","ACh (ацетил)"],["#339af0","холин"],["#6c8ebf","Cav2.1 (P/Q) Ca²⁺ канал","box"],["#fab005","синаптотагмин","box"],["#e03131","SNARE: синтаксин / SNAP-25 / синаптобревин","box"],["#ff8787","AChE","box"],["#e64980","nAChR: α (×2), β, δ, ε","box"],["#ffd43b","деполяризация","box"]],
  stages:[
   {t:"Акционният потенциал достига терминала",short:"АП достига терминала",tag:"АП",badge:"−80 → +30 mV",d:"АП се провежда по моторния аксон до пресинаптичния терминал. Деполяризацията на мембраната (жълтата вълна) премества волтажните сензори (S4) на <b>Cav2.1 (P/Q-тип)</b> Ca²⁺ каналите в активните зони."},
   {t:"Ca²⁺ навлиза през Cav2.1",short:"Навлизане на Ca²⁺",tag:"Ca²⁺",badge:"нанодомен 10–100 µmol/L",d:"Каналите се отварят и Ca²⁺ навлиза по огромния си електрохимичен градиент (1,2 mmol/L навън, ≈ 0,1 µmol/L вътре). Около устието на канала за част от милисекундата възниква <b>нанодомен</b> с висока [Ca²⁺] — точно до закачените везикули. Mg²⁺ конкурира Ca²⁺ и намалява освобождаването."},
@@ -4604,7 +4613,7 @@ const STG_NMJ=(()=>{const RX=[-8,0,8],RS=0.78;return {id:"stgNMJ",title:"Пре�
   ctx.ves=MK.vesicle(T,2.6);sc.add(ctx.ves);ctx.vDock=V(-0.6,12.6,0.4);ctx.vZip=V(-0.6,10.95,0.4);
   [[-6,15.5,-4.5],[3,16.2,-5],[7.6,13.6,-4],[-10.5,12.8,-5],[-2.6,18.2,-6]].forEach(p=>{const v=MK.vesicle(T,2.1,{cut:2});v.position.set(...p);v.rotation.y=R()*6;sc.add(v)});
   // синаптотагмин (C2A, C2B) — закачен към везикулата
-  ctx.syt=MK.blob(T,[[-1.9,-1.7,1.3,0.75,0xfab005],[-2.4,-2.3,1.0,0.6,0xfab005],[-1.2,-2.6,1.7,0.7,0xf59f00],[-0.8,-3.1,1.4,0.55,0xf59f00]],{res:30,mo:{emissive:LIN(T,0xffa94d),emissiveIntensity:0}});ctx.ves.add(ctx.syt);
+  ctx.syt=MK.blob(T,[[-1.9,-1.7,1.3,0.75,0xfab005],[-2.4,-2.3,1.0,0.6,0xfab005],[-1.2,-2.6,1.7,0.7,0xf76707],[-0.8,-3.1,1.4,0.55,0xf76707]],{res:30,mo:{emissive:LIN(T,0xffa94d),emissiveIntensity:0}});ctx.ves.add(ctx.syt);
   ctx.sytRel=[V(-2.6,-1.4,1.9),V(-1.9,-2.3,2.2),V(-1.0,-3.2,2.1),V(-0.3,-3.3,1.7),V(-2.9,-2.6,1.4),V(-1.5,-1.0,2.0)];
   // SNARE (преизграждат се при движение на везикулата)
   ctx.snG=new T.Group();sc.add(ctx.snG);ctx.snA=V(1.6,8.45,1.5);ctx.snRel=V(0.9,-2.3,1.1);ctx.snLast=null;
@@ -4617,7 +4626,7 @@ const STG_NMJ=(()=>{const RX=[-8,0,8],RS=0.78;return {id:"stgNMJ",title:"Пре�
   // вълни на деполяризация
   const band=(w)=>{const m=new T.Mesh(new T.BoxGeometry(w,4.8,9.4),new T.MeshBasicMaterial({color:LIN(T,0xffd43b),transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending}));m.position.z=-3;sc.add(m);return m};ctx.apB=band(3);ctx.apB.position.y=6;ctx.eppB=band(1);ctx.eppB.position.y=-6;
   // йони и молекули
-  ctx.caP=MK.pool(T,0x74c0fc,0.3,30,{glow:0.35});ctx.naP=MK.pool(T,0xf59f00,0.28,50);ctx.kP=MK.pool(T,0x9c36b5,0.32,30);ctx.aG=MK.pool(T,0x69db7c,0.21,50,{glow:0.2});ctx.aB=MK.pool(T,0x339af0,0.23,50,{glow:0.2});
+  ctx.caP=MK.pool(T,0x74c0fc,0.3,30,{glow:0.35});ctx.naP=MK.pool(T,0xf76707,0.28,50);ctx.kP=MK.pool(T,0x9c36b5,0.32,30);ctx.aG=MK.pool(T,0x69db7c,0.21,50,{glow:0.2});ctx.aB=MK.pool(T,0x339af0,0.23,50,{glow:0.2});
   [ctx.caP,ctx.naP,ctx.kP,ctx.aG,ctx.aB].forEach(m=>sc.add(m));
   const amb=(n,x0,x1,y0,y1,z0=-6,z1=2.6)=>{const a=[];for(let k=0;k<n;k++)a.push({b:V(lerp(x0,x1,R()),lerp(y0,y1,R()),lerp(z0,z1,R())),f:[R()*6,R()*6,R()*6]});return a};
   ctx.amb={ca:amb(10,-13,13,-1.6,3.0),na:amb(18,-13,13,-1.6,3.0),k:[...amb(8,-13,13,-9.5,-13),...amb(6,-13,13,10,14)]};
@@ -4700,7 +4709,7 @@ function iglur(T,o){const g=new T.Group(),c=o.col,c2=o.col2,parts=[],V=(x,y,z)=>
 return {id:"stgCS",title:"Химичен синапс в ЦНС — стъпка по стъпка",h:500,dur:4,
  intro:"Молекулен модел на два синапса (цепката е съкратена): глутаматергичен — с AMPA и NMDA рецептори, скеле PSD-95 и астроцит с EAAT преносител, и GABA-ергичен — с GABA_A рецептор и GAT-1. Предните субединици на рецепторите са полупрозрачни.",
  cam:{r:28,th:0.25,phi:1.38,target:[GX,5,0],min:8,max:90},
- legend:[["#51cf66","глутамат"],["#cc5de8","GABA"],["#f59f00","Na⁺"],["#74c0fc","Ca²⁺"],["#e9ecef","Mg²⁺"],["#2f9e44","Cl⁻"],["#15aabf","AMPA рецептор","box"],["#f76707","NMDA рецептор (GluN1/GluN2)","box"],["#37b24d","EAAT (астроцит)","box"],["#9775fa","GABA_A рецептор","box"],["#ffd43b","врата на канала","box"]],
+ legend:[["#51cf66","глутамат"],["#cc5de8","GABA"],["#f76707","Na⁺"],["#74c0fc","Ca²⁺"],["#e9ecef","Mg²⁺"],["#2f9e44","Cl⁻"],["#15aabf","AMPA рецептор","box"],["#f76707","NMDA рецептор (GluN1/GluN2)","box"],["#37b24d","EAAT (астроцит)","box"],["#9775fa","GABA_A рецептор","box"],["#ffd43b","врата на канала","box"]],
  onMech:null,
  mechs:[
   {key:"glu",label:"Възбуден (глутамат)",center:"EPSP",stages:[
@@ -4737,7 +4746,7 @@ return {id:"stgCS",title:"Химичен синапс в ЦНС — стъпка
   [[GX-6,13.8,-4.5],[GX+4.5,14.6,-5],[GX-1.5,16.6,-6],[BX-5,13.6,-4.5],[BX+2.5,15.4,-5]].forEach(p=>{const v=MK.vesicle(T,2.0,{cut:2});v.position.set(...p);sc.add(v)});
   // молекули и йони
   ctx.gl1=MK.pool(T,0x51cf66,0.22,40,{glow:0.2});ctx.gl2=MK.pool(T,0xfa5252,0.15,40);ctx.ga1=MK.pool(T,0xcc5de8,0.22,30,{glow:0.2});ctx.ga2=MK.pool(T,0x4dabf7,0.15,30);
-  ctx.naP=MK.pool(T,0xf59f00,0.28,60);ctx.caP=MK.pool(T,0x74c0fc,0.3,30,{glow:0.35});ctx.clP=MK.pool(T,0x2f9e44,0.38,40);ctx.kP=MK.pool(T,0x9c36b5,0.32,20);
+  ctx.naP=MK.pool(T,0xf76707,0.28,60);ctx.caP=MK.pool(T,0x74c0fc,0.3,30,{glow:0.35});ctx.clP=MK.pool(T,0x2f9e44,0.38,40);ctx.kP=MK.pool(T,0x9c36b5,0.32,20);
   [ctx.gl1,ctx.gl2,ctx.ga1,ctx.ga2,ctx.naP,ctx.caP,ctx.clP,ctx.kP].forEach(m=>sc.add(m));
   ctx.mg=new T.Mesh(new T.SphereGeometry(0.34,18,12),MK.mat(T,0xe9ecef,{emissive:LIN(T,0xadb5bd),emissiveIntensity:0.2}));sc.add(ctx.mg);ctx.mgIn=V(NX,-6-0.3*RS,0.15);ctx.mgOut=V(NX+1.6,0.9,1.4);
   const amb=(n,x0,x1,y0,y1)=>{const a=[];for(let k=0;k<n;k++)a.push({b:V(lerp(x0,x1,R()),lerp(y0,y1,R()),lerp(-6,2.4,R())),f:[R()*6,R()*6,R()*6]});return a};
@@ -4791,7 +4800,7 @@ return {id:"stgCS",title:"Химичен синапс в ЦНС — стъпка
 const STG_ES=(()=>{const CH=[[0,0],[5.8,-3.4],[-5.8,-3.4],[0,-6.8]],H=3.45;return {id:"stgES",title:"Електричен синапс (gap junction) — стъпка по стъпка",h:480,dur:4,
  intro:"Две съседни клетки с плака от междуклетъчни канали (в разрез отпред). Всеки канал е от два коннексона — по един от всяка клетка, а всеки коннексон е от 6 коннексина. Предните коннексини на средния канал са полупрозрачни, за да се вижда порът.",
  cam:{r:34,th:0.3,phi:1.35,target:[0,0,-2],min:6,max:70},
- legend:[["#0ca678","коннексон на клетка 1","box"],["#1098ad","коннексон на клетка 2","box"],["#9c36b5","K⁺ (основен носител на тока)"],["#f59f00","Na⁺"],["#74c0fc","Ca²⁺"],["#ff6b6b","H⁺"],["#4dabf7","cAMP / IP₃"],["#adb5bd","белтък (> 1 kDa)"],["#ffd43b","деполяризация / ток","box"]],
+ legend:[["#0ca678","коннексон на клетка 1","box"],["#1098ad","коннексон на клетка 2","box"],["#9c36b5","K⁺ (основен носител на тока)"],["#f76707","Na⁺"],["#74c0fc","Ca²⁺"],["#ff6b6b","H⁺"],["#4dabf7","cAMP / IP₃"],["#adb5bd","белтък (> 1 kDa)"],["#ffd43b","деполяризация / ток","box"]],
  stages:[
   {t:"Плака от коннексони между две клетки",short:"Плака от коннексони",badge:"цепка 2–4 nm",d:"При електричния синапс мембраните на двете клетки са само на 2–4 nm една от друга (при химичния — 20–40 nm). В тях има плаки от стотици до хиляди канали (gap junctions). Срещат се в сърцето (интеркаларните дискове), гладката мускулатура, епителите, глията и някои неврони (долната олива, ретината, хипоталамуса)."},
   {t:"Два коннексона се скачват",short:"Скачване на два коннексона",badge:"6 + 6 коннексина",d:"Всяка клетка изгражда <b>коннексон</b> (хемиканал) от 6 <b>коннексина</b> (Cx43 в сърцето, Cx36 в невроните). Извънклетъчните бримки на двата коннексона се закачват и образуват непрекъснат воден канал с пора ≈ 1,2–1,5 nm, изолиран от междуклетъчната течност."},
@@ -4816,7 +4825,7 @@ const STG_ES=(()=>{const CH=[[0,0],[5.8,-3.4],[-5.8,-3.4],[0,-6.8]],H=3.45;retur
   ctx.pore=new T.Mesh(new T.CylinderGeometry(0.5,0.5,8.2,18,1,true),new T.MeshBasicMaterial({color:LIN(T,0xffd43b),transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide}));sc.add(ctx.pore);
   const band=()=>{const m=new T.Mesh(new T.BoxGeometry(28,5,10.2),new T.MeshBasicMaterial({color:LIN(T,0xffd43b),transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending}));m.position.z=-3.4;sc.add(m);return m};ctx.b1=band();ctx.b1.position.y=H;ctx.b2=band();ctx.b2.position.y=-H;
   // йони и молекули
-  ctx.kP=MK.pool(T,0x9c36b5,0.34,60);ctx.naP=MK.pool(T,0xf59f00,0.29,20);ctx.caP=MK.pool(T,0x74c0fc,0.3,20,{glow:0.35});ctx.hP=MK.pool(T,0xff6b6b,0.16,30,{glow:0.4});[ctx.kP,ctx.naP,ctx.caP,ctx.hP].forEach(m=>sc.add(m));
+  ctx.kP=MK.pool(T,0x9c36b5,0.34,60);ctx.naP=MK.pool(T,0xf76707,0.29,20);ctx.caP=MK.pool(T,0x74c0fc,0.3,20,{glow:0.35});ctx.hP=MK.pool(T,0xff6b6b,0.16,30,{glow:0.4});[ctx.kP,ctx.naP,ctx.caP,ctx.hP].forEach(m=>sc.add(m));
   const amb=(n,y0,y1,x0=-13,x1=13)=>{const a=[];for(let k=0;k<n;k++)a.push({b:V(lerp(x0,x1,R()),lerp(y0,y1,R()),lerp(-7.5,2.4,R())),f:[R()*6,R()*6,R()*6]});return a};
   ctx.amb={k:[...amb(18,6.4,10.5),...amb(18,-6.4,-10.5)],na:[...amb(4,-0.6,0.6,8.6,13),...amb(4,-0.6,0.6,-13,-8.6)],ca:amb(12,-6.4,-10),h:amb(22,-6.4,-10.5)};
   ctx.camp=[0,1].map(()=>{const m=MK.mol(T,"camp");m.scale.setScalar(1.3);sc.add(m);return m});
@@ -5059,7 +5068,7 @@ return {id:"stgST",title:"Как течността излиза от капил
     const am=(a0+da/2),dir=V(Math.sin(am),0,Math.cos(am)).applyAxisAngle(V(1,0,0),Math.PI/2);for(const z of [-3.5,0.5]){const p0=V(LX,LY,z).addScaledVector(dir,LR),p1=V(LX,LY,z).addScaledVector(dir,LR+2.3).add(V(0,0,0.6));sc.add(MK.taper(T,new T.LineCurve3(p0,p1),0.035,0.035,{seg:2,rad:4,color:0x868e96}))}}
   // молекули
   const ab=MK.blob(T,[[0,0,0,0.42],[0.42,0.22,0.1,0.34],[-0.38,0.25,-0.05,0.34],[0.05,-0.36,0.1,0.3]],{res:20});const ag=ab.geometry.clone();ag.scale(ab.scale.x,ab.scale.y,ab.scale.z);ag.translate(ab.position.x,ab.position.y,ab.position.z);
-  ctx.alb=new T.InstancedMesh(ag,MK.mat(T,0xfab005,{roughness:0.35,emissive:LIN(T,0xf59f00),emissiveIntensity:0.15}),60);ctx.alb.count=0;ctx.alb.frustumCulled=false;sc.add(ctx.alb);
+  ctx.alb=new T.InstancedMesh(ag,MK.mat(T,0xfab005,{roughness:0.35,emissive:LIN(T,0xf76707),emissiveIntensity:0.15}),60);ctx.alb.count=0;ctx.alb.frustumCulled=false;sc.add(ctx.alb);
   ctx.wat=MK.pool(T,0x4dabf7,0.15,120,{glow:0.25});sc.add(ctx.wat);
   const amb=(n,x0,x1,y0,y1)=>{const a=[];for(let k=0;k<n;k++)a.push({b:V(lerp(x0,x1,R()),lerp(y0,y1,R()),lerp(Z0+0.5,ZF-0.3,R())),f:[R()*6,R()*6,R()*6],r:R()*6});return a};
   ctx.amb={albL:amb(30,-14,14,3.4,9.5),albI:amb(7,-14,14,-2.5,-9.5),albLeak:amb(10,-6,6,-2.6,-6),wL:amb(26,-14,14,3.2,9.8),wI:amb(18,-14,14,-2.2,-9.8),wLy:amb(14,LX-1.8,LX+1.8,LY-1.8,LY+1.8)};
@@ -6487,7 +6496,7 @@ const BF=(()=>{
     return S(440,310,b,"Схема на двата кръга на кръвообращението")};
   // проводна система с времената по Guyton
   F.cond=()=>{let b="";const B=[["Синусов","възел","0 s"],["AV","възел","0,03 s"],["Сноп","на His","0,13 s"],["Бедра и","Пуркинье","0,16 s"],["Работен","миокард","0,17–0,22 s"]];
-    B.forEach(([a,c,tm],i)=>{const x=6+i*87;b+=box(x,16,76,52,{f:i===0?"color-mix(in srgb,#f59f00 18%,var(--panel))":"var(--chip)"})+tt(x+38,36,[a,c],{fs:12,w:600});b+=t(x+38,88,tm,{fs:12,c:"var(--muted)",w:600});if(i<4)b+=ar([[x+77,42],[x+86,42]],{w:2,h:7})});
+    B.forEach(([a,c,tm],i)=>{const x=6+i*87;b+=box(x,16,76,52,{f:i===0?"color-mix(in srgb,#f76707 18%,var(--panel))":"var(--chip)"})+tt(x+38,36,[a,c],{fs:12,w:600});b+=t(x+38,88,tm,{fs:12,c:"var(--muted)",w:600});if(i<4)b+=ar([[x+77,42],[x+86,42]],{w:2,h:7})});
     b+=box(93,102,165,40,{f:"none",dash:"4 3"})+tt(175.5,118,["AV забавяне ≈ 0,13 s:","предсърдията се изпразват първи"],{fs:11,c:"var(--muted)"});
     b+=box(267,150,165,40,{f:"none",dash:"4 3"})+tt(349.5,166,["Пуркинье: 1,5–4 m/s →","камерите се съкращават заедно"],{fs:11,c:"var(--muted)"});
     return S(440,196,b,"Път на възбуждането през сърцето")};
@@ -6674,7 +6683,7 @@ const BF=(()=>{
   b+=t(4,14,"извън",{fs:10.5,a:"start",c:"var(--muted)",w:600})+t(4,198,"вътре",{fs:10.5,a:"start",c:"var(--muted)",w:600});return S(440,226,b,"Трите състояния на волтаж-зависимия Na⁺ канал")};
  // положителна обратна връзка (цикъл на Ходжкин)
  F.hodg=()=>{let b="";const N=[[150,30,"деполяризация"],[262,140,"отварят се Na⁺ канали"],[38,140,"Na⁺ влиза в клетката"]];
-  N.forEach(([x,y,l])=>{b+=box(x-70,y-16,140,32,{f:"color-mix(in srgb,#f59f00 14%,var(--panel))"})+t(x,y+4,l,{fs:11.5,w:600})});
+  N.forEach(([x,y,l])=>{b+=box(x-70,y-16,140,32,{f:"color-mix(in srgb,#f76707 14%,var(--panel))"})+t(x,y+4,l,{fs:11.5,w:600})});
   b+=ar([[196,48],[246,122]],{w:2})+ar([[192,140],[110,140]],{w:2})+ar([[50,122],[104,48]],{w:2});b+=t(150,100,"+",{fs:26,w:700,c:NA});
   b+=t(150,186,"при прага цикълът се самоусилва",{fs:11,c:"var(--muted)"});return S(372,196,`<g transform="translate(36,0)">${b}</g>`,"Положителна обратна връзка при акционния потенциал")};
  // проводимости по Hodgkin–Huxley
@@ -6687,7 +6696,7 @@ const BF=(()=>{
   [[-1,-0.8],[-1.2,0.3],[-0.4,-1.2],[-0.3,1.2],[-1.1,1.0]].forEach(([dx,dy],k)=>{const x1=70+dx*40,y1=96+dy*40;b+=`<path d="M70,96 Q${70+dx*22},${96+dy*28} ${x1},${y1}" stroke="${ST}" stroke-width="7" fill="none" stroke-linecap="round"/>`;
    b+=`<path d="M${x1},${y1} l${dx*14-6},${dy*12-8} M${x1},${y1} l${dx*16+6},${dy*14+6}" stroke="${ST}" stroke-width="3" fill="none" stroke-linecap="round"/>`});
   b+=`<path d="M48,80 Q70,60 94,82 Q104,96 92,112 Q70,130 50,112 Q38,96 48,80Z" fill="${N}" stroke="${ST}" stroke-width="1.5"/>`+circ(70,96,9,"#b197fc");
-  b+=`<path d="M96,90 L118,94 L118,98 L96,104Z" fill="${N}" stroke="${ST}"/>`+rect(118,93,30,6,"color-mix(in srgb,#f59f00 50%,var(--panel))",{s:ST});
+  b+=`<path d="M96,90 L118,94 L118,98 L96,104Z" fill="${N}" stroke="${ST}"/>`+rect(118,93,30,6,"color-mix(in srgb,#f76707 50%,var(--panel))",{s:ST});
   for(let k=0;k<4;k++){const x=152+k*58;b+=rect(x,88,50,18,"#fbf5ea",{rx:9,s:"#cdb79e"})+ln(x+50,96,x+58,96,{c:ST,w:5})}
   b+=ln(148,96,384,96,{c:ST,w:3});b+=`<path d="M384,96 Q398,80 410,72 M384,96 Q402,96 416,94 M384,96 Q398,112 410,122" stroke="${ST}" stroke-width="3" fill="none"/>`+[[412,70],[419,94],[412,124]].map(([x,y])=>circ(x,y,6,"#e599f7",ST)).join("");
   b+=t(30,26,"дендрити",{fs:11,w:600})+t(70,148,"сома (ядро)",{fs:11,w:600})+t(118,80,"хълмче",{fs:10.5,w:600})+t(134,124,"начален сегмент",{fs:10.5,w:600})+t(206,78,"миелин",{fs:11,w:600})+t(260,124,"възел на Ранвие",{fs:11,w:600})+ln(264,112,262,100,{c:"var(--muted)"})+t(404,146,"бутони",{fs:11,w:600});
@@ -6729,7 +6738,7 @@ const BF=(()=>{
   return S(300,206,b,"Проста срещу улеснена дифузия")};
  // цикъл на Post–Albers (4 състояния)
  F.post=()=>{let b="";const N=[[180,36,"E1","местата гледат навътре"],[320,130,"E1P","3 Na⁺ затворени"],[180,224,"E2P","местата гледат навън"],[40,130,"E2","2 K⁺ затворени"]];
-  N.forEach(([x,y,a,c],i)=>{b+=box(x-62,y-22,124,44,{f:i<2?"color-mix(in srgb,#f59f00 16%,var(--panel))":"color-mix(in srgb,#9c36b5 14%,var(--panel))"})+t(x,y-3,a,{fs:13,w:700})+t(x,y+13,c,{fs:10,c:"var(--muted)"})});
+  N.forEach(([x,y,a,c],i)=>{b+=box(x-62,y-22,124,44,{f:i<2?"color-mix(in srgb,#f76707 16%,var(--panel))":"color-mix(in srgb,#9c36b5 14%,var(--panel))"})+t(x,y-3,a,{fs:13,w:700})+t(x,y+13,c,{fs:10,c:"var(--muted)"})});
   b+=ar([[242,44],[300,106]],{w:2})+ar([[300,154],[242,216]],{w:2})+ar([[118,216],[60,154]],{w:2})+ar([[60,106],[118,44]],{w:2});
   b+=t(290,64,"3 Na⁺ отвътре",{fs:10.5,a:"start",c:NA,w:600})+t(290,78,"ATP → ADP",{fs:10.5,a:"start",c:BLUE})+t(290,198,"3 Na⁺ навън",{fs:10.5,a:"start",c:NA,w:600});
   b+=t(70,198,"2 K⁺ отвън",{fs:10.5,a:"end",c:K,w:600})+t(70,212,"Pᵢ излиза",{fs:10.5,a:"end",c:GOLD})+t(70,64,"2 K⁺ навътре",{fs:10.5,a:"end",c:K,w:600})+t(70,78,"(ATP помага)",{fs:10.5,a:"end",c:"var(--muted)"});
