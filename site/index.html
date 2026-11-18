@@ -1641,7 +1641,7 @@ const TESTS_SK=[
 function viewSkeletal(main){
   main.innerHTML=`<h2>Скелетен мускул: саркомер и съкращение</h2><p class="lead">3D модел на саркомер: Z-дискове, тънки нишки (актин с тропомиозин и тропонин), дебели нишки (миозин с глави), M-линия и титин. Стимулирай, променяй честотата и дължината и наблюдавай плъзгането на нишките, цикъла на напречните мостове, сумацията и тетануса.</p>
   <div class="card" style="padding:10px"><div class="btns"><button class="b primary" id="demo">■︎ Спри демонстрацията</button><button class="b" id="one">Единичен стимул</button><button class="b" id="run">▶︎ Непрекъсната стимулация</button><button class="b" id="pause">⏸︎ Пауза</button><a class="b" href="#xb" style="text-decoration:none">Близък план: миозин, тропомиозин, ATP</a></div>
-  ${wrap3D("w3",420)}<div class="legend" style="margin-top:6px"><span><i style="background:#f08c00"></i>актин (тънки)</span><span><i style="background:#7048e8"></i>миозин (дебели)</span><span><i style="background:#1c7ed6"></i>тропомиозин</span><span><i style="background:#f06595;width:10px;height:10px;border-radius:50%"></i>тропонин (свети при Ca²⁺)</span><span><i style="background:#74c0fc;width:10px;height:10px;border-radius:50%"></i>Ca²⁺</span><span><i style="background:#339af0"></i>T-тубул</span><span><i style="background:#91a7ff"></i>СР</span><span><i style="background:#ff6b6b;width:10px;height:10px;border-radius:50%"></i>свързани глави</span></div>
+  ${wrap3D("w3",420)}<div class="legend" style="margin-top:6px"><span><i style="background:#c9583f"></i>актин (тънки)</span><span><i style="background:#7048e8"></i>миозин (дебели)</span><span><i style="background:#1c7ed6"></i>тропомиозин</span><span><i style="background:#f06595;width:10px;height:10px;border-radius:50%"></i>тропонин (свети при Ca²⁺)</span><span><i style="background:#74c0fc;width:10px;height:10px;border-radius:50%"></i>Ca²⁺</span><span><i style="background:#339af0"></i>T-тубул</span><span><i style="background:#91a7ff"></i>СР</span><span><i style="background:#ff6b6b;width:10px;height:10px;border-radius:50%"></i>свързани глави</span></div>
   <div class="stats" id="st"></div><div class="note" id="phase"></div></div>
   <div class="grid2"><div class="card" id="ctl"></div><div class="card"><canvas class="plot" id="pF"></canvas><div class="legend"><span><i style="background:${css("--accent")}"></i>сила</span><span><i style="background:#f76707"></i>Ca²⁺ в саркоплазмата (отн.)</span></div><canvas class="plot" id="pL" style="margin-top:6px"></canvas><div class="legend"><span><i style="background:${css("--accent")}"></i>активна</span><span><i style="background:${css("--accent2")}"></i>пасивна</span><span><i style="background:${css("--ink")}"></i>обща</span></div><canvas class="plot" id="pH" style="margin-top:6px"></canvas><div class="legend"><span><i style="background:${css("--accent5")}"></i>скорост на скъсяване</span><span><i style="background:${css("--accent3")}"></i>мощност</span></div></div></div>
   <h3>Експерименти</h3><div id="ex"></div>`;
@@ -1679,12 +1679,12 @@ function viewSkeletal(main){
     const mG=new T.Group();sc.add(mG);thick.slice(1).forEach(p=>{const d=new T.Vector3(0,p[0],p[1]);const c=new T.Mesh(new T.CylinderGeometry(0.018,0.018,d.length(),6),new T.MeshStandardMaterial({color:C(0x868e96)}));c.position.copy(d.clone().multiplyScalar(0.5));c.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),d.clone().normalize());mG.add(c)});
     const ml=new T.Mesh(new T.CylinderGeometry(1.0,1.0,0.03,6),new T.MeshStandardMaterial({color:C(0xadb5bd),transparent:true,opacity:0.22,depthWrite:false}));ml.rotation.z=Math.PI/2;mG.add(ml);
     /* --- тънки нишки (две страни) --- */
-    const acM=new T.MeshStandardMaterial({color:0xffffff,roughness:0.5});const bG=new T.SphereGeometry(0.04,10,8);
-    const tpM=new T.MeshStandardMaterial({color:C(0x1c7ed6),roughness:0.4}),tnM=new T.MeshStandardMaterial({color:C(0xf06595),roughness:0.35,emissive:C(0xf08c00),emissiveIntensity:0});
+    const acM=new T.MeshStandardMaterial({color:0xffffff,roughness:0.5});const acIs=[];const bG=new T.SphereGeometry(0.04,10,8);
+    const tpM=new T.MeshStandardMaterial({color:C(0x1c7ed6),roughness:0.4}),tnM=new T.MeshStandardMaterial({color:C(0xf06595),roughness:0.35,emissive:C(0xe8590c),emissiveIntensity:0});
     const pitch=0.74;const sides=[];
     [1,-1].forEach(dir=>{const grp=new T.Group();sc.add(grp);const nb=Math.floor(thinL/0.055);const bI=new T.InstancedMesh(bG,acM,thin.length*nb*2);bI.instanceColor=new T.InstancedBufferAttribute(new Float32Array(thin.length*nb*6),3);let k=0;
-      const cA=C(0xf76707),cB=C(0xffc078);
-      thin.forEach(p=>{for(let s=0;s<2;s++)for(let i=0;i<nb;i++){const x=0.03+i*0.055,an=2*Math.PI*x/pitch+s*Math.PI;m4.makeTranslation(dir*x,p[0]+Math.cos(an)*0.034,p[1]+Math.sin(an)*0.034);bI.setMatrixAt(k,m4);bI.setColorAt(k,(i+s)%2?cA:cB);k++}});grp.add(bI);
+      const cA=C(0xc9583f),cB=C(0xe0876c);
+      thin.forEach(p=>{for(let s=0;s<2;s++)for(let i=0;i<nb;i++){const x=0.03+i*0.055,an=2*Math.PI*x/pitch+s*Math.PI;m4.makeRotationX(an-Math.PI/2+(i%2)*0.3).setPosition(dir*x,p[0]+Math.cos(an)*0.034,p[1]+Math.sin(an)*0.034);bI.setMatrixAt(k,m4);bI.setColorAt(k,(i+s)%2?cA:cB);k++}});grp.add(bI);acIs.push(bI);
       const tps=[];thin.forEach(p=>{const tg=new T.Group();tg.position.set(0,p[0],p[1]);grp.add(tg);
         for(const g0 of [Math.PI/2,Math.PI*1.5]){const pts=[];for(let x=0;x<=thinL;x+=0.02){const an=2*Math.PI*x/pitch+g0;pts.push(new T.Vector3(dir*x,Math.cos(an)*0.058,Math.sin(an)*0.058))}
           tg.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),120,0.011,5,false),tpM));
@@ -1709,8 +1709,11 @@ function viewSkeletal(main){
     const NCa=500,caG=new T.BufferGeometry();caG.setAttribute("position",new T.BufferAttribute(new Float32Array(NCa*3),3));caG.setDrawRange(0,0);
     sc.add(new T.Points(caG,new T.PointsMaterial({color:0x74c0fc,size:0.07,transparent:true,opacity:0.95,depthWrite:false,blending:T.AdditiveBlending})));
     const bar=(col,y,h=0.07)=>{const m=new T.Mesh(new T.BoxGeometry(1,h,0.12),new T.MeshStandardMaterial({color:C(col),roughness:0.5}));m.position.y=y;sc.add(m);return m};
-    const bars={A:bar(0x7048e8,-2.15),IL:bar(0xf76707,-2.15),IR:bar(0xf76707,-2.15),H:bar(0xadb5bd,-2.32,0.05),ZL:bar(0x343a40,-2.15,0.35),ZR:bar(0x343a40,-2.15,0.35)};bars.ZL.scale.x=bars.ZR.scale.x=0.05;
+    const bars={A:bar(0x7048e8,-2.15),IL:bar(0xc9583f,-2.15),IR:bar(0xc9583f,-2.15),H:bar(0xadb5bd,-2.32,0.05),ZL:bar(0x343a40,-2.15,0.35),ZR:bar(0x343a40,-2.15,0.35)};bars.ZL.scale.x=bars.ZR.scale.x=0.05;
     const arM=new T.MeshStandardMaterial({color:C(0x4c6ef5),emissive:C(0x3b5bdb),emissiveIntensity:0.5});const arrows=[0,1].map(()=>{const g=new T.Group();const c1=new T.Mesh(new T.ConeGeometry(0.13,0.3,16),arM);c1.position.y=0.15;const c2=new T.Mesh(new T.CylinderGeometry(0.04,0.04,0.35,10),arM);c2.position.y=-0.15;g.add(c1,c2);g.position.y=1.85;sc.add(g);return g});
+    /* истински форми: G-актин (PDB 1J6Z) и глава S1 на миозина (PDB 2MYS) */
+    Promise.all([MK.loadMesh(T,"m/mol/gactin.txt"),MK.loadMesh(T,"m/mol/s1.txt")]).then(([ga,s1])=>{const a=ga.clone();a.scale(0.031,0.031,0.031);acIs.forEach(I=>I.geometry=a);acM.vertexColors=true;acM.needsUpdate=true;
+      const h=s1.clone();h.scale(2.2,2.2,1);hI.geometry=h;hI.material.vertexColors=true;hI.material.needsUpdate=true}).catch(()=>{});
     return {G,heads,hI,sides,caG,cas:[],tnM,thickL,thinL,U,bc,bars,arrows}},
   (ctx,dtr)=>{const {G,U}=ctx,T=G.T;const ty=typ();
     if(!st.paused){const sim=dtr*1000/S.slow.get(),n=Math.ceil(sim/0.2);const iso=$("#iso").checked;for(let i=0;i<n;i++){const dt=sim/n;
@@ -2137,7 +2140,7 @@ function viewXB(main){
   main.innerHTML=`<h2>Цикъл на напречните мостове: близък план</h2><p class="lead">Една миозинова глава върху актинова нишка, стъпка по стъпка (модел на Lymn–Taylor). Следи <b>къде е ATP</b>, <b>дали главата е свързана</b> и <b>накъде се завърта лостовото рамо</b>. Тропомиозинът (тъмнозелен) покрива червените места за свързване, докато Ca²⁺ не го отмести.</p>
   <div class="card" style="padding:10px"><div class="btns"><button class="b primary" id="play">⏸︎ Пауза</button><button class="b" id="prev">⏮︎ Назад</button><button class="b" id="next">⏭︎ Следваща стъпка</button><button class="b" id="ca">Ca²⁺: има</button><button class="b" id="atpB">ATP: има</button><button class="b" id="mate">Втора глава: скрита</button><a class="b" href="#skeletal" style="text-decoration:none">← към саркомера</a></div>
   ${wrap3D("w3",500)}
-  <div class="legend" style="margin-top:6px"><span><i style="background:#f08c00;width:10px;height:10px;border-radius:50%"></i>актин</span><span><i style="background:#fa5252;width:10px;height:10px;border-radius:50%"></i>място за миозина</span><span><i style="background:#1971c2"></i>тропомиозин</span><span><i style="background:#ff922b;width:10px;height:10px;border-radius:50%"></i>тропонин C</span><span><i style="background:#4dabf7;width:10px;height:10px;border-radius:50%"></i>Ca²⁺</span><span><i style="background:#6741d9"></i>моторен домен</span><span><i style="background:#cc5de8"></i>лостово рамо</span><span><i style="background:#f783ac;width:10px;height:10px;border-radius:50%"></i>ELC</span><span><i style="background:#66d9e8;width:10px;height:10px;border-radius:50%"></i>RLC</span><span><i style="background:#fd7e14;width:10px;height:10px;border-radius:50%"></i>фосфат</span></div></div>
+  <div class="legend" style="margin-top:6px"><span><i style="background:#c9583f;width:10px;height:10px;border-radius:50%"></i>актин</span><span><i style="background:#fa5252;width:10px;height:10px;border-radius:50%"></i>място за миозина</span><span><i style="background:#1971c2"></i>тропомиозин</span><span><i style="background:#d6336c;width:10px;height:10px;border-radius:50%"></i>тропонин C</span><span><i style="background:#4dabf7;width:10px;height:10px;border-radius:50%"></i>Ca²⁺</span><span><i style="background:#6741d9"></i>моторен домен</span><span><i style="background:#cc5de8"></i>лостово рамо</span><span><i style="background:#f783ac;width:10px;height:10px;border-radius:50%"></i>ELC</span><span><i style="background:#66d9e8;width:10px;height:10px;border-radius:50%"></i>RLC</span><span><i style="background:#fd7e14;width:10px;height:10px;border-radius:50%"></i>фосфат</span></div></div>
   <div class="grid2"><div class="card"><canvas id="cyc" style="width:100%;height:330px;display:block"></canvas></div><div class="card"><div id="stx" style="font-size:15px"></div><div class="stats" id="st" style="margin-top:10px"></div><div class="ctrl" id="sp" style="margin-top:8px"></div></div></div>
   <h3>Експерименти</h3><div id="ex"></div>`;
   const S={};S.dur=slider($("#sp"),{label:"Продължителност на стъпка",min:0.8,max:6,step:0.1,value:2.8,d:1,unit:"s"},()=>{});
@@ -2168,16 +2171,17 @@ function viewXB(main){
     const act=new T.Group();sc.add(act);const NM=36,rise=0.55,pitch=14,x0=-NM*rise/2,beads=[];
     for(let n=0;n<NM;n++){const s=n%2,x=x0+n*rise,an=2*Math.PI*x/pitch+s*Math.PI;beads.push({x,an,s})}
     const aI=new T.InstancedMesh(new T.SphereGeometry(0.33,26,18),mat(0xffffff,{roughness:0.5,clearcoat:0.15}),NM);aI.instanceColor=new T.InstancedBufferAttribute(new Float32Array(NM*3),3);
-    const sites=[];beads.forEach((b,n)=>{m4.makeTranslation(b.x,Math.cos(b.an)*0.33,Math.sin(b.an)*0.33);aI.setMatrixAt(n,m4);aI.setColorAt(n,C(b.s?0xf08c00:0xffa94d));
+    const sites=[];beads.forEach((b,n)=>{m4.makeTranslation(b.x,Math.cos(b.an)*0.33,Math.sin(b.an)*0.33);aI.setMatrixAt(n,m4);aI.setColorAt(n,C(b.s?0xc9583f:0xe0876c));
       const o=new T.Vector3(0,Math.cos(b.an),Math.sin(b.an));if(o.y<-0.35)sites.push({p:new T.Vector3(b.x,Math.cos(b.an)*0.33,Math.sin(b.an)*0.33).addScaledVector(new T.Vector3(0,-1,0),0.3),x:b.x})});
     act.add(aI);
+    MK.loadMesh(T,"m/mol/xb_actin.txt").then(ga=>{const a=ga.clone();a.scale(0.47,0.47,0.47);aI.geometry=a;aI.material.vertexColors=true;aI.material.needsUpdate=true;const ex=new T.Vector3(),ey=new T.Vector3(),ez=new T.Vector3(1,0,0);beads.forEach((b,n)=>{const co=Math.cos(b.an),si=Math.sin(b.an);ex.set(0,si,-co);ey.set(0,co,si);m4.makeBasis(ex,ey,ez).setPosition(b.x,co*0.33,si*0.33);aI.setMatrixAt(n,m4)});aI.instanceMatrix.needsUpdate=true}).catch(()=>{});
     const sI=new T.InstancedMesh(new T.SphereGeometry(0.11,14,10),new T.MeshStandardMaterial({color:C(0xfa5252),emissive:C(0xe03131),emissiveIntensity:0.5}),sites.length);sites.forEach((s,i)=>{m4.makeTranslation(s.p.x,s.p.y,s.p.z);sI.setMatrixAt(i,m4)});act.add(sI);
     /* тропомиозин (долу — регулира местата; горе — симетричен) */
     const tpMat=mat(0x1971c2,{roughness:0.35});
     const coil=(len,y)=>{const g=new T.Group();for(const c of [0,Math.PI]){const pts=[];for(let x=-len/2;x<=len/2;x+=0.1){const w=x*4+c;pts.push(new T.Vector3(x,y+Math.cos(w)*0.055,Math.sin(w)*0.055))}g.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),400,0.065,10,false),tpMat))}return g};
     const tpLow=new T.Group();tpLow.add(coil(NM*rise,0));tpLow.position.y=-0.66;act.add(tpLow);const tpHi=coil(NM*rise,0.66);act.add(tpHi);
     const tns=[];for(let x=x0+1.8;x<-x0-0.5;x+=7*rise){const g=new T.Group();g.position.x=x;
-      const tnc=new T.Mesh(new T.SphereGeometry(0.21,18,14),mat(0xff922b,{emissive:C(0xf08c00),emissiveIntensity:0}));tnc.position.set(0,-0.18,0.22);
+      const tnc=new T.Mesh(new T.SphereGeometry(0.21,18,14),mat(0xd6336c,{emissive:C(0xc2255c),emissiveIntensity:0}));tnc.position.set(0,-0.18,0.22);
       const tni=new T.Mesh(new T.SphereGeometry(0.14,14,10),mat(0xf783ac));tni.position.set(0.28,-0.08,0.2);
       const tnt=new T.Mesh(new T.CylinderGeometry(0.075,0.075,1.0,12),mat(0x91a7ff));tnt.rotation.z=Math.PI/2;tnt.position.set(-0.35,0,0.08);
       const cas=[-0.12,0.12].map(dx=>{const c_=new T.Mesh(new T.SphereGeometry(0.08,12,10),new T.MeshStandardMaterial({color:C(0x4dabf7),emissive:C(0x1c7ed6),emissiveIntensity:0.8}));c_.position.set(dx,-0.36,0.34);g.add(c_);return c_});
@@ -2198,7 +2202,12 @@ function viewXB(main){
       const elc=new T.Mesh(new T.SphereGeometry(0.2,20,14),mat(0xf783ac,o));elc.scale.set(1,1.4,1);elc.position.set(0.12,0.92,0.06);
       const rlc=new T.Mesh(new T.SphereGeometry(0.18,20,14),mat(0x66d9e8,o));rlc.scale.set(1,1.4,1);rlc.position.set(-0.12,0.42,0.08);lever.add(lv,elc,rlc);
       const s2=new T.Group();for(const c of [0,Math.PI]){const pts=[];for(let u=0;u<=1;u+=0.05){const w=u*12+c;pts.push(new T.Vector3(u*0.9+Math.cos(w)*0.045,-u*1.0,Math.sin(w)*0.045))}s2.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),40,0.05,8,false),mat(0x845ef7,o)))}
-      g.add(motor,lever,s2);sc.add(g);return {g,motor,lever,s2,pk}}
+      g.add(motor,lever,s2);sc.add(g);const R={g,motor,lever,s2,pk};
+      /* истинска глава S1 (PDB 2MYS): моторен домен и лост с леките вериги */
+      Promise.all([MK.loadMesh(T,"m/mol/xb_motor.txt"),MK.loadMesh(T,"m/mol/xb_lever.txt")]).then(([gm,gl])=>{const mm=MK.molMat(T,dim?{transparent:true,opacity:0.35,depthWrite:false}:{});
+        const a=gm.clone();a.rotateX(-Math.PI/2);a.scale(0.7,0.7,0.7);const m=new T.Mesh(a,mm);m.position.set(-0.05,0.02,0);[md,up,lo,cv,cl].forEach(x=>x.visible=false);motor.add(m);
+        const c=gl.clone();c.rotateX(-Math.PI/2);c.scale(0.65,0.65,0.65);c.translate(0,0.65,0);const l=new T.Mesh(c,mm);[lv,elc,rlc].forEach(x=>x.visible=false);lever.add(l)}).catch(()=>{});
+      return R}
     const P=new T.Vector3(0,-2.6,0),L=1.3;const my=myosin(false),mate=myosin(true);mate.g.position.z=-0.7;
     /* нуклеотиди */
     const mkN=(np)=>{const g=new T.Group();const ad=new T.Mesh(new T.CylinderGeometry(0.16,0.16,0.07,6),new T.MeshStandardMaterial({color:C(0x1c7ed6)}));ad.rotation.x=Math.PI/2;const rb=new T.Mesh(new T.CylinderGeometry(0.13,0.13,0.07,5),new T.MeshStandardMaterial({color:C(0xadb5bd)}));rb.rotation.x=Math.PI/2;rb.position.x=0.28;g.add(ad,rb);
@@ -2250,7 +2259,7 @@ function viewXB(main){
     // надпис в сцената
     cap.innerHTML=`<div style="background:color-mix(in srgb,var(--panel) 88%,transparent);border:1px solid var(--line);border-radius:10px;padding:7px 11px;font-size:14px;font-weight:650;max-width:70%">${XB_ST[st.i].n.split(" ")[0]} ${SHORT[k]}${(!st.atp&&k==="rig")?" — няма ATP":""}${(!st.ca&&(k==="hyd"||k==="bind"))?" — няма Ca²⁺":""}</div><div style="background:color-mix(in srgb,var(--panel) 88%,transparent);border:1px solid var(--line);border-radius:10px;padding:7px 11px;font-size:13px;white-space:nowrap">${bound>0.5?"свързана":"↕ свободна"} · ${k==="rig"?"без нуклеотид":k==="atp"?"ATP":k==="adp"?"ADP":"ADP + Pᵢ"}</div>`;
     const V=(x,y,z)=>new T.Vector3(x,y,z);
-    G.render([["актин",V(-3.6,0.75,0.6)],["тропомиозин",V(-2.4,-0.95,0.95)],[st.ca?"тропонин C + Ca²⁺":"тропонин (без Ca²⁺)",ctx.tns[2].g.position.clone().add(ctx.tpLow.position).add(ctx.act.position).add(V(0,-0.55,0.6))],["моторен домен",mp.clone().add(V(-1.15,0.15,0.5))],["лостово рамо",ctx.P.clone().add(V(Math.sin(a)*0.8+0.75,0.75,0.4))],["S2",ctx.P.clone().add(V(0.75,-0.5,0.3))],["дебела нишка",V(-3.4,-3.75,0.8)],...(N.g.visible?[[k==="atp"?"ATP":"ADP",N.g.position.clone().add(V(0.2,-0.35,0.2))]]:[]),...(ctx.pi.visible?[["Pᵢ",ctx.pi.position.clone().add(V(0.25,0.25,0))]]:[]),...(ctx.slideA.visible?[["актинът се плъзга ≈ 10 nm → M-линия",V(1.1,1.75,0)]]:[])]);
+    G.render([["актин",V(-3.6,0.75,0.6)],["тропомиозин",V(-2.6,-0.62,0.95)],[st.ca?"тропонин C + Ca²⁺":"тропонин (без Ca²⁺)",ctx.tns[2].g.position.clone().add(ctx.tpLow.position).add(ctx.act.position).add(V(0,-0.55,0.6))],["моторен домен",mp.clone().add(V(-0.8,0.05,0.6))],["лостово рамо",ctx.P.clone().add(V(Math.sin(a)*0.8+0.75,0.75,0.4))],["S2",ctx.P.clone().add(V(0.75,-0.5,0.3))],["дебела нишка",V(-3.4,-3.75,0.8)],...(N.g.visible?[[k==="atp"?"ATP":"ADP",N.g.position.clone().add(V(0.2,-0.35,0.2))]]:[]),...(ctx.pi.visible?[["Pᵢ",ctx.pi.position.clone().add(V(0.25,0.25,0))]]:[]),...(ctx.slideA.visible?[["актинът се плъзга ≈ 10 nm → M-линия",V(1.1,1.75,0)]]:[])]);
     if((cnt++)%4)return;
     drawCycle();
     $("#stx").innerHTML=`<b>${XB_ST[st.i].n}</b><div style="margin-top:6px">${XB_ST[st.i].d}</div>`;
@@ -4843,8 +4852,8 @@ return {id:"stgCS",title:"Химичен синапс в ЦНС — стъпка
  stats(ctx){return ctx.st.mech==="glu"?[["Цепка","≈ 20 nm"],["AMPA","Na⁺/K⁺, бърз"],["NMDA","Na⁺, K⁺, Ca²⁺; Mg²⁺ блок"],["Изчистване","EAAT (астроцити)"]]:[["Рецептор","GABA_A (Cl⁻ канал)"],["Ефект","IPSP / шунтиране"],["Засилват го","бензодиазепини, барбитурати"],["Изчистване","GAT-1"]]}}})();
 
 /* --- I.8 Електричен синапс (gap junction) по етапи --- */
-const STG_ES=(()=>{const CH=[[0,0],[5.8,-3.4],[-5.8,-3.4],[0,-6.8]],H=3.45;return {id:"stgES",title:"Електричен синапс (gap junction) — стъпка по стъпка",h:480,dur:4,
- intro:"Две съседни клетки с плака от междуклетъчни канали (в разрез отпред). Всеки канал е от два коннексона — по един от всяка клетка, а всеки коннексон е от 6 коннексина. Предните коннексини на средния канал са полупрозрачни, за да се вижда порът.",
+const STG_ES=(()=>{const CH=[[0,0],[7.55,-4.4],[-7.55,-4.4],[0,-8.8]],H=3.2,BK=0.55;return {id:"stgES",title:"Електричен синапс (gap junction) — стъпка по стъпка",h:480,dur:4,
+ intro:"Две съседни клетки с плака от междуклетъчни канали (в разрез отпред). Всеки канал е от два коннексона — по един от всяка клетка, а всеки коннексон е от 6 коннексина. Предните коннексини на средния канал са полупрозрачни, за да се вижда порът. Формата на коннексина е по рентгеновата структура на Cx26 (PDB 2ZW3).",
  cam:{r:34,th:0.3,phi:1.35,target:[0,0,-2],min:6,max:70},
  legend:[["#3b5bdb","коннексон на клетка 1","box"],["#1098ad","коннексон на клетка 2","box"],["#9c36b5","K⁺ (основен носител на тока)"],["#f76707","Na⁺"],["#74c0fc","Ca²⁺"],["#ff6b6b","H⁺"],["#4dabf7","cAMP / IP₃"],["#adb5bd","белтък (> 1 kDa)"],["#ff8787","деполяризация / ток","box"]],
  stages:[
@@ -4855,28 +4864,30 @@ const STG_ES=(()=>{const CH=[[0,0],[5.8,-3.4],[-5.8,-3.4],[0,-6.8]],H=3.45;retur
   {t:"Малки молекули също преминават",short:"Малки молекули (cAMP, IP₃, Ca²⁺)",badge:"до ≈ 1 kDa",d:"Пората пропуска не само йони, а и малки молекули до ≈ 1 kDa: cAMP, IP₃, Ca²⁺, ATP, глюкоза, аминокиселини. Така клетките споделят сигнални и метаболитни молекули (метаболитно свързване). Белтъците и нуклеиновите киселини са твърде големи и не минават."},
   {t:"Затваряне при ↑Ca²⁺ и ↓pH",short:"Затваряне (ирисов механизъм)",badge:"изолира увредената клетка",d:"При увреждане вътреклетъчният Ca²⁺ се покачва, а pH спада. Коннексините се завъртат и накланят като диафрагма на фотоапарат, а N-краищата им запушват пората. Така здравите клетки се изолират от увредената (напр. при инфаркт). Каналите се регулират и чрез фосфорилиране и от напрежението между клетките."}],
  build(G,T,ctx){const sc=G.scene,V=(x,y,z)=>new T.Vector3(x,y,z),R=MK.rnd(17);ctx.V=V;
-  [H,-H].forEach(y=>{const b=MK.bilayer(T,{w:28,d:10,z0:-3.4,holes:CH.map(c=>[c[0],c[1],2.45])});b.position.y=y;sc.add(b)});
+  [H,-H].forEach(y=>{const b=MK.bilayer(T,{w:30/BK,d:15/BK,z0:-4.4/BK,holes:CH.map(c=>[c[0]/BK,c[1]/BK,3.55/BK])});b.scale.setScalar(BK);b.position.y=y;sc.add(b)});
   // един коннексин (4 TM спирали, извънклетъчни бримки за скачване, цитоплазмени краища)
   const cb=[];for(const y of [-1.6,-0.5,0.6,1.6])cb.push([1.3,y,-0.35,0.55],[1.3,y,0.4,0.52],[2.15,y*0.95,-0.3,0.55],[2.15,y*0.95,0.45,0.52]);
   cb.push([1.5,2.5,0,0.62],[2.0,2.75,0.3,0.55],[1.3,3.0,-0.2,0.48],[2.3,-2.4,0.4,0.5],[2.4,-3.0,0.2,0.42],[1.6,-2.4,-0.2,0.45]);
-  const proto=MK.blob(T,cb,{res:30});const mats=[MK.mat(T,0x3b5bdb),MK.mat(T,0x1098ad)];const glass=mats.map(m=>{const c=m.clone();c.transparent=true;c.opacity=0.2;c.depthWrite=false;return c});
+  const proto=MK.blob(T,cb,{res:30});const mats=[MK.mat(T,0x3b5bdb),MK.mat(T,0x1098ad)];const glass=mats.map(m=>{const c=m.clone();c.transparent=true;c.opacity=0.2;c.depthWrite=false;return c});const allM=[];
   const plugM=MK.mat(T,0xff8787,{emissive:LIN(T,0xf06595),emissiveIntensity:0.25});
   const hemi=(x,z,top,cut)=>{const g=new T.Group(),tw=new T.Group();g.add(tw);g.position.set(x,top?H:-H,z);if(top)g.rotation.x=Math.PI;sc.add(g);const cons=[];
-    for(let k=0;k<6;k++){const a=k*Math.PI/3+(top?0:Math.PI/6),piv=new T.Group();piv.rotation.y=-a;tw.add(piv);const tl=new T.Group();tl.position.x=1.75;piv.add(tl);
-      const m=proto.clone();m.position.x-=1.75;const front=(top?-1:1)*Math.sin(a)>0.45;m.material=cut&&front?glass[top?0:1]:mats[top?0:1];if(cut&&front)m.renderOrder=5;tl.add(m);
-      const pl=new T.Mesh(new T.SphereGeometry(0.36,14,10),plugM);pl.position.set(1.05,-2.55,0);piv.add(pl);cons.push({tl,pl})}
-    return {g,tw,cons,y0:top?H:-H,top,set(c,sep){tw.rotation.y=0.5*c;cons.forEach(o=>{o.tl.rotation.x=0.32*c;o.pl.position.x=lerp(1.05,0.32,c)});g.position.y=this.y0+(this.top?1:-1)*(sep||0)}}};
+    for(let k=0;k<6;k++){const a=k*Math.PI/3+(top?0.035:0),piv=new T.Group();piv.rotation.y=-a;tw.add(piv);const tl=new T.Group();tl.position.x=1.75;piv.add(tl);
+      const m=proto.clone();m.position.x-=1.75;const front=(top?-1:1)*Math.sin(a)>0.45;m.material=cut&&front?glass[top?0:1]:mats[top?0:1];if(cut&&front)m.renderOrder=5;tl.add(m);allM.push({m,top,gl:cut&&front});
+      const pl=new T.Mesh(new T.SphereGeometry(0.3,14,10),plugM);pl.position.set(0.95,-2.35,0);pl.scale.setScalar(0.01);piv.add(pl);cons.push({tl,pl})}
+    return {g,tw,cons,y0:top?H:-H,top,set(c,sep){tw.rotation.y=0.5*c;cons.forEach(o=>{o.tl.rotation.x=0.32*c;o.pl.position.x=lerp(0.95,0.3,c);o.pl.scale.setScalar(Math.max(0.01,c))});g.position.y=this.y0+(this.top?1:-1)*(sep||0)}}};
   ctx.ch=CH.map((c,k)=>({t:hemi(c[0],c[1],true,k===0),b:hemi(c[0],c[1],false,k===0)}));
+  // истински коннексин (Cx26, PDB 2ZW3) вместо схематичния
+  MK.loadMesh(T,"m/mol/cx26.txt").then(geo=>{const cols=[0x3b5bdb,0x1098ad],rm=cols.map(c=>MK.molMat(T,{color:LIN(T,c)})),rg=cols.map(c=>MK.molMat(T,{color:LIN(T,c),transparent:true,opacity:0.22,depthWrite:false}));allM.forEach(o=>{o.m.geometry=geo;o.m.position.set(-1.75,0,0);o.m.scale.set(1,1,1);o.m.rotation.set(0,0,0);o.m.material=o.gl?rg[o.top?0:1]:rm[o.top?0:1]})}).catch(()=>{});
   // пора: светеща колона при ток
   ctx.pore=new T.Mesh(new T.CylinderGeometry(0.5,0.5,8.2,18,1,true),new T.MeshBasicMaterial({color:LIN(T,0xff8787),transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide}));sc.add(ctx.pore);
-  const band=()=>{const m=new T.Mesh(new T.BoxGeometry(28,5,10.2),new T.MeshBasicMaterial({color:LIN(T,0xff8787),transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending}));m.position.z=-3.4;sc.add(m);return m};ctx.b1=band();ctx.b1.position.y=H;ctx.b2=band();ctx.b2.position.y=-H;
+  const band=()=>{const m=new T.Mesh(new T.BoxGeometry(30,3.2,15),new T.MeshBasicMaterial({color:LIN(T,0xff8787),transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending}));m.position.z=-4.4;sc.add(m);return m};ctx.b1=band();ctx.b1.position.y=H;ctx.b2=band();ctx.b2.position.y=-H;
   // йони и молекули
-  ctx.kP=MK.pool(T,0x9c36b5,0.34,60);ctx.naP=MK.pool(T,0xf76707,0.29,20);ctx.caP=MK.pool(T,0x74c0fc,0.3,20,{glow:0.35});ctx.hP=MK.pool(T,0xff6b6b,0.16,30,{glow:0.4});[ctx.kP,ctx.naP,ctx.caP,ctx.hP].forEach(m=>sc.add(m));
-  const amb=(n,y0,y1,x0=-13,x1=13)=>{const a=[];for(let k=0;k<n;k++)a.push({b:V(lerp(x0,x1,R()),lerp(y0,y1,R()),lerp(-7.5,2.4,R())),f:[R()*6,R()*6,R()*6]});return a};
-  ctx.amb={k:[...amb(18,6.4,10.5),...amb(18,-6.4,-10.5)],na:[...amb(4,-0.6,0.6,8.6,13),...amb(4,-0.6,0.6,-13,-8.6)],ca:amb(12,-6.4,-10),h:amb(22,-6.4,-10.5)};
-  ctx.camp=[0,1].map(()=>{const m=MK.mol(T,"camp");m.scale.setScalar(1.3);sc.add(m);return m});
-  ctx.ip3=(()=>{const g=new T.Group();for(let k=0;k<6;k++){const a=k*Math.PI/3,s=new T.Mesh(new T.SphereGeometry(0.17,12,8),MK.mat(T,0xf1f3f5));s.position.set(0.32*Math.cos(a),0.32*Math.sin(a),0);g.add(s)}[0,2,3].forEach(k=>{const a=k*Math.PI/3,p=new T.Mesh(new T.SphereGeometry(0.2,12,8),MK.mat(T,0xfd7e14));p.position.set(0.62*Math.cos(a),0.62*Math.sin(a),0);g.add(p)});g.scale.setScalar(1.25);sc.add(g);return g})();
-  ctx.prot=MK.blob(T,[[0,0,0,1.0,0xadb5bd],[0.9,0.4,0.2,0.8,0xadb5bd],[-0.6,0.6,-0.3,0.75,0xced4da],[0.2,-0.8,0.4,0.7,0xced4da]],{res:28});sc.add(ctx.prot);
+  ctx.kP=MK.pool(T,0x9c36b5,0.28,60);ctx.naP=MK.pool(T,0xf76707,0.24,20);ctx.caP=MK.pool(T,0x74c0fc,0.26,20,{glow:0.35});ctx.hP=MK.pool(T,0xff6b6b,0.16,30,{glow:0.4});[ctx.kP,ctx.naP,ctx.caP,ctx.hP].forEach(m=>sc.add(m));
+  const amb=(n,y0,y1,x0=-14,x1=14)=>{const a=[];for(let k=0;k<n;k++)a.push({b:V(lerp(x0,x1,R()),lerp(y0,y1,R()),lerp(-7.5,2.4,R())),f:[R()*6,R()*6,R()*6]});return a};
+  ctx.amb={k:[...amb(18,6.4,10.5),...amb(18,-6.4,-10.5)],na:[...amb(4,-0.6,0.6,11.8,14.5),...amb(4,-0.6,0.6,-14.5,-11.8)],ca:amb(12,-6.4,-10),h:amb(22,-6.4,-10.5)};
+  ctx.camp=[0,1].map(()=>{const m=MK.mol(T,"camp");m.scale.setScalar(1.0);sc.add(m);return m});
+  ctx.ip3=(()=>{const g=new T.Group();for(let k=0;k<6;k++){const a=k*Math.PI/3,s=new T.Mesh(new T.SphereGeometry(0.17,12,8),MK.mat(T,0xf1f3f5));s.position.set(0.32*Math.cos(a),0.32*Math.sin(a),0);g.add(s)}[0,2,3].forEach(k=>{const a=k*Math.PI/3,p=new T.Mesh(new T.SphereGeometry(0.2,12,8),MK.mat(T,0xfd7e14));p.position.set(0.62*Math.cos(a),0.62*Math.sin(a),0);g.add(p)});g.scale.setScalar(1.0);sc.add(g);return g})();
+  ctx.prot=MK.blob(T,[[0,0,0,0.8,0xadb5bd],[0.9,0.4,0.2,0.8,0xadb5bd],[-0.6,0.6,-0.3,0.75,0xced4da],[0.2,-0.8,0.4,0.7,0xced4da]],{res:28});sc.add(ctx.prot);
   ctx.path=[V(0.6,8.6,1.0),V(0,4.6,0),V(0,0,0),V(0,-4.6,0),V(-0.6,-8.6,1.0)];ctx.camI=-1;ctx.vm.style.display=""},
  update(ctx,i,u,dt,t){const V=ctx.V,e=easeIO(u),cl=v=>Math.max(0,Math.min(1,v)),sg=(a,b)=>easeIO(cl((u-a)/(b-a))),A=MK.along,P=ctx.path;
   if(ctx.camI!==i){ctx.camI=i;const c=[[0,0,-2,34,0.3,1.35],[0,0,0,22,0.35,1.4],[0,0.5,0,25,0.3,1.4],[0,0.5,0,25,0.3,1.4],[0,2.5,0,25,0.32,1.4],[0,-1,-1,28,0.3,1.3]][i];ctx.G.flyTo(c[0],c[1],c[2],c[3],c[4],c[5])}
@@ -4901,10 +4912,10 @@ const STG_ES=(()=>{const CH=[[0,0],[5.8,-3.4],[-5.8,-3.4],[0,-6.8]],H=3.45;retur
   // малки молекули и белтък
   const showM=i===4;ctx.camp.forEach((m,j)=>{m.visible=showM;if(showM){m.position.copy(A(P,(t*0.22+j*0.5)%1));m.rotation.set(t,t*0.7,0)}});
   ctx.ip3.visible=showM;if(showM){ctx.ip3.position.copy(A(P,1-((t*0.18+0.25)%1)));ctx.ip3.rotation.set(0,t*0.8,t*0.5)}
-  ctx.prot.visible=showM;if(showM){const b=Math.abs(Math.sin(t*1.6));ctx.prot.position.set(0.2,lerp(7.8,10.2,1-b),0.9);ctx.prot.rotation.y=t*0.4}
+  ctx.prot.visible=showM;if(showM){const b=Math.abs(Math.sin(t*1.6));ctx.prot.position.set(0.2,lerp(7.7,9.4,1-b),0.9);ctx.prot.rotation.y=t*0.4}
   ctx.vm.innerHTML=i===2||i===3?`Клетка 1: <b>${Math.round(v1)} mV</b> · Клетка 2: <b>${Math.round(v2)} mV</b> · закъснение ≈ 0`:["Пора ≈ 1,2–1,5 nm · пропуска до ≈ 1 kDa","Скачване: 6 + 6 коннексина = 1 канал","","","cAMP и IP₃ минават · белтъкът не минава",`Отворени канали: <b>${Math.round(100*(1-clo))} %</b>`][i]},
  labels(ctx,i){const V=ctx.V,L=[["клетка 1",V(-11.5,8.8,-3)],["клетка 2",V(-11.5,-8.8,-3)],["междуклетъчна цепка 2–4 nm",V(11.6,0.2,0.4)]];
-  if(i<=1)L.push(["коннексон (6 коннексина)",V(5.8,7.6,-3.4)],["канал = 2 коннексона",V(-5.8,0,-1)]);
+  if(i<=1)L.push(["коннексон (6 коннексина)",V(7.55,7.2,-4.4)],["канал = 2 коннексона",V(-7.55,0,-0.6)]);
   if(i===4){L.push(["cAMP",ctx.camp[0].position.clone().add(V(1.2,0.3,0.6))],["IP₃",ctx.ip3.position.clone().add(V(-1.2,0.3,0.6))],["белтък — не минава",ctx.prot.position.clone().add(V(2.2,0.8,0.4))])}
   if(i===5)L.push(["N-краищата запушват пората",V(2.4,-3.0,2.6)],["↑Ca²⁺, ↓pH",V(5.5,-8.4,1.2)]);
   if(i===2||i===3)L.push(["K⁺ през пората",V(1.7,1.2,1.4)]);return L},
