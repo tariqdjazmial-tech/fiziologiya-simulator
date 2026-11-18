@@ -59,7 +59,6 @@ header.bar{position:sticky;top:0;z-index:40;height:var(--barH);background:var(--
 .navhead h2{font:600 26px/1 var(--cond);margin:0 0 10px}
 .navhead input{width:100%;font:inherit;font-size:15px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
 .navhead input::placeholder{color:var(--muted)}
-.mdlsw{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:13px}.mdlsw span{color:var(--muted);margin-right:auto}.mdlsw button{font:inherit;font-size:12.5px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}.mdlsw button.on{background:#1f2329;color:#fff;border-color:#1f2329}
 #navlist{flex:1;overflow:auto;padding:6px 0 16px;overscroll-behavior:contain}
 .nsec{padding:12px 16px 4px;display:grid;grid-template-columns:30px 1fr auto;align-items:baseline;gap:6px}
 .nsec .n{font:600 19px/1 var(--cond);color:var(--accent)}
@@ -264,7 +263,7 @@ details.tb summary{cursor:pointer}
 </header>
 <div class="layout">
   <aside id="nav" aria-label="Конспект">
-    <div class="navhead"><h2>Конспект</h2><input id="navq" type="search" placeholder="Търси тема" autocomplete="off" aria-label="Търси тема"><div class="mdlsw" role="group" aria-label="3D модели"><span>3D модели</span><button type="button" data-m="real">Реалистични</button><button type="button" data-m="simple">Опростени</button></div></div>
+    <div class="navhead"><h2>Конспект</h2><input id="navq" type="search" placeholder="Търси тема" autocomplete="off" aria-label="Търси тема"></div>
     <div id="navlist"></div>
     <div class="navfoot" id="navfoot"></div>
   </aside>
@@ -4017,7 +4016,7 @@ MK.ptube=function(T,curve,rf,o={}){const seg=o.seg||40,rad=o.rad||10;const geo=n
 MK._mc={};
 /* избор в менюто: „реалистични“ (истински структури от PDB) или „опростени“ (схематичните модели) */
 MK.real=(()=>{try{return localStorage.getItem("fizsim_models")!=="simple"}catch(e){return true}})();
-MK.loadMesh=function(T,url){if(!MK.real&&/\/mol\//.test(url))return new Promise(()=>{});if(MK._mc[url])return MK._mc[url];return MK._mc[url]=fetch(url).then(r=>{if(!r.ok)throw new Error(url);return r.text()}).then(b64=>{const bin=atob(b64.trim()),u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
+MK.loadMesh=function(T,url){if(/\/mol\//.test(url)){MK.usedView=typeof curView!=="undefined"?curView:location.hash;if(!MK.real)return new Promise(()=>{})}if(MK._mc[url])return MK._mc[url];return MK._mc[url]=fetch(url).then(r=>{if(!r.ok)throw new Error(url);return r.text()}).then(b64=>{const bin=atob(b64.trim()),u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
   const dv=new DataView(u8.buffer),nv=dv.getUint32(0,true),nf=dv.getUint32(4,true),mn=[0,1,2].map(k=>dv.getFloat32(8+4*k,true)),sz=[0,1,2].map(k=>dv.getFloat32(20+4*k,true));
   let o=32;const q=new Uint16Array(u8.buffer,o,nv*3);o+=nv*6;o=(o+3)&~3;const idx=new Uint32Array(u8.buffer.slice(o,o+nf*12));const pos=new Float32Array(nv*3);for(let i=0;i<nv*3;i++)pos[i]=mn[i%3]+q[i]/65535*sz[i%3];
   const g=new T.BufferGeometry();g.setAttribute("position",new T.BufferAttribute(pos,3));g.setIndex(new T.BufferAttribute(idx,1));const co=o+nf*12;
@@ -7609,10 +7608,18 @@ function lessonParts(mn,v){const tp=$("#tab_tst",mn),gp=$("#tab_gl",mn);
   const ids=linkTerms(mn).sort((a,b)=>GL[a].t.localeCompare(GL[b].t,"bg"));
   gp.innerHTML=ids.length?`<div class="card"><h3 style="margin-top:0">Речник на урока</h3><p class="small" style="margin:0 0 8px;color:var(--muted)">${ids.length} термина от теорията и теста. Подчертаните думи в текста също се отварят с докосване.</p>`+ids.map(i=>`<details class="gl"><summary>${GL[i].t}</summary><div>${GL[i].d}</div></details>`).join("")+`</div>`:`<div class="card">Няма термини за този урок.</div>`}
 /* <</BOOK>> */
-/* превключвател „3D модели“ в менюто: изборът се пази и страницата се презарежда на същата тема */
-(function(){const box=document.querySelector(".mdlsw");if(!box)return;const cur=MK.real?"real":"simple";
-  box.querySelectorAll("button").forEach(b=>{b.classList.toggle("on",b.dataset.m===cur);b.setAttribute("aria-pressed",b.dataset.m===cur);
-    b.onclick=()=>{if(b.dataset.m===cur)return;try{localStorage.setItem("fizsim_models",b.dataset.m)}catch(e){}location.reload()}})})();
+/* превключвател „Реалистичен | Опростен“ в самия 3D изглед — само там, където има истински модели (структури от PDB);
+   изборът се пази, изгледът се построява наново и страницата се връща на същия модел */
+(function(){const st=document.createElement("style");st.textContent=`.mdl-sw{position:absolute;right:10px;bottom:10px;z-index:4;display:flex;padding:3px;border-radius:999px;background:rgba(255,255,255,.92);box-shadow:0 2px 8px rgba(0,0,0,.18);border:1px solid rgba(0,0,0,.12)}
+.mdl-sw button{font:600 12px/1 inherit;padding:7px 11px;border:0;border-radius:999px;background:transparent;color:#1D1D1F;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.mdl-sw button.on{background:#1f2329;color:#fff}.mdl-sw button:focus-visible{outline:2px solid #C8102E;outline-offset:1px}
+@media (max-width:600px){.mdl-sw button{padding:6px 9px;font-size:11px}}`;document.head.appendChild(st);
+  const L=()=>window.PHYS_LANG==="en"?["Realistic","Simplified","3D model"]:["Реалистичен","Опростен","3D модел"];
+  const add=v=>{if(v.querySelector(".mdl-sw"))return;const t=L(),d=document.createElement("div");d.className="mdl-sw";d.setAttribute("role","group");d.setAttribute("aria-label",t[2]);
+    [["real",t[0]],["simple",t[1]]].forEach(([m,tx])=>{const b=document.createElement("button");b.type="button";b.textContent=tx;const on=(m==="real")===MK.real;b.classList.toggle("on",on);b.setAttribute("aria-pressed",String(on));
+      b.onclick=e=>{e.stopPropagation();if(on)return;const all=[...document.querySelectorAll("#main .v3d")],k=all.indexOf(v);MK.real=m==="real";try{localStorage.setItem("fizsim_models",m)}catch(x){}
+        route();setTimeout(()=>{const w=document.querySelectorAll("#main .v3d")[k];if(w)w.scrollIntoView({block:"center"})},350)};d.appendChild(b)});v.appendChild(d)};
+  setInterval(()=>{if(MK.usedView!==curView)return;document.querySelectorAll("#main .v3d").forEach(add)},600)})();
 const VIEWS={home:viewHome,about:viewAbout,glossary:viewGlossary,test:viewTest,ghk:viewGHK,ap:viewAP,neuron3d:viewNeuron3D,channels:viewChannels,transport:viewTransport,nka:viewNKA,synapse:viewSynapse,skeletal:viewSkeletal,smooth:viewSmooth,heart3d:viewHeartSwitch,ecg:viewECG,cardap:viewCardiacAP,hemo:viewHemo,baro:viewBaro,starling:viewStarling,lungmech:viewLungMech,gasx:viewGasX,respreg:viewRespReg,xb:viewXB,chemsyn:viewChemSyn,elecsyn:viewElecSyn,cardio:viewCardio};
 let curView="home";
 function buildNav(cur){
