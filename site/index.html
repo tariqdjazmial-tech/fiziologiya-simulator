@@ -3872,14 +3872,14 @@ const MK={
     pool.put(L.map(q=>{const p=q.p.clone();p.s=Math.max(.001,Math.min(1,q.a));return p}))},
   // малки молекули като групи сфери
   mol(T,kind){const g=new T.Group();const S=(x,y,z,r,h)=>{const me=new T.Mesh(new T.SphereGeometry(r,14,10),MK.mat(T,h,{roughness:0.3,clearcoat:0.6}));me.position.set(x,y,z);g.add(me);return me};
-    if(kind==="atp"){S(-0.55,0.15,0,0.28,0x4dabf7);S(-0.3,0.42,0,0.24,0x4dabf7);S(-0.05,0.1,0,0.27,0xfab005);[0.4,0.8,1.2].forEach((x,i)=>{S(x,0.0,0,0.2,0xfd7e14);S(x,0.22,0.12,0.11,0xfa5252);S(x,-0.2,-0.1,0.11,0xfa5252)})}
+    if(kind==="atp"){S(-0.55,0.15,0,0.28,0x4dabf7);S(-0.3,0.42,0,0.24,0x4dabf7);S(-0.05,0.1,0,0.27,0xff922b);[0.4,0.8,1.2].forEach((x,i)=>{S(x,0.0,0,0.2,0xfd7e14);S(x,0.22,0.12,0.11,0xfa5252);S(x,-0.2,-0.1,0.11,0xfa5252)})}
     else if(kind==="pi"){S(0,0,0,0.2,0xfd7e14);[[0.2,0.1,0],[-0.18,0.12,0.05],[0,-0.2,0.08],[0.02,0.05,-0.22]].forEach(p=>S(p[0],p[1],p[2],0.11,0xfa5252))}
     else if(kind==="glc"){for(let i=0;i<6;i++){const a=i*Math.PI/3;S(0.32*Math.cos(a),0,0.32*Math.sin(a),0.15,i===5?0xfa5252:0xf8f9fa)}S(0.55,0.15,0,0.12,0xfa5252)}
     else if(kind==="o2"){S(-0.14,0,0,0.17,0xfa5252);S(0.14,0,0,0.17,0xfa5252)}
     else if(kind==="ach"){S(-0.3,0,0,0.17,0xadb5bd);S(-0.05,0.08,0,0.15,0xfa5252);S(0.2,0,0,0.15,0xadb5bd);S(0.45,0.05,0,0.2,0x4dabf7)}
     else if(kind==="glu"){S(-0.3,0,0,0.15,0xfa5252);S(-0.08,0.05,0,0.16,0xadb5bd);S(0.15,0,0,0.16,0x4dabf7);S(0.36,0.06,0,0.15,0xadb5bd);S(0.56,0,0,0.15,0xfa5252)}
     else if(kind==="gaba"){S(-0.3,0,0,0.15,0x4dabf7);S(-0.08,0.05,0,0.15,0xadb5bd);S(0.15,0,0,0.15,0xadb5bd);S(0.38,0.05,0,0.16,0xfa5252)}
-    else if(kind==="camp"){S(-0.25,0.1,0,0.22,0x4dabf7);S(0.05,0,0,0.2,0xfab005);S(0.32,-0.05,0,0.18,0xfd7e14)}
+    else if(kind==="camp"){S(-0.25,0.1,0,0.22,0x4dabf7);S(0.05,0,0,0.2,0xff922b);S(0.32,-0.05,0,0.18,0xfd7e14)}
     else if(kind==="h2o"){S(0,0,0,0.13,0xfa5252);S(0.12,0.08,0,0.07,0xf8f9fa);S(-0.12,0.08,0,0.07,0xf8f9fa)}
     return g},
   // спрайт със знак (+, −, текст)
@@ -4012,6 +4012,9 @@ MK.loadMesh=function(T,url){if(MK._mc[url])return MK._mc[url];return MK._mc[url]
   if(u8.length>=co+nv*3){const c=new Float32Array(nv*3);for(let i=0;i<nv*3;i++){const v=u8[co+i]/255;c[i]=v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4)}g.setAttribute("color",new T.BufferAttribute(c,3))}
   g.computeVertexNormals();return g})};
 MK.molMat=function(T,o={}){return MK.skin(T,new T.MeshPhysicalMaterial(Object.assign({vertexColors:true,roughness:.55,clearcoat:.25,clearcoatRoughness:.5,sheen:new T.Color(0x222222)},o)),{rim:0xffffff,rimI:.35,pow:2.2,env:.45})};
+/* добавя центрирана реална структура в група (по желание скрива старите деца) */
+MK.addCentered=function(T,grp,url,o={}){return MK.loadMesh(T,url).then(g0=>{const g=g0.clone();g.computeBoundingBox();const c=g.boundingBox.getCenter(new T.Vector3());g.translate(-c.x,o.keepY?0:-c.y,-c.z);
+  const m=new T.Mesh(g,MK.molMat(T,o.mat));m.scale.setScalar(o.s||1);if(o.ry)m.rotation.y=o.ry;if(o.p)m.position.set(...o.p);if(o.hide)grp.children.forEach(ch=>ch.visible=false);grp.add(m);return m}).catch(()=>null)};
 /* поставя реална структура вместо модел от сфери: скрива старите деца на групата и добавя повърхността */
 MK.swapMol=function(T,grp,url,o={}){return MK.loadMesh(T,url).then(g=>{const m=new T.Mesh(g,MK.molMat(T,o.mat));if(o.s)m.scale.setScalar(o.s);if(o.ry)m.rotation.y=o.ry;if(o.p)m.position.set(...o.p);if(o.hide!==false)grp.children.forEach(c=>c.visible=false);grp.add(m);return m}).catch(()=>null)};
 // „кожа“ на неврона: полупрозрачен ръб (Френел) като при микроскопски рендер
@@ -4473,7 +4476,7 @@ const OUAB=[
 return {id:"stgNKA",title:"Цикълът на Na⁺/K⁺-ATP-азата (Post–Albers) — стъпка по стъпка",h:530,dur:4,
  intro:"Модел на α-субединицата (10 трансмембранни спирали M1–M10 и цитоплазмените домени A, N и P), β-субединицата с гликани и регулаторния белтък FXYD. Предните спирали са полупрозрачни, за да се виждат местата за йоните. Синкавата „фуния“ показва кой вход е отворен в момента. Помпата никога не е отворена едновременно навън и навътре.",
  cam:{r:22.5,th:0.02,phi:1.42,target:[0.5,-0.7,0.8],min:7,max:60},
- legend:[["#f76707","Na⁺"],["#9c36b5","K⁺"],["#4dabf7","ATP / ADP"],["#fd7e14","фосфат (Pᵢ)"],["#f06595","M1–M2","box"],["#12b886","M3–M4","box"],["#66d9e8","M5–M6","box"],["#ced4da","M7–M10","box"],["#fab005","A-домен","box"],["#e03131","N-домен","box"],["#1c7ed6","P-домен","box"],["#74b816","β-субединица","box"],["#a5d8ff","FXYD","box"],["#c2255c","уабаин (режим „Уабаин / дигоксин“)"]],
+ legend:[["#f76707","Na⁺"],["#9c36b5","K⁺"],["#4dabf7","ATP / ADP"],["#fd7e14","фосфат (Pᵢ)"],["#f06595","M1–M2","box"],["#748ffc","M3–M4","box"],["#66d9e8","M5–M6","box"],["#ced4da","M7–M10","box"],["#f06595","A-домен","box"],["#e03131","N-домен","box"],["#1c7ed6","P-домен","box"],["#adb5bd","β-субединица","box"],["#a5d8ff","FXYD","box"],["#c2255c","уабаин (режим „Уабаин / дигоксин“)"]],
  mechs:[{key:"norm",label:"Нормален цикъл",center:"цикъл на Post–Albers",stages:NORM},{key:"ouab",label:"Уабаин / дигоксин",center:"блок в E2P",stages:OUAB}],
  build(G,T,ctx){const sc=G.scene,V=(x,y,z)=>new T.Vector3(x,y,z),R=MK.rnd(7);ctx.V=V;ctx.cnt=0;
   const Y0=-2.85,Y1=2.75,HX={M1:[-2.35,1.2],M2:[-3.0,0.0],M3:[-1.6,-0.5],M4:[-1.05,1.75],M5:[0.45,-0.3],M6:[1.0,1.85],M7:[1.6,-1.3],M8:[1.75,0.4],M9:[2.9,0.9],M10:[2.8,-0.6]};ctx.HX=HX;
@@ -4484,7 +4487,7 @@ return {id:"stgNKA",title:"Цикълът на Na⁺/K⁺-ATP-азата (Post�
   const hel=(p0,p1,col,ph,op)=>{const g=new T.Group();g.add(MK.helix(T,p0,p1,{color:col,rad:0.3,tube:0.15,pitch:0.56,phase:ph||0}));
     const L=p1.clone().sub(p0),c=new T.Mesh(new T.CylinderGeometry(0.27,0.27,L.length(),14,1,true),MK.mat(T,col,{transparent:true,opacity:0.35,depthWrite:false}));c.position.copy(p0).add(p1).multiplyScalar(0.5);c.quaternion.setFromUnitVectors(V(0,1,0),L.clone().normalize());g.add(c);if(op)ghost(g,op);return g};
   const tube=(pts,r,col,op)=>{const m=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),Math.max(12,pts.length*8),r,7,false),MK.mat(T,col,{roughness:0.45}));if(op)ghost(m,op);return m};
-  const C12=0xf06595,C34=0x12b886,C56=0x66d9e8,C7=0xced4da;
+  const C12=0xf06595,C34=0x748ffc,C56=0x66d9e8,C7=0xced4da;
   // M1–M2 се движат заедно (тегли ги A-доменът)
   const g12=new T.Group();sc.add(g12);ctx.g12=g12;
   g12.add(hel(V(HX.M1[0],Y0,HX.M1[1]),V(HX.M1[0],Y1,HX.M1[1]),C12,0.3,0.55),hel(V(HX.M2[0],Y0,HX.M2[1]),V(HX.M2[0],Y1,HX.M2[1]),C12,1.2));
@@ -4505,22 +4508,24 @@ return {id:"stgNKA",title:"Цикълът на Na⁺/K⁺-ATP-азата (Post�
   sc.add(tube([V(HX.M6[0],Y0,HX.M6[1]),V(1.5,-3.45,0.3),V(HX.M7[0],Y0,HX.M7[1])],0.13,C7),tube([V(HX.M8[0],Y0,HX.M8[1]),V(2.35,-3.35,0.8),V(HX.M9[0],Y0,HX.M9[1])],0.13,C7),tube([V(HX.M10[0],Y0,HX.M10[1]),V(3.0,-3.5,-1.2),V(3.3,-3.9,-1.9)],0.13,C7));
   sc.add(tube([V(HX.M4[0],Y0,HX.M4[1]),V(-0.75,-3.4,1.5),V(-0.3,-3.9,1.0)],0.15,C34));
   // P-домен с Asp369
-  sc.add(MK.blob(T,lump([0.5,-4.95,0.1],[1.45,1.0,1.1],34,0.3,0.5,0x1c7ed6,21,[[0.05,-4.15,1.1,0.5],[0.6,-4.9,0.1,0.85]]),{res:54}));
+  {const pg=new T.Group();sc.add(pg);pg.add(MK.blob(T,lump([0.5,-4.95,0.1],[1.45,1.0,1.1],34,0.3,0.5,0x1c7ed6,21,[[0.05,-4.15,1.1,0.5],[0.6,-4.9,0.1,0.85]]),{res:54}));MK.addCentered(T,pg,"m/mol/nka_p.txt",{s:.5,p:[0.5,-4.9,0.1],hide:true})}
   ctx.asp=V(0.2,-3.62,1.5);const asp=new T.Mesh(new T.SphereGeometry(0.2,14,10),MK.mat(T,0xfa5252,{emissive:LIN(T,0xc92a2a),emissiveIntensity:0.5}));asp.position.copy(ctx.asp);sc.add(asp);ctx.aspM=asp;
   // N-домен (носи ATP) и A-домен (актуатор, мотив TGES)
   const dom=(balls)=>{const g=new T.Group();g.add(MK.blob(T,balls,{res:40}));sc.add(g);return g};
   ctx.N=dom(lump([0.3,0,0],[1.0,0.85,0.85],24,0.3,0.48,0xe03131,33,[[0.2,0,0,0.7]]));ctx.Nop=V(3.75,-5.25,0.3);ctx.Ncl=V(2.7,-4.3,0.4);ctx.atpOff=V(-0.6,0.55,0.9);
-  ctx.A=dom(lump([-0.2,0,0],[0.95,0.85,0.8],22,0.3,0.47,0xfab005,45,[[-0.1,0,0,0.65]]));ctx.Aout=V(-3.0,-4.0,0.9);ctx.Ain=V(-1.75,-4.25,1.75);
-  ctx.tges=new T.Mesh(new T.SphereGeometry(0.2,14,10),MK.mat(T,0xfff3bf,{emissive:LIN(T,0xfab005),emissiveIntensity:0.3}));ctx.tges.position.set(0.9,0.15,0.1);ctx.A.add(ctx.tges);
+  ctx.A=dom(lump([-0.2,0,0],[0.95,0.85,0.8],22,0.3,0.47,0xf06595,45,[[-0.1,0,0,0.65]]));ctx.Aout=V(-3.0,-4.0,0.9);ctx.Ain=V(-1.75,-4.25,1.75);
+  ctx.tges=new T.Mesh(new T.SphereGeometry(0.2,14,10),MK.mat(T,0xffdeeb,{emissive:LIN(T,0xf06595),emissiveIntensity:0.3}));ctx.tges.position.set(0.9,0.15,0.1);ctx.A.add(ctx.tges);
+  MK.addCentered(T,ctx.N,"m/mol/nka_n.txt",{s:.48,hide:true});MK.addCentered(T,ctx.A,"m/mol/nka_a.txt",{s:.5,hide:true}).then(()=>{ctx.tges.visible=true});
   // свързващи участъци (пресмятат се всеки кадър)
   const rod=(r,col)=>{const m=new T.Mesh(new T.CylinderGeometry(r,r,1,8,1),MK.mat(T,col,{roughness:0.5}));sc.add(m);return m};
   ctx.setRod=(m,a,b)=>{const d=b.clone().sub(a),L=Math.max(0.01,d.length());m.position.copy(a).add(b).multiplyScalar(0.5);m.quaternion.setFromUnitVectors(V(0,1,0),d.divideScalar(L));m.scale.set(1,L,1)};
   ctx.rods=[[rod(0.13,C12),V(0.2,0.7,0.5),"M1"],[rod(0.13,C12),V(-0.5,0.6,-0.2),"M2"],[rod(0.13,C34),V(0.4,0.6,-0.5),"M3"]];ctx.hinge=rod(0.16,0xe03131);
   // β-субединица: една спирала + извънклетъчен домен с три N-гликана
-  sc.add(hel(V(3.5,Y0-0.6,-1.9),V(3.5,Y1,-1.9),0x74b816,0.5));
-  sc.add(MK.blob(T,lump([2.6,4.75,-0.9],[1.5,0.9,1.05],30,0.3,0.48,0x74b816,57,[[3.3,3.5,-1.7,0.45],[2.6,4.75,-0.9,0.8]]),{res:50}));
-  const glyc=(b,dir)=>{let p=b.clone();for(let k=0;k<4;k++){p=p.clone().add(dir.clone().multiplyScalar(0.42));const m=new T.Mesh(new T.SphereGeometry(0.2,12,8),MK.mat(T,0xd8f5a2));m.position.copy(p);sc.add(m);
-    if(k>=2){const q=p.clone().add(V(0.35,0.2,0.15*(k-2.5)));const m2=new T.Mesh(new T.SphereGeometry(0.18,12,8),MK.mat(T,0xd8f5a2));m2.position.copy(q);sc.add(m2)}}};
+  const bG=new T.Group();sc.add(bG);bG.add(hel(V(3.5,Y0-0.6,-1.9),V(3.5,Y1,-1.9),0xadb5bd,0.5));
+  bG.add(MK.blob(T,lump([2.6,4.75,-0.9],[1.5,0.9,1.05],30,0.3,0.48,0xadb5bd,57,[[3.3,3.5,-1.7,0.45],[2.6,4.75,-0.9,0.8]]),{res:50}));
+  MK.loadMesh(T,"m/mol/nka_b.txt").then(g0=>{const gg=g0.clone();gg.computeBoundingBox();const c=gg.boundingBox.getCenter(V(0,0,0));gg.translate(-c.x,0,-c.z);const m=new T.Mesh(gg,MK.molMat(T));m.scale.setScalar(.95);m.position.set(3.2,0,-1.6);bG.children.forEach(ch=>ch.visible=false);bG.add(m);ctx.glyG&&ctx.glyG.forEach(x=>x.visible=false)}).catch(()=>{});
+  const glyc=(b,dir)=>{let p=b.clone();for(let k=0;k<4;k++){p=p.clone().add(dir.clone().multiplyScalar(0.42));const m=new T.Mesh(new T.SphereGeometry(0.2,12,8),MK.mat(T,0xe9ecef));m.position.copy(p);sc.add(m);(ctx.glyG=ctx.glyG||[]).push(m);
+    if(k>=2){const q=p.clone().add(V(0.35,0.2,0.15*(k-2.5)));const m2=new T.Mesh(new T.SphereGeometry(0.18,12,8),MK.mat(T,0xe9ecef));m2.position.copy(q);sc.add(m2);(ctx.glyG=ctx.glyG||[]).push(m2)}}};
   glyc(V(1.5,5.5,-0.2),V(-0.3,0.85,0.4));glyc(V(3.8,5.6,0.0),V(0.4,0.85,0.3));glyc(V(2.5,6.1,-1.7),V(0,0.9,-0.3));
   // FXYD
   sc.add(hel(V(4.1,Y0,1.0),V(4.1,Y1,1.0),0xa5d8ff,0.2));sc.add(tube([V(4.1,Y1,1.0),V(4.4,3.3,1.3),V(4.6,3.8,1.6)],0.12,0xa5d8ff));
