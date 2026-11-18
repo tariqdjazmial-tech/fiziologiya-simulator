@@ -28,8 +28,8 @@ function b3Hemost(cv){r3Attach(cv,460,{r:135,th:0.35,phi:1.15,target:[0,-10,0],f
     const wg2=wg.clone();{const P=wg2.attributes.position;for(let i=0;i<P.count;i++){const y=P.getY(i),z=P.getZ(i),r=Math.hypot(y,z)||1;P.setY(i,y*(Rv+2.6)/r);P.setZ(i,z*(Rv+2.6)/r)}wg2.computeVertexNormals()}
     vessel.add(new T.Mesh(wg2,new T.MeshStandardMaterial({color:LIN(T,0xc77b7b),roughness:0.7,side:T.DoubleSide})));
     // тъкан отдолу и колагенови влакна, оголени в раната
-    const tis=new T.Mesh(new T.BoxGeometry(Lv,16,46),new T.MeshStandardMaterial({color:LIN(T,0xf1d9c6),roughness:0.85,transparent:true,opacity:0.55,depthWrite:false}));tis.position.set(0,-Rv-11,-4);vessel.add(tis);
-    const colM=new T.MeshPhysicalMaterial({color:LIN(T,0xf3e2b0),roughness:0.4,clearcoat:0.4,emissive:LIN(T,0x6b4f00),emissiveIntensity:0});const R=MK.rnd(11);
+    const tis=new T.Mesh(new T.BoxGeometry(Lv,16,46),new T.MeshStandardMaterial({color:LIN(T,0xd99a92),roughness:0.9,transparent:true,opacity:0.38,depthWrite:false}));tis.position.set(0,-Rv-11,-4);vessel.add(tis);
+    const colM=new T.MeshPhysicalMaterial({color:LIN(T,0xf2dcd6),roughness:0.4,clearcoat:0.4,emissive:LIN(T,0x7a2a2a),emissiveIntensity:0});const R=MK.rnd(11);
     for(let k=0;k<26;k++){const z0=(R()-0.5)*2*wz*1.4,y0=-Rv-1.5-R()*5;const pts=[];for(let s=0;s<6;s++)pts.push(V3(-wx*1.6+s*wx*0.64,y0+Math.sin(s*1.3+k)*1.2,z0+Math.cos(s+k)*1.5));vessel.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),40,0.45+R()*0.35,6,false),colM))}
     // еритроцити в потока
     const rg=b3RbcGeo(T),rm=b3RbcMat(T),N=120,rbc=new T.InstancedMesh(rg,rm,N);rbc.frustumCulled=false;sc.add(rbc);const cells=[];
@@ -40,7 +40,7 @@ function b3Hemost(cv){r3Attach(cv,460,{r:135,th:0.35,phi:1.15,target:[0,-10,0],f
     const NP=40,pltR=new T.InstancedMesh(b3PltGeo(T,false),pm,NP),NA_=150,pltA=new T.InstancedMesh(b3PltGeo(T,true),pm,NA_);pltR.frustumCulled=pltA.frustumCulled=false;sc.add(pltR,pltA);
     const pr=[];for(let i=0;i<NP;i++)pr.push(newCell({}));const pa=[];for(let i=0;i<NA_;i++){const u=i/NA_,lay=Math.floor(u*4);pa.push({p:V3((R()-0.5)*2*wx*(1.1-lay*0.12),-Rv+0.8+lay*1.7+R()*1.2,(R()-0.5)*2*wz*(1.1-lay*0.12)),q:new T.Euler(R()*0.6,R()*6,R()*0.6),s:0.9+R()*0.5})}
     // фибринови нишки (мрежа над тапата) и уловени еритроцити
-    const fibM=new T.MeshPhysicalMaterial({color:LIN(T,0xfff4d6),roughness:0.35,clearcoat:0.6,transparent:true,opacity:0.95});const fibs=[];
+    const fibM=new T.MeshPhysicalMaterial({color:LIN(T,0xf6eef0),roughness:0.35,clearcoat:0.6,transparent:true,opacity:0.95});const fibs=[];
     for(let k=0;k<110;k++){const a=V3((R()-0.5)*2*wx*1.5,-Rv-1+R()*12,(R()-0.5)*2*wz*1.5),b=V3((R()-0.5)*2*wx*1.5,-Rv-1+R()*12,(R()-0.5)*2*wz*1.5),m=a.clone().lerp(b,0.5).add(V3(0,R()*2,0));
       const f=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3([a,m,b]),16,0.12+R()*0.12,5,false),fibM);f.visible=false;sc.add(f);fibs.push({f,th:R()})}
     const NT=40,trap=new T.InstancedMesh(rg,rm,NT);trap.frustumCulled=false;sc.add(trap);const tp=[];for(let i=0;i<NT;i++)tp.push({p:V3((R()-0.5)*2*wx*1.2,-Rv+1+R()*9,(R()-0.5)*2*wz*1.2),q:new T.Euler(R()*6,R()*6,R()*6),th:R()});
