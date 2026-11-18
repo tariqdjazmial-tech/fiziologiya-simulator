@@ -1,15 +1,10 @@
 /* ===== Телефон: по-чист изглед =====
-   - без анимирания фон (червените петна по краищата) — спокоен светъл фон;
-   - заглавието на темата в горната лента се скрива (то е най-отгоре на страницата);
-   - плаващите бутони (шрифтове, „Тестов режим“) не закриват текста;
+   - фонът, заглавието в горната лента и бутонът за шрифтове остават както са договорени;
+   - значката „Тестов режим“ е вдясно и не се застъпва с бутона за шрифтове;
    - по-плътни отстъпи, по-четим текст и по-удобни бутони. */
 (function(){"use strict";
 const st=document.createElement("style");st.id="mobileCss";st.textContent=`
 @media (max-width:700px){
-  html body #lm-bg,html body #lm-bg-fallback{display:none!important}
-  html,html body{background:#F4F4F6!important}
-  html body header .crumb,html body #crumb{display:none!important}
-  html body .ft-fab,html body .ft-pan{display:none!important}
   html body #testbadge{left:auto!important;right:10px!important;transform:none!important;bottom:calc(74px + env(safe-area-inset-bottom,0px))!important;font-size:10px!important;padding:5px 9px!important;opacity:.82;box-shadow:0 2px 8px #0003!important}
   html body #main{padding:12px 12px 32px!important}
   html body #main .card{padding:14px!important;border-radius:16px!important}
