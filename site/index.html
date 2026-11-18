@@ -3866,7 +3866,7 @@ const MK={
     const pal=o.pal||[[0xf0a39b,0xf3b6ad,0xe58f88],[0xf0a39b,0xd8807b,0xf3b6ad]];
     H.forEach((h,i)=>{m.makeTranslation(h[0],h[1],h[2]);hm.setMatrixAt(i,m);const p=pal[h[3]>0?0:1];c.copy(LIN(T,p[i%p.length]));hm.setColorAt(i,c)});g.add(hm);
     const tm=new T.InstancedMesh(new T.CylinderGeometry(0.11,0.09,1.55,LOWGPU?3:5,1,true),MK.mat(T,o.tail||0xf3e6c4,{roughness:0.7,clearcoat:0}),Tl.length);
-    Tl.forEach((t,i)=>{m.makeTranslation(t[0],t[1]*1.0,t[2]);tm.setMatrixAt(i,m)});g.add(tm);g.userData={heads:hm,tails:tm};return g},
+    Tl.forEach((t,i)=>{m.makeTranslation(t[0],t[1]*1.0,t[2]);tm.setMatrixAt(i,m)});g.add(tm);g.userData={heads:hm,tails:tm};(MK._bil=MK._bil||[]).push(g);return g},
   // белтъчна повърхност от метатопки: balls=[[x,y,z,r,hex?]]
   blob(T,balls,o={}){const res=o.res||44;let mn=[1e9,1e9,1e9],mx=[-1e9,-1e9,-1e9];balls.forEach(b=>{for(let k=0;k<3;k++){mn[k]=Math.min(mn[k],b[k]-b[3]*1.8);mx[k]=Math.max(mx[k],b[k]+b[3]*1.8)}});
     const c=[0,1,2].map(k=>(mn[k]+mx[k])/2),h=Math.max(mx[0]-mn[0],mx[1]-mn[1],mx[2]-mn[2])/2*1.08;const colored=balls.some(b=>b[4]!=null);
@@ -4025,13 +4025,30 @@ MK.ptube=function(T,curve,rf,o={}){const seg=o.seg||40,rad=o.rad||10;const geo=n
 MK._mc={};
 /* избор в менюто: „реалистични“ (истински структури от PDB) или „опростени“ (схематичните модели) */
 MK.real=(()=>{try{return localStorage.getItem("fizsim_models")!=="simple"}catch(e){return true}})();
-MK.loadMesh=function(T,url){if(/\/mol\//.test(url)){MK.usedView=typeof curView!=="undefined"?curView:location.hash;if(!MK.real)return new Promise(()=>{})}if(MK._mc[url])return MK._mc[url];return MK._mc[url]=fetch(url).then(r=>{if(!r.ok)throw new Error(url);return r.text()}).then(b64=>{const bin=atob(b64.trim()),u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
+/* липидите, в които влиза истински белтък, се скриват — за всички сцени, автоматично след зареждане на белтък.
+   За всяка мембрана: точките на белтъка в нейния слой (|y| < 2,6 в координатите на мембраната) дават контур по 36 сектора около центъра;
+   липидите вътре в контура се скриват. Белтъци от няколко части (субединици) се обработват поотделно. */
+MK.tagMol=function(m){m.userData.mol=true;return m};
+MK.cullLipids=function(){const T=window.THREE;if(!T||!MK._bil)return;MK._bil=MK._bil.filter(b=>{let r=b;while(r.parent)r=r.parent;return r.isScene});
+  const inv=new T.Matrix4(),M=new T.Matrix4(),Zm=new T.Matrix4().makeScale(0,0,0),v=new T.Vector3(),q=new T.Vector3();
+  MK._bil.forEach(B=>{let root=B;while(root.parent)root=root.parent;const prots=[];root.traverse(o=>{if(o.isMesh&&o.geometry&&o.geometry.attributes.position&&(o.userData.prot||(o.material&&o.material.userData&&o.material.userData.mol))){let vis=true,x=o;while(x){if(!x.visible){vis=false;break}x=x.parent}if(vis)prots.push(o)}});
+    if(!prots.length)return;root.updateMatrixWorld(true);inv.copy(B.matrixWorld).invert();const fps=[];
+    prots.forEach(o=>{const P=o.geometry.attributes.position,st=Math.max(1,Math.floor(P.count/3000)),pts=[];M.multiplyMatrices(inv,o.matrixWorld);
+      for(let i=0;i<P.count;i+=st){v.fromBufferAttribute(P,i).applyMatrix4(M);if(Math.abs(v.y)<2.6)pts.push(v.x,v.z)}if(pts.length<24)return;
+      let cx=0,cz=0;for(let i=0;i<pts.length;i+=2){cx+=pts[i];cz+=pts[i+1]}cx/=pts.length/2;cz/=pts.length/2;const Rr=new Float32Array(36);
+      for(let i=0;i<pts.length;i+=2){const a=Math.atan2(pts[i+1]-cz,pts[i]-cx),k=((Math.round(a/(Math.PI*2)*36)%36)+36)%36,r=Math.hypot(pts[i]-cx,pts[i+1]-cz);if(r>Rr[k])Rr[k]=r}
+      for(let k=0;k<36;k++)Rr[k]=Math.max(Rr[k],Math.min(Rr[(k+35)%36],Rr[(k+1)%36]));fps.push([cx,cz,Rr])});
+    [B.userData.heads,B.userData.tails].forEach(I=>{if(!I||!fps.length)return;let ch=0;for(let i=0;i<I.count;i++){I.getMatrixAt(i,M);q.setFromMatrixPosition(M);if(M.elements[0]===0)continue;
+      for(const [cx,cz,Rr] of fps){const a=Math.atan2(q.z-cz,q.x-cx),k=((Math.round(a/(Math.PI*2)*36)%36)+36)%36;if(Math.hypot(q.x-cx,q.z-cz)<Rr[k]+0.3){I.setMatrixAt(i,Zm);ch=1;break}}}if(ch)I.instanceMatrix.needsUpdate=true})})};
+MK.cullSoon=function(){clearTimeout(MK._ct);MK._ct=setTimeout(()=>{try{MK.cullLipids()}catch(e){console.error(e)}},450)};
+MK.loadMesh=function(T,url){if(/\/mol\//.test(url))(MK._mcP=MK._mcP||new Set()).add(url);const pr=MK._loadMesh0(T,url);if(pr&&pr.then)pr.then(()=>{MK.cullSoon();setTimeout(MK.cullSoon,1200)},()=>{});return pr};
+MK._loadMesh0=function(T,url){if(/\/mol\//.test(url)){MK.usedView=typeof curView!=="undefined"?curView:location.hash;if(!MK.real)return new Promise(()=>{})}if(MK._mc[url])return MK._mc[url];return MK._mc[url]=fetch(url).then(r=>{if(!r.ok)throw new Error(url);return r.text()}).then(b64=>{const bin=atob(b64.trim()),u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
   const dv=new DataView(u8.buffer),nv=dv.getUint32(0,true),nf=dv.getUint32(4,true),mn=[0,1,2].map(k=>dv.getFloat32(8+4*k,true)),sz=[0,1,2].map(k=>dv.getFloat32(20+4*k,true));
   let o=32;const q=new Uint16Array(u8.buffer,o,nv*3);o+=nv*6;o=(o+3)&~3;const idx=new Uint32Array(u8.buffer.slice(o,o+nf*12));const pos=new Float32Array(nv*3);for(let i=0;i<nv*3;i++)pos[i]=mn[i%3]+q[i]/65535*sz[i%3];
   const g=new T.BufferGeometry();g.setAttribute("position",new T.BufferAttribute(pos,3));g.setIndex(new T.BufferAttribute(idx,1));const co=o+nf*12;
   if(u8.length>=co+nv*3){const c=new Float32Array(nv*3);for(let i=0;i<nv*3;i++){const v=u8[co+i]/255;c[i]=v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4)}g.setAttribute("color",new T.BufferAttribute(c,3))}
   g.computeVertexNormals();return g})};
-MK.molMat=function(T,o={}){return MK.skin(T,new T.MeshPhysicalMaterial(Object.assign({vertexColors:true,roughness:.55,clearcoat:.25,clearcoatRoughness:.5,sheen:new T.Color(0x222222)},o)),{rim:0xffffff,rimI:.35,pow:2.2,env:.45})};
+MK.molMat=function(T,o={}){return MK.tagMol(MK.skin(T,new T.MeshPhysicalMaterial(Object.assign({vertexColors:true,roughness:.55,clearcoat:.25,clearcoatRoughness:.5,sheen:new T.Color(0x222222)},o)),{rim:0xffffff,rimI:.35,pow:2.2,env:.45}))};
 /* вписва реална многочастна структура на мястото на стар модел: еднаква височина, мембраната на y=0 в групата */
 MK.realize=function(T,grp,urls,o={}){const vis=grp.children.slice(),bx=new T.Box3();vis.forEach(c=>bx.expandByObject(c));
   return Promise.all(urls.map(u=>MK.loadMesh(T,u))).then(gs=>{const sc=grp.getWorldScale(new T.Vector3()).y||1;grp.updateMatrixWorld(true);const b2=new T.Box3().setFromObject(grp);const H0=(b2.max.y-b2.min.y)/sc;
@@ -4047,7 +4064,7 @@ MK.addCentered=function(T,grp,url,o={}){return MK.loadMesh(T,url).then(g0=>{cons
 MK.swapGeo=function(T,mesh,url,o={}){if(!mesh||!mesh.geometry)return Promise.resolve(null);mesh.geometry.computeBoundingBox();const bb=mesh.geometry.boundingBox,sc=mesh.scale.clone(),c=bb.getCenter(new T.Vector3()).multiply(sc),sz=bb.getSize(new T.Vector3()).multiply(sc);
   return MK.loadMesh(T,url).then(g0=>{const g=g0.clone();if(o.rx)g.rotateX(o.rx);if(o.ry)g.rotateY(o.ry);if(o.rz)g.rotateZ(o.rz);g.computeBoundingBox();const b=g.boundingBox,gc=b.getCenter(new T.Vector3()),gs=b.getSize(new T.Vector3());
     const k=(o.fit==="y"?sz.y/gs.y:Math.max(sz.x,sz.y,sz.z)/Math.max(gs.x,gs.y,gs.z))*(o.k||1);g.translate(-gc.x,-gc.y,-gc.z);g.scale(k,k,k);g.translate(c.x,c.y,c.z);
-    mesh.geometry=g;mesh.scale.set(1,1,1);const m=mesh.material;if(m){m.vertexColors=false;if(o.col!=null)m.color=LIN(T,o.col);m.needsUpdate=true}return mesh}).catch(()=>null)};
+    mesh.geometry=g;mesh.scale.set(1,1,1);mesh.userData.prot=true;const m=mesh.material;if(m){m.vertexColors=false;if(o.col!=null)m.color=LIN(T,o.col);m.needsUpdate=true}return mesh}).catch(()=>null)};
 MK.swapMol=function(T,grp,url,o={}){return MK.loadMesh(T,url).then(g=>{const m=new T.Mesh(g,MK.molMat(T,o.mat));if(o.s)m.scale.setScalar(o.s);if(o.ry)m.rotation.y=o.ry;if(o.p)m.position.set(...o.p);if(o.hide!==false)grp.children.forEach(c=>c.visible=false);grp.add(m);return m}).catch(()=>null)};
 // „кожа“ на неврона: полупрозрачен ръб (Френел) като при микроскопски рендер
 MK.skin=function(T,m,o={}){const rc=new T.Color(o.rim||0xfff0f0).convertSRGBToLinear(),ri=o.rimI==null?0.55:o.rimI,pw=o.pow||2.4;
