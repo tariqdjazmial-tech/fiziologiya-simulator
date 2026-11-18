@@ -3,7 +3,7 @@
 if(window.PHYS_LANG==="en")document.documentElement.style.setProperty("--figw",'"Fig."');
 const d=document.createElement("div");d.innerHTML='<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>'
 +'<radialGradient id="aSph" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fff" stop-opacity=".8"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></radialGradient>'
-+'<radialGradient id="aHead" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#fbe3ad"/><stop offset=".6" stop-color="#e8b25a"/><stop offset="1" stop-color="#c98a2e"/></radialGradient>'
++'<radialGradient id="aHead" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#fbd9d3"/><stop offset=".6" stop-color="#f0a39b"/><stop offset="1" stop-color="#cf766f"/></radialGradient>'
 +'<linearGradient id="aShade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".42"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".2"/></linearGradient>'
 +'<linearGradient id="aShadeV" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".42"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".2"/></linearGradient>'
 +'<linearGradient id="aPore" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe6fb"/><stop offset="1" stop-color="#eaf4fd"/></linearGradient>'

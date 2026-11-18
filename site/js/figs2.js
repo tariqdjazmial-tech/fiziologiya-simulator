@@ -9,13 +9,13 @@ const P=(d,f,s,w,x)=>`<path d="${d}" fill="${f||"none"}"${s?` stroke="${s}" stro
 const sph=(x,y,r,f,lab,o={})=>circ(x,y,r,f)+circ(x,y,r,"url(#aSph)")+(lab?t(x,y+(o.fs||r*1.05)*0.36,lab,{fs:o.fs||r*1.05,c:o.c||"#fff",w:700}):"");
 const prot=(d,f,st,o={})=>`<g${o.sh===0?"":` filter="url(#aDrop)"`}>${P(d,f,st,o.w||1.1)}<path d="${d}" fill="url(#${o.v?"aShadeV":"aShade"})"/></g>`;
 const lead=(x1,y1,x2,y2)=>ln(x1,y1,x2,y2,{c:MU,w:0.8})+circ(x2,y2,1.5,MU);
-const CORE=mix("#f6e3b4",55),TAIL="#c9a063";
+const CORE=mix("#f7e1dc",55),TAIL="#d39a92";
 const bil=(horiz,c,a0,a1,w)=>{w=w||8;const r=Math.min(3.3,w*0.36),st=2*r+0.7,n=Math.max(1,Math.floor((a1-a0)/st)),off=(a1-a0-n*st)/2+st/2,hd=w-r;let h="",tp="";
   for(let i=0;i<n;i++){const a=a0+off+i*st;[-1,1].forEach(sg=>{const p=c+sg*hd,q=c+sg*0.6,f=v=>v.toFixed(1);
     if(horiz){tp+=`M${f(a-r*0.42)},${f(p-sg*r)}L${f(a-r*0.42)},${f(q)}M${f(a+r*0.42)},${f(p-sg*r)}L${f(a+r*0.42)},${f(q)}`;h+=`<circle cx="${f(a)}" cy="${f(p)}" r="${r}"/>`}
     else{tp+=`M${f(p-sg*r)},${f(a-r*0.42)}L${f(q)},${f(a-r*0.42)}M${f(p-sg*r)},${f(a+r*0.42)}L${f(q)},${f(a+r*0.42)}`;h+=`<circle cx="${f(p)}" cy="${f(a)}" r="${r}"/>`}})}
   const bg=horiz?`<rect x="${a0}" y="${c-w+r}" width="${a1-a0}" height="${2*(w-r)}" fill="${CORE}"/>`:`<rect x="${c-w+r}" y="${a0}" width="${2*(w-r)}" height="${a1-a0}" fill="${CORE}"/>`;
-  return `<g>${bg}<path d="${tp}" stroke="${TAIL}" stroke-width="${Math.max(0.6,r*0.26).toFixed(2)}" fill="none"/><g fill="url(#aHead)" stroke="#b9802c" stroke-width="0.4">${h}</g></g>`};
+  return `<g>${bg}<path d="${tp}" stroke="${TAIL}" stroke-width="${Math.max(0.6,r*0.26).toFixed(2)}" fill="none"/><g fill="url(#aHead)" stroke="#b8655f" stroke-width="0.4">${h}</g></g>`};
 // половинка на канален белтък: sg=-1 лява, +1 дясна; h — полувисочина, w — ширина, g — полупора
 const lobe=(x,y,h,w,g,sg)=>{const a=x+sg*g,b=x+sg*(g+w);return `M${b},${y-h+8} C${b+sg*5},${y-h-6} ${a+sg*1},${y-h-8} ${a},${y-h+6} C${a-sg*3},${y-h/2} ${a-sg*3},${y+h/2} ${a},${y+h-6} C${a+sg*1},${y+h+8} ${b+sg*5},${y+h+6} ${b},${y+h-8} C${b+sg*4},${y+h/2} ${b+sg*4},${y-h/2} ${b},${y-h+8}Z`};
 const chan=(x,y,h,w,g,f,s,o)=>`<rect x="${x-g-1}" y="${y-h}" width="${2*g+2}" height="${2*h}" fill="url(#aPore)"/>`+prot(lobe(x,y,h,w,g,-1),f,s,o)+prot(lobe(x,y,h,w,g,1),f,s,o);
@@ -221,7 +221,7 @@ N["Слоеве на дихателната мембрана"]=()=>{let b="";con
   b+=`<rect x="${x0}" y="6" width="${w}" height="44" fill="${mix("#d0ebff",60)}"/>`+t(x0+w/2,30,"алвеола (въздух)",{fs:11,w:600});
   b+=`<rect x="${x0}" y="50" width="${w}" height="7" fill="#a5d8ff"/>`;for(let x=x0+6;x<x0+w;x+=9)b+=ln(x,50,x,45,{c:"#b88600",w:0.8})+circ(x,50.5,1.8,"#ff8787","#b88600",0.4);
   b+=`<rect x="${x0}" y="57" width="${w}" height="17" fill="#f3b3a6"/>`+el(70,65.5,20,6,"#8e6bb8","#5b4a99",0.6)+`<rect x="${x0}" y="57" width="${w}" height="17" fill="url(#aShadeV)"/>`;
-  b+=`<rect x="${x0}" y="74" width="${w}" height="4.5" fill="#8d99ab"/><rect x="${x0}" y="78.5" width="${w}" height="13" fill="${mix("#f6e3b4",70)}"/>`;[30,84,140,180].forEach(x=>b+=P(`M${x},86 q8,-6 16,0 t16,0`,"none","#b7a17a",0.9));
+  b+=`<rect x="${x0}" y="74" width="${w}" height="4.5" fill="#8d99ab"/><rect x="${x0}" y="78.5" width="${w}" height="13" fill="${mix("#f7e1dc",70)}"/>`;[30,84,140,180].forEach(x=>b+=P(`M${x},86 q8,-6 16,0 t16,0`,"none","#b7a17a",0.9));
   b+=`<rect x="${x0}" y="91.5" width="${w}" height="4.5" fill="#8d99ab"/><rect x="${x0}" y="96" width="${w}" height="16" fill="#f0a3a3"/>`+el(150,104,18,5.4,"#8e6bb8","#5b4a99",0.6)+`<rect x="${x0}" y="96" width="${w}" height="16" fill="url(#aShadeV)"/>`+ln(104,96,104,112,{c:"#9c2531",w:1});
   b+=`<rect x="${x0}" y="112" width="${w}" height="88" fill="${mix("#ffe8cc",70)}"/>`+rbc(118,156,54,28,0)+t(118,160,"еритроцит",{fs:11,c:"#fff",w:700});
   b+=`<rect x="${x0}" y="6" width="${w}" height="194" fill="none" stroke="var(--line)"/>`;

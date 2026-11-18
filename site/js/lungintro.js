@@ -297,7 +297,7 @@ float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<4;i++){s+=a*vn(p);p*=2.03;a*=.5;
   const hemi=new T.HemisphereLight(0xffffff,0x1a1b1e,.35);S.add(hemi);
   const inner=new T.PointLight(0xff9aa6,0,1.2,2);inner.position.set(0,OY+CY+.05,CZ+.3);S.add(inner);
 
-  function size(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.fov=cam.aspect<.8?54:34;cam.updateProjectionMatrix()}
+  function size(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.fov=cam.aspect<.8?42:34;cam.updateProjectionMatrix()}
   size();addEventListener("resize",size);
 
   /* ---------- камера ---------- */

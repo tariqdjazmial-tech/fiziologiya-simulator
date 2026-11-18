@@ -6684,18 +6684,18 @@ const BF=(()=>{
   F._={S,t,tt,box,ln,ar,cr,pth,RED,BLUE,GOLD,VIO,GRN};
   return F})();
 /* ---- схеми за раздели I и II ---- */
-(()=>{const {S,t,tt,box,ln,ar,cr,pth,RED,BLUE,GOLD,VIO,GRN}=BF._,F=BF,NA="#f76707",K="#9c36b5",CL="#4dabf7",MEM="color-mix(in srgb,#f2a65a 30%,var(--panel))";
+(()=>{const {S,t,tt,box,ln,ar,cr,pth,RED,BLUE,GOLD,VIO,GRN}=BF._,F=BF,NA="#f76707",K="#9c36b5",CL="#4dabf7",MEM="color-mix(in srgb,#f0a39b 30%,var(--panel))";
  const circ=(x,y,r,f,s,w)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${f}"${s?` stroke="${s}" stroke-width="${w||1.2}"`:""}/>`;
  // сфера с отблясък, липиден бислой, белтък със засенчване (общи „анатомични“ примитиви)
  const sph=(x,y,r,f,lab,o={})=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${f}"/><circle cx="${x}" cy="${y}" r="${r}" fill="url(#aSph)"/>`+(lab?t(x,y+(o.fs||r*1.05)*0.36,lab,{fs:o.fs||r*1.05,c:o.c||"#fff",w:700}):"");
  const prot=(d,f,st,o={})=>`<g${o.sh===0?"":` filter="url(#aDrop)"`}><path d="${d}" fill="${f}" stroke="${st}" stroke-width="${o.w||1.1}" stroke-linejoin="round"/><path d="${d}" fill="url(#${o.v?"aShadeV":"aShade"})"/></g>`;
- const CORE="color-mix(in srgb,#f6e3b4 55%,var(--panel))",TAIL="#c9a063";
+ const CORE="color-mix(in srgb,#f7e1dc 55%,var(--panel))",TAIL="#d39a92";
  const bil=(horiz,c,a0,a1,w)=>{w=w||8;const r=Math.min(3.3,w*0.36),st=2*r+0.7,n=Math.max(1,Math.floor((a1-a0)/st)),off=(a1-a0-n*st)/2+st/2,hd=w-r;let h="",tp="";
   for(let i=0;i<n;i++){const a=a0+off+i*st;[-1,1].forEach(sg=>{const p=c+sg*hd,q=c+sg*0.6;
     if(horiz){tp+=`M${(a-r*0.42).toFixed(1)},${(p-sg*r).toFixed(1)}L${(a-r*0.42).toFixed(1)},${q.toFixed(1)}M${(a+r*0.42).toFixed(1)},${(p-sg*r).toFixed(1)}L${(a+r*0.42).toFixed(1)},${q.toFixed(1)}`;h+=`<circle cx="${a.toFixed(1)}" cy="${p.toFixed(1)}" r="${r}"/>`}
     else{tp+=`M${(p-sg*r).toFixed(1)},${(a-r*0.42).toFixed(1)}L${q.toFixed(1)},${(a-r*0.42).toFixed(1)}M${(p-sg*r).toFixed(1)},${(a+r*0.42).toFixed(1)}L${q.toFixed(1)},${(a+r*0.42).toFixed(1)}`;h+=`<circle cx="${p.toFixed(1)}" cy="${a.toFixed(1)}" r="${r}"/>`}})}
   const bg=horiz?`<rect x="${a0}" y="${c-w+r}" width="${a1-a0}" height="${2*(w-r)}" fill="${CORE}"/>`:`<rect x="${c-w+r}" y="${a0}" width="${2*(w-r)}" height="${a1-a0}" fill="${CORE}"/>`;
-  return `<g>${bg}<path d="${tp}" stroke="${TAIL}" stroke-width="${Math.max(0.6,r*0.26).toFixed(2)}" fill="none"/><g fill="url(#aHead)" stroke="#b9802c" stroke-width="0.4">${h}</g></g>`};
+  return `<g>${bg}<path d="${tp}" stroke="${TAIL}" stroke-width="${Math.max(0.6,r*0.26).toFixed(2)}" fill="none"/><g fill="url(#aHead)" stroke="#b8655f" stroke-width="0.4">${h}</g></g>`};
  const rect=(x,y,w,h,f,o={})=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${o.rx||0}" fill="${f}"${o.s?` stroke="${o.s}" stroke-width="${o.w||1.2}"`:""}${o.op?` opacity="${o.op}"`:""}/>`;
  const memV=(x,y0,y1,w)=>bil(0,x,y0,y1,Math.max(w||8,8));
  const memH=(y,x0,x1,w)=>bil(1,y,x0,x1,Math.max(w||7,8));
@@ -6955,7 +6955,7 @@ const BF=(()=>{
   b+=t(410,Y(150),"PO₂",{fs:11,c:RED,w:700,a:"end"})+t(410,Y(60),"PCO₂",{fs:11,c:GRAY,w:700,a:"end"})+t(14,110,"mmHg",{fs:10.5,r:-90,c:"var(--muted)"});
   return S(440,224,b,"Парциални налягания на O₂ и CO₂ по пътя им")};
  // дихателна мембрана
- F.rMem=()=>{let b="";const L=[["слой течност със сурфактант","#74c0fc"],["алвеоларен епител","#f2a65a"],["базална мембрана на епитела","#ced4da"],["интерстициум","#ffe8cc"],["базална мембрана на ендотела","#ced4da"],["капилярен ендотел","#f2a65a"]];
+ F.rMem=()=>{let b="";const L=[["слой течност със сурфактант","#74c0fc"],["алвеоларен епител","#f2a65a"],["базална мембрана на епитела","#ced4da"],["интерстициум","#ffe8cc"],["базална мембрана на ендотела","#ced4da"],["капилярен ендотел","#e8907f"]];
   b+=`<rect x="20" y="10" width="160" height="44" fill="${tint("#74c0fc",18)}" stroke="#4dabf7"/>`+t(100,37,"алвеола (въздух)",{fs:11.5,w:600});
   L.forEach(([l,c],i)=>{const y=58+i*16;b+=`<rect x="20" y="${y}" width="160" height="14" fill="${c}" opacity="0.75"/>`+t(190,y+11,l,{fs:10.5,a:"start"})});
   b+=`<rect x="20" y="158" width="160" height="40" fill="${tint(RED,14)}" stroke="${RED}"/>`+`<ellipse cx="100" cy="178" rx="40" ry="12" fill="${RED}" opacity="0.85"/>`+t(100,182,"еритроцит",{fs:10.5,c:"#fff",w:600});
@@ -7615,10 +7615,10 @@ function lessonParts(mn,v){const tp=$("#tab_tst",mn),gp=$("#tab_gl",mn);
 .mdl-sw button.on{background:#1f2329;color:#fff}.mdl-sw button:focus-visible{outline:2px solid #C8102E;outline-offset:1px}
 @media (max-width:600px){.mdl-sw button{padding:6px 9px;font-size:11px}}`;document.head.appendChild(st);
   const L=()=>window.PHYS_LANG==="en"?["Realistic","Simplified","3D model"]:["Реалистичен","Опростен","3D модел"];
-  const add=v=>{if(v.querySelector(".mdl-sw"))return;const t=L(),d=document.createElement("div");d.className="mdl-sw";d.setAttribute("role","group");d.setAttribute("aria-label",t[2]);
+  const add=v=>{const ph=matchMedia("(max-width:600px)").matches;if(ph?(v.nextElementSibling&&v.nextElementSibling.classList.contains("mdl-sw")):v.querySelector(".mdl-sw"))return;const t=L(),d=document.createElement("div");d.className="mdl-sw";d.setAttribute("role","group");d.setAttribute("aria-label",t[2]);
     [["real",t[0]],["simple",t[1]]].forEach(([m,tx])=>{const b=document.createElement("button");b.type="button";b.textContent=tx;const on=(m==="real")===MK.real;b.classList.toggle("on",on);b.setAttribute("aria-pressed",String(on));
       b.onclick=e=>{e.stopPropagation();if(on)return;const all=[...document.querySelectorAll("#main .v3d")],k=all.indexOf(v);MK.real=m==="real";try{localStorage.setItem("fizsim_models",m)}catch(x){}
-        route();setTimeout(()=>{const w=document.querySelectorAll("#main .v3d")[k];if(w)w.scrollIntoView({block:"center"})},350)};d.appendChild(b)});v.appendChild(d)};
+        route();setTimeout(()=>{const w=document.querySelectorAll("#main .v3d")[k];if(w)w.scrollIntoView({block:"center"})},350)};d.appendChild(b)});if(ph){d.classList.add("out");v.after(d)}else v.appendChild(d)};
   setInterval(()=>{if(MK.usedView!==curView)return;document.querySelectorAll("#main .v3d").forEach(add)},600)})();
 const VIEWS={home:viewHome,about:viewAbout,glossary:viewGlossary,test:viewTest,ghk:viewGHK,ap:viewAP,neuron3d:viewNeuron3D,channels:viewChannels,transport:viewTransport,nka:viewNKA,synapse:viewSynapse,skeletal:viewSkeletal,smooth:viewSmooth,heart3d:viewHeartSwitch,ecg:viewECG,cardap:viewCardiacAP,hemo:viewHemo,baro:viewBaro,starling:viewStarling,lungmech:viewLungMech,gasx:viewGasX,respreg:viewRespReg,xb:viewXB,chemsyn:viewChemSyn,elecsyn:viewElecSyn,cardio:viewCardio};
 let curView="home";
@@ -7694,6 +7694,6 @@ route();
 <script src="js/resp-renal-3d.js"></script>
 <script src="js/blood-3d.js"></script>
 <script src="js/gutdata.js"></script><script src="js/bladder.js"></script>
-<script src="js/sys2.js"></script><script src="js/zorg.js"></script><script src="js/figs2.js"></script><script src="js/en.js"></script><script src="js/en_re.js"></script><script src="js/i18n.js"></script><script src="js/config.js"></script><script src="js/supabase.min.js"></script><script src="js/sb.js"></script><script src="js/native.js"></script><script src="js/shell.js"></script><script src="js/legal.js"></script><script src="js/atlas.js"></script><script src="js/calm.js"></script><script src="js/theme.js"></script><script src="js/polish.js"></script><script src="js/brutal.js"></script><script src="js/chrome.js"></script><script src="js/fullscreen.js"></script><script src="js/fonttest.js"></script><script src="js/intros.js"></script><script src="js/heartintro.js"></script><script src="js/neurointro.js"></script><script src="js/lungintro.js"></script>
+<script src="js/sys2.js"></script><script src="js/zorg.js"></script><script src="js/figs2.js"></script><script src="js/en.js"></script><script src="js/en_re.js"></script><script src="js/i18n.js"></script><script src="js/config.js"></script><script src="js/supabase.min.js"></script><script src="js/sb.js"></script><script src="js/native.js"></script><script src="js/shell.js"></script><script src="js/legal.js"></script><script src="js/atlas.js"></script><script src="js/calm.js"></script><script src="js/theme.js"></script><script src="js/polish.js"></script><script src="js/brutal.js"></script><script src="js/chrome.js"></script><script src="js/fullscreen.js"></script><script src="js/fonttest.js"></script><script src="js/intros.js"></script><script src="js/heartintro.js"></script><script src="js/neurointro.js"></script><script src="js/lungintro.js"></script><script src="js/mobile.js"></script>
 </body>
 </html>
