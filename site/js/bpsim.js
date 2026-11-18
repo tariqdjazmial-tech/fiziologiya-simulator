@@ -59,7 +59,7 @@ function viewBP(main){
   const truth=()=>{const arm=$("#bpArm").checked?10:0;return {s:S.s.get()+arm,d:Math.min(S.d.get(),S.s.get()-10)+arm}};
   const kf=()=>CUFF[$("#bpCuff").value].k;
   /* фаза на Коротков по налягането в маншета */
-  const phaseOf=(pc,s,d)=>{if(pc>=s)return "—";if(st.gap&&pc>st.gap[0]&&pc<st.gap[1])return "празнина";const r=(s-pc)/Math.max(10,s-d);if(st.ar&&pc<d+8)return "IV";if(pc<=d)return "V";if(r<0.15)return "I";if(r<0.4)return "II";if(pc>d+8)return "III";return "IV"};
+  const phaseOf=(pc,s,d)=>{if(pc>=s||pc<3)return "—";if(st.gap&&pc>st.gap[0]&&pc<st.gap[1])return "празнина";const r=(s-pc)/Math.max(10,s-d);if(st.ar&&pc<d+8)return "IV";if(pc<=d)return "V";if(r<0.15)return "I";if(r<0.4)return "II";if(pc>d+8)return "III";return "IV"};
   const upd=()=>{const tr=truth(),eff=Math.round(st.pc*kf());$("#bpS").innerHTML=[["Маншет",`${Math.round(st.pc)} mmHg`],["Фаза",st.phase],["Отчетено",`${st.sys??"—"}/${st.dia??"—"}`],["Истинско",(st.sys!=null&&st.dia!=null)?`${tr.s}/${tr.d}`:"скрито до отчитане"]].reduce((h,[a,b])=>h,"");$("#bpS").innerHTML=statsHTML([["Маншет",`${Math.round(st.pc)} mmHg`],["Фаза на Коротков",st.phase],["Отчетено",`${st.sys??"—"}/${st.dia??"—"}`],["Истинско",(st.sys!=null&&st.dia!=null)?`${tr.s}/${tr.d}`:"скрито до отчитане"]]);
     let n="";if(st.sys!=null&&st.dia!=null){const es=st.sys-tr.s,ed=st.dia-tr.d;n=`Отчете <b>${st.sys}/${st.dia}</b>, истинското е <b>${tr.s}/${tr.d}</b> mmHg (грешка ${es>0?"+":""}${es} / ${ed>0?"+":""}${ed}). `;
       if(S.rate.get()>4)n+="Вентилът е пуснат твърде бързо — между два удара маншетът пада с няколко mmHg и стойностите се подценяват. ";
