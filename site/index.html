@@ -3593,7 +3593,7 @@ function viewBaro(main){
     const B=V(0.031,0.6798,0.0297);
     tube([B,V(0.034,0.705,0.023),V(0.032,0.735,0.014),V(0.024,0.762,0.008)],0.0026,artM);// a. carotis interna
     tube([B,V(0.028,0.70,0.038),V(0.025,0.722,0.046)],0.002,artM);// a. carotis externa
-    const sinus=new T.Mesh(new T.SphereGeometry(0.0036,20,14),artM);sinus.position.set(0.0322,0.6855,0.0278);sinus.scale.set(1,1.5,1);body.add(sinus);
+    const sinus=new T.Mesh(new T.SphereGeometry(0.0036,20,14),artM);sinus.position.set(0.0322,0.6855,0.0278);sinus.scale.set(1,1.5,1);body.add(sinus);ctx.sinus=sinus;
     const glowM=c=>new T.MeshBasicMaterial({color:new T.Color(c).convertSRGBToLinear(),transparent:true,opacity:0.3,depthWrite:false,toneMapped:false});
     ctx.sinG=new T.Mesh(new T.SphereGeometry(0.0062,20,14),glowM(0x4dabf7));ctx.sinG.position.copy(sinus.position);ctx.sinG.scale.set(1,1.4,1);body.add(ctx.sinG);
     ctx.aoG=new T.Mesh(new T.SphereGeometry(0.014,24,16),glowM(0x4dabf7));ctx.aoG.position.set(0.0094,0.566,0.0111);ctx.aoG.scale.set(1.25,0.55,1.05);body.add(ctx.aoG);
@@ -3607,7 +3607,7 @@ function viewBaro(main){
     chain.forEach(c=>{if(!c[3])return;const me=new T.Mesh(new T.SphereGeometry(0.0022*c[3],14,10),gangM);me.position.set(c[0],c[1],c[2]);me.scale.set(0.8,1.7,0.8);body.add(me);ctx.gang.push(me)});
     // артериола (ефектор на α₁)
     const arG=new T.Group();arG.position.set(0.082,0.608,0.012);body.add(arG);const arT=new T.Mesh(new T.CylinderGeometry(1,1,0.016,24,1,true),std(0xd9363e,{side:T.DoubleSide,roughness:0.4}));arT.rotation.z=Math.PI/2;arG.add(arT);ctx.arT=arT;
-    ctx.rings=[];for(let i=0;i<5;i++){const r=new T.Mesh(new T.TorusGeometry(1,0.18,8,24),std(0xf08c00));r.rotation.y=Math.PI/2;r.position.x=-0.006+i*0.003;arG.add(r);ctx.rings.push(r)}
+    ctx.rings=[];for(let i=0;i<5;i++){const r=new T.Mesh(new T.TorusGeometry(1,0.18,8,24),std(0xf08c00));r.rotation.y=Math.PI/2;r.position.x=-0.006+i*0.003;arG.add(r);ctx.rings.push(r)}/* гладкомускулните пръстени — червеникави, не жълти */ctx.rings.forEach(r=>r.material=std(0xc2565f,{roughness:0.5}));
     // сърце: позиция по HuBMAP (основа ≈ клапите, връх ≈ върха на LAD)
     const HP={a0:V(-0.33,0.01,-0.23),aL:V(0.507,-2.8,0.038),w0:V(0.010,0.487,0.028),wA:V(0.062,0.42,0.086)};
     const hq=new T.Quaternion().setFromUnitVectors(HP.aL.clone().sub(HP.a0).normalize(),HP.wA.clone().sub(HP.w0).normalize());const hs=0.88*HP.wA.distanceTo(HP.w0)/HP.aL.distanceTo(HP.a0);
@@ -3632,7 +3632,8 @@ function viewBaro(main){
     ctx.lbl=()=>{const far=G.cam.position.distanceTo(new G.T.Vector3(0.1,6.4,0.1))>4;const L=[["каротиден синус",W(V(0.05,0.69,0.03))],["аортна дъга",W(V(-0.01,0.585,0.02))],["продълговат мозък",W(V(-0.03,0.772,0.0))],["гръбначен мозък T1–T4",W(V(-0.05,0.61,-0.04))],["артериола (α₁)",W(V(0.09,0.625,0.012))],["сърце",W(V(0.07,0.45,0.09))]];
       if(!far)L.push(["n. IX (Hering)",W(V(0.046,0.725,0.016))],["n. vagus",W(V(0.055,0.655,0.018))],["симпатиков ствол",W(V(0.03,0.662,-0.02))],["NTS",W(NTS.clone().add(V(-0.004,0.006,-0.006)))],["n. ambiguus",W(NA.clone().add(V(0.008,0.002,0)))],["RVLM",W(RV.clone().add(V(0.006,-0.002,0.006)))],["CVLM (⊣ RVLM)",W(CV.clone().add(V(0.004,-0.006,0)))]);
       if(m.den)L.push(["аферентите са прерязани",W(V(0.05,0.705,0.03))]);return L};
-    ctx.views={ov:[0.75,1.45,[0.15,6.15,0.15],5.5],br:[2.3,1.3,[0.02,7.62,-0.06],1.35],cs:[0.9,1.42,[0.32,7.0,0.22],1.45],ht:[0.35,1.5,[0.25,4.7,0.4],2.8],lat:[Math.PI/2,1.45,[0.1,6.2,0.0],6.0]};
+    ctx.views={ov:[0.75,1.45,[0.15,6.15,0.15],5.5],br:[2.3,1.3,[0.02,7.62,-0.06],1.35],cs:[0.9,1.42,[0.32,7.0,0.22],1.1],ht:[0.35,1.5,[0.25,4.7,0.4],2.8],lat:[Math.PI/2,1.45,[0.1,6.2,0.0],6.0],
+      aff:[1.05,1.4,[0.22,7.15,0.05],2.3],vag:[0.85,1.45,[0.22,6.2,0.15],4.2],art:[0.95,1.4,[0.8,6.08,0.12],0.62]};
     document.querySelectorAll("[data-av]").forEach(b=>b.onclick=()=>{ctx.view=ctx.views[b.dataset.av]});
     const msg=document.createElement("div");msg.style.cssText="position:absolute;right:8px;bottom:8px;font-size:12px;color:var(--muted);pointer-events:none";msg.textContent="Зареждане на сърцето…";$("#w3").appendChild(msg);
     makeRealHeart(G).then(H=>{msg.remove();ctx.H=H;H.actOn=true;body.add(H.root);
@@ -3640,7 +3641,7 @@ function viewBaro(main){
       const sa=h2b(H.sa);vag.mesh.geometry.dispose();const c=new T.CatmullRomCurve3(mkVag(sa));vag.mesh.geometry=new T.TubeGeometry(c,60,0.0016,10,false);vag.c=c;vag.len=c.getLength();
       ctx.saG=new T.Mesh(new T.SphereGeometry(0.004,16,12),glowM(0x4dabf7));ctx.saG.position.copy(sa);body.add(ctx.saG);ctx.ready=true})
      .catch(e=>{if(G.dead||e&&e.dead)return;console.error(e);msg.textContent="Сърцето не се зареди."});
-    ctx.M=new T.Matrix4();ctx.vv=new T.Vector3();ctx.cGray=new T.Color(0x868e96).convertSRGBToLinear();ctx.cBlue=new T.Color(0x4dabf7).convertSRGBToLinear();ctx.cOr=new T.Color(0xfd7e14).convertSRGBToLinear();
+    ctx.M=new T.Matrix4();ctx.vv=new T.Vector3();ctx.cRed=new T.Color(0xfa5252).convertSRGBToLinear();ctx.cGray=new T.Color(0x868e96).convertSRGBToLinear();ctx.cBlue=new T.Color(0x4dabf7).convertSRGBToLinear();ctx.cOr=new T.Color(0xfd7e14).convertSRGBToLinear();
     return ctx},
   (ctx,dtr)=>{const {G}=ctx;let dt=st.play?dtr*S.sp.get():0;if(window.__baroAdv){dt+=window.__baroAdv;window.__baroAdv=0}
     const n=Math.round(dt/0.002);for(let i=0;i<n;i++){baroStep(m,0.002);if(m.newBeat){m.newBeat=0;bTimes.push({t:m.t,SV:m.SV});if(bTimes.length>8)bTimes.shift()}if(i%10===0)hist.push({t:m.t,Pa:m.Pa,MAP:m.Pam,HR:m.HR,n:m.n,Vg:m.atr?0:m.Vg,Sy:m.SyHe})}
@@ -3649,21 +3650,35 @@ function viewBaro(main){
     if(ctx.view){const v=ctx.view;G.flyTo(v[2][0],v[2][1],v[2][2],v[3],v[0],v[1]);ctx.view=null}
     ctx.skin.visible=!!arcSt.skin&&G.cam.position.distanceTo(new G.T.Vector3(0.1,6.5,0.1))>3.2;
     // светене според активността
-    /* поетапен режим (window.__baroStage): светят само структурите на текущата стъпка, импулси текат само по нейните нерви */const SG=window.__baroStage,hl=k=>!SG||SG.hl.includes(k)?1:0.12;
+    /* поетапен режим (window.__baroStage): светят само структурите на текущата стъпка, импулси текат само по нейните нерви */const SG=window.__baroStage,hl=k=>!SG||!SG.hl||SG.hl.includes(k)?1:0.12;
+    /* поетапна анимация: SG.i — стъпката, SG.u — 0…1 в рамките на стъпката */const si=SG?SG.i:-1,su=SG?Math.min(1,SG.u||0):0,se=su*su*(3-2*su),ramp=(a,b)=>{const x=Math.max(0,Math.min(1,(su-a)/(b-a)));return x*x*(3-2*x)};
+    if(SG&&SG.view&&ctx.svKey!==SG.view+"_"+si){ctx.svKey=SG.view+"_"+si;ctx.view=ctx.views[SG.view]}if(!SG)ctx.svKey=null;
     const na=m.den?0:Math.min(1,m.n);ctx.nCV.material.opacity=(0.3+0.6*na)*hl("cvlm");ctx.sinG.material.opacity=(0.12+0.6*na)*hl("sinus");ctx.aoG.material.opacity=(0.08+0.45*na)*hl("aorta");ctx.nNTS.material.opacity=(0.35+0.6*na)*hl("nts");ctx.nNA.material.opacity=(0.3+0.65*m.Vg)*hl("na");ctx.nRV.material.opacity=(0.3+0.65*m.SyH)*hl("rvlm");
     ctx.med.material.emissive.setRGB(0.25*na*hl("nts"),0.18*na*hl("nts"),0.05*na*hl("nts"));ctx.t14.material.emissive.copy(ctx.cOr).multiplyScalar(0.55*m.SyH*hl("cord"));ctx.gang.forEach(g=>g.material.emissive.copy(ctx.cOr).multiplyScalar(0.35*m.SyR*hl("gang")));
     const rr=0.0016*Math.pow(m.TPR0/m.TPR,0.25);ctx.arT.scale.set(rr,1,rr);ctx.rings.forEach(r=>r.scale.setScalar(rr*1.25));
-    ctx.nerves.forEach(nv=>{const cut=m.den&&nv.key==="aff",on=!SG||SG.parts.includes(nv.part);nv.mesh.material.color.copy(cut?ctx.cGray:nv.orig);if(!on)nv.mesh.material.color.lerp(ctx.cGray,0.75);
-      const rate=on?Math.max(0,nv.rate())*16:0;nv.acc+=rate*sdt;while(nv.acc>=1){nv.acc-=1;if(nv.dots.length<40)nv.dots.push(0)}
+    /* стъпкови ефекти: синусът се раздува, NTS/RVLM/n. ambiguus светват или гаснат, артериолата се разширява */
+    if(si>=0){const sw=si===0?1+0.5*se+0.06*Math.sin(tS*9):si<6?1.45:1.15;ctx.sinus.scale.set(sw,1.5*sw,sw);ctx.sinG.scale.set(1.25*sw,1.75*sw,1.25*sw);
+      if(si===0){ctx.sinG.material.opacity=0.2+0.6*se;ctx.aoG.material.opacity=0.15+0.5*se}
+      if(si===1)ctx.nNTS.material.opacity=0.25+0.7*ramp(0.45,0.8);if(si===2){ctx.nCV.material.opacity=0.3+0.65*ramp(0.1,0.4);ctx.nRV.material.opacity=0.95-0.75*ramp(0.35,0.95)}if(si===3)ctx.nNA.material.opacity=0.3+0.65*ramp(0.05,0.35)}
+    else if(ctx.sinus){ctx.sinus.scale.set(1,1.5,1);ctx.sinG.scale.set(1,1.4,1)}
+    const artF=si===4?1+0.75*ramp(0.25,0.95):si===5?1.75:si===6?1.35:1;ctx.arT.scale.x*=artF;ctx.arT.scale.z*=artF;ctx.rings.forEach(r=>r.scale.multiplyScalar(artF));
+    /* скорост на импулсите по стъпки (×16 = импулса/s в изгледа); намаляващите пътища оредяват с хода на стъпката */
+    const stR=part=>{if(si<0)return null;const up=0.75,dn=0.6*(1-0.85*ramp(0.25,0.9));
+      if(si===0)return /^aff_/.test(part)?up*ramp(0.3,0.5):0;if(si===1)return /^aff_/.test(part)?up:0;
+      if(si===2)return part==="nts_cv"||part==="cv_rv"?up:part==="sy_cord"?dn:0;if(si===3)return part==="nts_na"||part==="vag"?up:0;
+      if(si===4)return part==="sy_ves"||part==="sy_pre"?dn:part==="sy_cord"?0.2:0;if(si===5)return part==="sy_heart"||part==="sy_pre"?dn:part==="sy_cord"?0.2:0;return null};
+    ctx.nerves.forEach(nv=>{const cut=m.den&&nv.key==="aff",on=!SG||!SG.parts||SG.parts.includes(nv.part);nv.mesh.material.color.copy(cut?ctx.cGray:nv.orig);if(!on)nv.mesh.material.color.lerp(ctx.cGray,0.75);
+      if(!nv.dotC)nv.dotC=nv.im.material.color.clone();nv.im.material.color.copy(si>=0&&nv.part==="cv_rv"?ctx.cRed:nv.dotC);
+      const sr=stR(nv.part),rate=sr!=null?sr*16:on?Math.max(0,nv.rate())*16:0;nv.acc+=rate*sdt;while(nv.acc>=1){nv.acc-=1;if(nv.dots.length<40)nv.dots.push(0)}
       const sp=0.9/Math.max(0.05,nv.len*10);nv.dots=nv.dots.map(u=>u+sdt*sp*1.6).filter(u=>u<1);
-      nv.dots.forEach((u,i)=>{ctx.M.makeTranslation(...nv.c.getPointAt(u).toArray());nv.im.setMatrixAt(i,ctx.M)});nv.im.count=nv.dots.length;nv.im.instanceMatrix.needsUpdate=true});
+      const dS=si>=0?1.25:1;nv.dots.forEach((u,i)=>{ctx.M.makeScale(dS,dS,dS).setPosition(nv.c.getPointAt(u));nv.im.setMatrixAt(i,ctx.M)});nv.im.count=nv.dots.length;nv.im.instanceMatrix.needsUpdate=true});
     if(ctx.ready){const H=ctx.H,lb=bTimes.length?bTimes[bTimes.length-1]:null;
       H.showAct({pT:lb?tS-lb.t+0.16:null,vT:lb?tS-lb.t:null,fib:false,now:tS});
       if(ctx.saG){const x=lb?tS-lb.t+0.16:9;ctx.saG.material.opacity=(0.15+0.7*Math.exp(-x*x/0.002))*(SG&&!SG.hl.includes("sa")?0.25:1)}
       let Ev=0,ph=0;for(let i=0;i<bTimes.length;i++){const b=bTimes[i],x=tS-b.t-0.045;if(x<0||x>1.2)continue;const f=Math.max(0.1,Math.min(1.5,b.SV/69));const r=vtAt(x);if(r.E*f>Ev){Ev=r.E*f;ph=r.ph}}
       let K=0;if(lb){const x=tS-lb.t+0.09;if(x>0&&x<0.13)K=Math.sin(Math.PI*x/0.13)**2}
       const Ss=lb&&tS-lb.t-0.045>0&&tS-lb.t-0.045<0.06?1:0;springs.step({E:Ev,K,S:Ss,T:ph===2?Ev:0},sdt);const sp_=springs.sp;const pa=Math.max(0,(m.Pa-78)/42);
-      if(n>0||!ctx.drawn){ctx.drawn=1;H.deform({Es:sp_.E.x,Ks:sp_.K.x,Ss:sp_.S.x,Ts:sp_.T.x,Amp:1.2,P0:[pa,pa,pa,pa]})}}
+      if(n>0||!ctx.drawn){ctx.drawn=1;H.deform({Es:sp_.E.x,Ks:sp_.K.x,Ss:sp_.S.x,Ts:sp_.T.x,Amp:1.2*(si===5?1-0.45*ramp(0.2,0.9):si===6?0.8:1),P0:[pa,pa,pa,pa]})}}
     G.render(ctx.lbl());
     cnt++;if(cnt%5===0)ctx.ov.innerHTML=`ЧСС ${Math.round(m.HR)}/min · УО ${Math.round(m.SV)} ml · MAP ${Math.round(m.Pam)} mmHg`;
     if(cnt%10===0){const mb=document.querySelector('[data-e="mass"]');if(mb)mb.classList.toggle("primary",!!m.massage);const vb=document.querySelector('[data-e="vals"]');if(vb)vb.classList.toggle("primary",m.t-m.valsT>=0&&m.t-m.valsT<15.4)}

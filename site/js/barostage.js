@@ -9,16 +9,16 @@ const ST=[
  {short:"Разтягане на синуса",badge:"PIEZO1/2 · рецепторен потенциал",view:"cs",parts:["aff_cs","aff_ao"],hl:["sinus","aorta"],
   t:"Налягането се покачва — стената на каротидния синус се разтяга",
   d:"Барорецепторите са разклонени нервни окончания в адвентицията на <b>каротидния синус</b> (разширението в началото на a. carotis interna) и на <b>аортната дъга</b>. При по-високо налягане стената се разтяга и в окончанията се отварят механочувствителни катионни канали (<b>PIEZO1 и PIEZO2</b>) — възниква рецепторен потенциал и честотата на импулсите расте. Барорецепторите реагират между ≈ 60 и 180 mmHg (най-чувствително около 100 mmHg) и особено силно на <b>бърза</b> промяна. В модела налягането е вдигнато с фенилефрин."},
- {short:"Аферентни нерви → NTS",badge:"n. IX (Hering) · n. X",view:"ov",parts:["aff_cs","aff_ao"],hl:["sinus","aorta","nts"],
+ {short:"Аферентни нерви → NTS",badge:"n. IX (Hering) · n. X",view:"aff",parts:["aff_cs","aff_ao"],hl:["sinus","aorta","nts"],
   t:"Импулсите стигат до солитарното ядро",
   d:"От каротидния синус импулсите тръгват по <b>нерва на Hering</b> към <b>n. glossopharyngeus (IX)</b>, а от аортната дъга — по <b>n. vagus (X)</b>. Двата пътя завършват в <b>nucleus tractus solitarii (NTS)</b> в продълговатия мозък; медиаторът е глутамат. Каротидните рецептори са по-чувствителни от аортните."},
  {short:"NTS ⊣ RVLM: по-малко симпатикус",badge:"CVLM (GABA) потиска RVLM",view:"br",parts:["nts_cv","cv_rv","sy_cord"],hl:["nts","cvlm","rvlm","cord"],
   t:"NTS потиска симпатиковия център",
   d:"NTS възбужда <b>каудалната вентролатерална медула (CVLM)</b>; нейните GABA-ергични неврони <b>потискат</b> пресимпатиковите неврони в <b>ростралната вентролатерална медула (RVLM)</b> — вазомоторния център. RVLM нормално поддържа тоничен поток към <b>интермедиолатералния стълб (IML)</b> на гръбначния мозък (T1–L2). При високо налягане този поток намалява — импулсите по пътя към гръбначния мозък оредяват."},
- {short:"NTS → вагус → SA възел",badge:"ACh · M₂ · GIRK · ↓ I f",view:"ov",parts:["nts_na","vag"],hl:["nts","na","sa"],
+ {short:"NTS → вагус → SA възел",badge:"ACh · M₂ · GIRK · ↓ I f",view:"vag",parts:["nts_na","vag"],hl:["nts","na","sa"],
   t:"Вагусът забавя сърцето",
   d:"NTS активира <b>nucleus ambiguus</b> (и дорзалното моторно ядро на X). Вагусовите влакна отделят <b>ACh</b> в синусовия възел: <b>M₂</b> рецепторите чрез Gᵢ намаляват cAMP (по-малък <b>I<sub>f</sub></b>), а βγ отварят <b>GIRK</b> канали (I<sub>K,ACh</sub>) — клетката се хиперполяризира и диастолната деполяризация става по-полегата. Честотата пада още след 1–2 удара; забавя се и AV провеждането."},
- {short:"Съдовете се отпускат",badge:"↓ норадреналин на α₁",view:"lat",parts:["sy_cord","sy_pre","sy_ves"],hl:["cord","gang","art"],
+ {short:"Съдовете се отпускат",badge:"↓ норадреналин на α₁",view:"art",parts:["sy_cord","sy_pre","sy_ves"],hl:["cord","gang","art"],
   t:"Артериолите и вените се отпускат",
   d:"По-малко симпатикови импулси през ганглиите на симпатиковия ствол → по-малко <b>норадреналин</b> на α₁ рецепторите на гладката мускулатура. <b>Артериолите</b> се разширяват и общото периферно съпротивление пада; <b>вените</b> се отпускат и задържат повече кръв, затова венозното връщане намалява. Пада и симпатиковият стимул за ренина. Съдовият отговор се развива за 5–30 s — по-бавно от вагусовия."},
  {short:"Сърцето — по-слабо съкращение",badge:"↓ β₁ · ↓ контрактилитет",view:"ht",parts:["sy_cord","sy_pre","sy_heart"],hl:["cord","gang","heart","sa"],
@@ -52,15 +52,17 @@ VIEWS.baro=function(main){orig(main);const w3=main.querySelector("#w3");if(!w3)r
     q("txt").innerHTML=`<b>${st.i+1}. ${s.t}</b><div style="margin-top:6px">${s.d}</div>`;try{linkTerms(q("txt"))}catch(e){}
     capL.textContent=`${st.i+1}. ${s.short}`;capR.textContent=s.badge;cap.style.display=st.free?"none":"flex"};
   const go=i=>{st.i=Math.max(0,Math.min(ST.length-1,i));st.t=0;st.free=0;const s=ST[st.i];
-    window.__baroStage=s.parts?{parts:s.parts,hl:s.hl}:null;
-    if(!st.applied||st.i===0)applyBP();
-    const vb=main.querySelector(`[data-av="${s.view}"]`);vb&&vb.click();render();setB()};
+    /* 3D изгледът чете стъпката (i), напредъка в нея (u, 0…1) и изгледа на камерата */
+    window.__baroStage={i:st.i,u:0,parts:s.parts,hl:s.hl,view:s.view};
+    if(!st.applied||st.i===0)applyBP();render();setB()};
   const setB=()=>{const b=q("play");b.innerHTML=st.play?`${I.pause||""}Пауза`:`${I.play||I.next||""}Пусни`;b.classList.toggle("primary",!!st.play);q("free").classList.toggle("primary",!!st.free)};
   bar.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const k=b.dataset.k;
     if(k==="play"){st.play^=1;if(st.free){st.free=0;go(st.i)}setB()}
     if(k==="prev"){st.play=0;go(st.i-1)}if(k==="next"){st.play=0;go(st.i+1)}if(k==="rs"){st.play=1;go(0)}
     if(k==="free"){st.free=1;st.play=0;window.__baroStage=null;cap.style.display="none";setB()}});
-  const tick=setInterval(()=>{if(!document.body.contains(card)){clearInterval(tick);return}if(!st.play||st.free)return;st.t+=0.25;if(st.t>=DUR){if(st.i<ST.length-1)go(st.i+1);else{st.play=0;setB()}}},250);
+  /* часовник на стъпката: анимацията в 3D следва u; при пауза спира */
+  const tick=setInterval(()=>{if(!document.body.contains(card)){clearInterval(tick);return}if(st.free)return;if(st.t<DUR)st.t=Math.min(DUR,st.t+(st.play||st.t<DUR*0.92?0.1:0));if(window.__baroStage)window.__baroStage.u=st.t/DUR;
+    if(st.play&&st.t>=DUR){if(st.i<ST.length-1)go(st.i+1);else{st.play=0;setB()}}},100);
   (window.__cleanups=window.__cleanups||[]).push(()=>{clearInterval(tick);clearInterval(mv);window.__baroStage=null});
   setTimeout(()=>go(0),800)};
 })();
