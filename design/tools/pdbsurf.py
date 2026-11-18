@@ -12,6 +12,9 @@ from skimage import measure
 import fast_simplification
 
 pdb, OUT, specs = sys.argv[1], sys.argv[2], sys.argv[3:]
+import os
+SIG = float(os.environ.get("SIG", .16)); ISO = float(os.environ.get("ISO", .55)); TGT = int(os.environ.get("TGT", 9000)); FLIP = os.environ.get("FLIP") == "1"
+# SIG/ISO: за структури само с Cα (много големи, напр. RyR2) — по-широка гаусиана; FLIP=1 обръща посоката (когато извънклетъчната част е по-масивна)
 HYD = set("ALA VAL LEU ILE PHE MET TRP".split())
 atoms = []
 for l in open(pdb):
@@ -50,17 +53,17 @@ for i in range(1500):
         if sc > best[0]: best = (sc, n, c)
 _, nrm, c0 = best
 d = (X - ctr) @ nrm - c0
-if (d > 15).sum() > (d < -15).sum(): nrm, c0 = -nrm, -c0   # масивната страна → цитоплазма (−y)
+if ((d > 15).sum() > (d < -15).sum()) != FLIP: nrm, c0 = -nrm, -c0   # масивната страна → цитоплазма (−y)
 ex = np.cross(nrm, [0, 0, 1.0]) if abs(nrm[2]) < .9 else np.cross(nrm, [1.0, 0, 0]); ex /= np.linalg.norm(ex); ez = np.cross(ex, nrm)
 def tf(p):
     q = p - ctr; return np.c_[q @ ex, q @ nrm - c0, q @ ez] * .1   # Å → nm
 
 for name, chs, A, col in parts:
     Y = tf(np.array([a[4] for a in A]))
-    lo = Y.min(0) - .5; hi = Y.max(0) + .5; h = .085
+    lo = Y.min(0) - .5; hi = Y.max(0) + .5; h = float(os.environ.get("H", .085))
     dims = np.ceil((hi - lo) / h).astype(int) + 1
     grid = np.zeros(dims, np.float32)
-    sig = .16; R = int(np.ceil(3 * sig / h))
+    sig = SIG; R = int(np.ceil(3 * sig / h))
     ax = np.arange(-R, R + 1) * h
     kern = np.exp(-(ax[:, None, None] ** 2 + ax[None, :, None] ** 2 + ax[None, None, :] ** 2) / (2 * sig * sig))
     for p in Y:
@@ -68,9 +71,9 @@ for name, chs, A, col in parts:
         s = [slice(max(0, i[k] - R), min(dims[k], i[k] + R + 1)) for k in range(3)]
         ks = [slice(s[k].start - (i[k] - R), s[k].stop - (i[k] - R)) for k in range(3)]
         grid[s[0], s[1], s[2]] += kern[ks[0], ks[1], ks[2]]
-    v, f, _, _ = measure.marching_cubes(grid, .55)
+    v, f, _, _ = measure.marching_cubes(grid, ISO)
     v = v * h + lo
-    tgt = 9000
+    tgt = TGT
     if len(f) > tgt: v, f = fast_simplification.simplify(v.astype(np.float32), f.astype(np.int64), target_reduction=1 - tgt / len(f))
     base = np.array([int(col[i:i + 2], 16) for i in (0, 2, 4)], float)
     # лек шум в цвета по остатъци: съседните атоми задават тона

@@ -228,11 +228,28 @@ const ZK={
    MK.loadMesh(T,"m/mol/"+key+".txt").then(g0=>{const g=g0.clone();g.computeBoundingBox();const bb=g.boundingBox,c=bb.getCenter(new T.Vector3());if(center)g.translate(-c.x,-c.y,-c.z);else g.translate(-c.x,0,-c.z);
      const mat=MK.molMat(T,{vertexColors:false,color:LIN(T,col),emissive:LIN(T,col),emissiveIntensity:0});const me=new T.Mesh(g,mat);me.scale.setScalar(H0/(bb.max.y-bb.min.y)*1.05);
      m.children.forEach(ch=>ch.visible=false);m.add(me);if(!m.isMesh)m.material=mat}).catch(()=>{})},
+ /* истински белтък в реален мащаб (sp.nm единици на nm): повърхността от pdbsurf е с мембраната при y = 0 и цитоплазмата надолу;
+    o.flip — за мембраната на ретикулума (цитоплазмата е отгоре). Схематичният модел се скрива; материалът остава на групата за светенето. */
+ realNm(T,m,o,nm){return MK.loadMesh(T,"m/mol/"+o.pdb+".txt").then(g0=>{const mat=MK.molMat(T,{vertexColors:true,roughness:0.5,emissive:LIN(T,o.col),emissiveIntensity:0});
+     m.children.forEach(ch=>ch.visible=false);if(m.isMesh){m.geometry=new T.BufferGeometry()}m.scale.setScalar(1);m.userData.s0=1;m.userData.pdb=1;
+     const me=new T.Mesh(g0,mat);me.scale.setScalar(nm);if(o.ry)me.rotation.y=o.ry;m.add(me);m.material=mat;
+     (o.extra||[]).forEach(u=>MK.loadMesh(T,"m/mol/"+u+".txt").then(g1=>{const e=new T.Mesh(g1,mat);e.scale.setScalar(nm);if(o.ry)e.rotation.y=o.ry;m.add(e)}).catch(()=>{}));return me}).catch(()=>null)},
+ /* липидите, които попадат в истинския белтък, се скриват: за всеки белтък — контур в равнината на мембраната (36 сектора) */
+ cullLipids(T,g,mems,meshes){g.updateMatrixWorld(true);const v=new T.Vector3(),M=new T.Matrix4(),Z=new T.Matrix4().makeScale(0,0,0),q=new T.Vector3();
+   mems.forEach(mb=>{const fps=[];meshes.forEach(me=>{const P=me.geometry.attributes.position,c=new T.Vector3(),pts=[];for(let i=0;i<P.count;i+=2){v.fromBufferAttribute(P,i).applyMatrix4(me.matrixWorld);if(Math.abs(v.y-mb.y)<1.6)pts.push([v.x,v.z])}
+       if(pts.length<20)return;pts.forEach(p=>{c.x+=p[0];c.z+=p[1]});c.x/=pts.length;c.z/=pts.length;const R=new Float32Array(36);pts.forEach(p=>{const a=Math.atan2(p[1]-c.z,p[0]-c.x),k=((Math.round(a/(Math.PI*2)*36)%36)+36)%36,r=Math.hypot(p[0]-c.x,p[1]-c.z);if(r>R[k])R[k]=r});
+       for(let k=0;k<36;k++)R[k]=Math.max(R[k],Math.min(R[(k+35)%36],R[(k+1)%36]));fps.push({c,R})});
+     [mb.b.userData.heads,mb.b.userData.tails].forEach(I=>{if(!I)return;let ch=0;for(let i=0;i<I.count;i++){I.getMatrixAt(i,M);q.setFromMatrixPosition(M).applyMatrix4(mb.b.matrixWorld);
+       for(const f of fps){const a=Math.atan2(q.z-f.c.z,q.x-f.c.x),k=((Math.round(a/(Math.PI*2)*36)%36)+36)%36;if(Math.hypot(q.x-f.c.x,q.z-f.c.z)<f.R[k]+0.18){I.setMatrixAt(i,Z);ch=1;break}}}if(ch)I.instanceMatrix.needsUpdate=true})})},
  build(G,T,ctx,sp){const g=new T.Group();G.scene.add(g);ctx.B={};ctx.P={};ctx.L={};
-   (sp.mem||[]).forEach(m=>{const b=MK.bilayer(T,{w:m.w||34,d:10,z0:-5,holes:m.holes||[]});b.position.set(m.x||0,m.y,0);if(m.rz)b.rotation.z=m.rz;g.add(b)});
+   const real=sp.nm&&MK.real;ctx.mems=[];
+   (sp.mem||[]).forEach(m=>{const k=real&&m.bk?m.bk:1,b=MK.bilayer(T,{w:(m.w||34)/k,d:(m.d||10)/k,z0:(m.z0!=null?m.z0:-5)/k,holes:real&&m.bk?[]:(m.holes||[]),seg:real?[8,6]:null});b.scale.setScalar(k);b.position.set(m.x||0,m.y,0);if(m.rz)b.rotation.z=m.rz;g.add(b);ctx.mems.push({b,y:m.y})});
+   const pdbs=[];
    (sp.it||[]).forEach(o=>{const m=ZK.x[o.kind]?ZK.x[o.kind](T,o):o.kind==="gpcr"?ZK.gpcr(T,o.col,o.side||(o.p[1]<=-6?-1:1)):o.kind==="ball"?new T.Mesh(new T.SphereGeometry(o.r||0.7,18,14),MK.mat(T,o.col,{emissive:LIN(T,o.col),emissiveIntensity:0.1})):o.kind==="ves"?new T.Mesh(new T.SphereGeometry(o.r||1.8,24,18),new T.MeshPhysicalMaterial({color:LIN(T,o.col),transparent:true,opacity:0.35,roughness:0.3,depthWrite:false})):ZK.prot(T,o.col,o.kind);
      m.position.set(...o.p);if(o.flip)m.rotation.x=Math.PI;if(o.rz)m.rotation.z=o.rz;if(o.s)m.scale.setScalar(o.s);g.add(m);ctx.B[o.k]=m;m.userData.p0=m.position.clone();
+     if(real&&o.pdb){pdbs.push(ZK.realNm(T,m,o,sp.nm));return}
      const RK={chan:"chan_all",pump:"pump_all",enz:"enz_all",gpcr:"gpcrw_r"}[o.kind];if(RK&&!ZK.x[o.kind]&&!o.schematic)ZK.real(T,m,RK,o.col,o.kind==="enz")});
+   if(pdbs.length)Promise.all(pdbs).then(ms=>ZK.cullLipids(T,g,ctx.mems,ms.filter(Boolean))).catch(()=>{});
    Object.entries(sp.pools||{}).forEach(([k,v])=>{ctx.P[k]=zPool(T,k,v);g.add(ctx.P[k])});try{ZK.decor(T,g,sp)}catch(e){console.error(e)}ctx.g=g;return g},
  begin(ctx){for(const k in ctx.P)ctx.L[k]=[]},end(ctx){const tg=ctx.tags=[];for(const k in ctx.P){const L=ctx.L[k];ctx.P[k].put(L);const h=ctx.P[k].userData.tag;if(h&&L.length){const p=L[0];tg.push([h,new THREE.Vector3(p.x,p.y+1.1,p.z)])}}},
  // поток от частици по отсечка/ломена; ph — фаза, n — брой
@@ -1198,7 +1215,7 @@ const myoSvg=p=>`<svg viewBox="0 0 170 70" width="170" height="70" style="displa
 const STG_MYOCH=zCellStg({id:"stgMyo",title:"Основните йонни канали в камерния кардиомиоцит — фаза по фаза",
  intro:"Сарколемата с всички главни канали подред и саркоплазменият ретикулум под нея. Всяка фаза на акционния потенциал се дължи на различен канал; червената точка на кривата долу показва къде си.",
  legend:[["#f06595","Na⁺"],["#74c0fc","Ca²⁺"],["#7950f2","K⁺"]],
- mechs:[{key:"v",label:"Камерна клетка",center:"",cam:[0,0,0,48,0.18,1.42],foc:[[7,5,32],[-15,6,24],[-10.5,6,24],[-6,0,34],[3,6,32],[5,-2,40],[0,0,48]],stages:[
+ mechs:[{key:"v",label:"Камерна клетка",center:"",cam:[-4,0,0,74,0.16,1.42],foc:[[11,4,34],[-27,5,30],[-19.5,5,30],[-12,-2,46],[2,5,40],[10,-3,48],[-4,0,74]],stages:[
    {t:"Фаза 4 — покой: K⁺ каналите I<sub>K1</sub> държат −90 mV",short:"Фаза 4: покой",badge:"I K1",d:"В покой са отворени главно <b>K⁺ каналите с входящо изправяне (I<sub>K1</sub>)</b>. K⁺ излиза и държи мембраната близо до равновесния потенциал на калия — около −90 mV. Na⁺/K⁺-помпата поддържа градиентите. За разлика от синусовия възел, тук покоят е стабилен."},
    {t:"Фаза 0 — бърза деполяризация: Na⁺ канали",short:"Фаза 0: Na⁺ влиза",badge:"I Na · 1–2 ms",d:"Когато съседната клетка деполяризира мембраната до прага (≈ −65 mV), бързите <b>волтаж-зависими Na⁺ канали</b> се отварят лавинообразно. Na⁺ нахлува и потенциалът скача до +20…+30 mV. След 1–2 ms каналите се <b>инактивират</b> и остават така до реполяризацията."},
    {t:"Фаза 1 — ранна реполяризация: преходен K⁺ ток",short:"Фаза 1: зъбец",badge:"I to",d:"Отварят се за кратко K⁺ канали за <b>преходен изходящ ток (I<sub>to</sub>)</b>. Малко K⁺ излиза и потенциалът спада с няколко миливолта — „зъбецът“ преди платото."},
@@ -1206,22 +1223,24 @@ const STG_MYOCH=zCellStg({id:"stgMyo",title:"Основните йонни ка�
    {t:"Фаза 3 — реполяризация: забавените K⁺ канали надделяват",short:"Фаза 3: реполяризация",badge:"I Kr, I Ks, I K1",d:"Ca²⁺ каналите се затварят, а <b>забавените K⁺ канали</b> — бързият I<sub>Kr</sub> и бавният I<sub>Ks</sub> — са напълно отворени. K⁺ излиза и мембраната се връща към −90 mV; накрая се включва и I<sub>K1</sub>. Na⁺ каналите излизат от инактивация — клетката пак е възбудима."},
    {t:"Отпускане: Ca²⁺ се прибира",short:"Ca²⁺ се прибира",badge:"SERCA · Na⁺/Ca²⁺ обменник",d:"<b>SERCA</b> изпомпва около 70 % от Ca²⁺ обратно в ретикулума (фосфоламбанът я задържа; симпатикусът снема тази спирачка). <b>Na⁺/Ca²⁺ обменникът</b> изнася останалото — 3 Na⁺ навътре срещу 1 Ca²⁺ навън. Сърдечните гликозиди потискат Na⁺/K⁺-помпата, Na⁺ в клетката расте, обменникът изнася по-малко Ca²⁺ — съкращението се усилва."},
    {t:"Целият цикъл и какво следва от него",short:"Целият цикъл",badge:"дълъг рефрактерен период",d:"Акционният потенциал трае 250–300 ms — почти колкото съкращението. Докато Na⁺ каналите са инактивирани, нов импулс е невъзможен: сърцето <b>не може да изпадне в тетанус</b>. Антиаритмичните лекарства са насочени към тези канали: клас I — Na⁺, клас III — K⁺ (удължават потенциала), клас IV — Ca²⁺. В синусовия възел I<sub>K1</sub> липсва, а фаза 0 се дължи на Ca²⁺."}],
-   spec:{cyto:[],mem:[{y:6,ext:1,holes:[ZH(-15),ZH(-10.5),ZH(-6),ZH(-1.5),ZH(2.5),ZH(6.5),ZH(11),ZH(15)]},{y:-6,x:-4,w:16,ext:0,holes:[[-4,0,1.7],[4,0,1.5]]}],
-    it:[{k:"nav",kind:"chan",col:0x1c7ed6,p:[-15,6,0],s:1.15},{k:"ito",kind:"chan",col:0xae3ec9,p:[-10.5,6,0]},{k:"cal",kind:"chan",col:0x15aabf,p:[-6,6,0],s:1.15},{k:"kr",kind:"chan",col:0x7950f2,p:[-1.5,6,0]},{k:"ks",kind:"chan",col:0x9775fa,p:[2.5,6,0]},{k:"k1",kind:"chan",col:0x5f3dc4,p:[6.5,6,0]},{k:"ncx",kind:"chan",col:0xe8590c,p:[11,6,0]},{k:"nka",kind:"pump",col:0xf06595,p:[15,6,0]},
-     {k:"ryr",kind:"chan",col:0xe03131,p:[-8,-6,0],s:1.35},{k:"ser",kind:"pump",col:0x1c7ed6,p:[0,-6,0],flip:true},{k:"mf",kind:"myofib",col:0xf8c4c0,p:[11.5,-3,-2]}],
-    pools:{na:[0xf06595,0.28,60],ca:[0x74c0fc,0.28,90],k:[0x7950f2,0.28,70]}},
+   spec:{cyto:[],nm:0.55,mem:[{y:6,x:-4,w:62,d:13,z0:-5.5,bk:0.5,ext:1,holes:[ZH(-27),ZH(-19.5),ZH(-12),ZH(-4),ZH(4),ZH(11),ZH(16.5),ZH(21.5)]},{y:-9.5,x:-6,w:38,d:14,z0:-6,bk:0.5,ext:0,holes:[[-6,0,1.7],[12,0,1.5]]}],
+    /* истински структури (PDB): Nav1.5 6UZ3, Kv4.2 7E83, Cav1.1 с β и α₂δ 5GJV, hERG 5VA1, KCNQ1 + калмодулин 6UZZ, Kir2.2 3JYC, NCX 5HXE, Na⁺/K⁺-ATP-аза 2ZXE, RyR2 5GO9, SERCA1a 1SU4 */
+    it:[{k:"nav",kind:"chan",col:0x1c7ed6,p:[-27,6,0],s:1.15,pdb:"cm_nav_x"},{k:"ito",kind:"chan",col:0xae3ec9,p:[-19.5,6,0],pdb:"cm_kv4_x"},{k:"cal",kind:"chan",col:0x15aabf,p:[-12,6,0],s:1.15,pdb:"cm_cav_a",extra:["cm_cav_b"]},{k:"kr",kind:"chan",col:0x7950f2,p:[-4,6,0],pdb:"cm_herg_x"},{k:"ks",kind:"chan",col:0x9775fa,p:[4,6,0],pdb:"cm_kcnq1_x",extra:["cm_kcnq1_cam"]},{k:"k1",kind:"chan",col:0x5f3dc4,p:[11,6,0],pdb:"cm_kir_x"},{k:"ncx",kind:"chan",col:0xe8590c,p:[16.5,6,0],pdb:"cm_ncx_x"},{k:"nka",kind:"pump",col:0xf06595,p:[21.5,6,0],pdb:"cm_nka_x"},
+     {k:"ryr",kind:"chan",col:0xe03131,p:[-12,-9.5,0],s:1.35,flip:true,pdb:"cm_ryr_x"},{k:"ser",kind:"pump",col:0x1c7ed6,p:[6,-9.5,0],flip:true,pdb:"cm_serca_x"},{k:"mf",kind:"myofib",col:0xf8c4c0,p:[19,-8,-2]}],
+    pools:{na:[0xf06595,0.24,60],ca:[0x74c0fc,0.24,90],k:[0x7950f2,0.24,70]}},
    init(G,T,C){C.B.mf.scale.set(0.34,1,0.6)},
    upd(C,i,u,t,sg,R){const ph=i<6?MYO_R[i][0]+(MYO_R[i][1]-MYO_R[i][0])*(i===0?0.5:u):(t*0.13)%1,w=(a,b,r=0.02)=>Z.cl((ph-a)/r,0,1)*Z.cl((b-ph)/r,0,1),nav=w(0.1,0.14,0.008),ito=w(0.15,0.22),cal=w(0.2,0.6,0.03),kr=w(0.45,0.8,0.1),ks=Z.cl((ph-0.25)/0.3,0,1)*Z.cl((0.8-ph)/0.04,0,1),k1=1-w(0.11,0.68,0.03),ryr=w(0.23,0.42,0.03),cai=Z.cl((ph-0.24)/0.08,0,1)*Z.cl((0.92-ph)/0.2,0,1),rem=w(0.5,0.97,0.06);
-    const ch=(k,o,x,pool,dir,n)=>{C.B[k].scale.setScalar((C.B[k].userData.s0=C.B[k].userData.s0||C.B[k].scale.x));const s0=C.B[k].userData.s0;C.B[k].scale.set(s0*(0.78+0.3*o),s0,s0*(0.78+0.3*o));ZK.glow(C,k,0.85*o);if(o>0.08)R(pool,dir>0?[[x,11.5],[x,6],[x,2]]:[[x,2],[x,6],[x,11.5]],Math.round(n*o),t*1.1,0.15)};
-    ch("nav",nav,-15,"na",1,14);ch("ito",ito,-10.5,"k",-1,7);ch("cal",cal,-6,"ca",1,8);ch("kr",kr,-1.5,"k",-1,9);ch("ks",ks,2.5,"k",-1,8);ch("k1",k1,6.5,"k",-1,5);
-    if(ph>0.14&&ph<0.7){C.B.nav.scale.x*=0.8}
-    C.B.ryr.scale.set(1.05+0.4*ryr,1.35,1.05+0.4*ryr);ZK.glow(C,"ryr",0.9*ryr);if(ryr>0.08)R("ca",[[-8,-10.5],[-8,-6],[-7,-2],[2,-1]],Math.round(16*ryr),t*1.1,0.4);
-    ZK.cloud(C,"ca",[-6,-9.6,0],Math.round(16*(1-0.8*cai)),4.5,t*0.5);C.L.ca.forEach(p=>{if(p.y<-7.5&&p.y>-13)p.y=Math.min(p.y,-7.8)});ZK.cloud(C,"ca",[3,-1,0],Math.round(26*cai),6.5,t*0.9);
+    /* отварянето се показва със светене и йонен поток; схематичните канали се и разширяват, истинските структури — не (не се деформират) */
+    const ch=(k,o,x,pool,dir,n)=>{const B=C.B[k];if(!B.userData.pdb){B.scale.setScalar((B.userData.s0=B.userData.s0||B.scale.x));const s0=B.userData.s0;B.scale.set(s0*(0.78+0.3*o),s0,s0*(0.78+0.3*o))}ZK.glow(C,k,0.85*o);if(o>0.08)R(pool,dir>0?[[x,11.5],[x,6],[x,1.5]]:[[x,1.5],[x,6],[x,11.5]],Math.round(n*o),t*1.1,0.15)};
+    ch("nav",nav,-27,"na",1,14);ch("ito",ito,-19.5,"k",-1,7);ch("cal",cal,-12,"ca",1,8);ch("kr",kr,-4,"k",-1,9);ch("ks",ks,4,"k",-1,8);ch("k1",k1,11,"k",-1,5);
+    if(ph>0.14&&ph<0.7&&!C.B.nav.userData.pdb){C.B.nav.scale.x*=0.8}
+    if(!C.B.ryr.userData.pdb)C.B.ryr.scale.set(1.05+0.4*ryr,1.35,1.05+0.4*ryr);ZK.glow(C,"ryr",0.9*ryr);if(ryr>0.08)R("ca",[[-12,-13.5],[-12,-9.5],[-12,-5],[-8,-1.2],[0,-1]],Math.round(16*ryr),t*1.1,0.4);
+    ZK.cloud(C,"ca",[-9,-13.4,0],Math.round(16*(1-0.8*cai)),5,t*0.5);C.L.ca.forEach(p=>{if(p.y<-11&&p.y>-17)p.y=Math.min(p.y,-11.3)});ZK.cloud(C,"ca",[1,-2.5,0],Math.round(26*cai),7.5,t*0.9);
     C.B.mf.material.emissive=C.B.mf.material.emissive||new THREE.Color(0);C.B.mf.material.emissive.setRGB(0.5*cai,0.05*cai,0.05*cai);C.B.mf.scale.x=0.34*(1-0.14*cai);
-    ZK.glow(C,"ser",0.8*rem);if(rem>0.08)R("ca",[[0.6,-2.4],[0,-6],[-1,-9.6]],Math.round(9*rem),t*0.9,0.2);ZK.glow(C,"ncx",0.8*rem);if(rem>0.08){R("ca",[[10.4,2.4],[10.4,6],[10.4,11]],Math.round(4*rem),t*0.8,0.15);R("na",[[11.6,11],[11.6,6],[11.6,2.4]],Math.round(7*rem),t*0.8,0.15)}
-    R("na",[[14.4,2.4],[14.4,6],[14.4,11]],3,t*0.5,0.15);R("k",[[15.8,11],[15.8,6],[15.8,2.4]],2,t*0.5,0.15);ZK.glow(C,"nka",0.3);
+    ZK.glow(C,"ser",0.8*rem);if(rem>0.08)R("ca",[[6.6,-4.5],[6,-9.5],[5,-13]],Math.round(9*rem),t*0.9,0.2);ZK.glow(C,"ncx",0.8*rem);if(rem>0.08){R("ca",[[15.9,2.4],[15.9,6],[15.9,11]],Math.round(4*rem),t*0.8,0.15);R("na",[[17.1,11],[17.1,6],[17.1,2.4]],Math.round(7*rem),t*0.8,0.15)}
+    R("na",[[20.9,1.5],[20.9,6],[20.9,11]],3,t*0.5,0.15);R("k",[[22.3,11],[22.3,6],[22.3,1.5]],2,t*0.5,0.15);ZK.glow(C,"nka",0.3);
     return myoSvg(ph)},
-   lab:(i,V)=>[["извън клетката",V(-17,12.6)],["цитоплазма",V(-17,1)],["саркоплазмен ретикулум",V(-13,-12)],["Na⁺ канал",V(-15,1.6)],["I<sub>to</sub>",V(-10.5,1.6)],["Ca²⁺ канал (L)",V(-6,1.6)],["I<sub>Kr</sub>",V(-1.5,1.6)],["I<sub>Ks</sub>",V(2.5,1.6)],["I<sub>K1</sub>",V(6.5,1.6)],["Na⁺/Ca²⁺",V(11,1.6)],["Na⁺/K⁺-помпа",V(16.4,1.2)],...(i>=3?[["рианодинов рецептор",V(-12.6,-4.4)],["миофиламенти",V(11.5,-6)]]:[]),...(i>=5?[["SERCA",V(2.6,-4.4)]]:[])],
+   lab:(i,V)=>[["извън клетката",V(-34,9.5)],["цитоплазма",V(-34,0)],["саркоплазмен ретикулум",V(-26,-13.5)],["Na⁺ канал (Nav1.5)",V(-27,11.5)],["I<sub>to</sub> (Kv4)",V(-19.5,14.3)],["Ca²⁺ канал L (Cav1.2)",V(-12,17)],["I<sub>Kr</sub> (hERG)",V(-4,11.5)],["I<sub>Ks</sub> (KCNQ1)",V(4,14.3)],["I<sub>K1</sub> (Kir2)",V(11,11.5)],["Na⁺/Ca²⁺ обменник",V(16.5,14.3)],["Na⁺/K⁺-помпа",V(22.5,11.5)],...(i>=3?[["рианодинов рецептор (RyR2)",V(-21,-6)],["миофиламенти",V(19,-11.5)]]:[]),...(i>=5?[["SERCA",V(6,-3.4)]]:[])],
    stats:[[["Ток","I K1"],["Потенциал","−90 mV"]],[["Ток","I Na"],["Връх","+20…+30 mV"]],[["Ток","I to"]],[["Токове","I Ca,L ↔ I K"],["Трайност","200–300 ms"]],[["Токове","I Kr, I Ks, I K1"]],[["SERCA","≈ 70 %"],["Обменник","3 Na⁺ : 1 Ca²⁺"]],[["Рефрактерен период","≈ 250 ms"],["Тетанус","невъзможен"]]]}]});
 
 // 4) гломерулен филтър

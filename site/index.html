@@ -3855,7 +3855,7 @@ const MK={
   bilayer(T,o){const w=o.w||30,d=o.d||14,z0=o.z0||0,sp=o.sp||0.86,holes=o.holes||[],g=new T.Group();const H=[],Tl=[];
     for(const side of [1,-1])for(let iz=0;iz*sp*0.866<=d;iz++)for(let ix=0;ix*sp<=w;ix++){const x=-w/2+ix*sp+(iz%2)*sp/2,z=z0-d/2+iz*sp*0.866;if(holes.some(h=>Math.hypot(x-h[0],z-h[1])<h[2]))continue;
       const j=()=>((Math.sin(x*12.9898+z*78.233+side*3.1)*43758.5453)%1)*0.18;H.push([x+j(),side*(2.05+j()*0.6),z+j(),side]);Tl.push([x-0.17,side,z],[x+0.17,side,z+0.08])}
-    const hm=new T.InstancedMesh(new T.SphereGeometry(0.43,14,10),MK.mat(T,0xffffff,{roughness:0.35,clearcoat:0.5}),H.length);const m=new T.Matrix4(),c=new T.Color();
+    const sg=o.seg||[14,10],hm=new T.InstancedMesh(new T.SphereGeometry(0.43,sg[0],sg[1]),MK.mat(T,0xffffff,{roughness:0.35,clearcoat:0.5}),H.length);const m=new T.Matrix4(),c=new T.Color();
     const pal=o.pal||[[0xf0a39b,0xf3b6ad,0xe58f88],[0xf0a39b,0xd8807b,0xf3b6ad]];
     H.forEach((h,i)=>{m.makeTranslation(h[0],h[1],h[2]);hm.setMatrixAt(i,m);const p=pal[h[3]>0?0:1];c.copy(LIN(T,p[i%p.length]));hm.setColorAt(i,c)});g.add(hm);
     const tm=new T.InstancedMesh(new T.CylinderGeometry(0.11,0.09,1.55,6),MK.mat(T,o.tail||0xf3e6c4,{roughness:0.7,clearcoat:0}),Tl.length);
