@@ -3,7 +3,7 @@ G-актин (PDB 1J6Z) и глава на миозина S1 (PDB 2MYS). RCSB PD
 Повърхността е центрирана, най-дългата ос е по z, а половината дължина е 1 (сцената мащабира).
 Цветовете на върховете са сиви тонове (инстанцията задава оттенъка).
 
-Употреба: python3 instsurf.py файл.pdb изход.txt триъгълници "вериги:от-до:тон (0–1) или цвят rrggbb" ... [--tip вериги:от-до]
+Употреба: python3 instsurf.py файл.pdb изход.txt триъгълници "вериги:от-до:тон (0–1) или цвят rrggbb" ... [--tip вериги:от-до] [--axis вериги:от-до вериги:от-до]
   --tip: частта, която трябва да сочи към +z (при миозина — моторният домен към актина)
 """
 import sys, struct, base64, numpy as np
@@ -11,8 +11,9 @@ from skimage import measure
 import fast_simplification
 from scipy.spatial import cKDTree
 
-a = sys.argv[1:]; tip = None
+a = sys.argv[1:]; tip = None; axis = None
 if "--tip" in a: k = a.index("--tip"); tip = a[k + 1]; a = a[:k] + a[k + 2:]
+if "--axis" in a: k = a.index("--axis"); axis = (a[k + 1], a[k + 2]); a = a[:k] + a[k + 3:]   # z: от центъра на първата част към втората
 pdb, out, tgt, specs = a[0], a[1], int(a[2]), a[3:]
 at = []
 for l in open(pdb):
@@ -31,6 +32,9 @@ X = np.array([at[i][2] for i in idx]) * .1; tone = np.array(tone)
 c = X.mean(0); X = X - c
 ev = np.linalg.svd(X, full_matrices=False)[2]          # главни оси: ev[0] — най-дългата
 B = np.array([ev[1], ev[2], ev[0]])
+if axis:
+    cA = np.array([at[i][2] for i in pick(axis[0] + ":1")]).mean(0) * .1 - c; cB = np.array([at[i][2] for i in pick(axis[1] + ":1")]).mean(0) * .1 - c
+    ez = (cB - cA) / np.linalg.norm(cB - cA); ex = ev[0] - (ev[0] @ ez) * ez; ex /= np.linalg.norm(ex); B = np.array([ex, np.cross(ez, ex), ez])
 if np.linalg.det(B) < 0: B[0] = -B[0]
 Y = X @ B.T
 if tip:

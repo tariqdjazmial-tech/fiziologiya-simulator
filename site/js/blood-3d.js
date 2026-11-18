@@ -11,8 +11,28 @@ function b3RbcGeo(T,D=7.82,seg=48){/* двойновдлъбнат диск по
 function b3RbcMat(T,o={}){/* мек, леко сатенен вид като при жив еритроцит — без пластмасов гланц */
   return new T.MeshPhysicalMaterial({vertexColors:true,color:LIN(T,o.c||0xb01420),roughness:0.5,clearcoat:0.12,clearcoatRoughness:0.6,sheen:new T.Color(0x6e0f16),emissive:LIN(T,0x2a0306),emissiveIntensity:0.3,transparent:!!o.tr,opacity:o.op==null?1:o.op})}
 // Тромбоцит: покой — двойноизпъкнал диск; активиран — с псевдоподи
-function b3PltGeo(T,act){const g=new T.IcosahedronGeometry(1,3),P=g.attributes.position,v=new T.Vector3();const R=MK.rnd(act?7:3);const sp=[];for(let k=0;k<7;k++)sp.push(new T.Vector3(R()-0.5,(R()-0.5)*0.5,R()-0.5).normalize());
-  for(let i=0;i<P.count;i++){v.set(P.getX(i),P.getY(i),P.getZ(i));if(!act){v.set(v.x*1.5,v.y*0.42,v.z*1.5)}else{let s=1;sp.forEach(d=>{const a=v.dot(d);if(a>0.86)s+=Math.pow((a-0.86)/0.14,3)*1.6});v.multiplyScalar(s);v.y*=0.75}P.setXYZ(i,v.x,v.y,v.z)}g.computeVertexNormals();return g}
+function b3SmoothN(T,g){/* гладки нормали за неиндексирана геометрия: усредняване по съвпадащи върхове */
+  g.computeVertexNormals();const P=g.attributes.position,N=g.attributes.normal,acc=new Map(),k=i=>Math.round(P.getX(i)*1e4)+"_"+Math.round(P.getY(i)*1e4)+"_"+Math.round(P.getZ(i)*1e4);
+  for(let i=0;i<P.count;i++){const key=k(i),a=acc.get(key)||[0,0,0];a[0]+=N.getX(i);a[1]+=N.getY(i);a[2]+=N.getZ(i);acc.set(key,a)}
+  for(let i=0;i<P.count;i++){const a=acc.get(k(i)),l=Math.hypot(a[0],a[1],a[2])||1;N.setXYZ(i,a[0]/l,a[1]/l,a[2]/l)}return g}
+function b3PltGeo(T,act){/* тромбоцит. Покой: гладка двойноизпъкнала леща ≈ 3 × 0,9 µm с плитки отвори на каналикуларната система.
+     Активиран: заоблено тяло с 8–11 тънки филоподии (до ≈ 5 µm) и къса ламелиподия — както на сканираща микроскопия. */
+  const R=MK.rnd(act?7:3),n3=(x,y,z)=>Math.sin(x*3.1+y*1.7)*Math.cos(z*2.9-x*1.3)+0.5*Math.sin(y*5.3+z*4.1);
+  const body=new T.IcosahedronGeometry(1,act?4:5),P=body.attributes.position,v=new T.Vector3();
+  for(let i=0;i<P.count;i++){v.set(P.getX(i),P.getY(i),P.getZ(i));
+    if(!act){const rr=Math.hypot(v.x,v.z);v.set(v.x*1.5,v.y*(0.42-0.06*rr*rr),v.z*1.5);const pit=Math.max(0,Math.sin(v.x*4.3)*Math.sin(v.z*4.7)-0.82)*0.25;v.y*=1-pit}
+    else{v.multiplyScalar(1+0.06*n3(v.x,v.y,v.z));v.y*=0.78;const lam=Math.max(0,v.x*0.8+v.z*0.6-0.3);v.x*=1+0.35*lam;v.z*=1+0.25*lam;v.y*=1-0.4*lam}
+    P.setXYZ(i,v.x,v.y,v.z)}
+  b3SmoothN(T,body);if(!act)return body
+  const geos=[body];
+  const nF=8+Math.floor(R()*4);for(let k=0;k<nF;k++){const a=R()*Math.PI*2,el=(R()-0.5)*0.7,d=new T.Vector3(Math.cos(a)*Math.cos(el),Math.sin(el)*0.6,Math.sin(a)*Math.cos(el)).normalize(),L=1.3+R()*1.7;
+    const side=new T.Vector3(-d.z,0,d.x).normalize(),bend=(R()-0.5)*0.5,pts=[];for(let s2=0;s2<=4;s2++){const u=s2/4;pts.push(d.clone().multiplyScalar(0.82+u*L).addScaledVector(side,bend*u*u*L).add(new T.Vector3(0,-0.15*u*u*L*0.3,0)))}
+    const tg=new T.TubeGeometry(new T.CatmullRomCurve3(pts),10,1,5,false),tp=tg.attributes.position;const cur=new T.CatmullRomCurve3(pts);
+    for(let q=0;q<tp.count;q++){const iu=Math.floor(q/6)/10,c=cur.getPoint(Math.min(1,iu)),r=0.13*(1-iu)+0.025;v.set(tp.getX(q),tp.getY(q),tp.getZ(q)).sub(c);v.setLength(r);v.add(c);tp.setXYZ(q,v.x,v.y,v.z)}
+    tg.computeVertexNormals();geos.push(tg.toNonIndexed())}
+  const tot=geos.reduce((a,g)=>a+g.attributes.position.count,0),pos=new Float32Array(tot*3);let o=0;geos.forEach(g=>{pos.set(g.attributes.position.array,o);o+=g.attributes.position.array.length});
+  const nor=new Float32Array(tot*3);o=0;geos.forEach(g2=>{nor.set(g2.attributes.normal.array,o);o+=g2.attributes.normal.array.length});
+  const g=new T.BufferGeometry();g.setAttribute("position",new T.BufferAttribute(pos,3));g.setAttribute("normal",new T.BufferAttribute(nor,3));return g}
 // ендотел: калдъръм от полигонални клетки (канва)
 function b3EndoTex(T){return R3.tex(T,512,512,(g,W,H)=>{g.fillStyle="#e9a3a3";g.fillRect(0,0,W,H);const R=MK.rnd(5),pts=[];for(let i=0;i<90;i++)pts.push([R()*W,R()*H]);
   const img=g.getImageData(0,0,W,H),d=img.data;for(let y=0;y<H;y+=2)for(let x=0;x<W;x+=2){let a=1e9,b=1e9,id=0;pts.forEach((p,k)=>{for(const ox of[-W,0,W])for(const oy of[-H,0,H]){const dd=(x-p[0]-ox)**2+(y-p[1]-oy)**2;if(dd<a){b=a;a=dd;id=k}else if(dd<b)b=dd}});
@@ -34,9 +54,15 @@ function b3Hemost(cv){r3Attach(cv,460,{r:135,th:0.35,phi:1.15,target:[0,-10,0],f
     const wg2=wg.clone();{const P=wg2.attributes.position;for(let i=0;i<P.count;i++){const y=P.getY(i),z=P.getZ(i),r=Math.hypot(y,z)||1;P.setY(i,y*(Rv+2.6)/r);P.setZ(i,z*(Rv+2.6)/r)}wg2.computeVertexNormals()}
     vessel.add(new T.Mesh(wg2,new T.MeshStandardMaterial({color:LIN(T,0xc77b7b),roughness:0.7,side:T.DoubleSide})));
     // тъкан отдолу и колагенови влакна, оголени в раната
-    const tis=new T.Mesh(new T.BoxGeometry(Lv,16,46),new T.MeshStandardMaterial({color:LIN(T,0xd99a92),roughness:0.9,transparent:true,opacity:0.38,depthWrite:false}));tis.position.set(0,-Rv-11,-4);vessel.add(tis);
+    /* адвентиция: рехава съединителна тъкан около съда (външна обвивка, също разкъсана в раната) */
+    {const wg3=wg.clone(),P3=wg3.attributes.position;for(let i=0;i<P3.count;i++){const y=P3.getY(i),z=P3.getZ(i),r=Math.hypot(y,z)||1,x=P3.getX(i),w=Rv+6.5+0.8*Math.sin(x*0.21+Math.atan2(z,y)*5)+0.5*Math.sin(x*0.57);P3.setY(i,y*w/r);P3.setZ(i,z*w/r)}wg3.computeVertexNormals();
+     vessel.add(new T.Mesh(wg3,new T.MeshStandardMaterial({color:LIN(T,0xe4b2a8),roughness:0.95,transparent:true,opacity:0.5,depthWrite:false,side:T.DoubleSide})))}
     const colM=new T.MeshPhysicalMaterial({color:LIN(T,0xf2dcd6),roughness:0.4,clearcoat:0.4,emissive:LIN(T,0x7a2a2a),emissiveIntensity:0});const R=MK.rnd(11);
-    for(let k=0;k<26;k++){const z0=(R()-0.5)*2*wz*1.4,y0=-Rv-1.5-R()*5;const pts=[];for(let s=0;s<6;s++)pts.push(V3(-wx*1.6+s*wx*0.64,y0+Math.sin(s*1.3+k)*1.2,z0+Math.cos(s+k)*1.5));vessel.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),40,0.45+R()*0.35,6,false),colM))}
+    /* колаген: вълнообразни („кримпирани“) снопове от усукани фибрили */
+    for(let k=0;k<14;k++){const z0=(R()-0.5)*2*wz*1.3,y0=-Rv-1.6-R()*4.5,ang=(R()-0.5)*0.5,ph=R()*6,nf=3+Math.floor(R()*3),rb=0.35+R()*0.25;
+      for(let f=0;f<nf;f++){const pts=[],a0=f/nf*Math.PI*2;for(let s2=0;s2<=40;s2++){const u=s2/40,x=-wx*1.7+u*wx*3.4,cr=0.45*Math.sin(u*Math.PI*9+ph),tw=a0+u*Math.PI*5;
+          pts.push(V3(x,y0+cr*0.5+Math.cos(tw)*rb,z0+x*Math.sin(ang)+cr+Math.sin(tw)*rb))}
+        vessel.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),120,0.17+R()*0.07,6,false),colM))}}
     // еритроцити в потока
     const rg=b3RbcGeo(T),rm=b3RbcMat(T),N=120,rbc=new T.InstancedMesh(rg,rm,N);rbc.frustumCulled=false;sc.add(rbc);const cells=[];
     const newCell=(c,x)=>{const a=R()*Math.PI*2,r=Math.sqrt(R())*(Rv-5);c.p=V3(x==null?-Lv/2+R()*Lv:-Lv/2-R()*10,r*Math.cos(a),-r*Math.abs(Math.sin(a))*0.95-1);c.q=new T.Euler(R()*6,R()*6,R()*6);c.w=V3((R()-0.5)*0.6,(R()-0.5)*0.6,(R()-0.5)*0.6);c.out=0;c.v=0.7+0.6*(1-(r/(Rv-5))**2);return c};
@@ -47,8 +73,10 @@ function b3Hemost(cv){r3Attach(cv,460,{r:135,th:0.35,phi:1.15,target:[0,-10,0],f
     const pr=[];for(let i=0;i<NP;i++)pr.push(newCell({}));const pa=[];for(let i=0;i<NA_;i++){const u=i/NA_,lay=Math.floor(u*4);pa.push({p:V3((R()-0.5)*2*wx*(1.1-lay*0.12),-Rv+0.8+lay*1.7+R()*1.2,(R()-0.5)*2*wz*(1.1-lay*0.12)),q:new T.Euler(R()*0.6,R()*6,R()*0.6),s:0.9+R()*0.5})}
     // фибринови нишки (мрежа над тапата) и уловени еритроцити
     const fibM=new T.MeshPhysicalMaterial({color:LIN(T,0xf6eef0),roughness:0.35,clearcoat:0.6,transparent:true,opacity:0.95});const fibs=[];
-    for(let k=0;k<110;k++){const a=V3((R()-0.5)*2*wx*1.5,-Rv-1+R()*12,(R()-0.5)*2*wz*1.5),b=V3((R()-0.5)*2*wx*1.5,-Rv-1+R()*12,(R()-0.5)*2*wz*1.5),m=a.clone().lerp(b,0.5).add(V3(0,R()*2,0));
-      const f=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3([a,m,b]),16,0.12+R()*0.12,5,false),fibM);f.visible=false;sc.add(f);fibs.push({f,th:R()})}
+    /* фибрин: мрежа от дълги, почти прави влакна с разклонения — всеки възел се свързва с 3 най-близки; мрежата расте отдолу нагоре */
+    {const nodes=[];for(let k=0;k<70;k++)nodes.push(V3((R()-0.5)*2*wx*1.5,-Rv-1+R()*12,(R()-0.5)*2*wz*1.5));const seen=new Set();
+     nodes.forEach((a,ia)=>{nodes.map((b,ib)=>[a.distanceTo(b),ib]).sort((x,y)=>x[0]-y[0]).slice(1,4).forEach(([d,ib])=>{const key=Math.min(ia,ib)+"_"+Math.max(ia,ib);if(seen.has(key))return;seen.add(key);const b=nodes[ib],m=a.clone().lerp(b,0.5).add(V3((R()-0.5)*0.6,-0.25*d*0.08,(R()-0.5)*0.6));
+       const f=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3([a,m,b]),12,0.07+R()*0.11,5,false),fibM);f.visible=false;sc.add(f);fibs.push({f,th:Math.min(0.98,Math.max(0,((Math.min(a.y,b.y)+Rv+1)/12)*0.75+R()*0.25))})})})}
     const NT=40,trap=new T.InstancedMesh(rg,rm,NT);trap.frustumCulled=false;sc.add(trap);const tp=[];for(let i=0;i<NT;i++)tp.push({p:V3((R()-0.5)*2*wx*1.2,-Rv+1+R()*9,(R()-0.5)*2*wz*1.2),q:new T.Euler(R()*6,R()*6,R()*6),th:R()});
     // изтекла кръв в тъканта
     const NO=60,outM=new T.InstancedMesh(rg,b3RbcMat(T,{c:0x8c1018}),NO);outM.frustumCulled=false;outM.count=0;sc.add(outM);const outs=[];
@@ -114,10 +142,14 @@ function b3Hb(cv){const hf=(()=>{const h=HB_PDB.hem.A,i=h.e.indexOf("F");return 
       const nm={A:"α₁",B:ty==="F"?"γ₁":"β₁",C:"α₂",D:ty==="F"?"γ₂":"β₂"};G.render(my?[["глобинова верига",labP.A],["хем + Fe²⁺",heme.A.fe.clone()]]:["A","B","C","D"].map(c=>[nm[c],c==="C"||c==="D"?labP[c].clone().applyEuler(dim2.rotation):labP[c]]).concat([["хем",heme.A.fe.clone().add(V3(0,0.3,0))]]))}},
   {views:[["Тетрамер",[0,0,0,15,0.4,1.35]],["Хем отблизо",[hf[0],hf[1],hf[2],5,0.4,1.35]],["Отгоре",[0,0,0,15,0.2,0.3]]]})}
 /* ---- III.3 Кръвни групи: аглутинация в ямки и при кръвопреливане ---- */
-function b3IgM(T){// пентамер IgM: 5 Y-образни мономера около J-верига
-  const g=new T.Group(),m=new T.MeshPhysicalMaterial({color:LIN(T,0xf2c94c),roughness:0.4,clearcoat:0.5}),cg=new T.CylinderGeometry(0.06,0.06,1,6);
-  const seg=(a,b)=>{const c=new T.Mesh(cg,m);c.position.copy(a).add(b).multiplyScalar(0.5);c.scale.y=a.distanceTo(b);c.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),b.clone().sub(a).normalize());g.add(c)};
+function b3IgM(T){/* пентамер IgM: 5 мономера с формата на истинско антитяло (IgG, PDB 1IGT — тежки вериги сини, леки светлосини);
+     Fc частите сочат към центъра (J-верига), Fab рамената — навън. Докато моделът се зарежда (или в опростен режим) — схема с пръчици. */
+  const g=new T.Group(),m=new T.MeshPhysicalMaterial({color:LIN(T,0x5c7cfa),roughness:0.4,clearcoat:0.5}),cg=new T.CylinderGeometry(0.06,0.06,1,6),stick=new T.Group();g.add(stick);
+  const seg=(a,b)=>{const c=new T.Mesh(cg,m);c.position.copy(a).add(b).multiplyScalar(0.5);c.scale.y=a.distanceTo(b);c.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),b.clone().sub(a).normalize());stick.add(c)};
   for(let k=0;k<5;k++){const a=k/5*Math.PI*2,d=new T.Vector3(Math.cos(a),0,Math.sin(a)),o=d.clone().multiplyScalar(0.25),e=d.clone().multiplyScalar(0.9),p=d.clone().cross(new T.Vector3(0,1,0)).multiplyScalar(0.3);seg(o,e);seg(e,e.clone().add(d.clone().multiplyScalar(0.4)).add(p));seg(e,e.clone().add(d.clone().multiplyScalar(0.4)).sub(p))}
+  MK.loadMesh(T,"m/mol/igg.txt").then(geo=>{if(!b3IgM.mat)b3IgM.mat=MK.molMat(T,{roughness:0.5});const up=new T.Vector3(0,1,0),M=new T.Matrix4();
+    for(let k=0;k<5;k++){const a=k/5*Math.PI*2,d=new T.Vector3(Math.cos(a),0,Math.sin(a)),t=d.clone().cross(up),mm=new T.Mesh(geo,b3IgM.mat);M.makeBasis(t,up,d.clone().negate());mm.quaternion.setFromRotationMatrix(M);mm.scale.setScalar(0.55);mm.position.copy(d).multiplyScalar(0.82);g.add(mm)}
+    const jc=new T.Mesh(new T.SphereGeometry(0.16,14,10),MK.mat(T,0xe64980));g.add(jc);stick.visible=false}).catch(()=>{});
   return g}
 function b3BgCard(cv){r3Attach(cv,380,{r:34,th:0.0001,phi:0.8,target:[0,0,0],fov:34,min:8,max:70},(G,ctx)=>{const T=G.T,sc=G.scene,V3=(x,y,z)=>new T.Vector3(x,y,z);G.ren.toneMappingExposure=1.0;
     if(window.THREE&&THREE.RoomEnvironment&&!sc.environment){const pm=new T.PMREMGenerator(G.ren);sc.environment=pm.fromScene(new THREE.RoomEnvironment(),0.04).texture}
@@ -136,7 +168,7 @@ function b3BgCard(cv){r3Attach(cv,380,{r:34,th:0.0001,phi:0.8,target:[0,0,0],fov
         w.cells.forEach((c,j)=>{const p=c.a.clone().lerp(c.b,k).add(V3(w.x,0,0));Q.setFromEuler(new T.Euler(c.e.x+(c.e2.x-c.e.x)*k,c.e.y+(c.e2.y-c.e.y)*k,c.e.z+(c.e2.z-c.e.z)*k));M.compose(p,Q,S);w.im.setMatrixAt(j,M)});w.im.instanceMatrix.needsUpdate=true;
         w.ab.forEach(a=>{a.m.visible=pos&&e>0.6;a.m.position.copy(a.c).add(V3(w.x,0,0));a.m.rotation.y+=dt*0.3});
         L.push([d.l+(e<0.8?"":pos?" — аглутинация":" — няма"),V3(w.x,0,4.2)])});
-      b3Overlay(ctx,`Еритроцити на пациента и тестови серуми<div style="font-weight:400;font-size:11.5px">жълто — IgM антитела (пентамери), които свързват еритроцитите в бучки</div>`);G.render(L)}},
+      b3Overlay(ctx,`Еритроцити на пациента и тестови серуми<div style="font-weight:400;font-size:11.5px">синьо — IgM антитела (пентамери), които свързват еритроцитите в бучки</div>`);G.render(L)}},
   {views:[["Карта",[0,0,0,34,0.0001,0.8]],["Ямка отблизо",[-19,0,0,9,0.0001,0.9]]]})}
 function b3BgTrans(cv){r3Attach(cv,300,{r:15,th:0.35,phi:1.3,target:[0,0,0],fov:34,min:6,max:60},(G,ctx)=>{const T=G.T,sc=G.scene,V3=(x,y,z)=>new T.Vector3(x,y,z);G.ren.toneMappingExposure=1.0;
     if(window.THREE&&THREE.RoomEnvironment&&!sc.environment){const pm=new T.PMREMGenerator(G.ren);sc.environment=pm.fromScene(new THREE.RoomEnvironment(),0.04).texture}
