@@ -4033,6 +4033,12 @@ MK.realize=function(T,grp,urls,o={}){const vis=grp.children.slice(),bx=new T.Box
 MK.addCentered=function(T,grp,url,o={}){return MK.loadMesh(T,url).then(g0=>{const g=g0.clone();g.computeBoundingBox();const c=g.boundingBox.getCenter(new T.Vector3());g.translate(-c.x,o.keepY?0:-c.y,-c.z);
   const m=new T.Mesh(g,MK.molMat(T,o.mat));m.scale.setScalar(o.s||1);if(o.ry)m.rotation.y=o.ry;if(o.p)m.position.set(...o.p);if(o.hide)grp.children.forEach(ch=>ch.visible=false);grp.add(m);return m}).catch(()=>null)};
 /* поставя реална структура вместо модел от сфери: скрива старите деца на групата и добавя повърхността */
+/* истинска повърхност (PDB) в схематичен „blob“: вписва се в неговата кутия и на неговото място;
+   позицията и материалът (със светенето) остават, затова анимациите работят без промяна */
+MK.swapGeo=function(T,mesh,url,o={}){if(!mesh||!mesh.geometry)return Promise.resolve(null);mesh.geometry.computeBoundingBox();const bb=mesh.geometry.boundingBox,sc=mesh.scale.clone(),c=bb.getCenter(new T.Vector3()).multiply(sc),sz=bb.getSize(new T.Vector3()).multiply(sc);
+  return MK.loadMesh(T,url).then(g0=>{const g=g0.clone();if(o.rx)g.rotateX(o.rx);if(o.ry)g.rotateY(o.ry);if(o.rz)g.rotateZ(o.rz);g.computeBoundingBox();const b=g.boundingBox,gc=b.getCenter(new T.Vector3()),gs=b.getSize(new T.Vector3());
+    const k=(o.fit==="y"?sz.y/gs.y:Math.max(sz.x,sz.y,sz.z)/Math.max(gs.x,gs.y,gs.z))*(o.k||1);g.translate(-gc.x,-gc.y,-gc.z);g.scale(k,k,k);g.translate(c.x,c.y,c.z);
+    mesh.geometry=g;mesh.scale.set(1,1,1);const m=mesh.material;if(m){m.vertexColors=false;if(o.col!=null)m.color=LIN(T,o.col);m.needsUpdate=true}return mesh}).catch(()=>null)};
 MK.swapMol=function(T,grp,url,o={}){return MK.loadMesh(T,url).then(g=>{const m=new T.Mesh(g,MK.molMat(T,o.mat));if(o.s)m.scale.setScalar(o.s);if(o.ry)m.rotation.y=o.ry;if(o.p)m.position.set(...o.p);if(o.hide!==false)grp.children.forEach(c=>c.visible=false);grp.add(m);return m}).catch(()=>null)};
 // „кожа“ на неврона: полупрозрачен ръб (Френел) като при микроскопски рендер
 MK.skin=function(T,m,o={}){const rc=new T.Color(o.rim||0xfff0f0).convertSRGBToLinear(),ri=o.rimI==null?0.55:o.rimI,pw=o.pow||2.4;
@@ -4938,7 +4944,7 @@ const S=(t,short,tag,badge,d)=>({t,short,tag,badge,d});
 return {id:"stgSM",title:"Как се съкращава и отпуска гладкият мускул — стъпка по стъпка",h:500,dur:4.2,cycle:true,center:"секунди",
  intro:"Молекулен модел на гладкомускулна клетка: плазмена мембрана с α₁ рецептор, Gq, PLCβ и L-тип Ca²⁺ канал; саркоплазмен ретикулум (СР) с IP₃ рецептор и SERCA; калмодулин, MLCK, актин, закрепен към плътно телце, миозин II, MLC фосфатаза и Rho-киназа.",
  cam:{r:34,th:0.22,phi:1.38,target:[4,2,0],min:8,max:90},
- legend:[["#74c0fc","Ca²⁺"],["#4c6ef5","α₁ рецептор","box"],["#f08c00","Gαq","box"],["#1098ad","PLCβ","box"],["#7950f2","IP₃ рецептор (СР)","box"],["#339af0","L-тип Ca²⁺ канал","box"],["#1c7ed6","SERCA","box"],["#ffc078","калмодулин","box"],["#e64980","MLCK","box"],["#ced4da","актин","box"],["#e8590c","миозин II (RLC — тюркоазена)","box"],["#1c7ed6","MLC фосфатаза","box"],["#c92a2a","Rho-киназа","box"],["#fd7e14","фосфат"]],
+ legend:[["#74c0fc","Ca²⁺"],["#4c6ef5","α₁ рецептор","box"],["#e8590c","Gαq","box"],["#1098ad","PLCβ","box"],["#7950f2","IP₃ рецептор (СР)","box"],["#339af0","L-тип Ca²⁺ канал","box"],["#1c7ed6","SERCA","box"],["#ff8787","калмодулин","box"],["#e64980","MLCK","box"],["#ced4da","актин","box"],["#e8590c","миозин II (RLC — тюркоазена)","box"],["#1c7ed6","MLC фосфатаза","box"],["#c92a2a","Rho-киназа","box"],["#fd7e14","фосфат"]],
  stages:[
   S("Норадреналин активира α₁ рецептора и Gq","α₁ → Gq","α₁","фармакомеханично","Норадреналинът от симпатиковите окончания се свързва с <b>α₁-адренергичния рецептор</b> (7 трансмембранни спирали). Рецепторът активира G-белтъка <b>Gq</b>: GDP се заменя с GTP и α-субединицата се отделя от βγ. Това е <b>фармакомеханично свързване</b> — съкращение и без промяна на потенциала (така действат и ангиотензин II, ендотелин, ACh чрез M₃)."),
   S("PLCβ → IP₃ → Ca²⁺ излиза от СР","IP₃ → Ca²⁺ от СР","IP₃","IP₃ рецептор","Gαq-GTP активира <b>фосфолипаза Cβ</b>, която разцепва PIP₂ на <b>IP₃</b> и <b>DAG</b>. IP₃ дифундира до IP₃ рецепторите в саркоплазмения ретикулум и ги отваря — Ca²⁺ излиза от СР в цитоплазмата. DAG остава в мембраната и активира протеин киназа C."),
@@ -4961,8 +4967,8 @@ return {id:"stgSM",title:"Как се съкращава и отпуска гл�
   [[0.55,0.25,0xfa5252],[0.5,-0.32,0xfa5252],[-0.52,0.05,0xadb5bd],[-0.82,0.2,0xadb5bd],[-1.1,0.05,0x4dabf7]].forEach(p=>{const s=new T.Mesh(new T.SphereGeometry(0.13,12,8),MK.mat(T,p[2]));s.position.set(p[0],p[1],0);ctx.ne.add(s)});ctx.ne.scale.setScalar(1.3);sc.add(ctx.ne);
   ctx.neA=V(XA+1.6,12.6,1.5);ctx.neB=V(XA+0.2,9.6,1.0);
   // Gq: βγ (статични) и Gα (подвижна) с GDP/GTP
-  sc.add(MK.blob(T,[...Array.from({length:7},(_,k)=>{const a=k*2*Math.PI/7;return [XA+2.4+Math.cos(a)*0.6,3.3,-0.3+Math.sin(a)*0.6,0.45,0x339af0]}),[XA+1.8,4.2,-0.5,0.35,0xced4da],[XA+1.4,4.6,-0.4,0.3,0xced4da]],{res:32}));
-  ctx.ga=new T.Group();ctx.ga.add(MK.blob(T,[[0,0,0,0.85,0xf08c00],[0.7,-0.5,0.3,0.7,0xf08c00],[-0.3,0.6,0.2,0.55,0xfd7e14]],{res:30,mo:glow(0xffa94d)}));
+  const gbg=MK.blob(T,[...Array.from({length:7},(_,k)=>{const a=k*2*Math.PI/7;return [XA+2.4+Math.cos(a)*0.6,3.3,-0.3+Math.sin(a)*0.6,0.45,0x339af0]}),[XA+1.8,4.2,-0.5,0.35,0xced4da],[XA+1.4,4.6,-0.4,0.3,0xced4da]],{res:32});sc.add(gbg);
+  ctx.ga=new T.Group();ctx.ga.add(MK.blob(T,[[0,0,0,0.85,0xe8590c],[0.7,-0.5,0.3,0.7,0xe8590c],[-0.3,0.6,0.2,0.55,0xfd7e14]],{res:30,mo:glow(0xff8787)}));
   ctx.nt=new T.Group();[[0,0,0,0x4dabf7],[0.3,0.05,0,0xf06595],[0.55,0,0,0xfd7e14],[0.78,0,0,0xfd7e14],[1.0,0,0,0xfd7e14]].forEach((p,k)=>{const s=new T.Mesh(new T.SphereGeometry(k?0.12:0.16,10,8),MK.mat(T,p[3]));s.position.set(p[0],p[1],p[2]);ctx.nt.add(s)});ctx.nt.position.set(-0.3,0.1,0.8);ctx.ga.add(ctx.nt);
   ctx.gaR=V(XA+1.3,3.5,0.9);ctx.gaP=V(XP-1.4,3.5,1.1);ctx.ga.position.copy(ctx.gaR);sc.add(ctx.ga);
   // PLCβ и PIP₂ (→ IP₃ + DAG)
@@ -4984,15 +4990,19 @@ return {id:"stgSM",title:"Как се съкращава и отпуска гл�
   sc.add(MK.blob(T,[[XL+0.5,3.7,-1.6,0.7,0x74c0fc],[XL+1.2,3.4,-1.2,0.55,0x74c0fc]],{res:24}));sc.add(MK.blob(T,[[XL+1.6,10.3,-1.6,0.8,0xa5d8ff],[XL+2.4,10.9,-1.2,0.6,0xa5d8ff],[XL+1.0,11.0,-1.8,0.55,0xa5d8ff]],{res:24}));
   // SERCA (TM + домени A, P, N) и фосфоламбан
   const sb=[];for(let k=0;k<10;k++){const a=k*2*Math.PI/10;for(const y of [-1.5,0,1.5])sb.push([XS+Math.cos(a)*1.1,SRY+y,Math.sin(a)*0.9,0.55,0x1c7ed6])}
-  sb.push([XS,SRY+2.1,0,0.55,0x1c7ed6]);ctx.serca=MK.blob(T,sb,{res:40});sc.add(ctx.serca);sc.add(MK.blob(T,[[XS,SRY+2.85,0,0.95,0x1c7ed6],[XS+0.3,SRY+2.6,0.5,0.6,0x1c7ed6]],{res:26}));sc.add(MK.blob(T,[[XS-1.45,SRY+3.0,0.3,0.8,0xf06595],[XS-1.8,SRY+3.5,-0.2,0.6,0xf06595]],{res:24}));
+  sb.push([XS,SRY+2.1,0,0.55,0x1c7ed6]);ctx.serca=MK.blob(T,sb,{res:40});sc.add(ctx.serca);const sP=MK.blob(T,[[XS,SRY+2.85,0,0.95,0x1c7ed6],[XS+0.3,SRY+2.6,0.5,0.6,0x1c7ed6]],{res:26}),sA=MK.blob(T,[[XS-1.45,SRY+3.0,0.3,0.8,0xf06595],[XS-1.8,SRY+3.5,-0.2,0.6,0xf06595]],{res:24});sc.add(sP,sA);
   ctx.sN=MK.blob(T,[[0,0,0,0.85,0xe03131],[0.5,0.45,0.2,0.6,0xe03131]],{res:24});ctx.sN.position.add(V(XS+1.35,SRY+3.5,0.4));sc.add(ctx.sN);ctx.sN0=ctx.sN.position.clone();
   sc.add(MK.helix(T,V(XS+1.5,SRY-1.6,1.0),V(XS+1.7,SRY+2.4,1.1),{color:0xff8787,rad:0.16,tube:0.11}));
   // PMCA (изнася Ca²⁺)
   const pb=[];for(let k=0;k<8;k++){const a=k*Math.PI/4;for(const y of [-1.4,0,1.4])pb.push([6.5+Math.cos(a)*0.8,PMY+y,Math.sin(a)*0.7,0.5,0x91a7ff])}pb.push([6.5,PMY-2.4,0,0.7,0x748ffc],[7.2,PMY-3.0,0.3,0.55,0x748ffc]);sc.add(MK.blob(T,pb,{res:32}));
   // калмодулин (2 дяла + централна спирала)
-  ctx.cam=new T.Group();ctx.camN=MK.blob(T,[[0,0,0,0.55,0xffc078],[-0.3,0.3,0.2,0.42,0xffc078]],{res:22,mo:glow(0xffa94d)});ctx.camC=MK.blob(T,[[0,0,0,0.55,0xffa94d],[0.3,-0.3,0.2,0.42,0xffa94d]],{res:22,mo:glow(0xffa94d)});ctx.cam.add(ctx.camN,ctx.camC);
+  ctx.cam=new T.Group();ctx.camN=MK.blob(T,[[0,0,0,0.55,0xffa8a8],[-0.3,0.3,0.2,0.42,0xffa8a8]],{res:22,mo:glow(0xff8787)});ctx.camC=MK.blob(T,[[0,0,0,0.55,0xff8787],[0.3,-0.3,0.2,0.42,0xff8787]],{res:22,mo:glow(0xff8787)});ctx.cam.add(ctx.camN,ctx.camC);
   ctx.camH=new T.Group();ctx.cam.add(ctx.camH);sc.add(ctx.cam);ctx.camR=V(XC,2.6,1.4);ctx.camK=V(XK+1.3,4.5,1.5);ctx.cam.position.copy(ctx.camR);ctx.camSp=-1;
   ctx.camSites=[V(-0.15,0.45,0.35),V(0.2,-0.45,0.4),V(-0.2,0.45,0.4),V(0.15,-0.45,0.35)];
+  /* истински структури (PDB): α₁ рецептор (GPCR, 3SN6), Gαq, PLCβ3 (3OHM), SERCA1a с N-домен (1SU4), два дяла на калмодулина (1CLL) */
+  MK.swapGeo(T,ctx.rec,"m/mol/gpcr_r.txt",{fit:"y",col:0x4c6ef5});MK.swapGeo(T,ctx.ga.children[0],"m/mol/gpcr_ga.txt",{col:0xe8590c,k:1.3});MK.swapGeo(T,gbg,"m/mol/gpcr_gb.txt",{col:0x339af0,k:1.1});MK.swapGeo(T,ctx.plc,"m/mol/sm_plc_b.txt",{col:0x15aabf,k:1.15});
+  MK.loadMesh(T,"m/mol/serca_core.txt").then(()=>{sP.visible=sA.visible=false;MK.swapGeo(T,ctx.serca,"m/mol/serca_core.txt",{rx:Math.PI,fit:"y",col:0x1c7ed6,k:1.25});MK.swapGeo(T,ctx.sN,"m/mol/serca_n.txt",{rx:Math.PI,col:0xe03131,k:1.2})}).catch(()=>{});
+  MK.swapGeo(T,ctx.camN,"m/mol/cam_n.txt",{col:0xffa8a8,k:1.1});MK.swapGeo(T,ctx.camC,"m/mol/cam_c.txt",{col:0xff8787,k:1.1});
   // MLCK: Ig домени (свързват актина), киназен домен, спирала за калмодулин
   sc.add(MK.blob(T,[[7.7,2.3,0.2,0.45,0xf783ac],[8.4,2.9,0.1,0.5,0xf783ac],[9.2,3.3,0.2,0.5,0xf783ac]],{res:26}));
   ctx.mlck=MK.blob(T,[[XK,3.5,0.3,1.0,0xe64980],[XK+0.5,4.2,-0.2,0.7,0xd6336c],[XK-0.4,2.9,0.5,0.6,0xe64980]],{res:30,mo:glow(0xff8cc6)});sc.add(ctx.mlck);
