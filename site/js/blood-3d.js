@@ -1,9 +1,15 @@
 /* ===== III. Кръв — реалистични 3D модели: еритроцити, тромбоцити, фибрин, хемоглобин (PDB 1GZX), аглутинация ===== */
 // Еритроцит: двойновдлъбнат диск по уравнението на Evans–Fung (D = 7,82 µm)
-function b3RbcGeo(T,D=7.82,seg=36){const C0=0.0518,C2=2.0026,C4=-4.491,pts=[],n=24;
-  for(let i=0;i<=n;i++){const u=Math.sin(i/n*Math.PI/2),r=u*D/2,x2=Math.pow(2*r/D,2),z=0.5*D*Math.sqrt(Math.max(0,1-x2))*(C0+C2*x2+C4*x2*x2);pts.push(new T.Vector2(Math.max(0.001,r),Math.max(0.12,z)))}
-  for(let i=n;i>=0;i--){const p=pts[i];pts.push(new T.Vector2(p.x,-p.y))}const g=new T.LatheGeometry(pts,seg);g.computeVertexNormals();return g}
-function b3RbcMat(T,o={}){return new T.MeshPhysicalMaterial({color:LIN(T,o.c||0xb0141f),roughness:0.38,clearcoat:0.6,clearcoatRoughness:0.25,emissive:LIN(T,0x3a0006),emissiveIntensity:0.35,transparent:!!o.tr,opacity:o.op==null?1:o.op})}
+function b3RbcGeo(T,D=7.82,seg=48){/* двойновдлъбнат диск по Evans & Fung (1972): z = D·√(1−4q²)·(a₀ + a₁q² + a₂q⁴), q = r/D
+     (дебелина ≈ 0,8 µm в центъра и ≈ 2,5 µm по ръба при D = 7,8 µm); профилът е гъсто разделен около ръба */
+  const a0=0.0518,a1=2.0026,a2=-4.491,pts=[],n=48,R=D/2;
+  for(let i=0;i<=n;i++){const ph=i/n*Math.PI/2,r=R*Math.sin(ph)*0.9995,q=r/D,z=D*Math.sqrt(Math.max(0,1-4*q*q))*(a0+a1*q*q+a2*q*q*q*q);pts.push(new T.Vector2(Math.max(0.0005*D,r),Math.max(0.004*D,z)))}
+  for(let i=n;i>=0;i--){const p=pts[i];pts.push(new T.Vector2(p.x,-p.y))}const g=new T.LatheGeometry(pts,seg);g.computeVertexNormals();
+  /* централно просветление: в тънкия център има по-малко хемоглобин → по-светъл; ръбът е по-плътен и тъмен */
+  const P=g.attributes.position,col=new Float32Array(P.count*3);for(let i=0;i<P.count;i++){const rr=Math.hypot(P.getX(i),P.getZ(i))/R,k=rr<0.55?1-0.3*(rr/0.55)**2:0.7-0.12*Math.min(1,(rr-0.55)/0.45);col[3*i]=k;col[3*i+1]=k*(0.86+0.14*(1-rr));col[3*i+2]=k*(0.86+0.14*(1-rr))}
+  g.setAttribute("color",new T.BufferAttribute(col,3));return g}
+function b3RbcMat(T,o={}){/* мек, леко сатенен вид като при жив еритроцит — без пластмасов гланц */
+  return new T.MeshPhysicalMaterial({vertexColors:true,color:LIN(T,o.c||0xb01420),roughness:0.5,clearcoat:0.12,clearcoatRoughness:0.6,sheen:new T.Color(0x6e0f16),emissive:LIN(T,0x2a0306),emissiveIntensity:0.3,transparent:!!o.tr,opacity:o.op==null?1:o.op})}
 // Тромбоцит: покой — двойноизпъкнал диск; активиран — с псевдоподи
 function b3PltGeo(T,act){const g=new T.IcosahedronGeometry(1,3),P=g.attributes.position,v=new T.Vector3();const R=MK.rnd(act?7:3);const sp=[];for(let k=0;k<7;k++)sp.push(new T.Vector3(R()-0.5,(R()-0.5)*0.5,R()-0.5).normalize());
   for(let i=0;i<P.count;i++){v.set(P.getX(i),P.getY(i),P.getZ(i));if(!act){v.set(v.x*1.5,v.y*0.42,v.z*1.5)}else{let s=1;sp.forEach(d=>{const a=v.dot(d);if(a>0.86)s+=Math.pow((a-0.86)/0.14,3)*1.6});v.multiplyScalar(s);v.y*=0.75}P.setXYZ(i,v.x,v.y,v.z)}g.computeVertexNormals();return g}
