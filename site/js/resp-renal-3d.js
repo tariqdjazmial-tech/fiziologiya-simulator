@@ -182,21 +182,24 @@ VIEWS.gasx=function(main){_vGX(main);window.__R3=null;
     const wallM=R3.phys(T,0xffffff,{map:wallTex,roughness:0.5,clearcoat:0.5,side:T.DoubleSide,clippingPlanes:[cut],transparent:true,opacity:0.42,depthWrite:false});G.ren.localClippingEnabled=true;
     const alv=new T.Mesh(new T.SphereGeometry(RA,64,48),wallM);alv.renderOrder=5;sc.add(alv);
     const surfM=R3.glass(T,0x9be7ff,0.18,{clippingPlanes:[cut]});const surfL=new T.Mesh(new T.SphereGeometry(RA-0.06,48,36),surfM);sc.add(surfL);
-    const intM=R3.glass(T,0xffe8a3,0.25,{clippingPlanes:[cut]});const inter=new T.Mesh(new T.SphereGeometry(RA+0.1,48,36),intM);sc.add(inter);
+    const intM=R3.glass(T,0xf2c4c9,0.22,{clippingPlanes:[cut]});const inter=new T.Mesh(new T.SphereGeometry(RA+0.1,48,36),intM);sc.add(inter);
     const nb=[[3.3,1.8,-2.6],[-3.5,1.3,-2.4],[0.4,3.8,-2.6],[-1.4,-3.6,-2.4],[3.0,-2.5,-2.2],[-4.0,-1.6,-1.4],[4.1,0.1,-1.2]];
-    nb.forEach(([x,y,z],i)=>{const m=new T.Mesh(new T.SphereGeometry(1.9+R()*0.5,40,30),R3.phys(T,0xffffff,{map:wallTex,roughness:0.55,clearcoat:0.3,transparent:true,opacity:0.2,depthWrite:false}));m.position.set(x,y,z);m.renderOrder=1;sc.add(m)});
+    /* съседните алвеоли са многостенни (притиснати една в друга, с общи прегради), а не кълба */
+    nb.forEach(([x,y,z],i)=>{const r=1.9+R()*0.5,geo=new T.IcosahedronGeometry(r,3),P=geo.attributes.position,v=new T.Vector3();for(let k=0;k<P.count;k++){v.fromBufferAttribute(P,k);/* леко сплескани стени: съседните алвеоли се притискат */const f=Math.max(Math.abs(v.x),Math.abs(v.y),Math.abs(v.z))/r;v.multiplyScalar((1+0.05*Math.sin(v.x*3+i)*Math.cos(v.y*2.6))*(0.86+0.14*f));P.setXYZ(k,v.x,v.y,v.z)}geo.computeVertexNormals();
+      const m=new T.Mesh(geo,R3.phys(T,0xffffff,{map:wallTex,roughness:0.6,clearcoat:0.2,transparent:true,opacity:0.3,depthWrite:false}));m.position.set(x,y,z);m.renderOrder=1;sc.add(m);
+});
     // алвеоларен канал
     sc.add(R3.vtube(T,[V3(0,RA*0.8,-1.2),V3(0.3,4.2,-1.6),V3(0.6,6,-1.8)],u=>0.9-0.2*u,R3.phys(T,0xf1c4cb,{roughness:0.5,transparent:true,opacity:0.6,depthWrite:false}),{seg:20}));
     // клетки: пневмоцити тип II и макрофаг
     const p2=[];for(let i=0;i<7;i++){const th=R()*6.283,ph=0.5+R()*2.2,p=V3(Math.sin(ph)*Math.cos(th),Math.cos(ph),Math.sin(ph)*Math.sin(th)).multiplyScalar(RA-0.12);if(p.z>0.2)p.z=-p.z;const m=MK.blob(T,[[p.x,p.y,p.z,0.24,0xf783ac],[p.x*0.97,p.y*0.97,p.z*0.97,0.16,0xd6336c]],{res:22});sc.add(m);p2.push(p)}
     const mac=MK.blob(T,[[-0.6,-1.6,-1.1,0.32,0xb197fc],[-0.9,-1.5,-1.0,0.2,0xb197fc],[-0.35,-1.85,-1.05,0.18,0x9775fa]],{res:26});sc.add(mac);
     // капилярна мрежа по външната повърхност
-    const capM=R3.phys(T,0xe66a6a,{roughness:0.3,clearcoat:0.5,transparent:true,opacity:0.4,depthWrite:false}),caps=[];
+    const capM=R3.phys(T,0xd9485a,{roughness:0.35,clearcoat:0.5,transparent:true,opacity:0.72,depthWrite:false}),caps=[];
     const sp=(al,be)=>V3(Math.sin(al)*Math.cos(be),Math.sin(al)*Math.sin(be),-Math.cos(al)).multiplyScalar(RA+0.22);
-    for(let k=0;k<7;k++){const a0=0.35+k*0.17,b0=R()*6.28,pts=[];for(let i=0;i<=30;i++){const be=b0+i/30*3.4;pts.push(sp(Math.min(1.42,a0+0.12*Math.sin(be*2+k)),be))}const m=R3.tube(T,pts,0.15,capM,{seg:90,rad:12});m.renderOrder=4;sc.add(m);caps.push(m.userData.curve)}
-    for(let k=0;k<7;k++){const b0=k/7*6.28+R()*0.3,pts=[];for(let i=0;i<=24;i++){const al=0.15+i/24*1.27;pts.push(sp(al,b0+0.25*Math.sin(al*5+k)))}const m=R3.tube(T,pts,0.15,capM,{seg:70,rad:12});m.renderOrder=4;sc.add(m);caps.push(m.userData.curve)}
+    /* алвеоларните капиляри образуват гъста мрежа (почти „ламина“ от кръв около алвеолата) */for(let k=0;k<12;k++){const a0=0.3+k*0.1,b0=R()*6.28,pts=[];for(let i=0;i<=30;i++){const be=b0+i/30*3.6;pts.push(sp(Math.min(1.45,a0+0.08*Math.sin(be*3+k)),be))}const m=R3.tube(T,pts,0.13,capM,{seg:90,rad:10});m.renderOrder=4;sc.add(m);caps.push(m.userData.curve)}
+    for(let k=0;k<12;k++){const b0=k/12*6.28+R()*0.2,pts=[];for(let i=0;i<=24;i++){const al=0.15+i/24*1.3;pts.push(sp(al,b0+0.2*Math.sin(al*5+k)))}const m=R3.tube(T,pts,0.13,capM,{seg:70,rad:10});m.renderOrder=4;sc.add(m);caps.push(m.userData.curve)}
     // еритроцити в капилярите
-    const nR=170,rbc=new T.InstancedMesh(R3.rbcGeo(T,0.15),R3.phys(T,0xffffff,{roughness:0.35,clearcoat:0.6}),nR);rbc.frustumCulled=false;sc.add(rbc);
+    const nR=220,rbc=new T.InstancedMesh(typeof b3RbcGeo==="function"?b3RbcGeo(T,0.3,24):R3.rbcGeo(T,0.15),typeof b3RbcMat==="function"?b3RbcMat(T,{c:0xffffff}):R3.phys(T,0xffffff,{roughness:0.35,clearcoat:0.6}),nR);rbc.frustumCulled=false;sc.add(rbc);
     const rb=[];for(let i=0;i<nR;i++)rb.push({c:i%caps.length,u:Math.random(),sp:0.9+Math.random()*0.2,rot:Math.random()*6});
     // молекули
     const o2=MK.pool(T,0xe03131,0.06,700,{glow:0.4,seg:10}),co2=MK.pool(T,0x868e96,0.065,500,{glow:0.2,seg:10}),coM=MK.pool(T,0x212529,0.08,200,{glow:0.1,seg:10});sc.add(o2,co2,coM);

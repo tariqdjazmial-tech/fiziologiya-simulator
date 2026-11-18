@@ -62,6 +62,18 @@ function zTube(T,P,mat,o={}){const cur=new T.CatmullRomCurve3(P.map(p=>new T.Vec
   const fill=(arr,rf)=>{for(let i=0;i<=NS;i++){const u=i/NS,c=C[i];for(let j=0;j<=NR;j++){const th=j/NR*Math.PI*2,r=r0(u)*(rf?rf(u,th):1),cs=Math.cos(th)*r,sn=Math.sin(th)*r,k=3*(i*(NR+1)+j);arr[k]=c.x+N[i].x*cs+B[i].x*sn;arr[k+1]=c.y+N[i].y*cs+B[i].y*sn;arr[k+2]=c.z+N[i].z*cs+B[i].z*sn}}};
   fill(pos);geo.setAttribute("rest",new T.BufferAttribute(pos.slice(),3));geo.computeVertexNormals();const mesh=new T.Mesh(geo,mat);mesh.frustumCulled=false;
   return {mesh,cur,update(rf){fill(pos,rf);geo.attributes.position.needsUpdate=true;geo.computeVertexNormals()}}}
+/* истински орган (BodyParts3D) върху процедурната тръба: вписва се в нейната кутия, всеки връх се свързва с най-близката точка от средната
+   линия (u) и пази отместването си; update(rf) мащабира отместването с rf(u) — перисталтиката и разтягането остават същите, но формата е реална.
+   o.crop — оставя само долните o.crop m (напр. дисталния хранопровод) */
+function zRealTube(T,tube,url,o={}){return MK.loadMesh(T,url).then(g0=>{let g=g0.clone();
+   if(o.crop){g=g.index?g.toNonIndexed():g;const P0=g.attributes.position;let mnY=1e9;for(let i=0;i<P0.count;i++)mnY=Math.min(mnY,P0.getY(i));const keep=[];for(let i=0;i<P0.count;i+=3){if(P0.getY(i)<mnY+o.crop&&P0.getY(i+1)<mnY+o.crop&&P0.getY(i+2)<mnY+o.crop)keep.push(i)}
+     const arr=new Float32Array(keep.length*9);keep.forEach((i,k)=>{for(let q=0;q<3;q++){arr[k*9+q*3]=P0.getX(i+q);arr[k*9+q*3+1]=P0.getY(i+q);arr[k*9+q*3+2]=P0.getZ(i+q)}});g=new T.BufferGeometry();g.setAttribute("position",new T.BufferAttribute(arr,3))}
+   tube.mesh.geometry.computeBoundingBox();const tb=tube.mesh.geometry.boundingBox;g.computeBoundingBox();const gb=g.boundingBox,ts=tb.getSize(new T.Vector3()),gs=gb.getSize(new T.Vector3()),tc=tb.getCenter(new T.Vector3()),gc=gb.getCenter(new T.Vector3());
+   g.translate(-gc.x,-gc.y,-gc.z);g.scale(ts.x/gs.x,ts.y/gs.y,ts.z/gs.z);g.translate(tc.x,tc.y,tc.z);
+   const NS=160,C=[];for(let i=0;i<=NS;i++)C.push(tube.cur.getPoint(i/NS));const P=g.attributes.position,n=P.count,U=new Float32Array(n),O=new Float32Array(n*3),v=new T.Vector3();
+   for(let i=0;i<n;i++){v.fromBufferAttribute(P,i);let bi=0,bd=1e18;for(let k=0;k<=NS;k++){const d=v.distanceToSquared(C[k]);if(d<bd){bd=d;bi=k}}U[i]=bi/NS;O[3*i]=v.x-C[bi].x;O[3*i+1]=v.y-C[bi].y;O[3*i+2]=v.z-C[bi].z}
+   g.setAttribute("rest",new T.BufferAttribute(P.array.slice(),3));g.computeVertexNormals();tube.mesh.geometry.dispose();tube.mesh.geometry=g;
+   tube.update=rf=>{for(let i=0;i<n;i++){const u=U[i],k=Math.round(u*NS),c=C[k],f=rf?rf(u,Math.atan2(O[3*i+2],O[3*i])):1;P.setXYZ(i,c.x+O[3*i]*f,c.y+O[3*i+1]*f,c.z+O[3*i+2]*f)}P.needsUpdate=true;g.computeVertexNormals()};tube.real=1;return tube}).catch(()=>null)}
 function zFlow(T,parent,n,col,size){const mt=new T.MeshStandardMaterial({color:LIN(T,col),emissive:LIN(T,col),emissiveIntensity:0.7,roughness:0.4}),im=new T.InstancedMesh(new T.SphereGeometry(size,10,8),mt,n);im.frustumCulled=false;im.count=0;im.renderOrder=3;parent.add(im);
   const M=new T.Matrix4(),sd=[];for(let i=0;i<n;i++)sd.push([Math.sin(i*12.9898)*0.5,Math.cos(i*78.233)*0.5,Math.sin(i*37.719)*0.5]);
   return {im,mt,set(curve,ph,cnt,spread=0.3,u0=0,u1=1){cnt=Math.round(Math.max(0,Math.min(n,cnt)));for(let i=0;i<cnt;i++){const u=u0+((((ph+i/cnt)%1)+1)%1)*(u1-u0),p=curve.getPoint(Math.max(0,Math.min(1,u))),s=sd[i];M.makeTranslation(p.x+s[0]*spread,p.y+s[1]*spread,p.z+s[2]*spread);im.setMatrixAt(i,M)}im.count=cnt;im.instanceMatrix.needsUpdate=true}}}
@@ -79,6 +91,7 @@ function zAbdo(G){const T=G.T,root=new T.Group();G.scene.add(root);const M=(x,y,
   A.m.st=zMat(T,Z_PAL.st,{sc:0.3,bump:0.35});A.st=zTube(T,S,A.m.st);root.add(A.st.mesh);
   A.m.cont=new T.MeshStandardMaterial({color:LIN(T,0x8f6a3a),roughness:0.7,transparent:true,opacity:0.95});A.cont=zTube(T,S.map(p=>[p[0],p[1],p[2],p[3]*0.86]),A.m.cont,{seg:64,rad:18});A.cont.mesh.renderOrder=1;A.cont.mesh.visible=false;root.add(A.cont.mesh);A.st.mesh.renderOrder=2;
   const E=[[0.012,0.50,-0.012,0.75],[0.014,0.468,-0.008,0.75],[0.030,0.446,-0.002,0.85],[0.047,0.437,0.003,0.9]].map(p=>{const v=M(p[0],p[1],p[2]);return [v.x,v.y,v.z,p[3]]});A.m.eso=zMat(T,Z_PAL.eso,{sc:0.3});A.eso=zTube(T,E,A.m.eso,{seg:40,rad:16});root.add(A.eso.mesh);
+  if(MK.real)zRealTube(T,A.st,"m/bp_stomach.txt");
   const cv=a=>new T.CatmullRomCurve3(a.map(p=>M(p[0],p[1],p[2])));
   A.path={duo:cv([[0.004,0.352,0.068],[-0.02,0.354,0.05],[-0.036,0.346,0.024],[-0.036,0.30,0.022],[-0.012,0.288,0.028],[0.02,0.29,0.032],[0.036,0.32,0.036],[0.046,0.348,0.04]]),
    cbd:cv([[-0.076,0.352,0.058],[-0.056,0.36,0.024],[-0.043,0.36,0.018],[-0.032,0.335,0.02],[-0.034,0.311,0.022]]),hep:cv([[-0.06,0.385,0.02],[-0.044,0.368,0.018],[-0.036,0.34,0.02],[-0.034,0.311,0.022]]),

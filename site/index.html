@@ -6066,6 +6066,14 @@ function lungThorax(wrapSel,st,opt={}){
           ctx.ribs.push({grp,i})})}
       const stern=new T.Mesh(new T.BoxGeometry(0.42,Hh*0.5,0.14),boneM);stern.position.set(rcx,yTop-1.6-Hh*0.25,zst+0.05);ribs.add(stern);ctx.stern={m:stern,p:stern.position.clone()};
       for(let i=0;i<14;i++){const v=new T.Mesh(new T.CylinderGeometry(0.32,0.32,0.42,12),boneM);v.position.set(rcx,yTop+0.6-i*0.62,zs-0.5);ribs.add(v)}
+      /* истински гръден кош (BodyParts3D, DBCLS, CC BY-SA 2.1 JP): ребра, гръдна кост, ребрени хрущяли — вписани по белите дробове от същия атлас
+         (центърът и височината на белите дробове BP3D → тези на модела HuBMAP); схематичните ребра се скриват */
+      Promise.all(["m/bp_lungs.txt","m/bp_bone.txt","m/bp_cart.txt"].map(u=>MK.loadMesh(T,u))).then(([gL,gB,gC])=>{if(G.dead)return;gL.computeBoundingBox();const bl=gL.boundingBox,bc=bl.getCenter(new T.Vector3()),lc=lb.getCenter(new T.Vector3());
+        const kx=(lb.max.x-lb.min.x)/(bl.max.x-bl.min.x)*1.1,ky=(lb.max.y-lb.min.y)/(bl.max.y-bl.min.y)*1.03,kz=(lb.max.z-lb.min.z)/(bl.max.z-bl.min.z)*1.1;
+        const piv=new T.Group();piv.position.set(lc.x,lc.y,lb.min.z-0.2);ribs.add(piv);const inner=new T.Group();inner.position.set(-lc.x,-lc.y,-(lb.min.z-0.2));piv.add(inner);
+        const mk=(g0,mat)=>{const g=g0.clone();g.translate(-bc.x,-bc.y,-bc.z);g.scale(kx,ky,kz);g.translate(lc.x,lc.y,lc.z);g.computeVertexNormals();const m=new T.Mesh(g,mat);m.renderOrder=3;inner.add(m);return m};
+        const bm=new T.MeshPhysicalMaterial({color:0xe9dcc4,roughness:0.5,clearcoat:0.25,transparent:true,opacity:0.92}),cm=new T.MeshPhysicalMaterial({color:0xbfd6e4,roughness:0.35,clearcoat:0.45,transparent:true,opacity:0.8});
+        mk(gB,bm);mk(gC,cm);ribs.children.forEach(c=>{if(c!==piv)c.visible=false});ctx.realRibs=piv}).catch(()=>{});
       // ---- реалистичното сърце от сърдечно-съдовите уроци ----
       const hc=toS(0.019,0.476,0.0375),hs=0.115*K;
       makeRealHeart(G).then(H=>{if(G.dead)return;ctx.H=H;H.actOn=false;const hb=new T.Box3();H.items.forEach(it=>{for(let i=0;i<it.B.length;i+=3)hb.expandByPoint(new T.Vector3(it.B[i],it.B[i+1],it.B[i+2]))});
@@ -6094,7 +6102,7 @@ function lungThorax(wrapSel,st,opt={}){
     // диафрагма
     {const d=ctx.dia,a=d.mesh.geometry.attributes.position.array;for(let i=0,j=0;i<d.B.length;i+=3,j++){a[i]=d.B[i]*glob;a[i+2]=d.B[i+2]*glob;a[i+1]=yTop-(yTop-d.B[i+1])*glob-dd*d.W[j]*1.05}d.mesh.geometry.attributes.position.needsUpdate=true}
     // ребра: „дръжка на помпа“ — предните краища се повдигат
-    const al=0.055*Math.min(2.5,Vv);ctx.ribG.visible=ctx.ribsOn;ctx.ribs.forEach(r=>{r.grp.rotation.x=-al*(0.6+r.i*0.06)});ctx.stern.m.position.set(ctx.stern.p.x,ctx.stern.p.y+al*1.4,ctx.stern.p.z+al*3.2);
+    const al=0.055*Math.min(2.5,Vv);ctx.ribG.visible=ctx.ribsOn;ctx.ribs.forEach(r=>{r.grp.rotation.x=-al*(0.6+r.i*0.06)});if(ctx.realRibs){/* вдишване: ребрата се повдигат около гръбначния стълб („дръжка на кофа“) и гръдният кош се разширява */ctx.realRibs.rotation.x=-al*0.45;ctx.realRibs.scale.set(1+al*0.12,1,1+al*0.18)}ctx.stern.m.position.set(ctx.stern.p.x,ctx.stern.p.y+al*1.4,ctx.stern.p.z+al*3.2);
     // сърце
     if(ctx.H){const H=ctx.H,HR=s.HR||70;ctx.tS+=dt;if(ctx.tS-ctx.beatT>=60/HR){ctx.beatT=ctx.tS;ctx.beats.push(ctx.tS);if(ctx.beats.length>5)ctx.beats.shift()}
       let Ev=0,ph=0;ctx.beats.forEach(b=>{const x=ctx.tS-b-0.2;if(x<0||x>1.2)return;const r=vtAt(x);if(r.E>Ev){Ev=r.E;ph=r.ph}});const lb2=ctx.beats[ctx.beats.length-1];let Kk=0;if(lb2!=null){const x=ctx.tS-lb2-0.07;if(x>0&&x<0.13)Kk=Math.sin(Math.PI*x/0.13)**2}
