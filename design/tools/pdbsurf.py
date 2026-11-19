@@ -37,7 +37,8 @@ allA = [a for p in parts for a in p[2]]
 X = np.array([a[4] for a in allA]); ctr = X.mean(0)
 
 # мембранна нормала: посоката с най-хидрофобен пояс от 30 Å
-CA = [(a[4] - ctr, a[2] in HYD) for a in allA if a[3] == "CA"]
+BELT = set(os.environ.get("BELT", ""))   # по желание: само тези вериги определят мембранния пояс (напр. трансмембранните субединици)
+CA = [(a[4] - ctr, a[2] in HYD) for a in allA if a[3] == "CA" and (not BELT or a[0] in BELT)]
 P = np.array([c[0] for c in CA]); H = np.array([c[1] for c in CA], float)
 best = (-1e9, None, 0)
 g = (1 + 5 ** .5) / 2

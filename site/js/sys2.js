@@ -231,15 +231,16 @@ const ZK={
    const ext=m=>m.ext!==undefined?m.ext:ys.length===2?(m.y===ys[1]?1:-1):ys.length===1&&m.y>=6?1:0,P=[],Gl=[];
    hm.forEach(m=>{const w=m.w||34,n=Math.round(w/3.2),e=ext(m);for(let k=0;k<n;k++){const x=(m.x||0)-w/2+1.5+R()*(w-3),z=-9.2+R()*6.4,s=0.7+0.5*R();P.push([x,m.y,z,s]);if(e&&R()<0.65){const nj=3+Math.floor(R()*3);for(let j=0;j<nj;j++)Gl.push([x+(R()-0.5)*0.35*j,m.y+e*(2.5*s+0.25+j*0.4),z+(R()-0.5)*0.35*j])}}});
    const inst=(geo,mat,n)=>{const im=new T.InstancedMesh(geo,mat,Math.max(1,n));im.count=n;im.frustumCulled=false;g.add(im);return im};
+   if(sp.nm&&MK.real)P.length=0;/* в реален мащаб (тънка мембрана) схематичните „други белтъци“ са прекалено големи */
    if(P.length){const im=inst(new T.SphereGeometry(0.62,12,10),MK.mat(T,0xffffff,{roughness:0.55,clearcoat:0.1}),P.length),pal=[0x8fb8b0,0xb9a3c9,0xa9b38a,0x9aa7bd,0xc9a98f];P.forEach((p,i)=>{M.compose(V.set(p[0],p[1],p[2]),Q.identity(),S.set(p[3],3.6*p[3],p[3]));im.setMatrixAt(i,M);im.setColorAt(i,C.copy(LIN(T,pal[i%pal.length])))});if(im.instanceColor)im.instanceColor.needsUpdate=true}
    if(Gl.length){const im=inst(new T.SphereGeometry(0.19,8,6),MK.mat(T,0xffffff,{roughness:0.35}),Gl.length),pal=[0xa5d8ff,0x74c0fc,0xd0ebff];Gl.forEach((p,i)=>{M.makeTranslation(p[0],p[1],p[2]);im.setMatrixAt(i,M);im.setColorAt(i,C.copy(LIN(T,pal[i%3])))});if(im.instanceColor)im.instanceColor.needsUpdate=true}
   },
 
  /* истински белтък от PDB на мястото на схематичния: канал KcsA (1BL8), помпа Na⁺/K⁺-ATP-аза (2ZXE), рецептор β2AR (3SN6), ензим PKA (1ATP);
     вписва се по височина, в цвета на елемента; материалът се предава на групата, за да работи светенето */
- real(T,m,key,col,center){const sc=m.scale.y||1;m.updateMatrixWorld(true);const bx=new T.Box3().setFromObject(m),H0=(bx.max.y-bx.min.y)/sc;
+ real(T,m,key,col,center){const sR=ZK._sR||1,sc=m.scale.y||1;m.updateMatrixWorld(true);const bx=new T.Box3().setFromObject(m),H0=(bx.max.y-bx.min.y)/sc;
    MK.loadMesh(T,"m/mol/"+key+".txt").then(g0=>{const g=g0.clone();g.computeBoundingBox();const bb=g.boundingBox,c=bb.getCenter(new T.Vector3());if(center)g.translate(-c.x,-c.y,-c.z);else g.translate(-c.x,0,-c.z);
-     const mat=MK.molMat(T,{vertexColors:false,color:LIN(T,col),emissive:LIN(T,col),emissiveIntensity:0});const me=new T.Mesh(g,mat);me.scale.setScalar(H0/(bb.max.y-bb.min.y)*1.05);
+     const mat=MK.molMat(T,{vertexColors:false,color:LIN(T,col),emissive:LIN(T,col),emissiveIntensity:0});const me=new T.Mesh(g,mat);me.scale.setScalar(H0/(bb.max.y-bb.min.y)*1.05*sR);
      m.children.forEach(ch=>ch.visible=false);m.add(me);if(!m.isMesh)m.material=mat}).catch(()=>{})},
  /* истински белтък в реален мащаб (sp.nm единици на nm): повърхността от pdbsurf е с мембраната при y = 0 и цитоплазмата надолу;
     o.flip — за мембраната на ретикулума (цитоплазмата е отгоре). Схематичният модел се скрива; материалът остава на групата за светенето. */
@@ -261,7 +262,7 @@ const ZK={
    (sp.it||[]).forEach(o=>{const m=ZK.x[o.kind]?ZK.x[o.kind](T,o):o.kind==="gpcr"?ZK.gpcr(T,o.col,o.side||(o.p[1]<=-6?-1:1)):o.kind==="ball"?new T.Mesh(new T.SphereGeometry(o.r||0.7,18,14),MK.mat(T,o.col,{emissive:LIN(T,o.col),emissiveIntensity:0.1})):o.kind==="ves"?new T.Mesh(new T.SphereGeometry(o.r||1.8,24,18),new T.MeshPhysicalMaterial({color:LIN(T,o.col),transparent:true,opacity:0.35,roughness:0.3,depthWrite:false})):ZK.prot(T,o.col,o.kind);
      m.position.set(...o.p);if(o.flip)m.rotation.x=Math.PI;if(o.rz)m.rotation.z=o.rz;if(o.s)m.scale.setScalar(o.s);g.add(m);ctx.B[o.k]=m;m.userData.p0=m.position.clone();
      if(real&&o.pdb){pdbs.push(ZK.realNm(T,m,o,sp.nm));return}
-     const RK={chan:"chan_all",pump:"pump_all",enz:"enz_all",gpcr:"gpcrw_r"}[o.kind];if(RK&&!ZK.x[o.kind]&&!o.schematic)ZK.real(T,m,RK,o.col,o.kind==="enz")});
+     const RK={chan:"chan_all",pump:"pump_all",enz:"enz_all",gpcr:"gpcrw_r"}[o.kind];if(RK&&!ZK.x[o.kind]&&!o.schematic){ZK._sR=real&&o.sR?o.sR:1;ZK.real(T,m,RK,o.col,o.kind==="enz");ZK._sR=1}});
    if(pdbs.length)Promise.all(pdbs).then(ms=>ZK.cullLipids(T,g,ctx.mems,ms.filter(Boolean))).catch(()=>{});
    Object.entries(sp.pools||{}).forEach(([k,v])=>{ctx.P[k]=zPool(T,k,v);g.add(ctx.P[k])});try{ZK.decor(T,g,sp)}catch(e){console.error(e)}ctx.g=g;return g},
  begin(ctx){for(const k in ctx.P)ctx.L[k]=[]},end(ctx){const tg=ctx.tags=[];for(const k in ctx.P){const L=ctx.L[k];ctx.P[k].put(L);const h=ctx.P[k].userData.tag;if(h&&L.length){const p=L[0];tg.push([h,new THREE.Vector3(p.x,p.y+1.1,p.z)])}}},
@@ -497,11 +498,19 @@ ZK.x.cx3=(T,o)=>{const g=new T.Group(),m=MK.mat(T,0x9c36b5,{emissive:LIN(T,0x9c3
 ZK.x.cx4=(T,o)=>{const g=new T.Group(),m=MK.mat(T,0x1c7ed6,{emissive:LIN(T,0x1c7ed6),emissiveIntensity:0}),b=[],b2=[];for(const s of[-1,1])b.push([s*0.85,1.3,0,0.9],[s*0.95,0,0,1.05],[s*0.85,-1.3,0,0.95]);b2.push([0,2.4,0.2,0.85],[0,-2.5,0,0.9],[-1.6,0.2,0.5,0.6],[1.6,0.2,0.5,0.6]);
   g.add(MK.blob(T,b,{res:32,mat:m}));g.add(MK.blob(T,b2,{res:28,mat:MK.mat(T,0xa5d8ff)}));const f=new T.Mesh(new T.SphereGeometry(0.32,12,10),MK.mat(T,0xff8787,{emissive:LIN(T,0xfa5252),emissiveIntensity:0.6}));f.position.set(0,0.4,1.2);g.add(f);g.material=m;return g};
 const MITO_E=[[-17.2,-5.6,1.3],[-16.2,-2.4,1.3],[-14.6,-0.2,1.5],[-11,0,1.7],[-7,0,1.7],[-3.6,0.6,1.5],[-2,2.9,1.1],[1,3.2,0.9],[3.4,2.8,1.1],[4.2,0.6,1.3],[4.2,-2.6,1.1]];
-const MITO_SPEC={cyto:[],mem:[{y:0,ext:0,holes:[ZH(-15.4),ZH(-14.2),ZH(-13),ZH(-11.8),ZH(-10.4),ZH(-6.6),[-3.1,0,1.3],[-1.3,0,1.3],[3.3,0,1.3],[5.1,0,1.3],[10.5,0,1.8],ZH(16)]},{y:12.5,ext:0,holes:[ZH(-2)]}],
-  it:[{k:"c1",kind:"cx1",p:[-13,0,0]},{k:"c2",kind:"cx2",p:[-6.6,0,0]},{k:"q",kind:"ball",col:0xff8787,p:[-9,0,1.8],r:0.55},{k:"c3",kind:"cx3",p:[-2.2,0,0]},{k:"cyc",kind:"ball",col:0xe03131,p:[1,3.2,0.9],r:0.8},{k:"c4",kind:"cx4",p:[4.2,0,0]},{k:"atps",kind:"atps",p:[10.5,0,0]},{k:"ucp",kind:"chan",col:0xf76707,p:[16,0,0],s:1.0},{k:"por",kind:"chan",col:0xadb5bd,p:[-2,12.5,0],s:0.9}],
+/* истински структури (PDB) в общ мащаб 0,4 единици/nm: комплекс I 5XTD, II 1ZOY, III 1BE3 (димер), IV 1OCC, цитохром c 1HRC, ATP синтаза 5ARA (статор + въртящ се ротор) */
+const MITO_SPEC={cyto:[],nm:0.4,mem:[{y:0,ext:0,bk:0.3,d:12,z0:-6,holes:[ZH(-15.4),ZH(-14.2),ZH(-13),ZH(-11.8),ZH(-10.4),ZH(-6.6),[-3.1,0,1.3],[-1.3,0,1.3],[3.3,0,1.3],[5.1,0,1.3],[10.5,0,1.8],ZH(16)]},{y:12.5,ext:0,bk:0.3,d:12,z0:-6,holes:[ZH(-2)]}],
+  it:[{k:"c1",kind:"cx1",col:0x4c6ef5,p:[-13,0,0],pdb:"mt_c1_x"},{k:"c2",kind:"cx2",col:0x15aabf,p:[-6.6,0,0],pdb:"mt_c2_x"},{k:"q",kind:"ball",col:0xff8787,p:[-9,0,1.8],r:0.55},{k:"c3",kind:"cx3",col:0x7950f2,p:[-2.2,0,0],pdb:"mt_c3_x"},{k:"cyc",kind:"ball",col:0xe03131,p:[1,3.2,0.9],r:0.8},{k:"c4",kind:"cx4",col:0xe64980,p:[4.2,0,0],pdb:"mt_c4_x"},{k:"atps",kind:"atps",p:[10.5,0,0]},{k:"ucp",kind:"chan",col:0xf76707,p:[16,0,0],s:1.0,sR:0.42},{k:"por",kind:"chan",col:0xadb5bd,p:[-2,12.5,0],s:0.9,sR:0.42}],
   pools:{h:[0xe03131,0.24,140],e:[0xffa8a8,0.26,40],nadh:[0x4dabf7,0.42],o2:[0xff6b6b,0.36],w:[0x99e9f2,0.3],atp:[0xff8787,0.4,30],adp:[0xced4da,0.38],heat:[0xff4500,0.32,60]}};
 function mitoInit(G,T,C){const cur=new T.CatmullRomCurve3(MITO_E.map(p=>new T.Vector3(p[0],p[1],p[2])));C.trail=new T.Mesh(new T.TubeGeometry(cur,90,0.13,8),new T.MeshBasicMaterial({color:0xffa8a8,transparent:true,opacity:0.3,depthWrite:false}));C.g.add(C.trail);
-  const kr=new T.Group(),km=MK.mat(T,0x4dabf7,{emissive:LIN(T,0x4dabf7),emissiveIntensity:0.15});kr.add(new T.Mesh(new T.TorusGeometry(2.3,0.32,10,40),km));for(let k=0;k<8;k++){const a=k/8*6.283,b=new T.Mesh(new T.SphereGeometry(0.55,14,10),MK.mat(T,k%2?0x74c0fc:0x1c7ed6));b.position.set(Math.cos(a)*2.3,Math.sin(a)*2.3,0);kr.add(b)}kr.position.set(-11,-10.5,0);C.g.add(kr);C.krebs=kr}
+  const kr=new T.Group(),km=MK.mat(T,0x4dabf7,{emissive:LIN(T,0x4dabf7),emissiveIntensity:0.15});kr.add(new T.Mesh(new T.TorusGeometry(2.3,0.32,10,40),km));for(let k=0;k<8;k++){const a=k/8*6.283,b=new T.Mesh(new T.SphereGeometry(0.55,14,10),MK.mat(T,k%2?0x74c0fc:0x1c7ed6));b.position.set(Math.cos(a)*2.3,Math.sin(a)*2.3,0);kr.add(b)}kr.position.set(-11,-10.5,0);C.g.add(kr);C.krebs=kr;
+  if(MK.real){const A=C.B.atps,nm=0.4;
+    Promise.all([MK.loadMesh(T,"m/mol/mt_atp_stat.txt"),MK.loadMesh(T,"m/mol/mt_atp_rot.txt")]).then(([gs,gr])=>{const mat=MK.molMat(T,{emissive:LIN(T,0xe8590c),emissiveIntensity:0});
+      A.children.forEach(ch=>ch.visible=false);const st=new T.Mesh(gs,mat);st.scale.setScalar(nm);A.add(st);
+      /* ос на ротора: центърът на c-пръстена (върховете в мембранния слой) */const P=gr.attributes.position,c=new T.Vector3();let n=0;for(let i=0;i<P.count;i++){if(Math.abs(P.getY(i))<1.5){c.x+=P.getX(i);c.z+=P.getZ(i);n++}}c.multiplyScalar(1/Math.max(1,n));
+      const g2=gr.clone();g2.translate(-c.x,0,-c.z);const piv=new T.Group();piv.position.set(c.x*nm,0,c.z*nm);const rm=new T.Mesh(g2,MK.molMat(T));rm.scale.setScalar(nm);piv.add(rm);A.add(piv);
+      A.userData.rot=piv;A.userData.m=mat;A.material=mat;MK.cullSoon()}).catch(()=>{})}
+  if(MK.real&&C.B.cyc)MK.swapGeo(T,C.B.cyc,"m/mol/cytc.txt",{col:0xe03131,k:1.1});}
 function mitoCore(C,t,o){const R=(k,p,n,ph,j)=>ZK.run(C,k,p,n,ph,j),f=o.flow,g=o.grad,on=f>0.02?1:0;
   C.krebs.rotation.z=-t*(0.3+1.2*f);C.trail.material.opacity=0.12+0.4*Math.min(1,f)*(0.7+0.3*Math.sin(t*4));
   if(on){R("nadh",[[-13.4,-9.6],[-16.6,-6.8]],3*f,t*0.4,0.25);R("e",MITO_E,16*Math.min(1,f),t*0.4*o.sp,0.06);
@@ -1417,7 +1426,7 @@ function viewGiMot(main){setTimeout(()=>{try{if(main.isConnected)stageViewer(mai
     // изпразване: 1 s реално време = 3 min
     const gs=Math.max(0,(-60+0.2*p.ach-0.14*p.sym+8*Math.min(1,s.V/800)+11+40)/8),k=0.011*gs*(1-0.85*p.fat/100)*(0.5+0.5*Math.min(1,s.V/500));const dm=dt/4*3;s.rate=k*s.V;s.V=Math.max(0,s.V-s.rate*dm);s.tm+=dm;s.gs=gs},
   rec:(s,p,t)=>[t,s.Vm+s.spk,s.ten,s.V,s.tm],calc:(p,s)=>({}),
-  stats:(p,R,s)=>[["Бавни вълни",String(GM_F[p.reg]).replace(".",",")+" /min"],["Мембранен потенциал",fmt(s.Vm,0)+" mV"],["Сила на съкращението",fmt(Math.min(100,s.ten*60),0)+" %"],["Обем в стомаха",fmt(s.V,0)+" mL"],["Изпразване",fmt(s.rate,1)+" mL/min"],["Време от храненето",fmt(s.tm,0)+" min"]],
+  stats:(p,R,s)=>[["Бавни вълни",String(GM_F[p.reg]).replace(".",",")+" /min"],["Мембранен потенциал",fmt(s.Vm||0,0)+" mV"],["Сила на съкращението",fmt(Math.min(100,(s.ten||0)*60),0)+" %"],["Обем в стомаха",fmt(s.V,0)+" mL"],["Изпразване",fmt(s.rate||0,1)+" mL/min"],["Време от храненето",fmt(s.tm||0,0)+" min"]],
   note:(p,R,s)=>s.Vm+11<-40&&s.gs<=0?"Бавните вълни не достигат прага от около −40 mV — <b>няма пикови потенциали и няма съкращения</b>.":"Когато бавната вълна премине около −40 mV, върху нея се появяват <b>пикови потенциали</b> (вход на Ca²⁺) и мускулът се съкращава. Колкото по-дълго вълната е над прага, толкова по-силно е съкращението.",
   plots:[{h:200,f:(p,R,h,s,t)=>({xmin:-60,xmax:0,ymin:-75,ymax:0,xlabel:"време, s",ylabel:"mV",series:[{x:h.map(a=>a[0]-t),y:h.map(a=>a[1]),color:css("--accent"),width:1.6},{x:h.map(a=>a[0]-t),y:h.map(a=>-75+a[2]*30),color:css("--accent3"),width:2}],hlines:[{y:-40,color:css("--accent4"),label:"праг за пикове"}]})},
    {h:200,f:(p,R,h)=>({xmin:0,xmax:Math.max(60,Math.ceil((h.length?h[h.length-1][4]:0)/30)*30),ymin:0,ymax:1500,xlabel:"време след хранене, min",ylabel:"обем в стомаха, mL",series:[{x:h.map(a=>a[4]),y:h.map(a=>a[3]),color:css("--accent2"),width:2.4}]})}],
