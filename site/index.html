@@ -2610,7 +2610,7 @@ function makeRealHeart(G,opt={}){
       const n=a.P.length/3;const act=new Float32Array(n*2);g.setAttribute("actv",new T.BufferAttribute(act,2));
       const om=a.o.material;const m=new T.MeshPhysicalMaterial({map:om.map,normalMap:om.normalMap,normalScale:new T.Vector2(1,1),roughnessMap:om.roughnessMap,metalnessMap:om.metalnessMap,metalness:0,roughness:0.75,clearcoat:0.75,clearcoatRoughness:0.22,envMapIntensity:0.9,side:T.DoubleSide});
       m.onBeforeCompile=sh=>{sh.vertexShader=sh.vertexShader.replace("#include <common>","#include <common>\nattribute vec2 actv;\nvarying vec2 vAct;").replace("#include <begin_vertex>","#include <begin_vertex>\nvAct=actv;");
-        sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\nvarying vec2 vAct;").replace("#include <emissivemap_fragment>","#include <emissivemap_fragment>\ntotalEmissiveRadiance+=vec3(1.0,0.78,0.18)*vAct.x*0.95+vec3(0.25,0.35,0.9)*vAct.y*0.16;")};
+        sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\nvarying vec2 vAct;").replace("#include <emissivemap_fragment>","#include <emissivemap_fragment>\ntotalEmissiveRadiance+=vec3(1.0,0.4,0.16)*vAct.x*0.95+vec3(0.25,0.35,0.9)*vAct.y*0.16;")};
       const mesh=new T.Mesh(g,m);H.root.add(mesh);H.items.push({mesh,B:a.P,N:Float32Array.from(g.attributes.normal.array),act})});
     // анатомична рамка
     let apex=null,minY=1e9;H.items.forEach(it=>{for(let i=0;i<it.B.length;i+=3)if(it.B[i+1]<minY){minY=it.B[i+1];apex=new T.Vector3(it.B[i],it.B[i+1],it.B[i+2])}});
@@ -2829,7 +2829,7 @@ const TESTS_ECG=[
  {q:"Как се определя мястото на миокарден инфаркт по ЕКГ?",opts:["По честотата","По отвежданията с ST елевация: V1–V4 предна (LAD), II/III/aVF долна (RCA), I/aVL/V5–V6 латерална (LCx)","По P вълната","Не може"],a:1,expl:"Отвежданията „гледат“ различни стени. Реципрочните промени потвърждават диагнозата."}
 ];
 function viewECG(main){
-  main.innerHTML=`<h2>ЕКГ: от възбуждането на сърцето до 12 отвеждания</h2><p class="lead">Сърдечният вектор (векторкардиограма) се изчислява във всеки момент и се проектира върху 12-те отвеждания (обратна трансформация на Dower). Записът е на стандартна ЕКГ хартия (25 mm/s, 10 mm/mV) с реален шум и дрейф на изолинията. На реалистичното 3D сърце се вижда вълната на възбуждане (жълто), деполяризираният миокард (синкаво), сърдечният вектор и неговата примка. Сърцето се съкращава след всеки QRS.</p>
+  main.innerHTML=`<h2>ЕКГ: от възбуждането на сърцето до 12 отвеждания</h2><p class="lead">Сърдечният вектор (векторкардиограма) се изчислява във всеки момент и се проектира върху 12-те отвеждания (обратна трансформация на Dower). Записът е на стандартна ЕКГ хартия (25 mm/s, 10 mm/mV) с реален шум и дрейф на изолинията. На реалистичното 3D сърце се вижда вълната на възбуждане (оранжево), деполяризираният миокард (синкаво), сърдечният вектор и неговата примка. Сърцето се съкращава след всеки QRS.</p>
   <div class="card" style="padding:10px"><div class="btns"><select id="pre" style="width:auto;max-width:100%"></select><button class="b primary" id="pl">⏸︎ Пауза</button><button class="b" id="actB">Възбуждане: вкл.</button><button class="b" id="vecB">Сърдечен вектор: вкл.</button><button class="b" id="monB">Изглед: 12 отвеждания</button><button class="b" data-v="ant">Отпред</button><button class="b" data-v="left">Отляво</button><button class="b" data-v="apex">Към върха</button></div>
   ${wrap3D("w3",440)}
   <canvas id="ecgP" style="width:100%;display:block;margin-top:8px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.15)"></canvas>
@@ -2841,7 +2841,7 @@ function viewECG(main){
   const S={};S.hr=slider($("#ec1"),{label:"Честота (за синусовите ритми)",min:35,max:180,step:1,value:72,unit:"/min"},()=>{if(ECG_PRESETS[sel.value].rh==="sinus"){E.pre=Object.assign({},ECG_PRESETS[sel.value],{hr:S.hr.get()});E.P=E.P.filter(e=>e.t<=tS);E.Q=E.Q.filter(e=>e.t<=tS+0.05);const lp=E.lastP(tS);E.tEnd=lp?lp.t+60/S.hr.get():tS;E.gen(tS+12)}});
   S.slow=slider($("#ec1"),{label:"Забавяне",min:1,max:10,step:0.5,value:1,d:1,show:v=>"×"+fmt(v,1)},()=>{});
   const E=EcgEngine();let tS=0;const st={play:1,act:1,vec:1,mon:0};
-  const setPre=k=>{sel.value=k;const p=ECG_PRESETS[k];if(p.rh==="sinus")S.hr.set(p.hr);E.reset(Object.assign({},p,p.rh==="sinus"?{hr:S.hr.get()}:{}),tS);buf.k.fill(-1);
+  const setPre=k=>{sel.value=k;const p=ECG_PRESETS[k];if(p.rh==="sinus")S.hr.set(p.hr);/* генераторът тръгва 10,5 s по-рано, за да са попълнени всички колони (aVR…V6) веднага, а не след 7,5 s */E.reset(Object.assign({},p,p.rh==="sinus"?{hr:S.hr.get()}:{}),tS-10.5);buf.k.fill(-1);
     $("#inf").innerHTML=ECG_INFO[k]||"";linkTerms($("#inf"));timingKey=null};
   sel.onchange=()=>setPre(sel.value);
   $("#pl").onclick=()=>{st.play^=1;$("#pl").textContent=st.play?"⏸︎ Пауза":"▶︎ Пусни"};
@@ -2867,7 +2867,7 @@ function viewECG(main){
     g.strokeStyle="#111";g.lineWidth=Math.max(1,mm*0.32);g.lineJoin="round";
     const cal=(y)=>{g.beginPath();g.moveTo(mm*1,y);g.lineTo(mm*2,y);g.lineTo(mm*2,y-mm*10);g.lineTo(mm*7,y-mm*10);g.lineTo(mm*7,y);g.stroke()};
     const kNow=Math.floor(tS*FS);
-    const trace=(lead,y0,ta,tb)=>{const j=ECG_LEADS.indexOf(lead);g.beginPath();let pen=false;for(let k=Math.floor(ta*FS);k<=Math.floor(tb*FS);k++){const tau=k/FS;let kk=k;if(k>kNow){if(k<kNow+0.25*FS){pen=false;continue}kk=k-SW*FS}if(kk<0){pen=false;continue}const y=y0-buf.v[sample(kk)+j]*mm*10,x=x0+(tau-W0)*pxs;pen?g.lineTo(x,y):g.moveTo(x,y);pen=true}g.stroke()};
+    const trace=(lead,y0,ta,tb)=>{const j=ECG_LEADS.indexOf(lead);g.beginPath();let pen=false;for(let k=Math.floor(ta*FS);k<=Math.floor(tb*FS);k++){const tau=k/FS;let kk=k;if(k>kNow){if(k<kNow+0.25*FS){pen=false;continue}kk=k-SW*FS}const y=y0-buf.v[sample(kk)+j]*mm*10,x=x0+(tau-W0)*pxs;pen?g.lineTo(x,y):g.moveTo(x,y);pen=true}g.stroke()};
     if(st.mon){["II","V1","V5"].forEach((l,r)=>{cal(rowY(r));trace(l,rowY(r),W0,W0+SW-0.004);g.fillStyle="#111";g.font=`600 ${Math.max(11,mm*3.2)}px -apple-system,Segoe UI,Arial`;g.fillText(l,x0+mm*1.5,rowY(r)-mm*9)})}
     else{for(let r=0;r<3;r++){cal(rowY(r));for(let c=0;c<4;c++){const ta=W0+c*2.5,tb=ta+2.5;trace(LAY[r][c],rowY(r),ta,tb-0.004);g.fillStyle="#111";g.font=`600 ${Math.max(10,mm*3.2)}px -apple-system,Segoe UI,Arial`;g.fillText(LAY[r][c],x0+c*2.5*pxs+mm*1.5,rowY(r)-mm*9);if(c){g.beginPath();g.moveTo(x0+c*2.5*pxs,rowY(r)-mm*2.5);g.lineTo(x0+c*2.5*pxs,rowY(r)+mm*2.5);g.stroke()}}}
     cal(rowY(3));trace("II",rowY(3),W0,W0+10-0.004);g.fillText("II",x0+mm*1.5,rowY(3)-mm*9)}
