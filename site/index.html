@@ -4196,7 +4196,10 @@ const STG_GHK={id:"stgGHK",foc:[[7,-1,0,24],[-5,1,0,22],[-4,-3,0,28],[-7,0,0,26]
   [[4.6,-4.3,0.6,1.3,0xf06595],[4.2,-5.6,0.2,1.0,0xf06595],[6.4,-4.6,-0.6,1.25,0x1c7ed6],[7.0,-5.4,-0.9,1.0,0x1c7ed6],[7.8,-6.6,-0.1,1.25,0xe03131],[8.6,-7.4,0.4,0.95,0xe03131],[6.0,-3.0,0,1.1,0xc2255c]].forEach(b=>pb.push(b));
   const pump=MK.blob(T,pb,{res:56});sc.add(pump);
   const beta=MK.blob(T,[[8.6,0,1.6,0.6,0xadb5bd],[8.6,1.6,1.6,0.6,0xadb5bd],[8.2,3.4,1.4,1.2,0xadb5bd],[7.4,4.3,0.9,1.0,0xadb5bd],[9.0,4.2,1.8,0.9,0xadb5bd]],{res:36});sc.add(beta);
-  [[9.4,5.2,2.2],[9.9,5.9,2.5],[10.4,6.4,2.2],[8.0,5.4,0.4],[8.4,6.2,0.1]].forEach(p=>{const m=new T.Mesh(new T.SphereGeometry(0.3,12,8),MK.mat(T,0xe9ecef));m.position.set(...p);sc.add(m)});
+  const gly=[];[[9.4,5.2,2.2],[9.9,5.9,2.5],[10.4,6.4,2.2],[8.0,5.4,0.4],[8.4,6.2,0.1]].forEach(p=>{const m=new T.Mesh(new T.SphereGeometry(0.3,12,8),MK.mat(T,0xe9ecef));m.position.set(...p);sc.add(m);gly.push(m)});
+  /* реалистичен режим (мащабът е в nm): K⁺ канал на изтичане = K2P (TWIK-1, 3UKM) с извънклетъчната „шапка“; Na⁺/K⁺-ATPаза от 2ZXE (α: TM, A, N, P; β; γ/FXYD) */
+  if(MK.real){const put=(urls,x,z,old)=>{const g=new T.Group();g.position.set(x,0,z);sc.add(g);let n=0;urls.forEach(u=>MK.loadMesh(T,"m/mol/"+u+".txt").then(gg=>{g.add(new T.Mesh(gg,MK.molMat(T,{})));if(++n===urls.length)old.forEach(o=>o.visible=false)}).catch(()=>{}))};
+    put(["k2p_a","k2p_b"],-5,0,[kch]);put(["nka_tm","nka_a","nka_n","nka_p","nka_b","nka_g"],6,0.2,[pump,beta,...gly])}
   // белтъчни аниони вътре
   ctx.an=[];[[-9,-7.5,2],[1,-8,-2.5],[11.5,-7.5,3],[-2,-6.8,4]].forEach(p=>{const b=MK.blob(T,[[p[0],p[1],p[2],1.1],[p[0]+1,p[1]+0.5,p[2]-0.4,0.9],[p[0]-0.8,p[1]-0.4,p[2]+0.5,0.8]],{res:30,color:0x495057});sc.add(b);const s=MK.sign(T,"−","#1c7ed6",1.6);s.position.set(p[0]+0.4,p[1]+2.0,p[2]+1.2);sc.add(s)});
   // йони
