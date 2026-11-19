@@ -237,7 +237,7 @@ function viewHbCurve(main){
       if(s.k==="co"){g.fillStyle="#495057";g.beginPath();g.arc(-4,-12,5,0,7);g.fill();g.fillStyle="#e03131";g.beginPath();g.arc(5,-12,5,0,7);g.fill();g.fillStyle="#fff";g.font=RFONT(8,700);g.textAlign="center";g.fillText("C",-4,-9)}
       g.fillStyle="#fff";g.font=RFONT(11,700);g.textAlign="center";g.fillText(ty==="M"?"Mb":(i<2?"α":(ty==="F"?"γ":"β"))+(ty==="M"?"":(i%2+1)),0,28);
       g.restore()});
-    if(ty==="A"&&Q.dpg>5&&Rst<0.5){g.fillStyle="#f08c00";g.beginPath();g.moveTo(cx-10,cy);g.lineTo(cx,cy-9);g.lineTo(cx+10,cy);g.lineTo(cx,cy+9);g.closePath();g.fill();g.fillStyle=css("--ink");g.font=RFONT(10,700);g.textAlign="center";g.fillText("2,3-BPG",cx,cy+24)}
+    if(ty==="A"&&Q.dpg>5&&Rst<0.5){g.fillStyle="#d9480f";g.beginPath();g.moveTo(cx-10,cy);g.lineTo(cx,cy-9);g.lineTo(cx+10,cy);g.lineTo(cx,cy+9);g.closePath();g.fill();g.fillStyle=css("--ink");g.font=RFONT(10,700);g.textAlign="center";g.fillText("2,3-BPG",cx,cy+24)}
     rTag(g,20,18,[`P_O₂ = ${fmt(curP,0)} mmHg`,run.on?(curP>70?"в белодробния капиляр":"в тъканния капиляр"):"среда около молекулата"],{fs:12});
     // панел вдясно
     const X=460;g.fillStyle=css("--ink");g.font=RFONT(13,700);g.textAlign="left";g.fillText(ty==="M"?"Миоглобин":Rst>0.5?"R състояние (отпуснато)":"T състояние (напрегнато)",X,40);
@@ -352,7 +352,7 @@ function viewBloodGroups(main){
       if(prod==="pl"&&don){g.fillStyle="#f76707";g.beginPath();g.moveTo(x,y-5);g.lineTo(x+4,y+4);g.lineTo(x-4,y+4);g.closePath();g.fill();continue}
       const col=don?"#862e9c":"#c92a2a";if(hem){g.strokeStyle=col;g.setLineDash([2,2]);g.beginPath();g.arc(x,y,6,0,7);g.stroke();g.setLineDash([]);continue}
       g.fillStyle=col;g.beginPath();g.ellipse(x,y,7,4.5,0,0,7);g.fill();
-      if(!C.ok&&u>0.3&&(prod==="rbc"?don:!don)){g.strokeStyle="#f08c00";g.lineWidth=1.5;for(let j=0;j<3;j++){const a=j*2.1;g.beginPath();g.moveTo(x+Math.cos(a)*7,y+Math.sin(a)*5);g.lineTo(x+Math.cos(a)*12,y+Math.sin(a)*9);g.stroke()}}}
+      if(!C.ok&&u>0.3&&(prod==="rbc"?don:!don)){g.strokeStyle="#d9480f";g.lineWidth=1.5;for(let j=0;j<3;j++){const a=j*2.1;g.beginPath();g.moveTo(x+Math.cos(a)*7,y+Math.sin(a)*5);g.lineTo(x+Math.cos(a)*12,y+Math.sin(a)*9);g.stroke()}}}
     g.fillStyle=C.ok?css("--accent3"):css("--accent");g.font=RFONT(12,700);g.textAlign="center";g.fillText(C.ok?"няма реакция":(prod==="rbc"?"антитела по донорските еритроцити → комплемент → хемолиза":"донорските антитела (▲) свързват еритроцитите на реципиента"),350,132);
     g.restore()}
   // --- 3. наследяване ---

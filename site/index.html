@@ -3122,7 +3122,7 @@ function viewCardiacAP(main){
   function drawCells(){const TW=2,n=Math.min(hb.k,HN),xs=[],sv=[],vv=[],si=[[],[],[],[],[]],vi=[[],[],[],[],[]];
     for(let q=hb.k-n;q<hb.k;q+=2){const i=q%HN,t=hb.t[i];if(t<tS-TW||t>tS)continue;xs.push(t-tS);sv.push(hb.sv[i]);vv.push(hb.vv[i]);for(let j=0;j<5;j++){si[j].push(Math.max(-1.6,Math.min(1.6,hb.si[i*5+j])));vi[j].push(Math.max(-4,Math.min(4,j===0?hb.vi[i*5]/100:hb.vi[i*5+j])))}}
     const xo={xmin:-TW,xmax:0,xlabel:"време, s (0 = сега)"};
-    plot($("#pSA"),Object.assign({},xo,{ymin:-80,ymax:50,ylabel:"mV",hlines:[{y:-40,color:"#e8590c",label:"праг ≈ −40"}],series:[{x:xs,y:sv,color:"#f08c00",width:2.2}]}));
+    plot($("#pSA"),Object.assign({},xo,{ymin:-80,ymax:50,ylabel:"mV",hlines:[{y:-40,color:"#e8590c",label:"праг ≈ −40"}],series:[{x:xs,y:sv,color:"#d9480f",width:2.2}]}));
     plot($("#iSA"),Object.assign({},xo,{ymin:-1.5,ymax:1.5,ylabel:"µA/cm²",hlines:[{y:0,color:css("--muted"),dash:[2,3]}],series:["#e8590c","#ae3ec9","#e03131","#1c7ed6","#3b5bdb"].map((c,j)=>({x:xs,y:si[j],color:c,width:j<2?2.4:1.6}))}));
     plot($("#pV"),Object.assign({},xo,{ymin:-100,ymax:60,ylabel:"mV",shade:shades(),series:[{x:xs,y:vv,color:"#e03131",width:2.2}],texts:phaseTexts()}));
     plot($("#iV"),Object.assign({},xo,{ymin:-4,ymax:4,ylabel:"µA/cm²",hlines:[{y:0,color:css("--muted"),dash:[2,3]}],series:["#f76707","#e03131","#1c7ed6","#3b5bdb","#7048e8"].map((c,j)=>({x:xs,y:vi[j],color:c,width:1.6}))}))}
@@ -3610,7 +3610,7 @@ function viewBaro(main){
     chain.forEach(c=>{if(!c[3])return;const me=new T.Mesh(new T.SphereGeometry(0.0022*c[3],14,10),gangM);me.position.set(c[0],c[1],c[2]);me.scale.set(0.8,1.7,0.8);body.add(me);ctx.gang.push(me)});
     // артериола (ефектор на α₁)
     const arG=new T.Group();arG.position.set(0.082,0.608,0.012);body.add(arG);const arT=new T.Mesh(new T.CylinderGeometry(1,1,0.016,24,1,true),std(0xd9363e,{side:T.DoubleSide,roughness:0.4}));arT.rotation.z=Math.PI/2;arG.add(arT);ctx.arT=arT;
-    ctx.rings=[];for(let i=0;i<5;i++){const r=new T.Mesh(new T.TorusGeometry(1,0.18,8,24),std(0xf08c00));r.rotation.y=Math.PI/2;r.position.x=-0.006+i*0.003;arG.add(r);ctx.rings.push(r)}ctx.rings.forEach(r=>r.visible=false);
+    ctx.rings=[];for(let i=0;i<5;i++){const r=new T.Mesh(new T.TorusGeometry(1,0.18,8,24),std(0xd9480f));r.rotation.y=Math.PI/2;r.position.x=-0.006+i*0.003;arG.add(r);ctx.rings.push(r)}ctx.rings.forEach(r=>r.visible=false);
     /* гладкомускулни клетки: вретеновидни дъги, увити спирално около стената (като тухлена зидария); мащабират се с диаметъра */
     {const smM=[0xc2565f,0xb84a55,0xcc6670].map(c=>SRGB(new T.MeshPhysicalMaterial({color:c,roughness:0.5,clearcoat:0.3})));const arc=new T.TorusGeometry(1,0.16,6,14,1.15);{const P=arc.attributes.position,v=new T.Vector3();for(let k=0;k<P.count;k++){v.fromBufferAttribute(P,k);const a=Math.atan2(v.y,v.x),f=Math.sin(Math.max(0,Math.min(1,a/1.15))*Math.PI);const rr=Math.hypot(v.x,v.y),rt=1+(rr-1)*(0.35+0.65*f);v.x*=rt/rr;v.y*=rt/rr;v.z*=0.35+0.65*f;P.setXYZ(k,v.x,v.y,v.z)}arc.computeVertexNormals()}
       for(let i=0;i<7;i++)for(let j=0;j<5;j++){const me=new T.Mesh(arc,smM[(i+j)%3]);me.rotation.y=Math.PI/2;me.rotation.x=0;const g2=new T.Group();g2.position.x=-0.0072+i*0.0024;g2.rotation.x=j*1.2566+(i%2)*0.63;g2.add(me);arG.add(g2);ctx.rings.push(g2)}}
@@ -4423,7 +4423,7 @@ const S=(t,short,badge,d,tag)=>({t,short,badge,d,tag});
 return {id:"stgTR",title:"Как работят дифузията, преносителите и помпите — стъпка по стъпка",h:490,dur:3.6,
  intro:"Участък от плазмената мембрана с три транспортни белтъка (в разрез отпред). Избери механизъм — камерата отива при него. Белтъците преносители никога не са отворени едновременно от двете страни: редуват „отворен навън“ и „отворен навътре“.",
  cam:{r:22,th:0.3,phi:1.33,target:[X.simple,-0.3,0],min:6,max:70},
- legend:[["#e03131","O₂"],["#dee2e6","глюкоза"],["#f76707","Na⁺"],["#9c36b5","K⁺"],["#4dabf7","ATP / ADP"],["#fd7e14","фосфат (Pᵢ)"],["#4c6ef5","GLUT1","box"],["#f08c00","Na⁺/K⁺-ATPаза (α); домени A, N, P","box"],["#1c7ed6","β-субединица","box"],["#7950f2","SGLT1","box"]],
+ legend:[["#e03131","O₂"],["#dee2e6","глюкоза"],["#f76707","Na⁺"],["#9c36b5","K⁺"],["#4dabf7","ATP / ADP"],["#fd7e14","фосфат (Pᵢ)"],["#4c6ef5","GLUT1","box"],["#d9480f","Na⁺/K⁺-ATPаза (α); домени A, N, P","box"],["#1c7ed6","β-субединица","box"],["#7950f2","SGLT1","box"]],
  onMech:k=>{if(window.__trSetMode)window.__trSetMode(k)},
  mechs:[
   {key:"simple",label:"Проста дифузия (O₂)",center:"без белтък",stages:[
@@ -4458,14 +4458,14 @@ return {id:"stgTR",title:"Как работят дифузията, пренос
   const rocker=(x,c,W)=>{const L=new T.Group(),Rr=new T.Group();L.position.set(x-W,0,0);Rr.position.set(x+W,0,0);L.add(half(-1,c[0],c[1],W));Rr.add(half(1,c[2],c[3],W));sc.add(L,Rr);return {L,R:Rr,set(a){L.rotation.z=a;Rr.rotation.z=-a}}};
   ctx.glut=rocker(xf,[0x3b5bdb,0x5c7cfa,0x748ffc,0x91a7ff],1);ctx.glut.set(0.34);
   ctx.sglt=rocker(xg,[0x6741d9,0x7950f2,0x9775fa,0xb197fc],1.05);ctx.sglt.set(0.34);
-  ctx.nka=rocker(xp,[0xe8590c,0xf08c00,0xf76707,0xff922b],1.2);ctx.nka.set(-0.22);
+  ctx.nka=rocker(xp,[0xe8590c,0xd9480f,0xf76707,0xff922b],1.2);ctx.nka.set(-0.22);
   // Na⁺/K⁺-ATPаза: P-домен (под мембраната), подвижни N- и A-домен, β-субединица
-  ctx.pumpStatic=[];{const pd=MK.blob(T,[[xp,-3.2,0,1.15,0x1c7ed6],[xp+0.3,-4.0,0.2,1.2,0x1c7ed6],[xp-0.4,-3.7,-0.5,1.0,0x1c7ed6],[xp,-2.4,-0.3,0.8,0xf08c00]],{res:40});sc.add(pd);ctx.pumpStatic.push(pd)}
+  ctx.pumpStatic=[];{const pd=MK.blob(T,[[xp,-3.2,0,1.15,0x1c7ed6],[xp+0.3,-4.0,0.2,1.2,0x1c7ed6],[xp-0.4,-3.7,-0.5,1.0,0x1c7ed6],[xp,-2.4,-0.3,0.8,0xd9480f]],{res:40});sc.add(pd);ctx.pumpStatic.push(pd)}
   const dom=(balls,col)=>{const g=new T.Group();g.add(MK.blob(T,balls.map(b=>[b[0],b[1],b[2],b[3],col]),{res:36}));sc.add(g);return g};
   ctx.N=dom([[0,0,0,1.15],[0.8,-0.5,0.2,0.95],[0.3,0.6,-0.4,0.8],[1.2,0.4,-0.2,0.7]],0xe03131);
   ctx.A=dom([[0,0,0,1.0],[-0.8,-0.4,0.3,0.9],[-0.3,0.6,-0.3,0.75]],0xf06595);
   ctx.Nop=V(xp+2.9,-4.6,0.3);ctx.Ncl=V(xp+1.75,-4.15,0.5);ctx.Aout=V(xp-2.8,-3.6,0.1);ctx.Ain=V(xp-1.7,-4.3,0.9);
-  const lk=(a,b)=>{const m=MK.taper(T,new T.LineCurve3(a,b),0.22,0.22,{seg:6,rad:8,color:0xf08c00});sc.add(m);ctx.pumpStatic.push(m)};lk(V(xp+1.2,-2.4,-0.6),V(xp+2.6,-3.9,-0.4));lk(V(xp-1.1,-2.4,-0.4),V(xp-2.5,-3.3,-0.2));
+  const lk=(a,b)=>{const m=MK.taper(T,new T.LineCurve3(a,b),0.22,0.22,{seg:6,rad:8,color:0xd9480f});sc.add(m);ctx.pumpStatic.push(m)};lk(V(xp+1.2,-2.4,-0.6),V(xp+2.6,-3.9,-0.4));lk(V(xp-1.1,-2.4,-0.4),V(xp-2.5,-3.3,-0.2));
   const bx=xp+2.9;{const bb=MK.blob(T,[[bx,-1.6,-0.9,0.5,0xadb5bd],[bx,0,-0.9,0.55,0xadb5bd],[bx,1.6,-0.9,0.55,0xadb5bd],[bx-0.2,3.3,-0.7,1.2,0xadb5bd],[bx-1.1,4.0,-0.6,1.0,0xadb5bd],[bx+0.6,4.1,-0.2,0.9,0xadb5bd]],{res:36});sc.add(bb);ctx.pumpStatic.push(bb)}
   [[bx+1.1,4.9,0.2],[bx+1.6,5.6,0.4],[bx+2.1,6.1,0.1],[bx-1.4,5.0,-0.2],[bx-1.0,5.8,0.1]].forEach(p=>{const m=new T.Mesh(new T.SphereGeometry(0.28,12,8),MK.mat(T,0xe9ecef));m.position.set(...p);sc.add(m);ctx.pumpStatic.push(m)});
   /* истински структури (RCSB PDB): GLUT1 4PYP, vSGLT 3DH4, Na⁺/K⁺-ATP-аза 3B8E — половините се люлеят като преди */
@@ -5170,7 +5170,7 @@ const VAL=[null,{Pc:30,pc:0,pif:0,piif:0},{Pc:30,pc:28,pif:-3,piif:8},{Pc:10,pc:
 return {id:"stgST",title:"Как течността излиза от капиляра и се връща — стъпка по стъпка",h:500,dur:4.5,
  intro:"Разрез през стената на капиляр в нанометров мащаб: кръвната плазма с албумин отгоре, ендотелни клетки с междуклетъчна цепка, гликокаликс и базална мембрана, а отдолу интерстициум с колагенови влакна и протеогликани. Вдясно е лимфен капиляр с клапи от припокриващи се клетки.",
  cam:{r:30,th:0.22,phi:1.4,target:[0,0,0],min:8,max:90},
- legend:[["#4dabf7","вода"],["#f06595","албумин"],["#f4b6b0","ендотелна клетка","box"],["#748ffc","ядро","box"],["#bac8ff","гликокаликс","box"],["#f08c00","междуклетъчни връзки","box"],["#ced4da","базална мембрана","box"],["#e9d8a6","колаген","box"],["#d0ebff","лимфен капиляр","box"],["#e03131","сила навън","box"],["#1c7ed6","сила навътре","box"]],
+ legend:[["#4dabf7","вода"],["#f06595","албумин"],["#f4b6b0","ендотелна клетка","box"],["#748ffc","ядро","box"],["#bac8ff","гликокаликс","box"],["#d9480f","междуклетъчни връзки","box"],["#ced4da","базална мембрана","box"],["#e9d8a6","колаген","box"],["#d0ebff","лимфен капиляр","box"],["#e03131","сила навън","box"],["#1c7ed6","сила навътре","box"]],
  stages:[
   S("Стената на капиляра","Устройство на стената","стена","цепки ≈ 6–7 nm","Капилярът е само един слой <b>ендотелни клетки</b> върху <b>базална мембрана</b>. Между клетките има тесни <b>междуклетъчни цепки</b>, частично затворени от междуклетъчни връзки. Луминалната повърхност е покрита с <b>гликокаликс</b> — гъста мрежа от протеогликани. Вода и малки разтворени вещества минават свободно, а албуминът почти не минава."),
   S("Хидростатичното налягане изтласква водата навън","Pc изтласква водата","Pc","Pc ≈ 30 mmHg","На артериоларния край кръвното налягане в капиляра (P<sub>c</sub> ≈ 30 mmHg) притиска плазмата към стената и изтласква вода и малки молекули през цепките към интерстициума — <b>филтрация</b>."),
@@ -5188,7 +5188,7 @@ return {id:"stgST",title:"Как течността излиза от капил
   [[ctx.c1,-8],[ctx.c2,8]].forEach(([g,x])=>{const n=new T.Mesh(new T.SphereGeometry(1,32,20),MK.mat(T,0x748ffc,{roughness:0.45}));n.scale.set(3.2,1.2,2.6);n.position.set(x,1.25,-1.8);g.add(n);
     for(let k=0;k<7;k++){const v=new T.Mesh(new T.SphereGeometry(0.22,12,8),MK.mat(T,0xfff5f5,{roughness:0.3}));v.position.set(x-4+k*1.3+R()*0.4,-0.4+R()*1.4,ZF+0.18);g.add(v)}});
   // междуклетъчни връзки (с прекъсване — пора)
-  ctx.jn=[];for(let z=Z0+0.4;z<ZF;z+=0.45){if(z>-1.3&&z<0.7)continue;const b=new T.Mesh(new T.CylinderGeometry(0.13,0.13,0.8,8),MK.mat(T,0xf08c00));b.rotation.z=Math.PI/2;b.position.set(0,0.65,z);sc.add(b);ctx.jn.push(b)}
+  ctx.jn=[];for(let z=Z0+0.4;z<ZF;z+=0.45){if(z>-1.3&&z<0.7)continue;const b=new T.Mesh(new T.CylinderGeometry(0.13,0.13,0.8,8),MK.mat(T,0xd9480f));b.rotation.z=Math.PI/2;b.position.set(0,0.65,z);sc.add(b);ctx.jn.push(b)}
   // гликокаликс
   const hairs=[];for(let x=-14.6;x<14.6;x+=0.42)for(let z=Z0+0.3;z<ZF-0.2;z+=0.5){if(Math.abs(x)<0.5)continue;const y0=1.6+(Math.abs(Math.abs(x)-8)<3.2&&z<1&&z>-4.6?0.35:0);hairs.push({x:x+R()*0.2,z:z+R()*0.2,y0,l:1.1+R()*0.6,tx:(R()-0.5)*0.4,tz:(R()-0.5)*0.4,sh:R()})}
   ctx.hairs=hairs;ctx.gly=new T.InstancedMesh(new T.CylinderGeometry(0.035,0.05,1,5),new T.MeshStandardMaterial({color:LIN(T,0xbac8ff),roughness:0.6}),hairs.length);sc.add(ctx.gly);
@@ -5219,7 +5219,7 @@ return {id:"stgST",title:"Как течността излиза от капил
   ctx.toLy=[V(8,-3.6,0),V(16,-4.4,-0.4),V(LX-LR-0.6,LY+0.6,-0.2),V(LX,LY,-0.2),V(LX+0.4,LY,-4.8)];
   // стрелки на силите
   const mk=(hex)=>{const a=MK.arrow(T,hex,{w:0.13,head:0.7,hw:0.5});sc.add(a);a.setLen(0);return a};
-  ctx.A={Pc:mk(0xe03131),pc:mk(0x1c7ed6),pif:mk(0xe03131),piif:mk(0xf08c00),net:mk(0x9c36b5)};
+  ctx.A={Pc:mk(0xe03131),pc:mk(0x1c7ed6),pif:mk(0xe03131),piif:mk(0xd9480f),net:mk(0x9c36b5)};
   ctx.A.Pc.position.set(-3,8.2,2.6);ctx.A.Pc.setDirection(V(0,-1,0));ctx.A.pc.position.set(3,3.4,2.6);ctx.A.pc.setDirection(V(0,1,0));
   ctx.A.pif.position.set(-3,-2.2,2.6);ctx.A.pif.setDirection(V(0,-1,0));ctx.A.piif.position.set(3,-2.2,2.6);ctx.A.piif.setDirection(V(0,-1,0));ctx.A.net.position.set(0,0.3,3.6);
   ctx.camI=-1;ctx.vm.style.display=""},
@@ -6486,14 +6486,14 @@ function viewRespReg(main){
     const CX=440;g.strokeStyle="#c92a2a";g.lineWidth=7;g.lineCap="round";g.beginPath();g.moveTo(CX,370);g.lineTo(CX,250);g.lineTo(CX-20,170);g.moveTo(CX,250);g.lineTo(CX+24,170);g.stroke();
     g.beginPath();g.moveTo(CX,370);g.bezierCurveTo(CX,330,CX+70,310,CX+100,340);g.lineTo(CX+110,378);g.stroke();
     const per=Math.min(1,(Math.max(0,d.hyp)+Math.max(0,d.acid))/12);
-    [[CX-2,236,"каротидно телце","IX нерв"],[CX+66,322,"аортно телце","X нерв"]].forEach(([x,y,l,nn])=>{g.fillStyle="#f08c00";g.globalAlpha=0.3+0.7*per;g.beginPath();g.arc(x,y,9,0,7);g.fill();g.globalAlpha=1;g.strokeStyle="#f08c00";g.lineWidth=1.5;g.stroke();g.fillStyle=css("--ink");g.font=RFONT(11,700);g.textAlign="left";g.fillText(l,x+14,y-2);g.font=RFONT(10);g.fillStyle=css("--muted");g.fillText("PO₂↓, H⁺↑ · "+nn,x+14,y+11)});
+    [[CX-2,236,"каротидно телце","IX нерв"],[CX+66,322,"аортно телце","X нерв"]].forEach(([x,y,l,nn])=>{g.fillStyle="#d9480f";g.globalAlpha=0.3+0.7*per;g.beginPath();g.arc(x,y,9,0,7);g.fill();g.globalAlpha=1;g.strokeStyle="#d9480f";g.lineWidth=1.5;g.stroke();g.fillStyle=css("--ink");g.font=RFONT(11,700);g.textAlign="left";g.fillText(l,x+14,y-2);g.font=RFONT(10);g.fillStyle=css("--muted");g.fillText("PO₂↓, H⁺↑ · "+nn,x+14,y+11)});
     // бял дроб и диафрагма
     const vol=s.vol||0,ls=1+vol*0.25,LX=600;g.fillStyle="#f3a6b4";g.strokeStyle="#c2566b";g.lineWidth=2;g.beginPath();g.ellipse(LX,120,40*ls,62*ls,0,0,7);g.fill();g.stroke();
     g.fillStyle="#7a2232";g.font=RFONT(11,700);g.textAlign="center";g.fillText("бял дроб",LX,116);g.font=RFONT(10);g.fillText("рецептори",LX,130);g.fillText("за разтягане",LX,142);
     g.strokeStyle="#b35a1f";g.lineWidth=6;g.beginPath();g.moveTo(LX-58,214+vol*16);g.quadraticCurveTo(LX,176+vol*36,LX+58,214+vol*16);g.stroke();g.fillStyle="#b35a1f";g.font=RFONT(11,700);g.fillText("диафрагма",LX,236+vol*16);
     // нерви
     const path=(pts,col,act,w)=>{g.strokeStyle=col;g.globalAlpha=0.35;g.lineWidth=w||2.5;g.beginPath();pts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.stroke();g.globalAlpha=1;return {pts,col,act}};
-    const N=[path([[SX(176),320],[SX(200),352],[LX-30,352],[LX,222]],"#7048e8",ins?s.ramp:0,3),path([[CX-10,232],[SX(240),150],[SX(178),142]],"#f08c00",per),path([[CX+58,318],[SX(250),170],[SX(180),146]],"#f08c00",per),path([[LX-40,110],[SX(260),96],[SX(178),134]],"#1c7ed6",p.vag?0:Math.max(0,(vol-0.6))*1.2)];
+    const N=[path([[SX(176),320],[SX(200),352],[LX-30,352],[LX,222]],"#7048e8",ins?s.ramp:0,3),path([[CX-10,232],[SX(240),150],[SX(178),142]],"#d9480f",per),path([[CX+58,318],[SX(250),170],[SX(180),146]],"#d9480f",per),path([[LX-40,110],[SX(260),96],[SX(178),134]],"#1c7ed6",p.vag?0:Math.max(0,(vol-0.6))*1.2)];
     if(p.vag){const mx=(LX-40+SX(260))/2,my=103;g.strokeStyle="#e03131";g.lineWidth=3;g.beginPath();g.moveTo(mx-10,my-12);g.lineTo(mx+10,my+12);g.moveTo(mx+10,my-12);g.lineTo(mx-10,my+12);g.stroke();g.fillStyle="#e03131";g.font=RFONT(10.5,700);g.textAlign="center";g.fillText("вагус прерязан",mx,my-16)}
     else{g.fillStyle=css("--muted");g.font=RFONT(10.5,600);g.textAlign="center";g.fillText("Херинг–Бройер (X)",(LX-40+SX(260))/2,92)}
     g.fillStyle=css("--muted");g.font=RFONT(10.5,600);g.textAlign="left";g.fillText("диафрагмален нерв (C3–C5)",SX(214),346);
@@ -6877,7 +6877,7 @@ const BF=(()=>{
   b+=ar([[50,40],[50,180]],{c:RED,w:2})+circ(50,32,6,RED)+L(50,"проста","дифузия");
   b+=rect(118,80,14,60,"#5c7cfa",{rx:4})+rect(148,80,14,60,"#5c7cfa",{rx:4})+ar([[140,40],[140,180]],{c:K,w:2})+circ(140,32,6,K)+L(140,"канал","(K⁺, Na⁺)");
   b+=`<path d="M210,78 q20,-6 40,0 l-4,64 q-16,6 -32,0Z" fill="color-mix(in srgb,#4c6ef5 35%,var(--panel))" stroke="#4c6ef5"/>`+ar([[230,40],[230,180]],{c:"var(--ink)",w:2})+circ(230,32,6,"var(--panel)","var(--ink)")+L(230,"улеснена","дифузия");
-  b+=`<path d="M298,78 q22,-6 44,0 l-4,64 q-18,6 -36,0Z" fill="color-mix(in srgb,#f08c00 35%,var(--panel))" stroke="#f08c00"/>`+ar([[312,170],[312,40]],{c:NA,w:2})+ar([[330,40],[330,170]],{c:K,w:2})+t(352,160,"ATP",{fs:10.5,c:BLUE,w:700,a:"start"})+L(320,"първичен","активен");
+  b+=`<path d="M298,78 q22,-6 44,0 l-4,64 q-18,6 -36,0Z" fill="color-mix(in srgb,#d9480f 35%,var(--panel))" stroke="#d9480f"/>`+ar([[312,170],[312,40]],{c:NA,w:2})+ar([[330,40],[330,170]],{c:K,w:2})+t(352,160,"ATP",{fs:10.5,c:BLUE,w:700,a:"start"})+L(320,"първичен","активен");
   b+=`<path d="M378,78 q22,-6 44,0 l-4,64 q-18,6 -36,0Z" fill="color-mix(in srgb,#7950f2 30%,var(--panel))" stroke="#7950f2"/>`+ar([[392,40],[392,180]],{c:NA,w:2})+ar([[410,40],[410,180]],{c:"var(--ink)",w:2})+L(400,"вторичен","активен");
   b+=t(10,20,"извън",{fs:10.5,a:"start",c:"var(--muted)"})+t(10,176,"вътре",{fs:10.5,a:"start",c:"var(--muted)"});
   b+=t(95,232,"по градиента, без ATP",{fs:10.5,c:GRN,w:600})+t(360,232,"срещу градиента, с енергия",{fs:10.5,c:RED,w:600});return S(440,240,b,"Основни начини на транспорт през мембраната")};
