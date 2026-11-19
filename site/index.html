@@ -3585,7 +3585,7 @@ function viewBaro(main){
     const std=(c,o={})=>SRGB(new T.MeshStandardMaterial(Object.assign({color:c,roughness:0.55},o)));
     const glass=(c,op,o={})=>SRGB(new T.MeshStandardMaterial(Object.assign({color:c,roughness:0.6,transparent:true,opacity:op,depthWrite:false},o)));
     ctx.skin=mk("skin",glass(0xe8b89a,0.075));ctx.skin.renderOrder=12;
-    mk("cortex",glass(0xf2b6c0,0.15)).renderOrder=11;mk("cerebellum",glass(0xe39aa6,0.2)).renderOrder=11;
+    ctx.ctx_=mk("cortex",glass(0xf2b6c0,0.15));ctx.ctx_.renderOrder=11;ctx.cbl=mk("cerebellum",glass(0xe39aa6,0.2));ctx.cbl.renderOrder=11;
     mk("pons",glass(0xc4834f,0.7)).renderOrder=9;ctx.med=mk("medulla",glass(0xc98b55,0.55,{emissive:0x000000}));ctx.med.renderOrder=9;
     mk("cordC",std(0xe2bf8a,{roughness:0.6}));ctx.t14=mk("cordT14",std(0xe2bf8a,{emissive:0x000000,roughness:0.6}));mk("cordT58",std(0xe2bf8a,{roughness:0.6}));
     const artM=SRGB(new T.MeshPhysicalMaterial({color:0xc93a42,roughness:0.42,clearcoat:0.5,clearcoatRoughness:0.35,sheen:new T.Color(0x662222)}));mk("aorta",artM);mk("neckart",artM);
@@ -3661,6 +3661,7 @@ function viewBaro(main){
     const tS=m.t,sdt=n*0.002;
     if(ctx.view){const v=ctx.view;G.flyTo(v[2][0],v[2][1],v[2][2],v[3],v[0],v[1]);ctx.view=null}
     ctx.skin.visible=!!arcSt.skin&&G.cam.position.distanceTo(new G.T.Vector3(0.1,6.5,0.1))>3.2;
+    /* отблизо мозъкът (нискополигонален) избледнява, за да се виждат стволът и ядрата */{const dB=G.cam.position.distanceTo(new G.T.Vector3(0.05,7.65,-0.05)),f=Math.max(0,Math.min(1,(dB-1.2)/2.2));ctx.ctx_.material.opacity=0.03+0.12*f;ctx.cbl.material.opacity=0.04+0.16*f;ctx.ctx_.visible=ctx.cbl.visible=f>0.02||dB>0.9}
     // светене според активността
     /* поетапен режим (window.__baroStage): светят само структурите на текущата стъпка, импулси текат само по нейните нерви */const SG=window.__baroStage,hl=k=>!SG||!SG.hl||SG.hl.includes(k)?1:0.12;
     /* поетапна анимация: SG.i — стъпката, SG.u — 0…1 в рамките на стъпката */const si=SG?SG.i:-1,su=SG?Math.min(1,SG.u||0):0,se=su*su*(3-2*su),ramp=(a,b)=>{const x=Math.max(0,Math.min(1,(su-a)/(b-a)));return x*x*(3-2*x)};

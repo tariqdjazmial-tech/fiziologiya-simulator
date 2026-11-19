@@ -333,7 +333,7 @@ function k3Tub(cv,get){
     const OC=[[50,[116,192,252]],[300,[236,214,220]],[700,[247,103,7]],[1250,[165,30,40]]],oc=o=>{let i=0;while(i<OC.length-2&&o>OC[i+1][0])i++;const [a,ca]=OC[i],[b,cb]=OC[i+1],u=Math.max(0,Math.min(1,(o-a)/(b-a)));return `rgb(${ca.map((c,k)=>Math.round(c+(cb[k]-c)*u)).join(",")})`};
     let lastMp=0;const paintT=Mp=>{for(let y=0;y<256;y++){const Y=Y0-(Y0-Y3)*y/255,o=Y>Y1?300:300+(Mp-300)*Math.min(1,(Y1-Y)/(Y1-Y3));tg.fillStyle=oc(o);tg.fillRect(0,y,16,1)}ttex.needsUpdate=true};
     const blk=new T.Mesh(new T.BoxGeometry(11,Y0-Y3,4.2),new T.MeshStandardMaterial({map:ttex,transparent:true,opacity:0.16,depthWrite:false,side:T.DoubleSide,roughness:0.9}));blk.position.set(0.5,(Y0+Y3)/2,0);blk.renderOrder=1;sc.add(blk);
-    const edges=new T.LineSegments(new T.EdgesGeometry(blk.geometry),new T.LineBasicMaterial({color:0xadb5bd,transparent:true,opacity:0.5}));edges.position.copy(blk.position);sc.add(edges);
+    
     [Y1,Y2].forEach(y=>{const pl=new T.Mesh(new T.PlaneGeometry(11,4.2),new T.MeshBasicMaterial({color:0x868e96,transparent:true,opacity:0.07,side:T.DoubleSide,depthWrite:false}));pl.rotation.x=Math.PI/2;pl.position.set(0.5,y,0);sc.add(pl)});
     // капсула на бъбрека отгоре
     const capsM=R3.phys(T,0xf1e3d3,{roughness:0.6,transparent:true,opacity:0.6,depthWrite:false});const caps=new T.Mesh(new T.BoxGeometry(11,0.12,4.2),capsM);caps.position.set(0.5,Y0+0.06,0);sc.add(caps);
@@ -345,11 +345,19 @@ function k3Tub(cv,get){
     path("tal",[V3(0.22,-1.8,0.05),V3(0.25,0,0.05),V3(0.3,1.6,0.05),V3(-1.6,2.85,0.45),V3(-2.55,3.35,0.45)]);
     const dctP=[V3(-2.55,3.35,0.45)];for(let i=1;i<=16;i++){const u=i/16;dctP.push(V3(-2.55+u*4.0+Math.sin(u*14)*0.4,3.35-u*0.2+Math.cos(u*12)*0.3,0.45+Math.sin(u*17)*0.6))}dctP.push(V3(2.5,2.6,0));path("dct",dctP);
     path("cd",[V3(2.5,2.6,0),V3(3.2,2.0,0),V3(3.3,0,0),V3(3.35,-3,0),V3(3.4,-5.4,0),V3(3.45,-6.1,0)]);
-    const SEG=[["pct",0.34,0xf2c49b],["dtl",0.12,0xc5d9f1],["atl",0.12,0xd3e4f5],["tal",0.24,0xf0b7a8],["dct",0.24,0xcfe2b9],["cd",0.36,0xe2d4f3]],meshes={};
+    const SEG=[["pct",0.34,0xf2c49b],["dtl",0.12,0xc5d9f1],["atl",0.12,0xd3e4f5],["tal",0.24,0xf0b7a8],["dct",0.24,0xe7c1d8],["cd",0.36,0xe2d4f3]],meshes={};
+    /* епител: многоъгълни клетки с ядра (проксималният — високи кубични клетки; тънките клонове — плоски); текстурата се повтаря по дължината */
+    const epi=(flat)=>R3.tex(T,256,128,(g,W,H)=>{g.fillStyle="#f6eeee";g.fillRect(0,0,W,H);const r=MK.rnd(flat?7:3),n=flat?14:26,pts=[];for(let i=0;i<n;i++)pts.push([r()*W,r()*H]);
+      const img=g.getImageData(0,0,W,H),d=img.data;for(let y=0;y<H;y++)for(let x=0;x<W;x++){let a=1e9,b=1e9;pts.forEach(p=>{for(const ox of[-W,0,W])for(const oy of[-H,0,H]){const dd=(x-p[0]-ox)**2+(y-p[1]-oy)**2;if(dd<a){b=a;a=dd}else if(dd<b)b=dd}});const e=Math.sqrt(b)-Math.sqrt(a),k=4*(y*W+x),v=e<1.6?0.72:1;d[k]*=v;d[k+1]*=v;d[k+2]*=v}g.putImageData(img,0,0);
+      pts.forEach(p=>{g.fillStyle="rgba(120,70,110,.55)";g.beginPath();g.ellipse(p[0],p[1],flat?7:5,flat?3:4.2,0,0,7);g.fill()})});
+    const epiT={thick:epi(false),thin:epi(true)};
     SEG.forEach(([k,r,c])=>{const g=new T.TubeGeometry(seg[k],k==="pct"||k==="dct"?160:60,r,14,false);const col=new Float32Array(g.attributes.position.count*3).fill(1);g.setAttribute("color",new T.BufferAttribute(col,3));
-      const m=new T.Mesh(g,R3.phys(T,0xffffff,{vertexColors:true,roughness:0.4,clearcoat:0.5}));m.userData.k=k;m.userData.base=c;sc.add(m);meshes[k]=m});
+      const tx=(k==="dtl"||k==="atl"?epiT.thin:epiT.thick).clone();tx.needsUpdate=true;tx.wrapS=tx.wrapT=T.RepeatWrapping;tx.repeat.set(Math.max(2,seg[k].getLength()/(r*3)),2);
+      const m=new T.Mesh(g,R3.phys(T,0xffffff,{vertexColors:true,map:tx,roughness:0.5,clearcoat:0.35}));m.userData.k=k;m.userData.base=c;sc.add(m);meshes[k]=m});
     // гломерул и капсула на Боуман
-    const bc=new T.Mesh(new T.SphereGeometry(0.62,32,24),R3.glass(T,0xf3d9a4,0.45));bc.position.copy(g0);sc.add(bc);sc.add(Object.assign(MK.blob(T,[[g0.x,g0.y,g0.z,0.35,0xd6336c],[g0.x+0.2,g0.y-0.1,g0.z+0.15,0.28,0xe03131],[g0.x-0.15,g0.y+0.12,g0.z-0.12,0.26,0xc92a2a]],{res:24})));
+    const bc=new T.Mesh(new T.SphereGeometry(0.62,32,24),R3.glass(T,0xf2c9cf,0.32));bc.position.copy(g0);sc.add(bc);
+    /* гломерул: кълбо от капилярни бримки (вместо топка) */
+    {const gm=R3.phys(T,0xd6336c,{roughness:0.35,clearcoat:0.5}),rr=MK.rnd(23);for(let k=0;k<9;k++){const pts=[],a0=rr()*6.28,b0=rr()*3.14;for(let q=0;q<=14;q++){const u=q/14,a=a0+u*4.2,b=b0+Math.sin(u*6.28+k)*0.9;pts.push(V3(g0.x+Math.sin(b)*Math.cos(a)*0.36,g0.y+Math.cos(b)*0.34,g0.z+Math.sin(b)*Math.sin(a)*0.36))}sc.add(R3.tube(T,pts,0.045,gm,{seg:50,rad:6}))}}
     // vasa recta
     const vrM=R3.phys(T,0xe8737a,{roughness:0.4,transparent:true,opacity:0.55,depthWrite:false}),vvM=R3.phys(T,0x748ffc,{roughness:0.4,transparent:true,opacity:0.55,depthWrite:false});
     for(const dz of [-0.9,0.9]){const x=-0.1+dz*0.2;sc.add(R3.tube(T,[V3(x-0.25,1.5,dz),V3(x-0.25,-3,dz),V3(x-0.2,-5.2,dz),V3(x,-5.5,dz)],0.07,vrM,{seg:40,rad:8}));sc.add(R3.tube(T,[V3(x,-5.5,dz),V3(x+0.2,-5.2,dz),V3(x+0.25,-3,dz),V3(x+0.25,1.5,dz)],0.08,vvM,{seg:40,rad:8}))}
