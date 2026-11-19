@@ -47,10 +47,14 @@ function zGlb(id){if(__zglb[id])return __zglb[id];return __zglb[id]=loadScript(G
 // процедурна „мокра“ тъкан с три нюанса (ползва шума от белодробния шейдър)
 function zMat(T,c,o={}){const m=new T.MeshPhysicalMaterial({color:0xffffff,roughness:o.ro||0.42,clearcoat:o.cc==null?0.8:o.cc,clearcoatRoughness:0.18,side:T.DoubleSide,transparent:true,opacity:1,emissive:new T.Color(0),emissiveIntensity:0});
   m.userData.u={uSc:{value:o.sc||1},uA:{value:new T.Vector3(...c[0])},uB:{value:new T.Vector3(...c[1])},uC:{value:new T.Vector3(...c[2])}};
-  m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,m.userData.u);sh.vertexShader=sh.vertexShader.replace("#include <common>","#include <common>\nattribute vec3 rest;\nvarying vec3 vRest;").replace("#include <begin_vertex>","#include <begin_vertex>\nvRest=rest;");
-    sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\n"+LUNG_GLSL+"\nuniform vec3 uA,uB,uC;")
+  const FB=o.fib||0;
+  m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,m.userData.u);sh.vertexShader=sh.vertexShader.replace("#include <common>","#include <common>\nattribute vec3 rest;\nvarying vec3 vRest;"+(FB?"\nattribute vec2 tw;\nvarying vec2 vTw;":"")).replace("#include <begin_vertex>","#include <begin_vertex>\nvRest=rest;"+(FB?"vTw=tw;":""));
+    sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\n"+LUNG_GLSL+"\nuniform vec3 uA,uB,uC;"+(FB?"\nvarying vec2 vTw;":""))
      .replace("#include <color_fragment>",`#include <color_fragment>
-      vec3 P=vRest*uSc;float fb=lfbm(P*1.3);vec3 col=mix(uA,uB,smoothstep(0.3,0.75,fb));col=mix(col,uC,smoothstep(0.6,0.9,lfbm(P*3.1))*0.5);diffuseColor.rgb*=pow(col,vec3(2.2));`)
+      vec3 P=vRest*uSc;float fb=lfbm(P*1.3);vec3 col=mix(uA,uB,smoothstep(0.3,0.75,fb));col=mix(col,uC,smoothstep(0.6,0.9,lfbm(P*3.1))*0.5);`+(FB?`
+      /* надлъжни мускулни снопчета: леко вълнообразни, с плитки бразди между тях и по-светли гребени */
+      float ph=vTw.y*${FB.toFixed(1)}*6.2832+3.0*lfbm(vec3(P.x*0.5,P.y*0.12,P.z*0.5)+vec3(vTw.y*4.0));float aa=clamp(1.6-fwidth(ph)*0.7,0.0,1.0);float rib=mix(0.5,smoothstep(0.0,1.0,0.5+0.5*sin(ph)),aa);
+      col=mix(uB*0.9,col,0.78+0.22*rib);fb=mix(fb,fb*0.55+rib*0.45,aa);`:"")+`diffuseColor.rgb*=pow(col,vec3(2.2));`)
      .replace("#include <normal_fragment_maps>",`#include <normal_fragment_maps>
       {float h0=fb;vec3 dpx=dFdx(-vViewPosition),dpy=dFdy(-vViewPosition);float dhx=dFdx(h0),dhy=dFdy(h0);vec3 lr1=cross(dpy,normal),lr2=cross(normal,dpx);float det=dot(dpx,lr1);vec3 gg=sign(det)*(dhx*lr1+dhy*lr2);float ba=clamp(1.0-length(fwidth(P))*2.5,0.0,1.0);normal=normalize(abs(det)*normal-gg*${(o.bump||0.25).toFixed(2)}*ba);}`)};return m}
 // тръба с променлив радиус, която може да се деформира (перисталтика)
@@ -59,8 +63,9 @@ function zTube(T,P,mat,o={}){const cur=new T.CatmullRomCurve3(P.map(p=>new T.Vec
   const r0=u=>{const f=u*(P.length-1),k=Math.min(P.length-2,Math.floor(f)),w=f-k,s=w*w*(3-2*w);return P[k][3]+(P[k+1][3]-P[k][3])*s},nv=(NS+1)*(NR+1),pos=new Float32Array(nv*3),idx=[];
   for(let i=0;i<NS;i++)for(let j=0;j<NR;j++){const a=i*(NR+1)+j,b=a+NR+1;idx.push(a,b,a+1,b,b+1,a+1)}
   const geo=new T.BufferGeometry();geo.setAttribute("position",new T.BufferAttribute(pos,3));geo.setIndex(idx);
-  const fill=(arr,rf)=>{for(let i=0;i<=NS;i++){const u=i/NS,c=C[i];for(let j=0;j<=NR;j++){const th=j/NR*Math.PI*2,r=r0(u)*(rf?rf(u,th):1),cs=Math.cos(th)*r,sn=Math.sin(th)*r,k=3*(i*(NR+1)+j);arr[k]=c.x+N[i].x*cs+B[i].x*sn;arr[k+1]=c.y+N[i].y*cs+B[i].y*sn;arr[k+2]=c.z+N[i].z*cs+B[i].z*sn}}};
-  fill(pos);geo.setAttribute("rest",new T.BufferAttribute(pos.slice(),3));geo.computeVertexNormals();const mesh=new T.Mesh(geo,mat);mesh.frustumCulled=false;
+  const bs=o.base,fill=(arr,rf)=>{for(let i=0;i<=NS;i++){const u=i/NS,c=C[i];for(let j=0;j<=NR;j++){const th=j/NR*Math.PI*2,r=r0(u)*(rf?rf(u,th):1)*(bs?bs(u,th):1),cs=Math.cos(th)*r,sn=Math.sin(th)*r,k=3*(i*(NR+1)+j);arr[k]=c.x+N[i].x*cs+B[i].x*sn;arr[k+1]=c.y+N[i].y*cs+B[i].y*sn;arr[k+2]=c.z+N[i].z*cs+B[i].z*sn}}};
+  fill(pos);geo.setAttribute("rest",new T.BufferAttribute(pos.slice(),3));{const tw=new Float32Array(nv*2);for(let i=0;i<=NS;i++)for(let j=0;j<=NR;j++){const k=2*(i*(NR+1)+j);tw[k]=i/NS;tw[k+1]=j/NR}geo.setAttribute("tw",new T.BufferAttribute(tw,2))}
+  geo.computeVertexNormals();const mesh=new T.Mesh(geo,mat);mesh.frustumCulled=false;
   return {mesh,cur,update(rf){fill(pos,rf);geo.attributes.position.needsUpdate=true;geo.computeVertexNormals()}}}
 /* истински орган (BodyParts3D) върху процедурната тръба: вписва се в нейната кутия, всеки връх се свързва с най-близката точка от средната
    линия (u) и пази отместването си; update(rf) мащабира отместването с rf(u) — перисталтиката и разтягането остават същите, но формата е реална.
@@ -78,7 +83,7 @@ function zFlow(T,parent,n,col,size){const mt=new T.MeshStandardMaterial({color:L
   const M=new T.Matrix4(),sd=[];for(let i=0;i<n;i++)sd.push([Math.sin(i*12.9898)*0.5,Math.cos(i*78.233)*0.5,Math.sin(i*37.719)*0.5]);
   return {im,mt,set(curve,ph,cnt,spread=0.3,u0=0,u1=1){cnt=Math.round(Math.max(0,Math.min(n,cnt)));for(let i=0;i<cnt;i++){const u=u0+((((ph+i/cnt)%1)+1)%1)*(u1-u0),p=curve.getPoint(Math.max(0,Math.min(1,u))),s=sd[i];M.makeTranslation(p.x+s[0]*spread,p.y+s[1]*spread,p.z+s[2]*spread);im.setMatrixAt(i,M)}im.count=cnt;im.instanceMatrix.needsUpdate=true}}}
 const Z_PAL={st:[[0.86,0.55,0.50],[0.72,0.38,0.36],[0.93,0.68,0.60]],panc:[[0.90,0.72,0.46],[0.80,0.58,0.36],[0.96,0.82,0.58]],duo:[[0.88,0.56,0.52],[0.76,0.42,0.40],[0.93,0.68,0.62]],jej:[[0.90,0.60,0.56],[0.78,0.45,0.43],[0.94,0.70,0.64]],ile:[[0.86,0.56,0.54],[0.74,0.42,0.42],[0.92,0.66,0.62]],
-  col:[[0.80,0.52,0.46],[0.66,0.38,0.34],[0.88,0.62,0.54]],spl:[[0.42,0.16,0.26],[0.30,0.10,0.18],[0.50,0.20,0.30]],eso:[[0.84,0.52,0.48],[0.70,0.38,0.36],[0.90,0.62,0.56]]};
+  col:[[0.80,0.52,0.46],[0.66,0.38,0.34],[0.88,0.62,0.54]],spl:[[0.42,0.16,0.26],[0.30,0.10,0.18],[0.50,0.20,0.30]],eso:[[0.80,0.46,0.43],[0.62,0.31,0.31],[0.88,0.58,0.53]]};
 const zKey=n=>/pancreatic_duct/.test(n)?"pd":/pancrea/.test(n)?"panc":/duoden/.test(n)?"duo":/jejun/.test(n)?"jej":/ileum/.test(n)?"ile":/colon|caecum|rectum/.test(n)?"col":/spleen/.test(n)?"spl":/duct|ampulla/.test(n)?"bile":"x";
 function zAbdo(G){const T=G.T,root=new T.Group();G.scene.add(root);const M=(x,y,z)=>new T.Vector3((x-0.02)*100,(y-0.36)*100,(z-0.03)*100),A={root,M,o:{},m:{},ready:false,T};
   const mat=k=>A.m[k]||(A.m[k]=k==="liv"?(()=>{const m=liverMaterial(T,{tr:true,op:1});m.depthWrite=true;m.emissive=new T.Color(0);return m})():k==="gb"?new T.MeshPhysicalMaterial({color:LIN(T,0x5c8a2e),roughness:0.25,clearcoat:1,transparent:true,emissive:new T.Color(0)}):k==="bile"?new T.MeshPhysicalMaterial({color:LIN(T,0x74a82a),roughness:0.3,clearcoat:0.7,transparent:true,emissive:new T.Color(0)}):k==="pd"?new T.MeshPhysicalMaterial({color:LIN(T,0xf3e3b0),roughness:0.3,clearcoat:0.7,transparent:true,emissive:new T.Color(0)}):k==="ves"?new T.MeshPhysicalMaterial({color:LIN(T,0x7048e8),roughness:0.4,transparent:true}):zMat(T,Z_PAL[k]||Z_PAL.duo,{sc:0.3}));
@@ -90,7 +95,11 @@ function zAbdo(G){const T=G.T,root=new T.Group();G.scene.add(root);const M=(x,y,
   const S=[[0.058,0.452,0.000,0.4],[0.062,0.440,0.003,2.6],[0.070,0.415,0.016,3.2],[0.072,0.390,0.034,3.0],[0.064,0.368,0.052,2.5],[0.046,0.353,0.064,1.9],[0.028,0.350,0.069,1.3],[0.014,0.352,0.069,0.8],[0.004,0.352,0.068,0.7]].map(p=>{const v=M(p[0],p[1],p[2]);return [v.x,v.y,v.z,p[3]]});
   A.m.st=zMat(T,Z_PAL.st,{sc:0.3,bump:0.35});A.st=zTube(T,S,A.m.st);root.add(A.st.mesh);
   A.m.cont=new T.MeshStandardMaterial({color:LIN(T,0x8f6a3a),roughness:0.7,transparent:true,opacity:0.95});A.cont=zTube(T,S.map(p=>[p[0],p[1],p[2],p[3]*0.86]),A.m.cont,{seg:64,rad:18});A.cont.mesh.renderOrder=1;A.cont.mesh.visible=false;root.add(A.cont.mesh);A.st.mesh.renderOrder=2;
-  const E=[[0.012,0.50,-0.012,0.75],[0.014,0.468,-0.008,0.75],[0.030,0.446,-0.002,0.85],[0.047,0.437,0.003,0.9]].map(p=>{const v=M(p[0],p[1],p[2]);return [v.x,v.y,v.z,p[3]]});A.m.eso=zMat(T,Z_PAL.eso,{sc:0.3});A.eso=zTube(T,E,A.m.eso,{seg:40,rad:16});root.add(A.eso.mesh);
+  /* хранопровод: гръдната част продължава нагоре извън кадъра; празният лумен е сплеснат отпред-назад, долният сфинктер е леко задебелен,
+     а отвън се виждат надлъжните мускулни снопчета (няма серозна обвивка — само адвентиция) */
+  const E=[[0.009,0.61,-0.019,0.7],[0.010,0.555,-0.016,0.72],[0.012,0.50,-0.012,0.75],[0.014,0.468,-0.008,0.72],[0.030,0.446,-0.002,0.84],[0.047,0.437,0.003,0.9]].map(p=>{const v=M(p[0],p[1],p[2]);return [v.x,v.y,v.z,p[3]]});
+  A.m.eso=zMat(T,Z_PAL.eso,{sc:0.3,fib:24,ro:0.5,cc:0.45,bump:0.35});
+  A.eso=zTube(T,E,A.m.eso,{seg:110,rad:40,base:(u,th)=>(1-0.17*Math.cos(2*th))*(1+0.09*Math.exp(-Math.pow((u-0.84)/0.06,2)))});root.add(A.eso.mesh);
   if(MK.real)zRealTube(T,A.st,"m/bp_stomach.txt");
   const cv=a=>new T.CatmullRomCurve3(a.map(p=>M(p[0],p[1],p[2])));
   A.path={duo:cv([[0.004,0.352,0.068],[-0.02,0.354,0.05],[-0.036,0.346,0.024],[-0.036,0.30,0.022],[-0.012,0.288,0.028],[0.02,0.29,0.032],[0.036,0.32,0.036],[0.046,0.348,0.04]]),
@@ -123,14 +132,14 @@ const STG_GIMOT={id:"stgGM",title:"Моторика на стомаха и че�
   if(ctx.camI!==i){ctx.camI=i;G.flyTo(...[[1,9,0,26,0.45,1.3],[4,5,2,26,0.5,1.35],[3,3,3,26,0.45,1.4],[0,1,3,26,0.25,1.45],[-1,0,3,30,0.15,1.4],[3,-9,5,44,0.2,1.4],[2,-14,3,62,0.1,1.4]][i])}
   A.op("liv",i<5?0.22:0.12);A.op("st",i===0?1:0.5);A.op("jej",i===5?0.5:1);A.op("ile",i===5?0.5:1);A.op("col",i===6?0.5:i===5?0.3:i===0?1:0.12);A.op("duo",i===3||i===4?0.55:1);
   // хранопровод
-  if(i===0){const c=sg(0.05,0.9);A.eso.update(uu=>1+0.55*Math.exp(-Math.pow((uu-c)/0.13,2))-0.35*Math.exp(-Math.pow((uu-c+0.2)/0.08,2)));ctx.bol.position.copy(A.eso.cur.getPoint(c));ctx.bol.visible=u<0.93;ctx.eD=1}else if(ctx.eD){A.eso.update();ctx.bol.visible=false;ctx.eD=0}
+  if(i===0){const c=0.2+0.72*sg(0.05,0.9);A.eso.update(uu=>1+0.55*Math.exp(-Math.pow((uu-c)/0.08,2))-0.35*Math.exp(-Math.pow((uu-c+0.12)/0.05,2)));ctx.bol.position.copy(A.eso.cur.getPoint(c));ctx.bol.visible=u<0.93;ctx.eD=1}else if(ctx.eD){A.eso.update();ctx.bol.visible=false;ctx.eD=0}
   // стомах
   const c=0.3+0.64*((t*0.22)%1),amp=[0,0,0.32,0.5,0.1,0.14,0.14][i],rel=i===0?0:i===1?sg(0.1,0.8):1,open=i===3&&c>0.82,pyl=i===0?1:open?1.5:0.6,fill=i===0?0:i===1?sg(0.15,0.9):[1,1,1,0.85,0.75,0.5,0.4][i],rf=zStW(c,amp,rel,pyl);
   A.st.update(rf);A.cont.mesh.visible=fill>0.03;if(fill>0.03)A.cont.update(uu=>rf(uu)*(0.5+0.5*fill)*(uu<0.08?0.2+uu*10:1));
   if(i===3)ctx.f1.set(A.path.duo,(c-0.82)*1.6,open?10:6,0.5,0,0.4);else if(i===4)ctx.f1.set(A.path.duo,t*0.04,10,0.5,0,0.6);else if(i===5)ctx.f1.set(A.path.jej,t*0.03,40,0.7);else if(i===6)ctx.f1.set(A.path.col,t*0.025+(u>0.5?sg(0.5,0.9)*0.12:0),40,0.9);else if(i===2)ctx.f1.set(A.st.cur,0.5+0.5*Math.sin(t*1.4),0,0);else ctx.f1.set(A.path.duo,0,0);
   ctx.f2.set(ctx.brk,t*0.35,i===4?20*sg(0.05,0.35):0,0.4);
   A.glow("duo",i===4?0.35+0.2*Math.sin(t*4):0,0x0c8599);A.glow("jej",i===5?0.12+0.1*Math.sin(t*5):0,0xe8590c);A.glow("col",i===6?0.1+0.15*Z.cl(Math.sin(t*2),0,1)*sg(0.4,0.6):0,0xe8590c)},
- labels(ctx,i){const A=ctx.A,P=(c,u)=>c.getPoint(u),L=[[["хранопровод",P(A.eso.cur,0.3)],["долен сфинктер",P(A.eso.cur,1)]],[["фундус",P(A.st.cur,0.12)],["тяло",P(A.st.cur,0.4)]],[["антрум",P(A.st.cur,0.72)],["пилор (затворен)",P(A.st.cur,0.97)]],[["пилор",P(A.st.cur,0.97)],["дуоденум",P(A.path.duo,0.35)]],[["CCK, рефлекси (−)",P(ctx.brk,0.5)],["дуоденум",P(A.path.duo,0.4)]],[["йеюнум",P(A.path.jej,0.3)],["илеум",P(A.path.jej,0.85)]],[["възходящо",P(A.path.col,0.12)],["напречно",P(A.path.col,0.42)],["низходящо",P(A.path.col,0.7)],["ректум",P(A.path.col,0.98)]]][i];return L},
+ labels(ctx,i){const A=ctx.A,P=(c,u)=>c.getPoint(u),L=[[["хранопровод",P(A.eso.cur,0.5)],["долен сфинктер",P(A.eso.cur,1)]],[["фундус",P(A.st.cur,0.12)],["тяло",P(A.st.cur,0.4)]],[["антрум",P(A.st.cur,0.72)],["пилор (затворен)",P(A.st.cur,0.97)]],[["пилор",P(A.st.cur,0.97)],["дуоденум",P(A.path.duo,0.35)]],[["CCK, рефлекси (−)",P(ctx.brk,0.5)],["дуоденум",P(A.path.duo,0.4)]],[["йеюнум",P(A.path.jej,0.3)],["илеум",P(A.path.jej,0.85)]],[["възходящо",P(A.path.col,0.12)],["напречно",P(A.path.col,0.42)],["низходящо",P(A.path.col,0.7)],["ректум",P(A.path.col,0.98)]]][i];return L},
  stats:(ctx,i)=>[[["Скорост в хранопровода","3–4 cm/s"],["Фарингеална фаза","< 2 s"]],[["Вместимост","0,8–1,5 L"],["Рефлекс","ваго-вагален"]],[["Бавни вълни","≈ 3 /min"],["Пилор","затворен"]],[["Налягане в антрума","50–70 cmH₂O"],["Порция","няколко mL"]],[["Сигнали","CCK, секретин, GIP"],["Най-силен спирач","мазнини"]],[["Сегментации","8–12 /min"],["Преминаване","3–5 h"]],[["Масови движения","1–3 /ден"],["Преминаване","8–15 h и повече"]]][i]};
 const STG_GISEC={id:"stgGS",title:"Трите фази на секрецията — стъпка по стъпка",h:500,dur:6,
  intro:"Същият анатомичен модел. Цветните частици са сигналите: по нерва (вагус) и по кръвта (хормони). Съдържимото на стомаха почервенява, когато киселината се увеличава.",
