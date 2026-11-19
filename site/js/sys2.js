@@ -276,7 +276,7 @@ const ZK={
    const pdbs=[];
    (sp.it||[]).forEach(o=>{const m=ZK.x[o.kind]?ZK.x[o.kind](T,o):o.kind==="gpcr"?ZK.gpcr(T,o.col,o.side||(o.p[1]<=-6?-1:1)):o.kind==="ball"?new T.Mesh(new T.SphereGeometry(o.r||0.7,18,14),MK.mat(T,o.col,{emissive:LIN(T,o.col),emissiveIntensity:0.1})):o.kind==="ves"?new T.Mesh(new T.SphereGeometry(o.r||1.8,24,18),new T.MeshPhysicalMaterial({color:LIN(T,o.col),transparent:true,opacity:0.35,roughness:0.3,depthWrite:false})):ZK.prot(T,o.col,o.kind);
      m.position.set(...o.p);if(o.flip)m.rotation.x=Math.PI;if(o.rz)m.rotation.z=o.rz;if(o.s)m.scale.setScalar(o.s);g.add(m);ctx.B[o.k]=m;m.userData.p0=m.position.clone();
-     if(real&&o.pdb){pdbs.push(ZK.realNm(T,m,o,sp.nm));return}
+     if(MK.real&&o.pdb&&(o.nm||sp.nm)){pdbs.push(ZK.realNm(T,m,o,o.nm||sp.nm));return}
      const RK={chan:"chan_all",pump:"pump_all",enz:"enz_all",gpcr:"gpcrw_r"}[o.kind];if(RK&&!ZK.x[o.kind]&&!o.schematic){ZK._sR=real&&o.sR?o.sR:1;ZK.real(T,m,RK,o.col,o.kind==="enz");ZK._sR=1}});
    if(pdbs.length)Promise.all(pdbs).then(ms=>ZK.cullLipids(T,g,ctx.mems,ms.filter(Boolean))).catch(()=>{});
    Object.entries(sp.pools||{}).forEach(([k,v])=>{ctx.P[k]=zPool(T,k,v);g.add(ctx.P[k])});try{ZK.decor(T,g,sp)}catch(e){console.error(e)}ctx.g=g;return g},
@@ -748,11 +748,11 @@ const STG_CACELL=zCellStg({id:"stgCa",title:"На клетъчно ниво: к�
    {t:"При продължителен нисък калций жлезата расте",short:"Хиперплазия",badge:"часове до седмици",d:"PTH живее в кръвта само няколко минути, така че концентрацията му следва секрецията. Ако калцият остане нисък, се усилва синтезът на хормона, а клетките се размножават — жлезите се уголемяват (при рахит, бременност, бъбречна недостатъчност)."},
    {t:"Калцитриолът изключва гена за PTH",short:"Калцитриол ⊖",badge:"втора обратна връзка",d:"<b>Калцитриолът</b> влиза в клетката, свързва се с ядрения си рецептор и потиска гена за PTH. Така продуктът на веригата (активният витамин D) ограничава хормона, който го е поръчал."}],
    spec:{mem:[{y:8,holes:[ZH(-10)]}],
-    it:[{k:"casr",kind:"gpcr",col:0x1c7ed6,p:[-10,8,0]},{k:"gq",kind:"ball",col:0x495057,p:[-10,5.4,1.3],r:0.6},{k:"nuc",kind:"nuc",p:[5,-7.5,-1]},{k:"vdr",kind:"enz",col:0x0c8599,p:[4.6,-6.6,0.6],s:0.8},...[0,1,2,3].map(k=>[{k:"gv"+k,kind:"ves",col:0xe5dbff,p:[-2+k*3.6,1-(k%2)*2.6,0],r:1.7},{k:"gi"+k,kind:"ball",col:0x9c36b5,p:[-2+k*3.6,1-(k%2)*2.6,0],r:0.9}]).flat()],
+    it:[{k:"casr",kind:"gpcr",col:0x1c7ed6,p:[-10,8,0],pdb:"casr_vfta",extra:["casr_vftb","casr_tma","casr_tmb"],nm:0.5},{k:"gq",kind:"ball",col:0x495057,p:[-10,5.4,1.3],r:0.6},{k:"nuc",kind:"nuc",p:[5,-7.5,-1]},{k:"vdr",kind:"enz",col:0x0c8599,p:[4.6,-6.6,0.6],s:0.8},...[0,1,2,3].map(k=>[{k:"gv"+k,kind:"ves",col:0xe5dbff,p:[-2+k*3.6,1-(k%2)*2.6,0],r:1.7},{k:"gi"+k,kind:"ball",col:0x9c36b5,p:[-2+k*3.6,1-(k%2)*2.6,0],r:0.9}]).flat()],
     pools:{ca:[0x74c0fc,0.3,60],pth:[0x9c36b5,0.34,50],vd:[0x0c8599,0.34],mrna:[0x4c6ef5,0.28]}},
    init(G,T,C){C.B.nuc.scale.setScalar(1.5)},
    upd(C,i,u,t,sg,R){const low=i===0?0:i===1?sg(0,0.35):1,vd=i===3?sg(0,0.4):0,ca=1-0.55*low,sec=low*(1+0.6*(i>=2?zOn(i,u,2):0))*(1-0.55*vd);
-    ZK.cloud(C,"ca",[-6,13,0],Math.round(26*ca),8,t*0.6);const occ=ca>0.7?1:0.3;if(occ>0.5){C.L.ca.push({x:-10.6,y:10.7,z:0.6,s:1.2},{x:-9.4,y:10.9,z:-0.4,s:1.2})}else if(Math.sin(t*2)>0.6)C.L.ca.push({x:-10,y:10.8,z:0.5,s:1.2});
+    ZK.cloud(C,"ca",[-6,13,0],Math.round(26*ca),8,t*0.6);const occ=ca>0.7?1:0.3;if(occ>0.5){C.L.ca.push({x:-11.2,y:12.6,z:0.8,s:1.2},{x:-9.0,y:12.9,z:-0.6,s:1.2})}else if(Math.sin(t*2)>0.6)C.L.ca.push({x:-10.6,y:12.8,z:0.6,s:1.2});
     ZK.glow(C,"casr",0.8*occ);C.B.gq.position.x=-10+2.6*occ;
     for(let k=0;k<4;k++){const v=C.B["gv"+k],b=C.B["gi"+k],y0=v.userData.p0.y,ph=sec>0.05?((t*0.2*sec+k*0.25)%1):0,up=Math.min(1,ph/0.6),y=y0+(6.2-y0)*up,o=ph>0.6?(ph-0.6)/0.4:0;v.position.y=y;b.position.y=y+o*5;b.scale.setScalar(1-o*0.5);v.scale.setScalar(1-0.6*o);
       if(o>0)for(let j=0;j<3;j++)C.L.pth.push({x:v.position.x+Math.sin(j*2.1+k)*2*o,y:9.6+4*o+Math.cos(j*1.7)*o,z:Math.cos(j*2.6)*1.5})}
