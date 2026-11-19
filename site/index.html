@@ -3586,7 +3586,7 @@ function viewBaro(main){
     const glass=(c,op,o={})=>SRGB(new T.MeshStandardMaterial(Object.assign({color:c,roughness:0.6,transparent:true,opacity:op,depthWrite:false},o)));
     ctx.skin=mk("skin",glass(0xe8b89a,0.075));ctx.skin.renderOrder=12;
     ctx.ctx_=mk("cortex",glass(0xf2b6c0,0.15));ctx.ctx_.renderOrder=11;ctx.cbl=mk("cerebellum",glass(0xe39aa6,0.2));ctx.cbl.renderOrder=11;
-    mk("pons",glass(0xc4834f,0.7)).renderOrder=9;ctx.med=mk("medulla",glass(0xc98b55,0.55,{emissive:0x000000}));ctx.med.renderOrder=9;
+    mk("pons",glass(0xc4834f,0.7)).renderOrder=9;ctx.med=mk("medulla",glass(0xc98b55,0.72,{emissive:0x000000}));ctx.med.renderOrder=9;
     mk("cordC",std(0xe2bf8a,{roughness:0.6}));ctx.t14=mk("cordT14",std(0xe2bf8a,{emissive:0x000000,roughness:0.6}));mk("cordT58",std(0xe2bf8a,{roughness:0.6}));
     const artM=SRGB(new T.MeshPhysicalMaterial({color:0xc93a42,roughness:0.42,clearcoat:0.5,clearcoatRoughness:0.35,sheen:new T.Color(0x662222)}));mk("aorta",artM);mk("neckart",artM);
     const tube=(pts,r,mat,seg=60)=>{const c=new T.CatmullRomCurve3(pts);const me=new T.Mesh(new T.TubeGeometry(c,seg,r,10,false),mat);body.add(me);return {c,m:me}};

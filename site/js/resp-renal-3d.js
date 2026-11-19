@@ -236,7 +236,7 @@ VIEWS.respreg=function(main){_vRR(main);window.__R3=null;
     const nM=R3.phys(T,0xe8cbbd,{roughness:0.45,emissive:LIN(T,0xe8cbbd),emissiveIntensity:0.15});
     const nuc=(p,c,r)=>{const g=new T.Mesh(new T.SphereGeometry(r,18,14),R3.glow(T,c,0.7));g.position.copy(p);g.renderOrder=14;sc.add(g);const core=new T.Mesh(new T.SphereGeometry(r*0.5,14,10),R3.phys(T,c));core.position.copy(p);sc.add(core);return g};
     const DRG=[],VRG=[],CC=[],CB=[],PNX=[];
-    for(const s of [-1,1]){DRG.push(nuc(V3(s*0.045,7.75,-0.15),0x339af0,0.035));VRG.push(nuc(V3(s*0.1,7.69,-0.06),0x339af0,0.035));CC.push(nuc(V3(s*0.08,7.66,0.04),0xf76707,0.04));PNX.push(nuc(V3(s*0.08,8.14,-0.12),0xae3ec9,0.035));
+    for(const s of [-1,1]){DRG.push(nuc(V3(s*0.045,7.75,-0.15),0x339af0,0.035));VRG.push(nuc(V3(s*0.1,7.69,-0.06),0x339af0,0.035));CC.push(nuc(V3(s*0.08,7.66,0.04),0xd9480f,0.04));PNX.push(nuc(V3(s*0.08,8.14,-0.12),0xae3ec9,0.035));
       CB.push(nuc(V3(s*0.31,6.8,0.29),0xe03131,0.045))}
     {const art=R3.phys(T,0xc92a2a,{roughness:0.4});sc.add(R3.vtube(T,[V3(-0.22,5.95,0.2),V3(-0.28,6.3,0.26),V3(-0.31,6.68,0.3),V3(-0.31,6.8,0.3)],u=>0.034,art,{seg:30}));sc.add(R3.tube(T,[V3(-0.31,6.8,0.3),V3(-0.34,7.05,0.23),V3(-0.32,7.35,0.14),V3(-0.24,7.62,0.08)],0.026,art,{seg:30}));sc.add(R3.tube(T,[V3(-0.31,6.8,0.3),V3(-0.28,7.0,0.38),V3(-0.25,7.22,0.46)],0.02,art,{seg:20}))}
     const AB=nuc(V3(0.1,5.66,0.11),0xe03131,0.06);
