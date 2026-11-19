@@ -1038,7 +1038,26 @@ const arcAff=(P,rec,end)=>[rec,P.SN3,P.SN2,P.SN,P.DRG,P.DR1,P.DH,...end],arcEff=
 function zNrn(T,C,key,pts,col,o={}){const m=new T.MeshStandardMaterial({color:LIN(T,col),emissive:LIN(T,col),emissiveIntensity:0.15,roughness:0.5,transparent:true,opacity:1}),G=new T.Group();G.add(zTubeM(T,pts,m,o.r||0.17));
   if(o.soma){const s=new T.Mesh(new T.SphereGeometry(o.sr||0.55,16,12),m);s.position.set(o.soma[0],o.soma[1],o.soma[2]);G.add(s)}const e=pts[pts.length-1],b=new T.Mesh(new T.SphereGeometry(o.br||0.3,10,8),m);b.position.set(e[0],e[1],e[2]);G.add(b);C.g.add(G);(C.N=C.N||{})[key]={G,m,pts}}
 function zNSet(C,key,v,act=0){const n=C.N[key];n.G.visible=v>0.02;n.m.opacity=Math.min(1,v);n.m.emissiveIntensity=0.08+0.75*act}
-function zMuscle(T,C,key,pos,len,r,col){const g=new T.Group();g.position.set(pos[0],pos[1],pos[2]);const f=zFibre(T,len,r,col);f.rotation.z=Math.PI/2;g.add(f);const tm=MK.mat(T,0xefe6d2,{roughness:0.6});[1,-1].forEach(s=>{const t=new T.Mesh(new T.CylinderGeometry(r*0.28,r*0.5,2.6,10),tm);t.position.y=s*(len/2+1.2);if(s<0)t.rotation.z=Math.PI;g.add(t)});C.g.add(g);(C.M=C.M||{})[key]={g,f,pos,len}}
+/* мускул: вретеновиден корем (ротационно тяло) с надлъжни снопчета и перимизий, преминаващ в лъскави сухожилия.
+   f е обвивка по оста x (zMusSet я разтяга/скъсява), затова коремът е завъртян вътре в нея */
+function zMusTex(T,col,tendon){const W=256,H=512,cv=document.createElement("canvas");cv.width=W;cv.height=H;const g=cv.getContext("2d"),c=new T.Color(col),R=MK.rnd(tendon?7:3);
+  const rgb=(k,a=1)=>`rgba(${Math.round(Math.min(255,c.r*255*k))},${Math.round(Math.min(255,c.g*255*k))},${Math.round(Math.min(255,c.b*255*k))},${a})`;g.fillStyle=rgb(1);g.fillRect(0,0,W,H);
+  let x=0;while(x<W){const w=tendon?2+R()*3:6+R()*12,k=tendon?0.92+R()*0.12:0.82+R()*0.3;g.fillStyle=rgb(k);g.fillRect(x,0,w,H);if(!tendon){g.fillStyle=rgb(0.62,0.55);g.fillRect(x,0,1.2,H)}x+=w}
+  for(let i=0;i<(tendon?260:900);i++){const xx=R()*W,yy=R()*H,l=20+R()*90;g.strokeStyle=rgb(tendon?1.08:0.75+R()*0.5,0.22);g.lineWidth=0.6+R()*1.2;g.beginPath();g.moveTo(xx,yy);g.lineTo(xx+(R()-0.5)*3,yy+l);g.stroke()}
+  const t=new T.CanvasTexture(cv);t.wrapS=t.wrapT=T.RepeatWrapping;if(T.sRGBEncoding)t.encoding=T.sRGBEncoding;return t}
+function zMuscle(T,C,key,pos,len,r,col){const g=new T.Group();g.position.set(pos[0],pos[1],pos[2]);
+  const pr=[];for(let k=0;k<=40;k++){const t=k/40,y=-len/2+t*len,rr=r*(0.3+0.7*Math.pow(Math.sin(Math.PI*t),0.75))*(1+0.06*Math.sin(t*9));pr.push(new T.Vector2(Math.max(0.01,rr),y))}
+  const tex=zMusTex(T,col,false);tex.repeat.set(3,1);const m=new T.MeshPhysicalMaterial({map:tex,roughness:0.5,clearcoat:0.35,clearcoatRoughness:0.4,sheen:new T.Color(0x552222),emissive:LIN(T,col),emissiveIntensity:0});
+  const belly=new T.Mesh(new T.LatheGeometry(pr,48),m);belly.rotation.z=-Math.PI/2;const f=new T.Group();f.rotation.z=Math.PI/2;f.add(belly);f.material=m;g.add(f);
+  const tt=zMusTex(T,0xefe6d2,true);tt.repeat.set(2,1);const tm=new T.MeshPhysicalMaterial({map:tt,roughness:0.32,clearcoat:0.8,clearcoatRoughness:0.25});
+  [1,-1].forEach(s=>{const q=[];for(let k=0;k<=12;k++){const t=k/12;q.push(new T.Vector2(r*(0.34-0.2*t),t*3.0))}const te=new T.Mesh(new T.LatheGeometry(q,24),tm);te.position.y=s*(len/2-0.35);if(s<0)te.rotation.z=Math.PI;g.add(te)});
+  C.g.add(g);(C.M=C.M||{})[key]={g,f,pos,len}}
+/* мускулно вретено: капсула с интрафузални влакна и анулоспирално Ia окончание (то свети при разтягане) */
+function zSpindle(T,C,p,col){const g=new T.Group();g.position.set(p[0],p[1],p[2]);
+  const cap=new T.Mesh(new T.SphereGeometry(0.42,16,12),new T.MeshPhysicalMaterial({color:0xf1e4dc,transparent:true,opacity:0.35,roughness:0.3,depthWrite:false}));cap.scale.y=4.4;g.add(cap);
+  const fm=MK.mat(T,0xd77a7a,{roughness:0.5});[[-0.14,0],[0.14,0.05],[0,-0.14]].forEach(([x,z])=>{const c=new T.Mesh(new T.CylinderGeometry(0.07,0.07,3.6,8),fm);c.position.set(x,0,z);g.add(c)});
+  const hm=MK.mat(T,col,{emissive:LIN(T,col),emissiveIntensity:0.2});const pts=[];for(let k=0;k<=90;k++){const a=k/90*Math.PI*2*6;pts.push(new T.Vector3(0.3*Math.cos(a),-0.6+1.2*k/90,0.3*Math.sin(a)))}
+  g.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),180,0.045,6,false),hm));C.g.add(g);g.material=hm;return g}
 function zMusSet(C,key,L,glow=0){const m=C.M[key];m.f.scale.set(L,1/Math.sqrt(L),1/Math.sqrt(L));m.f.material.emissiveIntensity=glow}
 const ARC_POOLS={af:[0xf76707,0.42,30,"oct","аферент"],ef:[0xe03131,0.42,30,"oct","еферент"],inh:[0x7048e8,0.36,20,"oct","⊖"],exc:[0x1c7ed6,0.36,30,"oct","⊕"]};
 const ARC_LEG=[["#f76707","аферентен (сетивен) неврон"],["#e03131","α-мотоневрон на активния мускул"],["#4dabf7","α-мотоневрон на другия мускул"],["#1c7ed6","възбуждащ интерневрон"],["#7048e8","задържащ интерневрон"]];
@@ -1055,7 +1074,7 @@ const STG_REFARC=zCellStg({id:"stgArc",title:"Рефлексните дъги в
    {t:"Еферентен неврон и ефектор: мускулът се съкращава",short:"Еферентен неврон → мускул",badge:"предно коренче",d:"Аксонът на <b>α-мотоневрона</b> излиза през <b>предното коренче</b>, влиза в спиналния нерв и стига до същия мускул. Той се съкращава и се връща към началната си дължина."},
    {t:"Реципрочно задържане: антагонистът се отпуска",short:"Реципрочно задържане",badge:"задържащ интерневрон",d:"Колатерал на Ia влакното възбужда <b>задържащ интерневрон</b>, който потиска мотоневрона на мускула-антагонист. Без това двата мускула биха си пречили."}],
    spec:{cyto:[],mem:[],it:[],pools:ARC_POOLS},
-   init(G,T,C){arcScene(G,T,C);const P=arcP(1),y=ARC.y;C.rec=C.mk([22,-6,6.75],0xf76707,0.7);
+   init(G,T,C){arcScene(G,T,C);const P=arcP(1),y=ARC.y;C.rec=zSpindle(T,C,[22,-6,6.75],0xf76707);
     zNrn(T,C,"ia",arcAff(P,[22,-6,6.75],[[2.5,y,-1.2],[2.9,y,1.9]]),0xf76707,{soma:[10.5,2.95,-3.6],sr:0.6,r:0.2});zNrn(T,C,"aE",arcEff(P,P.VA,[[22,-1.6,5.4]]),0xe03131,{soma:P.VA,sr:0.65,r:0.2});
     zNrn(T,C,"ii",[[2.5,y,-1.2],[1.7,y,0.5],[1.8,y,2.4]],0x7048e8,{soma:[1.7,y,0.5],sr:0.42,r:0.13});zNrn(T,C,"aF",arcEff(P,P.VB,[[26.5,-1.6,3]]).map(p=>[p[0],p[1]-0.35,p[2]+0.25]),0x4dabf7,{soma:[1.9,y,3.0],sr:0.55,r:0.16})},
    upd(C,i,u,t,sg,R){const on=k=>zOn(i,u,k),con=i===3?sg(0.35,0.8):i>3?1:0,st=i===0?sg(0,0.3):1-con,rec=1-0.9*con;
