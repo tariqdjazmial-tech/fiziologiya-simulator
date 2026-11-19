@@ -55,6 +55,12 @@ for i in range(1500):
 _, nrm, c0 = best
 d = (X - ctr) @ nrm - c0
 if ((d > 15).sum() > (d < -15).sum()) != FLIP: nrm, c0 = -nrm, -c0   # масивната страна → цитоплазма (−y)
+if os.environ.get("AXIS") == "c3":   # тримери с извити лопати (PIEZO): оста е нормалата на равнината през центроидите на веригите
+    cs = [np.array([a[4] for a in allA if a[0] == c]).mean(0) for c in sorted({a[0] for a in allA})][:3]
+    nrm = np.cross(cs[1] - cs[0], cs[2] - cs[0]); nrm /= np.linalg.norm(nrm); cx = np.mean(cs, 0)
+    rel = X - cx; d = rel @ nrm; rad = np.linalg.norm(rel - np.outer(d, nrm), axis=1)
+    if d[rad > np.percentile(rad, 90)].mean() < d[rad < 25].mean(): nrm = -nrm; d = -d   # купата е отворена към извънклетъчното (лопатите се издигат навън)
+    core = (rad < 30) & np.array([a[2] in HYD for a in allA]); c0 = float(np.median(d[core])) + float((cx - ctr) @ nrm)
 ex = np.cross(nrm, [0, 0, 1.0]) if abs(nrm[2]) < .9 else np.cross(nrm, [1.0, 0, 0]); ex /= np.linalg.norm(ex); ez = np.cross(ex, nrm)
 def tf(p):
     q = p - ctr; return np.c_[q @ ex, q @ nrm - c0, q @ ez] * .1   # Å → nm
