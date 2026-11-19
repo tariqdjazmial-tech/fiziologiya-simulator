@@ -216,6 +216,8 @@ function zShape(T,shape,u,hex){const P=[],N=[],Cc=[],M=new T.Matrix4(),col=h=>LI
   const geo=new T.BufferGeometry();geo.setAttribute("position",new T.Float32BufferAttribute(P,3));geo.setAttribute("normal",new T.Float32BufferAttribute(N,3));geo.setAttribute("color",new T.Float32BufferAttribute(Cc,3));return geo}
 function zPool(T,key,v){const d=ZSH[key]||["sph",""],shape=v[3]||d[0],sym=v[4]!=null?v[4]:d[1],hex=v[0],n=v[2]||40,flat=/^(sph|cat|cat2|an|pill|tri)$/.test(shape),u=v[1]*(shape==="sph"?1:flat?1.25:1.15);
   const im=new T.InstancedMesh(zShape(T,shape,u,hex),MK.mat(T,0xffffff,{vertexColors:true,roughness:0.28,clearcoat:0.6,emissive:LIN(T,hex),emissiveIntensity:shape==="sph"?0.5:0.22}),n);im.count=0;im.frustumCulled=false;
+  /* реалистичен режим: частицата е истинската молекула (напр. димер на тиреоглобулина, 6SCJ) */
+  if(d[2]&&MK.real)MK.loadMesh(T,"m/mol/"+d[2]+".txt").then(g=>{g=g.clone();g.computeBoundingBox();const c=g.boundingBox.getCenter(new T.Vector3()),z=g.boundingBox.getSize(new T.Vector3());g.translate(-c.x,-c.y,-c.z);const k=u*4.2/Math.max(z.x,z.y,z.z);g.scale(k,k,k);g.computeVertexNormals();im.geometry.dispose();im.geometry=g}).catch(()=>{});
   const M=new T.Matrix4(),V=new T.Vector3(),S=new T.Vector3(),E=new T.Euler(),Q=[];for(let i=0;i<n;i++){const a=Math.sin(i*12.9898)*43758.5453,b=Math.sin(i*78.233)*43758.5453,c=Math.sin(i*37.719)*43758.5453,f=x=>x-Math.floor(x);Q.push(flat?new T.Quaternion():new T.Quaternion().setFromEuler(E.set((f(a)-0.5)*0.8,(f(b)-0.5)*0.8,f(c)*6.283)))}
   im.put=pts=>{let k=0;for(const p of pts){if(k>=n)break;const s=p.s==null?1:p.s;M.compose(V.set(p.x,p.y,p.z),Q[k],S.set(s,s,s));im.setMatrixAt(k++,M)}im.count=k;im.instanceMatrix.needsUpdate=true};
   const lum=((hex>>16&255)*0.299+(hex>>8&255)*0.587+(hex&255)*0.114);im.userData.tag=sym?`<span style="background:#${hex.toString(16).padStart(6,"0")};color:${lum>150?"#1c1c1c":"#fff"};border-radius:7px;padding:0 5px;margin:0 -5px;font-size:10.5px;display:inline-block">${sym}</span>`:"";return im}
@@ -675,7 +677,7 @@ const STG_GLUCELL=zCellStg({id:"stgGlu",title:"На клетъчно ниво: �
    stats:[[["Втори посредник","cAMP"]],[["Усилване","на всяко стъпало"]],[["Ензим само в черния дроб","Г-6-фосфатаза"]],[["Субстрати","аминокиселини, лактат, глицерол"]],[["Фосфодиестераза","cAMP ↓"]]]}]});
 
 /* ===== Клетъчни модели: щитовидна ос, кортизол, калций ===== */
-Object.assign(ZSH,{tsh:["pep2","TSH"],iod:["an","I⁻"],t4:["thy4","T₄"],t3:["thy3","T₃"],tg:["duo","тиреоглобулин"],mrna:["chain","иРНК"],prot:["duo","нов белтък"],acth:["pep","ACTH"],chol:["ster","холестерол"],preg:["ster","прегненолон"],cort:["ster","кортизол"],
+Object.assign(ZSH,{tsh:["pep2","TSH"],iod:["an","I⁻"],t4:["thy4","T₄"],t3:["thy3","T₃"],tg:["duo","тиреоглобулин","tg_x"],mrna:["chain","иРНК"],prot:["duo","нов белтък"],acth:["pep","ACTH"],chol:["ster","холестерол"],preg:["ster","прегненолон"],cort:["ster","кортизол"],
  pth:["pep","PTH"],opg:["duo","остеопротегерин"],ct:["pep","калцитонин"],pi:["tetra","фосфат"],vd:["ster","калцитриол"],col:["chain","колаген"]});
 const STG_THYCELL=zCellStg({id:"stgThy",title:"На клетъчно ниво: как се правят и как действат хормоните на оста",
  intro:"Три клетки от оста хипоталамус – хипофиза – периферия: тироцитът, който синтезира T₄; клетката-мишена, в която T₃ включва гени; и клетката на надбъбречната кора, която прави кортизол по команда на ACTH.",
