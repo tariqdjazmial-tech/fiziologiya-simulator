@@ -1854,10 +1854,10 @@ Z_GL.push({t:"Рилизинг хормони",re:"рилизинг[а-я ]*хо
 Z_NAMES.hpaxis="Хипоталамус–хипофиза";Z_VIEWS.hpaxis=viewHpAxis;
 
 /* ===== X. Калциева хомеостаза ===== */
-function caFlux(s,p){const pt=p.pt/100,kid=p.kid/100,vd=p.vd/100,Ca=s.Ca,
-  pthT=pt*(0.12+3.4/(1+Math.exp((Ca-1.165-0.12*Math.log(Math.max(1,pt)))/0.035)))/(0.6+0.4*s.D),dT=Math.min(2.5,vd*Math.min(1,kid*1.15)*(0.45+0.55*Math.min(3,s.PTH))),
-  abs=p.intake/40*0.35*Math.pow(Math.min(2.2,s.D),0.8),gut=abs-6.25*Math.min(1.3,Ca/1.2),res=12.5*(0.45+0.55*Math.min(4,s.PTH)+0.15*(s.D-1)),dep=12.5*Math.pow(Ca/1.2,1.5),
-  fl=180*kid*1.35*Ca/1.2,ur=fl*0.0103*Math.max(0.3,Math.min(2.2,1.75-0.75*s.PTH))*Math.pow(Ca/1.2,2);return {pthT,dT,abs,gut,res,dep,ur,net:gut+res-dep-ur}}
+function caFlux(s,p){const pt=p.pt/100,kid=p.kid/100,vd=p.vd/100,Ca=s.Ca,I=p.intake/40,
+  pthT=pt*(0.3+2.6/(1+Math.exp((Ca-1.165-0.2*Math.log(Math.max(1,pt)))/0.035)))/(0.6+0.4*s.D),dT=Math.min(2.5,vd*Math.min(1,kid*1.15)*(0.45+0.55*Math.min(3,s.PTH))),
+  abs=9.45*Math.pow(Math.min(2.2,s.D),0.8)*I/(I+10)+0.08*I,gut=abs-6.25*Math.min(1.3,Ca/1.2),P=Math.min(4,s.PTH),res=12.5*(0.45+0.55*P+0.7*Math.max(0,P-1)+0.15*(s.D-1)),dep=12.5*Math.pow(Ca/1.2,1.5),
+  fl=180*kid*1.35*Ca/1.2,ur=fl*0.0103*Math.max(0.3,Math.min(2.2,1.75-0.75*s.PTH))*Math.pow(Ca/1.2,4);return {pthT,dT,abs,gut,res,dep,ur,net:gut+res-dep-ur}}
 Z_EXP.calcium=[
  {q:"При операция на щитовидната жлеза са отстранени околощитовидните жлези. Какво става с калция?",opts:["Покачва се","Пада за 1–3 дни до опасни стойности","Не се променя"],a:1,set:{pre:"hypo"},expl:"Без PTH костта спира да отдава калций, бъбрекът го губи, а калцитриолът намалява. Под ≈ 0,9 mmol/L йонизиран калций започва тетания."},
  {q:"Аденом отделя PTH без спирачка. Какво показват кръвта и костите?",opts:["Ca ↑, костта губи калций","Ca ↓, костта трупа","Ca нормален"],a:0,set:{pre:"hpt"},expl:"PTH разгражда кост, задържа калций в бъбрека и вдига калцитриола. Въпреки това в урината има много калций (голям филтриран товар) — камъни."},
@@ -1872,7 +1872,7 @@ function viewCalcium(main){zAddStg(main,STG_CACELL);mkSim(main,{key:"calcium",h2
    vitd:{n:"Дефицит на витамин D (рахит, остеомалация)",set:{vd:10},info:"Слабо всмукване в червото. PTH се покачва и поддържа калция в кръвта, но костта не се минерализира."},
    ckd:{n:"Хронична бъбречна недостатъчност",set:{kid:15},info:"Бъбрекът не активира витамин D (и задържа фосфат). PTH е траен висок — вторичен хиперпаратиреоидизъм и костна болест."}},
   exp:Z_EXP.calcium,init:()=>({Ca:1.2,PTH:1,D:1,bone:0,inf:0}),
-  step(s,p,dt){const F=caFlux(s,p);s.Ca=Math.max(0.5,Math.min(2.2,s.Ca+(F.net+s.inf)/70*dt));s.PTH+=(F.pthT-s.PTH)*Math.min(1,dt/0.05);s.D+=(F.dT-s.D)/1.5*dt;s.bone+=(F.dep-F.res)*dt;s.inf*=Math.exp(-dt/0.15)},
+  step(s,p,dt){const F=caFlux(s,p);s.Ca=Math.max(0.5,Math.min(2.2,s.Ca+(F.net+s.inf)/45*dt));s.PTH+=(F.pthT-s.PTH)*Math.min(1,dt/0.05);s.D+=(F.dT-s.D)/1.5*dt;s.bone+=(F.dep-F.res)*dt;s.inf*=Math.exp(-dt/0.15)},
   rec:(s,p,t)=>[t,s.Ca,s.PTH,s.D],calc:(p,s)=>caFlux(s,p),
   stats:(p,R,s)=>[["Йонизиран Ca²⁺",fmt(s.Ca,2)+" mmol/L"],["Общ калций ≈",fmt(s.Ca*2,2)+" mmol/L"],["PTH",fmt(s.PTH*100,0)+" %"],["Калцитриол",fmt(s.D*100,0)+" %"],["Костен баланс",(R.dep-R.res>=0?"+":"")+fmt((R.dep-R.res)*40,0)+" mg/ден"],["Ca в урината",fmt(R.ur*40,0)+" mg/ден"]],
   note:(p,R,s)=>s.Ca<0.9?"<b>Хипокалциемия → тетания.</b> Ниският Ca²⁺ улеснява отварянето на Na⁺ каналите — нервите се разреждат спонтанно: спазми, ларингоспазъм, гърчове.":s.Ca>1.45?"<b>Хиперкалциемия</b>: нервната система е потисната — слабост, забавени рефлекси, запек, скъсен QT; в бъбрека — полиурия и камъни.":s.PTH>1.5&&R.dep-R.res<-2?"Калцият в кръвта е почти нормален, но <b>за сметка на костта</b>: PTH е повишен и костният баланс е отрицателен (вторичен хиперпаратиреоидизъм).":"Йонизираният калций е в нормата (1,1–1,3 mmol/L). PTH реагира за секунди, калцитриолът — за дни.",
