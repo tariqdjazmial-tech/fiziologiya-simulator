@@ -5051,8 +5051,8 @@ return {id:"stgSM",title:"Как се съкращава и отпуска гл�
   // калсеквестрин в СР
   for(let c=0;c<3;c++){const b=[];for(let k=0;k<6;k++)b.push([-15+c*6.5+k*0.9,-7.4+0.4*Math.sin(k+c),-1.5+c*0.8,0.5,0xadb5bd]);sc.add(MK.blob(T,b,{res:30}))}
   // L-тип Ca²⁺ канал (+ β и α₂δ)
-  ctx.cav=MK.vgChan(T,{col:[0x339af0,0x4dabf7,0x1c7ed6,0x74c0fc],vsd:0xd0ebff,cut:true,seed:4});ctx.cav.g.scale.setScalar(0.9);ctx.cav.g.position.set(XL,PMY,0);sc.add(ctx.cav.g);
-  sc.add(MK.blob(T,[[XL+0.5,3.7,-1.6,0.7,0x74c0fc],[XL+1.2,3.4,-1.2,0.55,0x74c0fc]],{res:24}));sc.add(MK.blob(T,[[XL+1.6,10.3,-1.6,0.8,0xa5d8ff],[XL+2.4,10.9,-1.2,0.6,0xa5d8ff],[XL+1.0,11.0,-1.8,0.55,0xa5d8ff]],{res:24}));
+  ctx.cav=MK.vgChan(T,{col:[0x339af0,0x4dabf7,0x1c7ed6,0x74c0fc],vsd:0xd0ebff,cut:true,seed:4});ctx.cav.g.scale.setScalar(0.9);ctx.cav.g.position.set(XL,PMY,0);if(MK.real)MK.realize(T,ctx.cav.g,["m/mol/cm_cav_a.txt","m/mol/cm_cav_b.txt"],{keep:ctx.cav.keep,ghost:0.75,s:0.95});sc.add(ctx.cav.g);
+  if(!MK.real){/* β и α2δ (в реалистичния режим са част от истинската структура) */sc.add(MK.blob(T,[[XL+0.5,3.7,-1.6,0.7,0x74c0fc],[XL+1.2,3.4,-1.2,0.55,0x74c0fc]],{res:24}));sc.add(MK.blob(T,[[XL+1.6,10.3,-1.6,0.8,0xa5d8ff],[XL+2.4,10.9,-1.2,0.6,0xa5d8ff],[XL+1.0,11.0,-1.8,0.55,0xa5d8ff]],{res:24}))}
   // SERCA (TM + домени A, P, N) и фосфоламбан
   const sb=[];for(let k=0;k<10;k++){const a=k*2*Math.PI/10;for(const y of [-1.5,0,1.5])sb.push([XS+Math.cos(a)*1.1,SRY+y,Math.sin(a)*0.9,0.55,0x1c7ed6])}
   sb.push([XS,SRY+2.1,0,0.55,0x1c7ed6]);ctx.serca=MK.blob(T,sb,{res:40});sc.add(ctx.serca);const sP=MK.blob(T,[[XS,SRY+2.85,0,0.95,0x1c7ed6],[XS+0.3,SRY+2.6,0.5,0.6,0x1c7ed6]],{res:26}),sA=MK.blob(T,[[XS-1.45,SRY+3.0,0.3,0.8,0xf06595],[XS-1.8,SRY+3.5,-0.2,0.6,0xf06595]],{res:24});sc.add(sP,sA);
@@ -5158,7 +5158,7 @@ return {id:"stgSM",title:"Как се съкращава и отпуска гл�
   const add=(c,txt,p)=>{if(c)L.push([txt,p])};
   add(i<=1||i===7,"α₁ рецептор",V(XA-2.2,9.2,0.6));add(i===0,"норадреналин",ctx.ne.position.clone().add(V(0,0.9,0)));add(i<=1,"Gαq",ctx.ga.position.clone().add(V(0,-1.1,0.6)));add(i===1,"PLCβ",V(XP,2.0,1.2));add(i===1||i===7,"IP₃",ctx.ip3.position.clone().add(V(0.9,0.5,0.4)));add(i===1,"DAG",V(XP+1.9,5.4,1.6));
   add(i===1||i===2,"IP₃ рецептор",V(XI-2.8,1.6,1.2));add(i===2||i===3,"L-тип Ca²⁺ канал",V(XL+2.6,9.8,1.0));add(i===3||i===4,"калмодулин",ctx.cam.position.clone().add(V(0,1.0,0.4)));add(i>=3&&i<=5,"MLCK",V(XK,5.0,0.6));
-  add(i>=4&&i<=6,"актин",V(23,2.4,0.8));add(i>=4&&i<=6,"плътно телце",V(6.4+(i>=5?1.6:0),-0.2,1.2));add(i>=4,"миозин II",V(25,-3.2,0.6));add(i===4,"ATP",V(XK+4,6.9,2.2));add(i===6,"MLCP",ctx.mlcp.position.clone().add(V(1.4,1.0,0.4)));add(i===6,"Rho-киназа",V(24.6,4.6,0.8));
+  add(i>=4&&i<=6,"актин",V(15,1.8,0.6));add(i>=4&&i<=6,"плътно телце",V(6.4+(i>=5?1.6:0),-0.2,1.2));add(i>=4,"миозин II",V(25,-3.2,0.6));add(i===4,"ATP",V(XK+4,6.9,2.2));add(i===6,"MLCP",ctx.mlcp.position.clone().add(V(1.4,1.0,0.4)));add(i===6,"Rho-киназа",V(24.6,4.6,0.8));
   add(i===7,"SERCA",V(XS-2.4,0.6,1.2));add(i===7,"PMCA",V(7.8,4.0,0.8));add(i===7,"NO → sGC → cGMP",V(-4.6,2.0,0.6));
   return L},
  stats(){return [["Регулация","миозинова: Ca²⁺–CaM–MLCK"],["Тропонин","няма"],["Скорост на мостовете","10–300× по-бавна"],["ATP за поддържане","≈ 1/300 от скелетния"]]}}})();
