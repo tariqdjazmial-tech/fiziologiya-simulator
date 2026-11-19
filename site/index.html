@@ -3687,7 +3687,7 @@ function viewBaro(main){
       const dS=Math.max(0.55,Math.min(1.1,nv.r*1.9/0.0028))*(si>=0?1.1:1);nv.dots.forEach((u,i)=>{ctx.M.makeScale(dS,dS,dS).setPosition(nv.c.getPointAt(u));nv.im.setMatrixAt(i,ctx.M)});nv.im.count=nv.dots.length;nv.im.instanceMatrix.needsUpdate=true});
     if(ctx.ready){const H=ctx.H,lb=bTimes.length?bTimes[bTimes.length-1]:null;
       H.showAct({pT:lb?tS-lb.t+0.16:null,vT:lb?tS-lb.t:null,fib:false,now:tS});
-      if(ctx.saG){const x=lb?tS-lb.t+0.16:9;ctx.saG.material.opacity=(0.15+0.7*Math.exp(-x*x/0.002))*(SG&&!SG.hl.includes("sa")?0.25:1)}
+      if(ctx.saG){const x=lb?tS-lb.t+0.16:9;ctx.saG.material.opacity=(0.15+0.7*Math.exp(-x*x/0.002))*(SG&&SG.hl&&!SG.hl.includes("sa")?0.25:1)}
       let Ev=0,ph=0;for(let i=0;i<bTimes.length;i++){const b=bTimes[i],x=tS-b.t-0.045;if(x<0||x>1.2)continue;const f=Math.max(0.1,Math.min(1.5,b.SV/69));const r=vtAt(x);if(r.E*f>Ev){Ev=r.E*f;ph=r.ph}}
       let K=0;if(lb){const x=tS-lb.t+0.09;if(x>0&&x<0.13)K=Math.sin(Math.PI*x/0.13)**2}
       const Ss=lb&&tS-lb.t-0.045>0&&tS-lb.t-0.045<0.06?1:0;springs.step({E:Ev,K,S:Ss,T:ph===2?Ev:0},sdt);const sp_=springs.sp;const pa=Math.max(0,(m.Pa-78)/42);
