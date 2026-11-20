@@ -244,7 +244,13 @@ void main(){
   size();addEventListener("resize",size);
   let t0=performance.now(),last=0,vis=true;document.addEventListener("visibilitychange",()=>{vis=!document.hidden});
   /* плавно движение около 30 кадъра/s; при „намалено движение“ фонът стои */
-  function draw(now){if(vis&&now-last>=33){last=now;gl.uniform2f(uRes,cv.width,cv.height);gl.uniform1f(uTime,RM?0:(now-t0)/1000);gl.uniform1f(uScroll,U.scroll);gl.uniform2f(uMouse,U.mx,U.my);gl.uniform1f(uCalm,U.calm);gl.drawArrays(gl.TRIANGLES,0,3)}
+  /* телефон: в уроците фонът е почти равномерен — рисува се само при промяна (скрол, размер, преход), без време;
+     на началната страница тече, но спира, докато пръстът превърта — така скролът и бутоните остават плавни */
+  const PHONE=(()=>{try{return matchMedia("(max-width:700px)").matches||/iPhone|Android.+Mobile/i.test(navigator.userAgent)}catch(e){return false}})();
+  let touching=false,sig="",tFrozen=0;if(PHONE){addEventListener("touchstart",()=>touching=true,{passive:true});addEventListener("touchend",()=>setTimeout(()=>touching=false,250),{passive:true});addEventListener("touchcancel",()=>touching=false,{passive:true})}
+  function draw(now){if(PHONE&&vis){const calm=U.calm>0.5;if(!calm&&!touching)tFrozen=(now-t0)/1000;const k=[cv.width,cv.height,U.calm.toFixed(3),U.scroll.toFixed(3),U.mx.toFixed(3),U.my.toFixed(3),calm?0:tFrozen.toFixed(2)].join();
+      if(k===sig||now-last<(calm?66:40)){requestAnimationFrame(draw);return}sig=k;last=now;gl.uniform2f(uRes,cv.width,cv.height);gl.uniform1f(uTime,RM?0:tFrozen);gl.uniform1f(uScroll,U.scroll);gl.uniform2f(uMouse,U.mx,U.my);gl.uniform1f(uCalm,U.calm);gl.drawArrays(gl.TRIANGLES,0,3);requestAnimationFrame(draw);return}
+    if(vis&&now-last>=33){last=now;gl.uniform2f(uRes,cv.width,cv.height);gl.uniform1f(uTime,RM?0:(now-t0)/1000);gl.uniform1f(uScroll,U.scroll);gl.uniform2f(uMouse,U.mx,U.my);gl.uniform1f(uCalm,U.calm);gl.drawArrays(gl.TRIANGLES,0,3)}
     requestAnimationFrame(draw)}
   requestAnimationFrame(draw);
 }

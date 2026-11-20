@@ -349,6 +349,8 @@ function fmt(x,d=0){return (Math.round(x*Math.pow(10,d))/Math.pow(10,d)).toFixed
 function plot(cv,o){
   const dpr=window.devicePixelRatio||1, W=cv.clientWidth, H=cv.clientHeight;
   if(!W) return;
+  /* извън екрана не се прерисува (на телефон това пести много); при връщане се рисува в следващия кадър */
+  if(cv.width>2&&!window.__harvest){const q=cv.getBoundingClientRect();if(q.bottom<-200||q.top>innerHeight+200)return}
   cv.width=W*dpr; cv.height=H*dpr;
   const g=cv.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W,H);
   const L=48,R=12,T=10,B=34, pw=W-L-R, ph=H-T-B;
@@ -2929,7 +2931,7 @@ function viewECG(main){
       G.render(H.labels(G.cam,[]).filter(l=>l[0]!=="Белодробен ствол"))}else G.render();
     hexTrail.push([tS,vec[0],vec[1],vec[2]]);while(hexTrail.length&&(hexTrail[0][0]<tS-0.9||hexTrail[0][0]>tS))hexTrail.shift();
     if((cnt++)%2)return;
-    drawPaper();drawHex(vec,hexAxis);
+    {const vh=innerHeight,on=id=>{const q=$(id).getBoundingClientRect();return q.bottom>-100&&q.top<vh+100};if(on("#ecgP"))drawPaper();if(on("#hex"))drawHex(vec,hexAxis)}
     if(cnt%8===1){const m=E.measure(tS);hexAxis=m.axis;
       const f=v=>v==null?"—":fmt(v,2)+" s";$("#ms").innerHTML=statsHTML([["Честота",pre.rh==="vf"?"—":(m.hr||"—")+"/min"],["PR",f(m.pr)],["QRS",f(m.qrs)],["QT",f(m.qt)],["QTc (Базет)",f(m.qtc)],["Ос на QRS",m.axis!=null&&pre.rh!=="vf"?m.axis+"°":"—"]])}
   },{bg:true});

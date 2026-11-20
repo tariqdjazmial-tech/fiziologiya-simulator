@@ -18,6 +18,17 @@ const st=document.createElement("style");st.id="mobileCss";st.textContent=`
   html body #main .stats{gap:8px!important}
   html body #main canvas.plot{max-width:100%}
   html body #hxo .side.l{background:linear-gradient(180deg,rgba(8,9,12,.66) 0%,rgba(8,9,12,.42) 72%,rgba(8,9,12,0) 100%);top:0!important;left:0!important;right:0!important;margin:0!important;padding:max(64px,calc(env(safe-area-inset-top,0px) + 52px)) 20px 36px!important;border-radius:0}
+  /* производителност: замъгляването (backdrop-filter) на големите карти е най-скъпото нещо на телефона —
+     картите са плътни, а стъклото остава на бутоните и лентите, с по-малък радиус */
+  html body #main .card,html body #main section.card{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background-color:color-mix(in srgb,var(--panel,#fff) 95%,transparent)!important}
+  html body #main .b,html body .fs-tab,html body .fs-btn,html body #testbadge,html body .ft-fab,html body #langBtn{-webkit-backdrop-filter:blur(8px) saturate(1.4)!important;backdrop-filter:blur(8px) saturate(1.4)!important}
+  html body #tabbar,html body #nav,html body .subnav{-webkit-backdrop-filter:blur(12px) saturate(1.5)!important;backdrop-filter:blur(12px) saturate(1.5)!important}
+  /* надписът с източника на 3D модела закриваше бутоните за изглед долу (Мозъчен ствол, Бъбреци, Хипофиза) — на телефон е горе вдясно, под бутона за цял екран, и не хваща докосвания извън линковете */
+  html body .credit3d{top:46px!important;bottom:auto!important;right:6px!important;left:auto!important;max-width:58%;font-size:9.5px!important;line-height:1.3;pointer-events:none;opacity:.85}
+  html body .credit3d a{pointer-events:auto}
   html body .mdl-sw.out{position:static!important;margin:8px 0 0 auto;width:max-content;box-shadow:none;background:#fff}
 }`;
-document.head.appendChild(st)})();
+document.head.appendChild(st);
+/* 2D платната на телефон: най-много 2× (при 3× пикселите са 2,25 пъти повече, а разлика не се вижда) */
+try{const ph=matchMedia("(max-width:700px)").matches||/iPhone|Android.+Mobile/i.test(navigator.userAgent),r=window.devicePixelRatio;if(ph&&r>2)Object.defineProperty(window,"devicePixelRatio",{get:()=>2,configurable:true})}catch(e){}
+})();
