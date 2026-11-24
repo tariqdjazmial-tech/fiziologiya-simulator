@@ -116,9 +116,89 @@ const exp=Q([
 exp[0].set={pre:"norm"};exp[1].set={pre:"oc"};exp[2].set={pre:"preg"};exp[3].set={pre:"meno"};exp[4].set={pre:"pcos"};
 exp.forEach(e=>{e.pre=e.set.pre});
 
+
+/* ---------- 3D сцена: яйчник, фалопиева тръба и матка в разрез — всичко следва модела ----------
+   Променливи → изображение: размер на фоликула = s.Fol; набиране на кохортата = FSH; разкъсване и път на ооцита = овулация (пик на LH);
+   размер/цвят на жълтото тяло = s.Lut (регресия → corpus albicans); дебелина на ендометриума и дължина на спиралните артерии = s.endo;
+   отлепване и кървене = s.shed; брой хормонални частици = нива на FSH, LH, E2, P4; hCG = имплантиран бластоцист.
+   Пропорциите са приблизителни (матка ≈ 7 cm, яйчник ≈ 3–4 cm, предовулаторен фоликул ≈ 2 cm) — учебна схема в 3D. */
+function ms3D(get){const W=document.createElement("div");W.className="card";W.style.cssText="padding:10px";
+  W.innerHTML="<div id=\"msW\" style=\"position:relative;width:100%;height:440px;border-radius:12px;overflow:hidden;background:radial-gradient(ellipse at center,#2a2d33,#14161a)\"></div><div class=\"legend\" style=\"margin-top:6px\"><span><i style=\"background:#1c7ed6\"></i>FSH</span><span><i style=\"background:#7048e8\"></i>LH</span><span><i style=\"background:#e64980\"></i>"+T_(L("естрадиол","estradiol"))+"</span><span><i style=\"background:#d9480f\"></i>"+T_(L("прогестерон","progesterone"))+"</span><span><i style=\"background:#0c8599\"></i>hCG</span></div>";
+  return {el:W,start(){const lo=window.LOWGPU,RS=lo?24:40;
+   return mk3DView("#msW",()=>{const G=make3D(document.getElementById("msW"),{r:15,th:0.25,phi:1.42,target:[3.6,-0.2,0.3],min:4,max:40,hq:true,fov:38}),T=G.T,sc=G.scene,V=(x,y,z)=>new T.Vector3(x,y,z),R=MK.rnd(17);
+    const rest=g=>{g.setAttribute("rest",new T.BufferAttribute(g.attributes.position.array.slice(),3));return g};
+    const tis=(geo,pal,o={})=>new T.Mesh(rest(geo),zMat(T,pal,Object.assign({sc:0.9,cc:0.5},o)));
+    const PAL={myo:[[0.80,0.47,0.45],[0.66,0.33,0.33],[0.88,0.58,0.54]],endo:[[0.88,0.45,0.50],[0.72,0.28,0.36],[0.95,0.60,0.64]],ova:[[0.94,0.83,0.81],[0.84,0.66,0.64],[0.98,0.90,0.88]],tube:[[0.90,0.58,0.58],[0.76,0.42,0.44],[0.95,0.70,0.68]],cl:[[0.93,0.47,0.22],[0.80,0.33,0.15],[0.97,0.62,0.38]]};
+    // матка: половин ротационно тяло (задната стена), гледано откъм кухината
+    const prof=[[0.02,3.7],[1.2,3.55],[2.0,3.1],[2.45,2.2],[2.45,1.0],[2.1,-0.4],[1.5,-1.6],[1.05,-2.5],[1.0,-3.6],[0.85,-4.2]].map(a=>new T.Vector2(a[0],a[1]));
+    const inner=prof.map(v=>new T.Vector2(Math.max(0.12,v.x*0.52-0.05),v.y*0.92-0.15));
+    const myo=tis(new T.LatheGeometry(prof,RS,Math.PI/2,Math.PI),PAL.myo,{ro:0.5});myo.geometry.computeVertexNormals();myo.material.side=T.DoubleSide;sc.add(myo);
+    {const shp=new T.Shape();prof.forEach((v,i)=>i?shp.lineTo(v.x,v.y):shp.moveTo(v.x,v.y));inner.slice().reverse().forEach(v=>shp.lineTo(v.x,v.y));const g1=new T.ShapeGeometry(shp,8),g2=g1.clone();g2.scale(-1,1,1);
+     [g1,g2].forEach(g=>{const m=tis(g,[[0.74,0.40,0.40],[0.62,0.30,0.31],[0.82,0.50,0.48]],{bump:0.5});m.material.side=T.DoubleSide;sc.add(m)})}
+    // ендометриум: слой върху вътрешната повърхност; дебелината следва модела
+    const eg=new T.LatheGeometry(inner,RS,Math.PI/2,Math.PI);const eRest=eg.attributes.position.array.slice();const endo=tis(eg,PAL.endo,{bump:0.6});endo.material.side=T.DoubleSide;sc.add(endo);
+    let lastTh=-1;const setEndo=th=>{if(Math.abs(th-lastTh)<0.004)return;lastTh=th;const P=eg.attributes.position;for(let i=0;i<P.count;i++){const x=eRest[3*i],y=eRest[3*i+1],z=eRest[3*i+2],r=Math.hypot(x,z)||1,w=Z.cl((y+2.6)/1.6,0,1),k=Math.max(0.05,(r-th*w*(1+0.12*Math.sin(y*7+x*5)))/r);P.setXYZ(i,x*k,y,z*k)}P.needsUpdate=true;eg.computeVertexNormals()};
+    // спирални артерии: от миометриума навътре
+    const sa=[],hm=MK.mat(T,0xc92a2a,{roughness:0.4,emissive:LIN(T,0x8b1a1a),emissiveIntensity:0.1});{const pts=[];for(let k=0;k<=40;k++){const a=k/40*Math.PI*6;pts.push(V(k/40,0.06*Math.cos(a),0.06*Math.sin(a)))}const hg=new T.TubeGeometry(new T.CatmullRomCurve3(pts),60,0.022,6,false);
+     for(let i=0;i<9;i++){const y=-1.2+i*0.42,ang=Math.PI*(0.62+0.76*R());let r0=0.3;for(let k=1;k<inner.length;k++){const a=inner[k-1],b=inner[k];if((y-a.y)*(y-b.y)<=0){r0=a.x+(b.x-a.x)*(y-a.y)/((b.y-a.y)||1);break}}
+      const g=new T.Group();g.position.set(Math.sin(ang)*r0,y,Math.cos(ang)*r0);g.rotation.y=ang+Math.PI/2;g.add(new T.Mesh(hg,hm));sc.add(g);sa.push(g)}}
+    // фалопиева тръба (дясна) с фимбрии и яйчник; лявата страна — опростено
+    const OV=V(6.8,-1.3,0.9);const FB=V(9.15,-0.15,1.15);const tc=new T.CatmullRomCurve3([V(2.1,2.9,-0.2),V(3.8,3.6,-0.3),V(6.0,3.3,0.2),V(8.0,2.4,0.8),V(9.3,1.0,1.2),FB]);
+    {const m=MK.taper(T,tc,0.28,0.55,{seg:60,rad:14,mat:zMat(T,PAL.tube,{sc:1.2})});rest(m.geometry);sc.add(m)}
+    for(let k=0;k<9;k++){const a=k/9*Math.PI*2,b=FB.clone(),c=V(FB.x+0.45*Math.cos(a),FB.y-0.35,FB.z+0.45*Math.sin(a)),d=V(FB.x-0.2+0.75*Math.cos(a+0.3),FB.y-0.95,FB.z+0.7*Math.sin(a+0.3));sc.add(MK.taper(T,new T.CatmullRomCurve3([b,c,d]),0.11,0.03,{seg:14,rad:6,color:0xe8a0a0}))}
+    sc.add(MK.taper(T,new T.CatmullRomCurve3([V(-2.1,2.9,-0.2),V(-3.8,3.6,-0.3),V(-5.6,3.2,0),V(-6.6,2.0,0.4)]),0.28,0.5,{seg:30,rad:10,color:0xe6a3a0}));
+    const ovL=tis(new T.SphereGeometry(1,RS,Math.round(RS*0.7)),PAL.ova,{sc:2});ovL.scale.set(1.7,1.05,0.95);ovL.position.set(-6.8,-0.9,0.2);sc.add(ovL);
+    sc.add(MK.taper(T,new T.CatmullRomCurve3([V(2.0,1.6,-0.6),V(4.5,0.3,-0.6),V(OV.x-1.6,OV.y+0.1,0)]),0.12,0.12,{seg:20,rad:8,color:0xd9a8a0}));
+    // яйчник: полупрозрачна обвивка, вътре фоликулите
+    const ov=tis(new T.SphereGeometry(1,RS,Math.round(RS*0.7)),PAL.ova,{sc:2,cc:0.6});ov.scale.set(1.9,1.2,1.1);ov.position.copy(OV);ov.material.opacity=0.72;ov.material.depthWrite=false;ov.renderOrder=6;sc.add(ov);
+    const fm=new T.MeshPhysicalMaterial({color:LIN(T,0xf8e6ea),roughness:0.25,transparent:true,opacity:0.75,clearcoat:0.6}),NC=lo?12:18,coh=new T.InstancedMesh(new T.SphereGeometry(1,14,10),fm,NC),cp=[];
+    for(let i=0;i<NC;i++){const a=R()*6.283,b=Math.acos(2*R()-1),q=0.86+0.1*R();cp.push(V(OV.x+1.9*q*Math.sin(b)*Math.cos(a),OV.y+1.2*q*Math.cos(b),OV.z+1.1*q*Math.sin(b)*Math.sin(a)))}sc.add(coh);const M4=new T.Matrix4();
+    // доминантен фоликул: тека, гранулоза, антрум, кумулус с ооцит
+    const DF=V(OV.x+0.95,OV.y+0.3,OV.z+0.62),dom=new T.Group();dom.position.copy(DF);sc.add(dom);
+    const th=new T.Mesh(new T.SphereGeometry(1,32,24),new T.MeshPhysicalMaterial({color:LIN(T,0xe8868f),roughness:0.4,transparent:true,opacity:0.45,clearcoat:0.5,depthWrite:false}));th.renderOrder=7;
+    const gr=tis(new T.SphereGeometry(0.9,32,24),[[0.97,0.86,0.86],[0.9,0.74,0.76],[1,0.93,0.93]],{sc:6,bump:0.6});gr.material.opacity=0.55;gr.material.depthWrite=false;gr.renderOrder=8;gr.material.side=T.BackSide;
+    const cum=new T.Group();cum.position.set(-0.55,-0.45,0.35);cum.add(new T.Mesh(new T.SphereGeometry(0.2,16,12),new T.MeshPhysicalMaterial({color:LIN(T,0xf6dfe2),roughness:0.6,transparent:true,opacity:0.8})));
+    const oo=new T.Mesh(new T.SphereGeometry(0.075,16,12),new T.MeshPhysicalMaterial({color:LIN(T,0xffeef0),roughness:0.3,clearcoat:1}));oo.position.set(0.04,0.04,0.12);cum.add(oo);const zp=new T.Mesh(new T.TorusGeometry(0.09,0.012,8,24),MK.mat(T,0xf1c4cc));zp.position.copy(oo.position);cum.add(zp);
+    dom.add(th,gr,cum);
+    // жълто тяло: нагънато (шум по повърхността), оранжево → бяло (corpus albicans)
+    const clg=new T.SphereGeometry(1,40,30);{const P=clg.attributes.position,v=V(0,0,0);for(let i=0;i<P.count;i++){v.fromBufferAttribute(P,i);const n=1+0.13*Math.sin(v.x*7+v.y*3)*Math.sin(v.y*6-v.z*5)+0.06*Math.sin(v.z*11);P.setXYZ(i,v.x*n,v.y*n,v.z*n)}clg.computeVertexNormals()}
+    const clM=tis(clg,PAL.cl,{sc:3,bump:0.8}),clU=clM.material.userData.u;sc.add(clM);clM.position.copy(DF);
+    // ооцит след овулация: пътува към фимбриите и в тръбата
+    const egg=new T.Group();egg.add(oo.clone(),zp.clone(),new T.Mesh(new T.SphereGeometry(0.16,12,10),new T.MeshPhysicalMaterial({color:LIN(T,0xf8e2e6),transparent:true,opacity:0.45})));egg.visible=false;sc.add(egg);
+    const eggPath=new T.CatmullRomCurve3([DF.clone().add(V(0.7,0.4,0.6)),V(9.0,-0.9,1.3),FB.clone(),V(9.3,1.0,1.2),V(8.0,2.4,0.8),V(6.0,3.3,0.2),V(3.8,3.6,-0.3),V(2.6,3.1,-0.2)]);
+    const blast=new T.Mesh(new T.SphereGeometry(0.22,20,14),new T.MeshPhysicalMaterial({color:LIN(T,0xf3d0d8),roughness:0.3,clearcoat:0.8,emissive:LIN(T,0x0c8599),emissiveIntensity:0.15}));blast.position.set(0.3,2.75,-0.6);blast.visible=false;sc.add(blast);
+    // частици: хормони и менструална кръв
+    const fF=zFlow(T,sc,30,0x1c7ed6,0.11),fL=zFlow(T,sc,30,0x7048e8,0.11),fE=zFlow(T,sc,26,0xe64980,0.1),fP=zFlow(T,sc,26,0xd9480f,0.1),fH=zFlow(T,sc,16,0x0c8599,0.07),fB=zFlow(T,sc,40,0xa61e2a,0.07);
+    const cIn=new T.CatmullRomCurve3([V(6.6,6.5,1.4),V(6.4,3.0,1.9),V(6.6,0.6,2.0),OV.clone().add(V(0,0.3,1.0))]);
+    const cOut=new T.CatmullRomCurve3([OV.clone().add(V(-1.4,-0.6,0.6)),V(5.2,-2.8,1.0),V(3.4,-1.5,0.6),V(1.8,0.4,0.2)]);
+    const cH=new T.CatmullRomCurve3([V(0.4,2.6,-0.3),V(3.4,0.8,0.8),V(5.6,-1.6,1.0),OV.clone().add(V(-0.6,-0.3,0.6))]);
+    const cBl=new T.CatmullRomCurve3([V(0,2.6,-0.4),V(0,0.8,-0.5),V(0,-1.6,-0.4),V(0,-3.4,-0.3),V(0,-5.2,-0.2)]);
+    let ph="",phT=0;const ctx={G,g:G};
+    ctx.frame=()=>{const st=get(),s=st.s,p=st.p;if(!s){G.render([]);return}const t=performance.now()/1000;
+      const rec=Z.cl((s.FSH-4)/8,0,1),atr=Z.cl((s.Fol-0.35)/0.3,0,1),res=p.res/100,andr=p.andr/100;
+      for(let i=0;i<NC;i++){const r=res<0.03?0.0001:(0.07+0.13*rec*(1-0.7*atr)+0.16*andr)*(0.7+0.6*((i*37)%10)/10)*Math.sqrt(res);M4.makeScale(r,r,r).setPosition(cp[i]);coh.setMatrixAt(i,M4)}coh.instanceMatrix.needsUpdate=true;
+      const fr=s.Fol>0.06&&!(s.ageCL>=0&&s.Lut>0.1)?0.12+0.95*Math.pow(s.Fol,0.85):0;dom.visible=fr>0;if(fr){dom.scale.setScalar(fr);const out=Z.cl((s.Fol-0.75)/0.25,0,1);dom.position.copy(DF).add(V(0.45*out,0.12*out,0.25*out));th.material.opacity=0.38+0.25*(s.surge||0)}
+      const age=s.ageCL,cR=age>=0?0.25+0.85*s.Lut:0;clM.visible=cR>0.05;clM.scale.setScalar(Math.max(0.01,cR));const wh=age>10&&!p.hcg?Z.cl((age-10)/3.5,0,1):0;
+      clU.uA.value.set(0.93+0.04*wh,0.47+0.45*wh,0.22+0.68*wh);clU.uB.value.set(0.80+0.08*wh,0.33+0.5*wh,0.15+0.7*wh);
+      egg.visible=age>=0&&age<1.6;if(egg.visible)egg.position.copy(eggPath.getPoint(Z.cl(age/1.6,0,1)));
+      blast.visible=!!p.hcg&&age>7;if(blast.visible)blast.scale.setScalar(1+0.25*Math.min(1,(age-7)/8));
+      const thE=0.06+s.endo*0.055;setEndo(thE);const kS=Z.cl((s.endo-3)/9,0,1);sa.forEach(g=>{g.visible=kS>0.05;g.scale.set(Math.max(0.01,thE*1.05),1,1)});hm.emissiveIntensity=s.shed>0?0.5:0.1;
+      const eu=endo.material.userData.u;if(s.shed>0)eu.uB.value.set(0.55,0.12,0.18);else eu.uB.value.set(0.72,0.28,0.36);
+      fF.set(cIn,t*0.25,Math.round(Z.cl(s.FSH/2,0,30)),0.25);fL.set(cIn,t*0.25+0.5,Math.round(Z.cl(s.LH/2.2,0,30)),0.35);
+      fE.set(cOut,t*0.22,Math.round(Z.cl(s.E2/11,0,26)),0.3);fP.set(cOut,t*0.22+0.5,Math.round(Z.cl(s.P4*1.6,0,26)),0.35);
+      fH.set(cH,t*0.2,blast.visible?14:0,0.3);fB.set(cBl,t*0.35,s.shed>0?40:0,0.35);
+      const nph=(s.surge||0)>0.3||egg.visible?"ov":s.shed>0?"men":"all";if(nph!==ph&&t-phT>2){ph=nph;phT=t;if(ph==="ov")G.flyTo(7.6,-0.6,0.9,8,0.35,1.42);else if(ph==="men")G.flyTo(0.6,-0.3,0,11,0.05,1.5);else G.flyTo(3.6,-0.2,0.3,15,0.25,1.42)}
+      const lb=[[T_(L("яйчник","ovary")),OV.clone().add(V(-1.2,-1.3,0.8))],[T_(L("матка (разрез)","uterus (section)")),V(-1.8,-2.2,0)],[T_(L("фалопиева тръба","fallopian tube")),V(5.6,3.7,0)],[T_(L("фимбрии","fimbriae")),V(10.1,-0.9,1.3)],[T_(L("ендометриум","endometrium"))+" "+fmt(s.endo,1)+" mm",V(0.9,-0.4,0)]];
+      if(dom.visible)lb.push([T_(s.Fol>0.75?L("зрял (Граафов) фоликул","mature (Graafian) follicle"):L("доминантен фоликул","dominant follicle")),dom.position.clone().add(V(0,fr+0.3,0))]);
+      if(clM.visible)lb.push([T_(wh>0.6?L("бяло тяло","corpus albicans"):L("жълто тяло","corpus luteum")),clM.position.clone().add(V(0,-cR-0.4,0.3))]);
+      if(egg.visible)lb.push([T_(L("ооцит","oocyte")),egg.position.clone().add(V(0,0.4,0))]);if(blast.visible)lb.push([T_(L("бластоцист (hCG)","blastocyst (hCG)")),blast.position.clone().add(V(0,0.5,0))]);
+      if(s.shed>0)lb.push([T_(L("менструация","menstruation")),V(0,-4.6,0)]);
+      G.render(lb)};
+    return ctx},ctx=>ctx.frame())}}}
+
 /* ---------- изглед ---------- */
-function view(main){
-  mkSim(main,{key:"menst",h2:L("Женска полова ос и менструален цикъл","Female reproductive axis and the menstrual cycle"),
+function view(main){let SS=null;const v3=ms3D(()=>({s:SS,p:main.__p||{gn:100,res:100,andr:0,oc:0,hcg:0}}));
+  const cfg={key:"menst",h2:L("Женска полова ос и менструален цикъл","Female reproductive axis and the menstrual cycle"),
    lead:L("Как обратните връзки между хипоталамуса, хипофизата и яйчника пораждат 28-дневен цикъл. 1 s = 1 ден. Опростено: един доминантен фоликул и типични нива на хормоните.","How feedback between the hypothalamus, pituitary and ovary generates a 28-day cycle. 1 s = 1 day. Simplified: one dominant follicle and typical hormone levels."),
    ch:330,speed:1,dtmax:0.02,recdt:0.1,hmax:700,
    sl:[{k:"gn",label:L("Пулсатилност на GnRH","GnRH pulsatility"),min:0,max:150,step:5,value:100,unit:"%",hint:L("норма 100 %; ниска при стрес, ниско тегло (хипоталамусна аменорея)","normal 100 %; low with stress or low weight (hypothalamic amenorrhoea)")},
@@ -133,14 +213,16 @@ function view(main){
         hyp:{n:L("Хипоталамусна аменорея","Hypothalamic amenorrhoea"),set:{gn:30},info:L("Бавни пулсове на GnRH (стрес, ниско тегло, тежки тренировки): ниски FSH, LH и естрадиол, няма фоликулен растеж и менструация.","Slow GnRH pulses (stress, low weight, intense training): low FSH, LH and estradiol, no follicle growth and no menstruation.")},
         meno:{n:L("Менопауза","Menopause"),set:{res:0},info:L("Без фоликули няма естрадиол и инхибин — отрицателната обратна връзка изчезва и FSH и LH се покачват.","Without follicles there is no estradiol or inhibin — the negative feedback disappears and FSH and LH rise.")}},
    exp,init:()=>msInit(),
-   step(s,p,dt){msStep(s,p,dt)},
+   step(s,p,dt){msStep(s,p,dt);SS=s;main.__p=p},
    rec:(s,p,t)=>[t,s.FSH,s.LH,s.E2,s.P4,s.endo],calc:(p,s)=>s,
    stats:(p,R,s)=>s?[[L("Ден от цикъла","Cycle day"),Math.floor(s.cday+1)+""],[L("Фаза","Phase"),phase(s,p)],["FSH",fmt(s.FSH,1)+" IU/L"],["LH",fmt(s.LH,1)+" IU/L"],[L("Естрадиол","Estradiol"),fmt(s.E2,0)+" pg/mL"],[L("Прогестерон","Progesterone"),fmt(s.P4,1)+" ng/mL"],[L("Ендометриум","Endometrium"),fmt(s.endo,1)+" mm"],[L("Базална температура","Basal temperature"),fmt(s.BBT,2)+" °C"],[L("Последен цикъл","Last cycle"),s.cyc.length?fmt(s.cyc[s.cyc.length-1],0)+" "+L("дни","days"):"—"]]:[],
    note:(p,R,s)=>!s?"":p.oc?L("<b>Контрацептив</b>: отрицателната обратна връзка е постоянна, FSH не стига прага за набиране и прогестинът блокира пика на LH.","<b>Contraceptive</b>: the negative feedback is constant, FSH does not reach the recruitment threshold and the progestin blocks the LH surge."):p.res<5?L("<b>Без фоликули</b> няма естрадиол и инхибин: FSH и LH са високи (менопауза).","<b>Without follicles</b> there is no estradiol or inhibin: FSH and LH are high (menopause)."):s.surge>0.3?L("<b>Пик на LH</b>: положителна обратна връзка от високия естрадиол; овулацията идва след ≈ 11 часа.","<b>LH surge</b>: positive feedback from high estradiol; ovulation follows after ≈ 11 hours."):s.E2h>2?L("Естрадиолът е над ≈ 200 pg/mL — ако остане така ≈ 40 часа, обратната връзка става <b>положителна</b>.","Estradiol is above ≈ 200 pg/mL — if it stays there ≈ 40 hours, the feedback becomes <b>positive</b>."):s.ageCL>=0&&p.hcg&&s.ageCL>9?L("<b>hCG</b> спасява жълтото тяло: прогестеронът остава висок, менструация няма.","<b>hCG</b> rescues the corpus luteum: progesterone stays high, no menstruation."):s.ageCL>=0?L("<b>Лутеална фаза</b>: прогестеронът (и инхибин A) потискат FSH и LH и правят ендометриума секреторен.","<b>Luteal phase</b>: progesterone (and inhibin A) suppress FSH and LH and make the endometrium secretory."):s.shed>0?L("<b>Менструация</b>: спадът на прогестерона отлепва функционалния слой; FSH се покачва и набира нови фоликули.","<b>Menstruation</b>: the fall of progesterone sheds the functional layer; FSH rises and recruits new follicles."):L("<b>Фоликуларна фаза</b>: FSH расте фоликула, естрадиолът и инхибин B потискат FSH (отрицателна обратна връзка).","<b>Follicular phase</b>: FSH grows the follicle, estradiol and inhibin B suppress FSH (negative feedback)."),
    legend:`<span><i style="background:${C.fsh}"></i>FSH</span><span><i style="background:${C.lh}"></i>LH</span><span><i style="background:${C.e2}"></i>${T_(L("естрадиол","estradiol"))}</span><span><i style="background:${C.p4}"></i>${T_(L("прогестерон ×10","progesterone ×10"))}</span>`,
    plots:[{f:(p,R,h)=>{const x=h.map(a=>a[0]),T=Math.max(56,Math.ceil((x[x.length-1]||0)/7)*7);return {xmin:T-56,xmax:T,ymin:0,ymax:70,xlabel:L("време, дни","time, days"),ylabel:"FSH, LH (IU/L)",series:[{x,y:h.map(a=>a[1]),color:C.fsh,width:2.2},{x,y:h.map(a=>a[2]),color:C.lh,width:2.2}]}}},
           {f:(p,R,h)=>{const x=h.map(a=>a[0]),T=Math.max(56,Math.ceil((x[x.length-1]||0)/7)*7);return {xmin:T-56,xmax:T,ymin:0,ymax:300,xlabel:L("време, дни","time, days"),ylabel:L("E2 (pg/mL), P4 ×10 (ng/mL)","E2 (pg/mL), P4 ×10 (ng/mL)"),hlines:[{y:200,color:css("--grid"),label:L("праг ≈ 200","threshold ≈ 200")}],series:[{x,y:h.map(a=>a[3]),color:C.e2,width:2.2},{x,y:h.map(a=>a[4]*10),color:C.p4,width:2,dash:[5,3]}]}}}],
-   draw})}
+   draw};window.__msCfg=cfg;mkSim(main,cfg);
+  /* 3D сцената е над 2D схемата */
+  const card=main.querySelector(".card");card.parentNode.insertBefore(v3.el,card);(window.__cleanups=window.__cleanups||[]).push(v3.start())}
 
 const gl=[{t:L("Лутеинизиращ хормон (LH)","Luteinising hormone (LH)"),re:"лутеинизиращ[а-я]* хормон[а-я]*",d:L("Хормон на предната хипофиза; пикът му предизвиква овулация и образуване на жълто тяло.","Anterior pituitary hormone; its surge causes ovulation and formation of the corpus luteum.")},
  {t:L("Фоликулостимулиращ хормон (FSH)","Follicle-stimulating hormone (FSH)"),re:"фоликулостимулиращ[а-я]* хормон[а-я]*",d:L("Хормон на предната хипофиза; набира и расте яйчниковите фоликули и индуцира ароматазата.","Anterior pituitary hormone; recruits and grows ovarian follicles and induces aromatase.")},
