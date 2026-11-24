@@ -4,6 +4,10 @@
 import json,os,shutil,re
 H="/home/claude";D=os.path.dirname(os.path.abspath(__file__));S=os.path.join(D,"site")
 cfg=json.load(open(os.path.join(D,"config.json")))
+# ВНИМАНИЕ: изходната работна версия (/home/claude) вече не съществува — истинският източник е site/ в репото.
+# Без тази проверка скриптът първо изтриваше site/ и чак после падаше.
+if not (os.path.isdir(H+"/js") and os.path.isfile(H+"/fiziologiya-simulator.html")):
+    raise SystemExit("build.py: няма изходна папка "+H+" — site/ е източникът; нищо не е променено.")
 shutil.rmtree(S,ignore_errors=True);os.makedirs(S+"/js")
 for f in os.listdir(H+"/js"):shutil.copy(H+"/js/"+f,S+"/js/"+f)
 shutil.copytree(H+"/fonts",S+"/fonts",dirs_exist_ok=True)

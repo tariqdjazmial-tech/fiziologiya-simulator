@@ -261,6 +261,8 @@ const load=src=>new Promise((res,rej)=>{const s=document.createElement("script")
 const G="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/";
 (window.gsap?Promise.resolve():load(G+"gsap.min.js")).then(()=>window.ScrollTrigger?null:load(G+"ScrollTrigger.min.js")).then(initMotion).catch(()=>{});
 function initMotion(){const gsap=window.gsap;gsap.registerPlugin(window.ScrollTrigger);const ST=window.ScrollTrigger;
+  /* при смяна на темата старите карти излизат от DOM — техните ScrollTrigger-и се унищожават, иначе слушателите и платната остават в паметта */
+  const gcST=()=>{try{ST.getAll().forEach(t=>{const el=t.trigger||(t.vars&&t.vars.trigger);if(el&&el.nodeType===1&&!el.isConnected)t.kill()})}catch(e){}};addEventListener("hashchange",()=>setTimeout(gcST,400));
   /* курсорът и скролът местят отблясъците по метала плавно, с инерция */
   const qx=gsap.quickTo(U,"mx",{duration:3.5,ease:"power2.out"}),qy=gsap.quickTo(U,"my",{duration:3.5,ease:"power2.out"});
   const calmNow=()=>gsap.to(U,{calm:document.body.classList.contains("lp")?0:1,duration:1.2,ease:"power2.out"});calmNow();addEventListener("hashchange",()=>setTimeout(calmNow,60));
