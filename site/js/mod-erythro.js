@@ -8,6 +8,7 @@
 (function(){"use strict";
 if(typeof mkSim!=="function"||typeof zRegister!=="function")return;
 const T_=x=>window.T?window.T(x):x,EN=window.__EN=window.__EN||{},L=(bg,en)=>{if(en)EN[bg]=en;return bg},cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+[["mL/ден","mL/day"],["# mL/ден","# mL/day"],["дни","days"],["# дни","# days"],["# mg/ден","# mg/day"],["# m","# m"]].forEach(([b,e])=>L(b,e));
 
 /* ---------- модел ---------- */
 const P_={J0:0.125,tauM:2.0,FeHb:173,FeLoss:1.0};
