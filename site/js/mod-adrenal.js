@@ -72,104 +72,106 @@ function draw(g,p,R,t,dt,s){if(!s||!R)return;const T=(x,y,txt,o)=>Z.T(g,x,y,T_(t
   const a=h/24*Math.PI*2-Math.PI/2;g.strokeStyle=css("--ink");g.lineWidth=2.5;g.beginPath();g.moveTo(cx,cy);g.lineTo(cx+Math.cos(a)*rr*0.85,cy+Math.sin(a)*rr*0.85);g.stroke();
   T(cx+rr+46,cy+4,String(Math.floor(h)).padStart(2,"0")+":"+String(Math.floor((h%1)*60)).padStart(2,"0"),{fs:13,w:700})}
 
-/* ---------- 3D: бъбрек и надбъбречна жлеза в напречен разрез ----------
-   Разрезът има формата на обърнато Y (λ): тяло с медула и два крака (медиален и латерален), които са само кора.
-   Зоните не са отделна геометрия: от контура веднъж се смята поле на разстоянието до капсулата (DataTexture),
-   а шейдърът оцветява по дълбочина: капсула → гломерулоза → фасцикулата → ретикуларис → медула (само в тялото).
+/* ---------- 3D: дясна надбъбречна жлеза върху десния бъбрек (BodyParts3D), в коронален разрез ----------
+   Жлезата, бъбрекът, бъбречните съдове, уретерът и долната куха вена са истински анатомични модели в реалното им положение
+   (design/tools/bp3d_kidney.py). Жлезата е отрязана в коронална равнина през средата ѝ (z = 0); контурът на разреза е
+   истинското сечение на модела. Зоните на разреза идват от поле на разстоянието до капсулата (DataTexture), а шейдърът
+   оцветява по дълбочина: капсула → гломерулоза → фасцикулата → ретикуларис → медула (където жлезата е по-дебела от кората).
    Дебелината на кората следва масата ѝ (ACTH), а гломерулозата — ангиотензин II и K⁺. */
+const ADR_SEC=[[0.3,1.502],[0.362,1.466],[0.424,1.431],[0.483,1.392],[0.544,1.356],[0.6,1.312],[0.651,1.263],[0.7,1.211],[0.746,1.157],[0.788,1.099],[0.828,1.04],[0.863,0.979],[0.897,0.916],[0.926,0.851],[0.954,0.786],[0.98,0.719],[1.002,0.652],[1.023,0.584],[1.044,0.516],[1.059,0.446],[1.074,0.377],[1.088,0.307],[1.104,0.238],[1.125,0.17],[1.147,0.102],[1.166,0.033],[1.181,-0.036],[1.195,-0.106],[1.202,-0.177],[1.206,-0.248],[1.204,-0.319],[1.196,-0.389],[1.182,-0.459],[1.164,-0.528],[1.14,-0.595],[1.115,-0.662],[1.088,-0.727],[1.066,-0.795],[1.044,-0.862],[1.02,-0.929],[0.996,-0.996],[0.971,-1.063],[0.946,-1.129],[0.92,-1.195],[0.892,-1.261],[0.857,-1.323],[0.817,-1.382],[0.773,-1.437],[0.72,-1.484],[0.657,-1.517],[0.589,-1.536],[0.519,-1.548],[0.449,-1.561],[0.379,-1.575],[0.31,-1.593],[0.246,-1.623],[0.19,-1.666],[0.14,-1.717],[0.094,-1.771],[0.056,-1.831],[0.023,-1.894],[0.0,-1.962],[-0.022,-2.029],[-0.051,-2.094],[-0.098,-2.145],[-0.168,-2.151],[-0.232,-2.12],[-0.294,-2.086],[-0.359,-2.057],[-0.425,-2.031],[-0.489,-2.0],[-0.548,-1.961],[-0.607,-1.921],[-0.66,-1.874],[-0.712,-1.825],[-0.76,-1.773],[-0.807,-1.72],[-0.853,-1.665],[-0.898,-1.61],[-0.944,-1.556],[-0.99,-1.501],[-1.036,-1.448],[-1.087,-1.398],[-1.14,-1.35],[-1.193,-1.303],[-1.228,-1.241],[-1.249,-1.173],[-1.258,-1.103],[-1.264,-1.032],[-1.275,-0.962],[-1.295,-0.893],[-1.326,-0.829],[-1.357,-0.765],[-1.388,-0.702],[-1.407,-0.633],[-1.403,-0.563],[-1.392,-0.493],[-1.387,-0.422],[-1.38,-0.351],[-1.369,-0.281],[-1.356,-0.211],[-1.336,-0.143],[-1.316,-0.074],[-1.291,-0.008],[-1.262,0.057],[-1.228,0.119],[-1.192,0.181],[-1.161,0.244],[-1.134,0.31],[-1.113,0.378],[-1.101,0.448],[-1.089,0.518],[-1.076,0.588],[-1.059,0.657],[-1.028,0.721],[-0.994,0.783],[-0.956,0.843],[-0.928,0.906],[-0.924,0.977],[-0.91,1.046],[-0.892,1.115],[-0.864,1.18],[-0.826,1.24],[-0.781,1.295],[-0.729,1.344],[-0.675,1.39],[-0.62,1.435],[-0.564,1.479],[-0.501,1.512],[-0.436,1.539],[-0.369,1.564],[-0.302,1.589],[-0.236,1.615],[-0.168,1.637],[-0.098,1.643],[-0.027,1.636],[0.042,1.618],[0.108,1.594],[0.174,1.567],[0.238,1.535]];
 function ad3D(get){const W=document.createElement("div");W.className="card";W.style.cssText="padding:10px";
-  const box=typeof wrap3D==="function"?wrap3D("adW",innerWidth<600?460:540):"<div id=\"adW\" style=\"position:relative;width:100%;height:440px;border-radius:6px;overflow:hidden\"></div>";
-  W.innerHTML=box+"<div class=\"legend\" style=\"margin-top:6px\"><span><i style=\"background:#adb5bd\"></i>ACTH</span><span><i style=\"background:#e64980\"></i>"+T_(L("ангиотензин II","angiotensin II"))+"</span><span><i style=\"background:#1c7ed6\"></i>"+T_(L("алдостерон","aldosterone"))+"</span><span><i style=\"background:#d9480f\"></i>"+T_(L("кортизол","cortisol"))+"</span><span><i style=\"background:#9c36b5\"></i>"+T_(L("андрогени","androgens"))+"</span><span>"+T_(L("хормоните идват по артериите и излизат по централната вена; дебелината на зоните следва модела (схематично)","hormones arrive via the arteries and leave via the central vein; zone thickness follows the model (schematic)"))+"</span><span style=\"opacity:.75\">"+T_(L("бъбрек и съдове: BodyParts3D (DBCLS, CC BY-SA 2.1 JP)","kidney and vessels: BodyParts3D (DBCLS, CC BY-SA 2.1 JP)"))+"</span></div>";
+  const box=typeof wrap3D==="function"?wrap3D("adW",innerWidth<600?460:540):"<div id=\"adW\" style=\"position:relative;width:100%;height:500px;border-radius:6px;overflow:hidden\"></div>";
+  W.innerHTML=box+"<div class=\"legend\" style=\"margin-top:6px\"><span><i style=\"background:#adb5bd\"></i>ACTH</span><span><i style=\"background:#e64980\"></i>"+T_(L("ангиотензин II","angiotensin II"))+"</span><span><i style=\"background:#1c7ed6\"></i>"+T_(L("алдостерон","aldosterone"))+"</span><span><i style=\"background:#d9480f\"></i>"+T_(L("кортизол","cortisol"))+"</span><span><i style=\"background:#9c36b5\"></i>"+T_(L("андрогени","androgens"))+"</span><span>"+T_(L("хормоните идват по артериите и излизат по централната вена; дебелината на зоните следва модела (схематично)","hormones arrive via the arteries and leave via the central vein; zone thickness follows the model (schematic)"))+"</span><span style=\"opacity:.75\">"+T_(L("жлеза, бъбрек и съдове: BodyParts3D (DBCLS, CC BY-SA 2.1 JP)","gland, kidney and vessels: BodyParts3D (DBCLS, CC BY-SA 2.1 JP)"))+"</span></div>";
   return {el:W,start(){const lo=window.LOWGPU,ph=innerWidth<600;
-   return mk3DView("#adW",()=>{const G=make3D(document.getElementById("adW"),{r:ph?16:11.2,th:0.3,phi:1.38,target:[ph?-0.4:-0.7,ph?-1.4:-0.7,0],min:3,max:30,hq:true,fov:38}),T=G.T,sc=G.scene,V=(x,y,z)=>new T.Vector3(x,y,z);
+   return mk3DView("#adW",()=>{const G=make3D(document.getElementById("adW"),{r:ph?15:13.5,th:-0.55,phi:1.36,target:[ph?-0.3:0.4,ph?-1.4:-0.2,0],min:3,max:40,hq:true,fov:38}),T=G.T,sc=G.scene,V=(x,y,z)=>new T.Vector3(x,y,z);
+    G.ren.localClippingEnabled=true;
     const rest=g=>{g.setAttribute("rest",new T.BufferAttribute(g.attributes.position.array.slice(),3));return g};
-    const opaque=m=>{m.material.transparent=false;m.material.opacity=1;return m};
-    /* контур на разреза (локални единици): тяло отгоре, медиален крак вляво, латерален вдясно */
-    const CP=[[0,1.38],[-0.42,1.24],[-0.62,0.86],[-0.68,0.42],[-0.95,0.02],[-1.45,-0.48],[-1.86,-0.86],[-1.74,-1.02],[-1.3,-0.78],[-0.78,-0.46],[-0.3,-0.2],[0.02,-0.16],[0.36,-0.24],[0.86,-0.44],[1.42,-0.7],[1.8,-0.72],[1.76,-0.52],[1.26,-0.16],[0.76,0.24],[0.6,0.7],[0.48,1.12],[0.26,1.32]];
-    const crv=new T.CatmullRomCurve3(CP.map(([x,y])=>V(x,y,0)),true,"centripetal"),NP=lo?120:180,OP=crv.getSpacedPoints(NP).slice(0,NP).map(v=>[v.x,v.y]);
-    const seg=[],segL=[];let per=0;for(let i=0;i<NP;i++){const a=OP[i],b=OP[(i+1)%NP],l=Math.hypot(b[0]-a[0],b[1]-a[1]);seg.push([a[0],a[1],b[0],b[1],per,l]);per+=l}
+    const real=(f,m,cb,par)=>MK.loadMesh(T,"m/"+f).then(g=>{const o=new T.Mesh(rest(g),m);(par||sc).add(o);cb&&cb(o);return o}).catch(()=>{});
+    const tis=(pal,o)=>{const m=zMat(T,pal,Object.assign({sc:0.6,cc:lo?0:0.4,bump:0.3},o));m.transparent=false;m.opacity=1;return m};
+    /* контур на разреза */
+    const OP=ADR_SEC,NP=OP.length,seg=[];let per=0;for(let i=0;i<NP;i++){const a=OP[i],b=OP[(i+1)%NP],l=Math.hypot(b[0]-a[0],b[1]-a[1]);seg.push([a[0],a[1],b[0],b[1],per,l]);per+=l}
     const inside=(x,y)=>{let c=false;for(let i=0,j=NP-1;i<NP;j=i++){const [xi,yi]=OP[i],[xj,yj]=OP[j];if((yi>y)!==(yj>y)&&x<(xj-xi)*(y-yi)/(yj-yi)+xi)c=!c}return c};
     const near=(x,y)=>{let best=1e9,pp=0;for(const [ax,ay,bx,by,p0,l] of seg){const dx=bx-ax,dy=by-ay,u=cl(((x-ax)*dx+(y-ay)*dy)/(l*l),0,1),qx=ax+u*dx-x,qy=ay+u*dy-y,d=qx*qx+qy*qy;if(d<best){best=d;pp=p0+u*l}}return [Math.sqrt(best),pp]};
-    /* поле: R = дълбочина, G = локална полудебелина, B = радиални тръжички (фасцикулата), A = маска на тялото */
-    const X0=-2.0,X1=2.0,Y0=-1.15,Y1=1.5,NX=lo?120:176,NY=Math.round(NX*(Y1-Y0)/(X1-X0)),DM=0.8,dd=new Float32Array(NX*NY),sp=new Float32Array(NX*NY),bm=new Float32Array(NX*NY);
-    for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const x=X0+(i+0.5)/NX*(X1-X0),y=Y0+(j+0.5)/NY*(Y1-Y0),k=j*NX+i;if(!inside(x,y))continue;const [d,p]=near(x,y);dd[k]=d;sp[k]=0.5+0.5*Math.sin(p*95+Math.sin(p*7.3)*2);
-      bm[k]=1-cl((Math.hypot(x*1.1,(y-0.66)*0.85)-0.42)/0.38,0,1)}
-    const R=Math.round(0.45/(X1-X0)*NX),tmp=new Float32Array(NX*NY),dl=new Float32Array(NX*NY);
+    let X0=1e9,X1=-1e9,Y0=1e9,Y1=-1e9;OP.forEach(([x,y])=>{X0=Math.min(X0,x);X1=Math.max(X1,x);Y0=Math.min(Y0,y);Y1=Math.max(Y1,y)});X0-=0.05;X1+=0.05;Y0-=0.05;Y1+=0.05;
+    const NX=lo?96:144,NY=Math.round(NX*(Y1-Y0)/(X1-X0)),DM=1.6,dd=new Float32Array(NX*NY),sp=new Float32Array(NX*NY);let deep=[0,0,0];
+    for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const x=X0+(i+0.5)/NX*(X1-X0),y=Y0+(j+0.5)/NY*(Y1-Y0),k=j*NX+i;if(!inside(x,y))continue;const [d,p]=near(x,y);dd[k]=d;sp[k]=0.5+0.5*Math.sin(p*80+Math.sin(p*6.1)*2);if(d>deep[2])deep=[x,y,d]}
+    const R=Math.round(0.35/(X1-X0)*NX),tmp=new Float32Array(NX*NY),dl=new Float32Array(NX*NY);
     for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){let m=0;for(let q=Math.max(0,i-R);q<=Math.min(NX-1,i+R);q++)m=Math.max(m,dd[j*NX+q]);tmp[j*NX+i]=m}
     for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){let m=0;for(let q=Math.max(0,j-R);q<=Math.min(NY-1,j+R);q++)m=Math.max(m,tmp[q*NX+i]);dl[j*NX+i]=Math.max(m,dd[j*NX+i],0.02)}
-    const tx=new Uint8Array(NX*NY*4);for(let k=0;k<NX*NY;k++){tx[4*k]=Math.round(cl(dd[k]/DM,0,1)*255);tx[4*k+1]=Math.round(cl(dl[k]/DM,0,1)*255);tx[4*k+2]=Math.round(sp[k]*255);tx[4*k+3]=Math.round(bm[k]*255)}
+    const tx=new Uint8Array(NX*NY*4);for(let k=0;k<NX*NY;k++){tx[4*k]=Math.round(cl(dd[k]/DM,0,1)*255);tx[4*k+1]=Math.round(cl(dl[k]/DM,0,1)*255);tx[4*k+2]=Math.round(sp[k]*255);tx[4*k+3]=255}
     const FT=new T.DataTexture(tx,NX,NY,T.RGBAFormat);FT.magFilter=FT.minFilter=T.LinearFilter;FT.needsUpdate=true;
-    const shape=new T.Shape(OP.map(([x,y])=>new T.Vector2(x,y)));
-    const C3=h=>new T.Color(h);
+    const shape=new T.Shape(OP.map(([x,y])=>new T.Vector2(x,y))),C3=h=>new T.Color(h);
     const U={F:{value:FT},bb:{value:new T.Vector4(X0,Y0,X1-X0,Y1-Y0)},DM:{value:DM},tCx:{value:0.32},fG:{value:0.15},fR:{value:0.1},cap:{value:0.035},
       cCap:{value:C3(0xd8a595)},cG:{value:C3(0xc98f7e)},cF:{value:C3(0xd9875f)},cR:{value:C3(0x8a4a4a)},cM:{value:C3(0x9a6f72)},
       eG:{value:C3(0x1c7ed6)},eF:{value:C3(0xd9480f)},eR:{value:C3(0x9c36b5)},aG:{value:0.2},aF:{value:0.2},aR:{value:0.2},
-      nod:{value:new T.Vector3(0,0,0)},cN:{value:C3(0xc08a7a)},eN:{value:C3(0x1c7ed6)},aN:{value:0}};
+      nod:{value:new T.Vector3(0,0,0)},cN:{value:C3(0xc08a7a)},eN:{value:C3(0x1c7ed6)},aN:{value:0},vl:{value:new T.Vector2(deep[0],deep[1])}};
     const faceM=new T.ShaderMaterial({uniforms:U,side:T.DoubleSide,
       vertexShader:"varying vec2 vP;void main(){vP=position.xy;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}",
-      fragmentShader:`uniform sampler2D F;uniform vec4 bb;uniform float DM,tCx,fG,fR,cap,aG,aF,aR,aN;uniform vec3 cCap,cG,cF,cR,cM,eG,eF,eR,nod,cN,eN;varying vec2 vP;
+      fragmentShader:`uniform sampler2D F;uniform vec4 bb;uniform float DM,tCx,fG,fR,cap,aG,aF,aR,aN;uniform vec3 cCap,cG,cF,cR,cM,eG,eF,eR,nod,cN,eN;uniform vec2 vl;varying vec2 vP;
       float hs(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
-      void main(){vec4 t=texture2D(F,(vP-bb.xy)/bb.zw);float d=t.r*DM,dl=max(t.g*DM,0.02),b=t.a;
-        float C=mix(dl,min(dl,tCx),b);float u=(d-cap)/max(0.01,C-cap);vec3 c;float ln=0.0;
+      void main(){vec4 t=texture2D(F,(vP-bb.xy)/bb.zw);float d=t.r*DM,dl=max(t.g*DM,0.02);
+        float C=min(dl,tCx);float u=(d-cap)/max(0.01,C-cap);vec3 c;float ln=0.0;
         if(d<cap){c=cCap;}
         else if(d>C+0.004){c=cM*(0.9+0.1*hs(floor(vP*90.0)));ln=1.0-smoothstep(0.0,0.012,d-C);}
         else if(u<fG){c=cG+eG*aG*0.55;ln=smoothstep(fG-0.03,fG,u);}
         else if(u<1.0-fR){c=cF*(0.86+0.16*t.b)+eF*aF*0.45;ln=smoothstep(1.0-fR-0.025,1.0-fR,u);}
         else {c=cR+eR*aR*0.55;}
         c=mix(c,c*0.72,ln*0.8);
-        float vd=length(vP-vec2(0.04,0.7));if(vd<0.085){c=mix(vec3(0.17,0.2,0.36),c*0.6,smoothstep(0.06,0.085,vd));}
+        float vd=length(vP-vl);if(vd<0.11){c=mix(vec3(0.17,0.2,0.36),c*0.6,smoothstep(0.08,0.11,vd));}
         float nd=length(vP-nod.xy);if(nod.z>0.0&&nd<nod.z){float e=smoothstep(nod.z*0.86,nod.z,nd);c=mix(cN+eN*aN*0.5,cN*0.7,e);}
         c*=0.93+0.07*hs(floor(vP*140.0));
         gl_FragColor=vec4(c,1.0);}`});
     const gland=new T.Group();sc.add(gland);
-    const face=new T.Mesh(new T.ShapeGeometry(shape,1),faceM);face.position.z=0.012;gland.add(face);
-    /* задна половина: контурът, изтеглен назад и закръглен към края (жлезата е тънка, листовидна) */
-    const DEP=2.1,eg=new T.ExtrudeGeometry(shape,{depth:DEP,bevelEnabled:false,steps:lo?6:10,curveSegments:8});
-    {const P=eg.attributes.position;for(let i=0;i<P.count;i++){const z=P.getZ(i),f=(DEP-z)/DEP,k=1-0.45*f*f;P.setXYZ(i,P.getX(i)*k,0.3+(P.getY(i)-0.3)*k,z-DEP)}eg.computeVertexNormals()}
-    const back=opaque(new T.Mesh(rest(eg),zMat(T,[[0.8,0.5,0.42],[0.69,0.4,0.34],[0.87,0.6,0.5]],{sc:2.2,cc:lo?0:0.25})));gland.add(back);
-    /* бъбрек: боб с вдлъбнатина към хилуса; горният полюс е под краката на жлезата, изцяло зад разреза */
-    const kg=new T.SphereGeometry(1,lo?30:48,lo?22:36);{const P=kg.attributes.position;for(let i=0;i<P.count;i++){let x=P.getX(i),y=P.getY(i);if(x>0)x-=0.32*x*Math.exp(-Math.pow(y/0.42,2));P.setX(i,x)}kg.computeVertexNormals()}
-    const kid=opaque(new T.Mesh(rest(kg),zMat(T,[[0.45,0.19,0.16],[0.35,0.13,0.11],[0.55,0.26,0.21]],{sc:0.55,cc:lo?0:0.45,bump:0.3})));kid.scale.set(2.6,4.6,1.9);kid.position.set(-2.0,-3.2,-2.2);kid.rotation.z=0.18;sc.add(kid);
-    /* истински десен бъбрек, бъбречни съдове, уретер и долна куха вена (BodyParts3D, CC BY-SA 2.1 JP); в координатите на сцената */
-    const real=(f,m,cb)=>MK.loadMesh(T,"m/"+f).then(g=>{const o=new T.Mesh(rest(g),m);sc.add(o);cb&&cb(o);return o}).catch(()=>{});
-    real("bp_kidR.txt",kid.material,()=>{kid.visible=false});
-    G.ren.localClippingEnabled=true;const renAM=MK.mat(T,0xa61e1e,{roughness:0.45});renAM.clippingPlanes=[new T.Plane(new T.Vector3(-1,0,0),3.4)];real("bp_renA.txt",renAM);real("bp_renV.txt",MK.mat(T,0x3b4fa0,{roughness:0.45}));real("bp_ureR.txt",MK.mat(T,0xd2aca4,{roughness:0.5}));
-    /* съдове: 3 надбъбречни артерии отгоре-вляво (горна, средна, долна) към капсулата; централна вена → долна куха вена */
-    const oW=(i,s=1)=>{const [x,y]=OP[((i%NP)+NP)%NP];return V(x*s,y*s,0.06)};
-    const aC=[[V(-2.6,2.4,-0.7),V(-1.5,1.95,-0.2),V(-0.75,1.6,0.06),oW(Math.round(NP*0.04),1.04)],
-      [V(-2.7,0.9,-0.6),V(-1.8,0.75,-0.1),V(-1.05,0.55,0.06),oW(Math.round(NP*0.13),1.04)],
-      [V(0.25,-1.95,0.3),V(0.85,-1.55,0.32),V(1.4,-1.05,0.15),V(1.66,-0.8,0.06)]].map(p=>new T.CatmullRomCurve3(p));
-    aC.forEach(c=>gland.add(MK.taper(T,c,0.085,0.05,{seg:28,rad:10,color:0xa61e1e})));
-    const vP=[V(0.04,0.7,-0.02),V(0.3,0.6,-0.4),V(0.95,0.42,-0.32),V(1.35,0.36,0.08),V(1.58,0.36,0.5)];
-    gland.add(MK.taper(T,new T.CatmullRomCurve3(vP),0.085,0.13,{seg:28,rad:10,color:0x3b4fa0}));
-    const ivcM=MK.mat(T,0x4a5aa8,{roughness:0.4});ivcM.transparent=true;ivcM.opacity=0.6;ivcM.depthWrite=false;real("bp_ivc.txt",ivcM,o=>{o.renderOrder=2});
-    /* аденом (нодул в кората): Кон — в латералния крак (гломерулоза); кортизол-секретиращ — в тялото (фасцикулата) */
-    const NOD={conn:[1.12,-0.36,0.2,0x9a8296,0x1c7ed6],adrAd:[-0.36,0.98,0.3,0xc08a7a,0xd9480f]};
-    /* частици: ACTH и Ang II по артериите; хормоните — от зоната през медулата в централната вена и нагоре по долната куха вена */
-    const fA=zFlow(T,gland,24,0xadb5bd,0.085),fAng=zFlow(T,gland,20,0xe64980,0.08),fAl=zFlow(T,gland,20,0x1c7ed6,0.08),fC=zFlow(T,gland,28,0xd9480f,0.085),fD=zFlow(T,gland,16,0x9c36b5,0.08);
-    const vO=vP.concat([V(2.0,0.75,0.8),V(1.95,3.0,0.85)]),outC=(x,y)=>new T.CatmullRomCurve3([V(x,y,0.08),V(x*0.45+0.02,0.7+(y-0.7)*0.45,0.08),V(0.04,0.7,0.06),...vO]);
-    const cAl=outC(1.38,-0.6),cC=outC(-0.48,1.0),cD=outC(-0.28,0.7);
-    /* етикети с водещи линии: колона вляво, точки в средата на всяка зона по хоризонтала през тялото */
-    const yR=[1.12,0.92,0.72,0.52],yM=0.66,xs=yR.map(y=>{for(let x=-1.0;x<0;x+=0.004)if(inside(x,y))return x;return -0.6});
-    const zp=[V(0,0,0.02),V(0,0,0.02),V(0,0,0.02),V(0,0,0.02),V(0.05,yM,0.02)],anc=ph?[0,1,2,3,4].map(i=>V(-1.6,5.0-0.72*i,0.1)):[V(-4.4,2.7,0.1),V(-4.4,2.05,0.1),V(-4.4,1.4,0.1),V(-4.4,0.75,0.1),V(-4.4,0.1,0.1)];
-    const lgP=new Float32Array(5*6),lg=new T.LineSegments(new T.BufferGeometry(),new T.LineBasicMaterial({color:0x868e96,transparent:true,opacity:0.85}));lg.geometry.setAttribute("position",new T.BufferAttribute(lgP,3));sc.add(lg);
+    const face=new T.Mesh(new T.ShapeGeometry(shape,1),faceM);face.position.z=0.004;gland.add(face);
+    /* истинската жлеза: само задната половина (отрязана в равнината на разреза) */
+    const glM=tis([[0.86,0.56,0.46],[0.76,0.46,0.39],[0.92,0.66,0.55]],{sc:1.6});glM.clippingPlanes=[new T.Plane(new T.Vector3(0,0,-1),0)];glM.side=T.DoubleSide;
+    real("bp_adrR.txt",glM,null,gland);
+    /* бъбрек, бъбречни съдове, уретер, долна куха вена */
+    real("bp_kidR.txt",tis([[0.45,0.19,0.16],[0.35,0.13,0.11],[0.55,0.26,0.21]],{sc:0.4}));
+    const renAM=MK.mat(T,0xa61e1e,{roughness:0.45});renAM.clippingPlanes=[new T.Plane(new T.Vector3(-1,0,0),4.6)];real("bp_renA.txt",renAM);
+    real("bp_renV.txt",MK.mat(T,0x3b4fa0,{roughness:0.45}));real("bp_ureR.txt",MK.mat(T,0xd2aca4,{roughness:0.5}));
+    const ivcM=MK.mat(T,0x4a5aa8,{roughness:0.4});ivcM.transparent=true;ivcM.opacity=0.38;ivcM.depthWrite=false;real("bp_ivc.txt",ivcM,o=>{o.renderOrder=2});
+    /* опорни точки по контура */
+    const pick=(dx,dy,inw=0)=>{let b=-1e9,q=OP[0];for(const p of OP){const v=p[0]*dx+p[1]*dy;if(v>b){b=v;q=p}}const L=Math.hypot(q[0]-deep[0],q[1]-deep[1])||1;return [q[0]+(deep[0]-q[0])/L*inw,q[1]+(deep[1]-q[1])/L*inw]};
+    const pV=(q,z=0.05,s=1)=>V(q[0]*s,q[1]*s,z);
+    /* артерии: горна (от долната диафрагмална), средна (от аортата, медиално зад долната куха вена), долна (от бъбречната) */
+    const aT=pick(-0.35,1),aM=pick(1,0.35),aB=pick(0.15,-1);
+    const aC=[[V(-2.4,5.4,-1.2),V(-1.6,3.6,-0.4),V(aT[0]-0.2,aT[1]+0.6,0.06),pV(aT,0.05,1.03)],
+      [V(4.2,2.0,-1.6),V(2.9,1.3,-0.6),V(aM[0]+0.6,aM[1]+0.2,0.08),pV(aM,0.05,1.03)],
+      [V(0.6,-5.4,1.6),V(0.6,-4.0,0.9),V(aB[0]+0.2,aB[1]-0.7,0.2),pV(aB,0.05,1.03)]].map(p=>new T.CatmullRomCurve3(p));
+    aC.forEach(c=>gland.add(MK.taper(T,c,0.09,0.05,{seg:28,rad:10,color:0xa61e1e})));
+    /* централна вена: от медулата по разреза до медиалния ръб и напред към задната стена на долната куха вена */
+    const IVC=[2.52,-0.04,6.05],mE=pick(1,0.05);
+    const vP=[V(deep[0],deep[1],0.05),V((deep[0]+mE[0])/2,(deep[1]+mE[1])/2+0.05,0.07),V(mE[0]+0.15,mE[1],0.25),V(mE[0]+0.6,mE[1]+0.05,1.6),V(IVC[0]-0.25,IVC[1],IVC[2]-0.9),V(IVC[0]-0.05,IVC[1]+0.05,IVC[2]-0.3)];
+    gland.add(MK.taper(T,new T.CatmullRomCurve3(vP),0.1,0.15,{seg:30,rad:10,color:0x3b4fa0}));
+    const vO=vP.concat([V(IVC[0],IVC[1]+0.8,IVC[2]-0.6),V(IVC[0]-0.1,IVC[1]+5,IVC[2]-0.5)]);
+    /* аденом: Кон — в гломерулозата латерално; кортизол-секретиращ — във фасцикулата отгоре */
+    const nC=pick(-1,0.2,0.32),nA=pick(-0.2,1,0.5),NOD={conn:[nC[0],nC[1],0.24,0x9a8296,0x1c7ed6],adrAd:[nA[0],nA[1],0.36,0xc08a7a,0xd9480f]};
+    /* частици */
+    const fA=zFlow(T,gland,24,0xadb5bd,0.09),fAng=zFlow(T,gland,20,0xe64980,0.085),fAl=zFlow(T,gland,20,0x1c7ed6,0.085),fC=zFlow(T,gland,28,0xd9480f,0.09),fD=zFlow(T,gland,16,0x9c36b5,0.085);
+    const outC=q=>new T.CatmullRomCurve3([V(q[0],q[1],0.08),V((q[0]+deep[0])/2,(q[1]+deep[1])/2,0.08),...vO]);
+    const cAl=outC(pick(-1,-0.3,0.08)),cC=outC(pick(-0.5,1,0.2)),cD=outC(pick(-1,0.4,0.3));
+    /* етикети с водещи линии към средата на всяка зона по хоризонтала през дебелата част */
+    const cols=[-0.3,-0.12,0.06,0.24].map(dx=>deep[0]+dx),ys=cols.map(x=>{for(let y=Y1;y>deep[1];y-=0.004)if(inside(x,y))return y;return deep[1]+0.5});
+    const zp=[V(0,0,0),V(0,0,0),V(0,0,0),V(0,0,0),V(0,0,0)],anc=ph?[0,1,2,3,4].map(i=>V(-1.4,5.4-0.7*i,0.1)):[0,1,2,3,4].map(i=>V(-4.6,2.9-0.58*i,0.1));
+    const lgP=new Float32Array(5*6),lg=new T.LineSegments(new T.BufferGeometry(),new T.LineBasicMaterial({color:0xadb5bd,transparent:true,opacity:0.9,depthTest:false}));lg.renderOrder=5;lg.geometry.setAttribute("position",new T.BufferAttribute(lgP,3));sc.add(lg);
     const LB=[T_(L("капсула","capsule")),T_(L("гломерулоза → алдостерон","glomerulosa → aldosterone")),T_(L("фасцикулата → кортизол","fasciculata → cortisol")),T_(L("ретикуларис → андрогени","reticularis → androgens")),T_(L("медула (адреналин)","medulla (adrenaline)"))];
-    const XL=[[T_(L("десен бъбрек","right kidney")),V(-3.0,-3.0,-0.3)],[T_(L("централна вена","central vein")),V(1.9,0.15,0.3)],[T_(L("долна куха вена","inferior vena cava")),V(2.8,-2.2,1.6)],[T_(L("бъбречни артерия и вена","renal artery and vein")),V(-0.2,-2.6,1.2)],[T_(L("уретер","ureter")),V(-0.5,-6.4,0.4)],[T_(L("надбъбречни артерии","suprarenal arteries")),ph?V(-2.9,0.2,-0.3):V(-0.6,3.1,-0.3)]];
+    const XL=[[T_(L("десен бъбрек","right kidney")),ph?V(-2.0,-3.0,3.2):V(-5.0,-4.2,1.6)],[T_(L("централна вена","central vein")),V(2.1,0.6,2.4)],[T_(L("долна куха вена","inferior vena cava")),V(2.6,-3.4,6.4)],[T_(L("бъбречни артерия и вена","renal artery and vein")),V(0.4,-6.4,3.4)],[T_(L("надбъбречни артерии","suprarenal arteries")),ph?V(-3.0,2.2,-0.4):V(-1.2,4.4,-0.4)]];
     const LBL=LB.map((t,i)=>[t,anc[i]]).concat(XL),nodL=[T_(L("аденом","adenoma")),V(0,0,0)],LBLn=LBL.concat([nodL]);
-    let gs=1,lastK=-1,lastG=-1;const W3=V(0,0,0);
+    let gs=1,lastK=-1,lastG=-1;
     const ctx={G,g:G};
     ctx.frame=()=>{const st=get(),s=st.s,p=st.p;if(!s){G.render([]);return}const t=performance.now()/1000;
       const k=cl(s.M*p.res/100,0.06,2.2),gA=cl(Math.sqrt(s.AngII*Math.exp((s.K-4.2)/0.5)),0.4,1.9);
       if(Math.abs(k-lastK)>0.005||Math.abs(gA-lastG)>0.01){lastK=k;lastG=gA;
-        gs=1.35*(0.8+0.2*Math.sqrt(k));gland.scale.setScalar(gs);
-        U.tCx.value=cl(0.3*Math.sqrt(k),0.07,0.5);U.fG.value=cl(0.15*gA,0.05,0.3);U.fR.value=cl(0.1*Math.sqrt(k),0.05,0.16);
-        const C=Math.min(U.tCx.value,0.62),cap=U.cap.value,fg=U.fG.value,fr=U.fR.value,dm=[cap*0.5,cap+(C-cap)*fg*0.5,cap+(C-cap)*(fg+(1-fg-fr)*0.5),cap+(C-cap)*(1-fr*0.5)];
-        for(let i=0;i<4;i++)zp[i].set((xs[i]+dm[i]*1.15)*gs,yR[i]*gs,0.03);zp[4].set(0.05*gs,(yM-0.12)*gs,0.03);
-        for(let i=0;i<5;i++){lgP.set([anc[i].x+(ph?0:0.05),anc[i].y-(ph?0.2:0),anc[i].z,zp[i].x,zp[i].y,zp[i].z],i*6)}lg.geometry.attributes.position.needsUpdate=true}
+        gs=0.82+0.18*Math.sqrt(k);gland.scale.setScalar(gs);
+        U.tCx.value=cl(0.6*Math.sqrt(k),0.12,0.95);U.fG.value=cl(0.15*gA,0.05,0.3);U.fR.value=cl(0.1*Math.sqrt(k),0.05,0.16);
+        const Cx=U.tCx.value,cap=U.cap.value,fg=U.fG.value,fr=U.fR.value,dm=[cap*0.5,cap+(Cx-cap)*fg*0.5,cap+(Cx-cap)*(fg+(1-fg-fr)*0.5),cap+(Cx-cap)*(1-fr*0.5)];
+        for(let i=0;i<4;i++)zp[i].set(cols[i]*gs,(ys[i]-dm[i])*gs,0.03);zp[4].set((deep[0]+0.1)*gs,(deep[1]+0.15)*gs,0.03);
+        for(let i=0;i<5;i++)lgP.set([anc[i].x+(ph?0:0.05),anc[i].y-(ph?0.2:0),anc[i].z,zp[i].x,zp[i].y,zp[i].z],i*6);lg.geometry.attributes.position.needsUpdate=true}
       U.aG.value=Math.min(1,s.AngII*0.6);U.aF.value=Math.min(1,s.F/30);U.aR.value=Math.min(1,s.DHEA/3);
-      const nd=NOD[p.pre];if(nd){U.nod.value.set(nd[0],nd[1],nd[2]);U.cN.value.setHex(nd[3]);U.eN.value.setHex(nd[4]);U.aN.value=p.pre==="conn"?Math.min(1,s.Ald/30):Math.min(1,s.F/30);nodL[1].set(nd[0]*gs,(nd[1]+nd[2]+0.25)*gs,0.1)}else{U.nod.value.z=0}
+      const nd=NOD[p.pre];if(nd){U.nod.value.set(nd[0],nd[1],nd[2]);U.cN.value.setHex(nd[3]);U.eN.value.setHex(nd[4]);U.aN.value=p.pre==="conn"?Math.min(1,s.Ald/30):Math.min(1,s.F/30);nodL[1].set(nd[0]*gs,(nd[1]+nd[2]+0.25)*gs,0.1)}else U.nod.value.z=0;
       fA.set(aC[0],t*0.35,Math.round(cl(s.A/5,0,12)),0.02);fAng.set(aC[1],t*0.35,Math.round(cl(s.AngII*6,0,20)),0.02);
-      fAl.set(cAl,t*0.18,Math.round(cl(s.Ald/1.6,0,20)),0.03);fC.set(cC,t*0.18,Math.round(cl(s.F*0.8,0,28)),0.03);fD.set(cD,t*0.18,Math.round(cl(s.DHEA*5,0,16)),0.03);
+      fAl.set(cAl,t*0.15,Math.round(cl(s.Ald/1.6,0,20)),0.03);fC.set(cC,t*0.15,Math.round(cl(s.F*0.8,0,28)),0.03);fD.set(cD,t*0.15,Math.round(cl(s.DHEA*5,0,16)),0.03);
       G.render(nd?LBLn:LBL)};
     return ctx},ctx=>ctx.frame())}}}
 
@@ -185,7 +187,7 @@ const book={title:L("Надбъбречна кора: кортизол и алд
  {h:L("Регулация и обратни връзки","Regulation and feedback"),html:P_("<b>Кортизол</b>: денонощен ритъм (пик ≈ 06–08 h), стрес го надвива; обратната връзка е бърза (минути, по скоростта на промяната) и бавна (часове, по нивото). <b>Алдостерон</b>: обем ↓ → ренин ↑ → ангиотензин II ↑ → алдостерон ↑ → Na⁺ и вода ↑ → обем се възстановява; K⁺ ↑ → алдостерон ↑ → K⁺ се изхвърля. ACTH вдига алдостерона само кратко.","<b>Cortisol</b>: circadian rhythm (peak ≈ 06–08 h), overridden by stress; feedback is fast (minutes, by rate of change) and slow (hours, by level). <b>Aldosterone</b>: volume ↓ → renin ↑ → angiotensin II ↑ → aldosterone ↑ → Na⁺ and water ↑ → volume restored; K⁺ ↑ → aldosterone ↑ → K⁺ excreted. ACTH raises aldosterone only briefly.")+P_("Ефекти на кортизола: глюконеогенеза и хипергликемия, катаболизъм на белтъците, липолиза (и преразпределение на мазнините), противовъзпалителен и имуносупресивен ефект, „пермисивно“ действие за катехоламините (съдов тонус), потиска костното образуване.","Cortisol effects: gluconeogenesis and hyperglycaemia, protein catabolism, lipolysis (and fat redistribution), anti-inflammatory and immunosuppressive effects, a “permissive” action for catecholamines (vascular tone), suppression of bone formation.")+P_("Кортизолът се свързва с минералкортикоидния рецептор колкото алдостерона, но в бъбрека <b>11β-HSD2</b> го превръща в неактивен кортизон. При много висок кортизол (ектопичен ACTH) ензимът се насища → хипокалиемия и хипертония; женската чушка (глициризин) го потиска.","Cortisol binds the mineralocorticoid receptor as avidly as aldosterone, but in the kidney <b>11β-HSD2</b> converts it to inactive cortisone. With very high cortisol (ectopic ACTH) the enzyme saturates → hypokalaemia and hypertension; liquorice (glycyrrhizin) inhibits it.")},
  {h:L("Клинично значение","Clinical relevance"),html:LI([["<b>Болест на Адисон</b> (разрушаване на кората): ниски кортизол и алдостерон, висок ACTH (хиперпигментация от POMC/MSH), висок ренин, хиперкалиемия, хипонатриемия, хипотония.","<b>Addison's disease</b> (destruction of the cortex): low cortisol and aldosterone, high ACTH (hyperpigmentation from POMC/MSH), high renin, hyperkalaemia, hyponatraemia, hypotension."],["<b>Вторична недостатъчност</b> (хипофиза или спрени глюкокортикоиди): нисък ACTH и кортизол, алдостеронът е запазен (ренин–ангиотензин) — няма хиперкалиемия.","<b>Secondary insufficiency</b> (pituitary, or stopped glucocorticoids): low ACTH and cortisol, aldosterone preserved (renin–angiotensin) — no hyperkalaemia."],["<b>Синдром на Кушинг</b>: екзогенни глюкокортикоиди (най-често), болест на Кушинг (ACTH от аденом на хипофизата — потиска се от висока, но не от ниска доза дексаметазон), аденом на кората (нисък ACTH, атрофия на другата жлеза), ектопичен ACTH.","<b>Cushing's syndrome</b>: exogenous glucocorticoids (most common), Cushing's disease (ACTH from a pituitary adenoma — suppressed by high but not low dose dexamethasone), cortical adenoma (low ACTH, atrophy of the other gland), ectopic ACTH."],["<b>Вродена надбъбречна хиперплазия</b> (дефицит на 21-хидроксилаза): нисък кортизол и алдостерон, висок ACTH → хиперплазия и отклоняване към андрогени (вирилизация), загуба на сол (при солово-губещата форма, ≈ 3/4 от класическите случаи).","<b>Congenital adrenal hyperplasia</b> (21-hydroxylase deficiency): low cortisol and aldosterone, high ACTH → hyperplasia and shunting to androgens (virilisation), salt wasting."],["<b>Синдром на Кон</b> (първичен хипералдостеронизъм): висок алдостерон, потиснат ренин, хипертония; хипокалиемия (само при ≈ 1/3 — повечето са с нормален K⁺) и метаболитна алкалоза. Скрининг: съотношение алдостерон/ренин.","<b>Conn's syndrome</b> (primary hyperaldosteronism): high aldosterone, suppressed renin, hypertension; hypokalaemia (only in ≈ 1/3 — most are normokalaemic) and metabolic alkalosis. Screening: aldosterone/renin ratio."]])},
  {h:L("Чести заблуди","Common misconceptions"),html:LI([["„ACTH регулира алдостерона.“ — Главните регулатори са ангиотензин II и K⁺; затова при хипофизна недостатъчност алдостеронът е нормален.","“ACTH regulates aldosterone.” — The main regulators are angiotensin II and K⁺; that is why aldosterone is normal in pituitary insufficiency."],["„Дексаметазонът се мери като кортизол.“ — Не; той потиска ACTH и така сваля измерения кортизол.","“Dexamethasone is measured as cortisol.” — No; it suppresses ACTH and so lowers measured cortisol."],["„Нормален сутрешен кортизол изключва Кушинг.“ — Характерна е загубата на ритъма: висок кортизол около полунощ.","“A normal morning cortisol excludes Cushing's.” — The typical finding is the loss of rhythm: high cortisol around midnight."]])},
- {h:L("Опростено в модела","Simplified in the model"),html:P_("Моделът е <b>редуциран образователен</b>: една средна концентрация вместо пулсове, денонощният ритъм е зададена крива, обемът, ренинът и K⁺ са по една обобщена променлива, а промяната на масата на кората е <b>ускорена</b> (дни вместо седмици–месеци), за да се вижда в симулацията. 3D сцената е схематичен напречен разрез с форма на обърнато Y (тяло и два крака): медулата е само в тялото, а дебелината на зоните е по средни пропорции (гломерулоза ≈ 15 %, фасцикулата ≈ 75 %, ретикуларис ≈ 10 % от кората). Жлезата е уголемена около 1,5 пъти спрямо бъбрека, за да се виждат зоните; бъбрекът, бъбречните съдове, уретерът и долната куха вена са истински анатомични модели (BodyParts3D).","The model is a <b>reduced educational model</b>: one mean concentration instead of pulses, the circadian rhythm is a set curve, volume, renin and K⁺ are single summary variables, and the change in cortical mass is <b>accelerated</b> (days instead of weeks–months) so that it is visible in the simulation. The 3D scene is a schematic transverse section shaped like an inverted Y (body and two limbs): the medulla is only in the body, and zone thickness follows average proportions (glomerulosa ≈ 15 %, fasciculata ≈ 75 %, reticularis ≈ 10 % of the cortex). The gland is enlarged about 1.5-fold relative to the kidney so the zones are visible; the kidney, renal vessels, ureter and inferior vena cava are real anatomical models (BodyParts3D).")}],
+ {h:L("Опростено в модела","Simplified in the model"),html:P_("Моделът е <b>редуциран образователен</b>: една средна концентрация вместо пулсове, денонощният ритъм е зададена крива, обемът, ренинът и K⁺ са по една обобщена променлива, а промяната на масата на кората е <b>ускорена</b> (дни вместо седмици–месеци), за да се вижда в симулацията. 3D сцената е схематичен напречен разрез с форма на обърнато Y (тяло и два крака): медулата е само в тялото, а дебелината на зоните е по средни пропорции (гломерулоза ≈ 15 %, фасцикулата ≈ 75 %, ретикуларис ≈ 10 % от кората). Жлезата, бъбрекът, бъбречните съдове, уретерът и долната куха вена са истински анатомични модели (BodyParts3D) в реалното им положение; разрезът е истинското коронално сечение на жлезата, а кората е показана по-дебела, отколкото е (≈ 1–2 mm), за да се виждат зоните. Бъбрекът е изместен на ≈ 7 mm назад, за да не закрива разреза.","The model is a <b>reduced educational model</b>: one mean concentration instead of pulses, the circadian rhythm is a set curve, volume, renin and K⁺ are single summary variables, and the change in cortical mass is <b>accelerated</b> (days instead of weeks–months) so that it is visible in the simulation. The 3D scene is a schematic transverse section shaped like an inverted Y (body and two limbs): the medulla is only in the body, and zone thickness follows average proportions (glomerulosa ≈ 15 %, fasciculata ≈ 75 %, reticularis ≈ 10 % of the cortex). The gland, kidney, renal vessels, ureter and inferior vena cava are real anatomical models (BodyParts3D) in their true positions; the cut is the real coronal section of the gland, and the cortex is drawn thicker than it is (≈ 1–2 mm) so the zones are visible. The kidney is moved ≈ 7 mm back so it does not hide the section.")}],
  key:[["Гломерулоза — алдостерон (Ang II, K⁺); фасцикулата — кортизол (ACTH); ретикуларис — андрогени (ACTH).","Glomerulosa — aldosterone (Ang II, K⁺); fasciculata — cortisol (ACTH); reticularis — androgens (ACTH)."],["StAR + CYP11A1 = скоростоопределящ етап; ACTH го ускорява чрез cAMP.","StAR + CYP11A1 = rate-limiting step; ACTH speeds it via cAMP."],["Кортизол: пик ≈ 06–08 h, минимум около полунощ; t½ ≈ 60–90 min.","Cortisol: peak ≈ 06–08 h, nadir around midnight; t½ ≈ 60–90 min."],["Първична недостатъчност: ACTH ↑, кортизол ↓, алдостерон ↓, K⁺ ↑, ренин ↑.","Primary insufficiency: ACTH ↑, cortisol ↓, aldosterone ↓, K⁺ ↑, renin ↑."],["Вторична: ACTH ↓, кортизол ↓, алдостерон N.","Secondary: ACTH ↓, cortisol ↓, aldosterone N."],["Дефицит на CYP21: кортизол ↓, алдостерон ↓, андрогени ↑, ACTH ↑ (хиперплазия).","CYP21 deficiency: cortisol ↓, aldosterone ↓, androgens ↑, ACTH ↑ (hyperplasia)."],["Кон: алдостерон ↑, ренин ↓, K⁺ ↓, хипертония.","Conn: aldosterone ↑, renin ↓, K⁺ ↓, hypertension."]].map(([b,e])=>L(b,e))};
 
 const Q=a=>a.map(([q,qe,opts,an,ex,exe])=>({q:L(q,qe),opts:opts.map(([b,e])=>L(b,e)),a:an,expl:L(ex,exe)}));
