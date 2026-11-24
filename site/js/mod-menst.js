@@ -139,15 +139,26 @@ function ms3D(get){const W=document.createElement("div");W.className="card";W.st
      [g1,g2].forEach(g=>{const m=tis(g,[[0.74,0.40,0.40],[0.62,0.30,0.31],[0.82,0.50,0.48]],{bump:0.5});m.material.side=T.DoubleSide;sc.add(m)})}
     // ендометриум: слой върху вътрешната повърхност; дебелината следва модела
     const eg=new T.LatheGeometry(inner,RS,Math.PI/2,Math.PI);const eRest=eg.attributes.position.array.slice();const endo=tis(eg,PAL.endo,{bump:0.6});endo.scale.z=0.45;endo.material.side=T.DoubleSide;sc.add(endo);
-    let lastTh=-1,fold=0.12;const setEndo=(th,fd)=>{if(Math.abs(th-lastTh)<0.004&&Math.abs(fd-fold)<0.01)return;lastTh=th;fold=fd;const P=eg.attributes.position;for(let i=0;i<P.count;i++){const x=eRest[3*i],y=eRest[3*i+1],z=eRest[3*i+2],r=Math.hypot(x,z)||1,w=Z.cl((y+2.6)/1.6,0,1),k=Math.max(0.05,(r-th*w*(1+fold*Math.sin(y*7+x*5)))/r);P.setXYZ(i,x*k,y,z*k)}P.needsUpdate=true;eg.computeVertexNormals()};
+    const bandM=tis(new T.PlaneGeometry(0.01,0.01),PAL.endo,{bump:0.5});bandM.material.side=T.DoubleSide;sc.add(bandM);
+    const mkBand=th=>{const pos=[],idx=[],n=inner.length;[1,-1].forEach((sx,h)=>{const o=h*n*2;for(let i=0;i<n;i++){const a=inner[i],w=Z.cl((a.y+2.6)/1.6,0,1),r2=Math.max(0.04,a.x-th*w);pos.push(sx*a.x,a.y,0.012,sx*r2,a.y,0.012);if(i){const q=o+2*i;idx.push(q-2,q-1,q,q-1,q+1,q)}}});
+      const g=new T.BufferGeometry();g.setAttribute("position",new T.Float32BufferAttribute(pos,3));g.setIndex(idx);g.computeVertexNormals();rest(g);bandM.geometry.dispose();bandM.geometry=g};
+    let lastTh=-1,fold=0.12;const setEndo=(th,fd)=>{if(Math.abs(th-lastTh)<0.004&&Math.abs(fd-fold)<0.01)return;lastTh=th;fold=fd;mkBand(th);const P=eg.attributes.position;for(let i=0;i<P.count;i++){const x=eRest[3*i],y=eRest[3*i+1],z=eRest[3*i+2],r=Math.hypot(x,z)||1,w=Z.cl((y+2.6)/1.6,0,1),k=Math.max(0.05,(r-th*w*(1+fold*Math.sin(y*7+x*5)))/r);P.setXYZ(i,x*k,y,z*k)}P.needsUpdate=true;eg.computeVertexNormals()};
     // спирални артерии: от миометриума навътре
     const sa=[],hm=MK.mat(T,0xc92a2a,{roughness:0.4,emissive:LIN(T,0x8b1a1a),emissiveIntensity:0.1});{const pts=[];for(let k=0;k<=40;k++){const a=k/40*Math.PI*6;pts.push(V(k/40,0.06*Math.cos(a),0.06*Math.sin(a)))}const hg=new T.TubeGeometry(new T.CatmullRomCurve3(pts),60,0.022,6,false);
      for(let i=0;i<9;i++){const y=-1.2+i*0.42,ang=Math.PI*(0.62+0.76*R());let r0=0.3;for(let k=1;k<inner.length;k++){const a=inner[k-1],b=inner[k];if((y-a.y)*(y-b.y)<=0){r0=a.x+(b.x-a.x)*(y-a.y)/((b.y-a.y)||1);break}}
-      const g=new T.Group();g.position.set(Math.sin(ang)*r0,y,Math.cos(ang)*r0);g.position.z*=0.45;g.rotation.y=Math.atan2(g.position.x,g.position.z)+Math.PI/2;g.add(new T.Mesh(hg,hm));sc.add(g);sa.push(g)}}
+      const g=new T.Group();g.position.set(Math.sin(ang)*r0,y,Math.cos(ang)*r0);g.position.z*=0.45;g.rotation.y=Math.atan2(g.position.x,g.position.z)+Math.PI/2;g.add(new T.Mesh(hg,hm));sc.add(g);sa.push(g)}
+     /* в разреза: по 4 спирални артерии от всяка страна, от миометриума навътре през ендометриума */
+     for(let i=0;i<8;i++){const sx=i<4?1:-1,y=-0.9+(i%4)*0.95;let r0=0.3;for(let k=1;k<inner.length;k++){const a=inner[k-1],b=inner[k];if((y-a.y)*(y-b.y)<=0){r0=a.x+(b.x-a.x)*(y-a.y)/((b.y-a.y)||1);break}}
+      const g=new T.Group();g.position.set(sx*r0,y,0.03);g.rotation.y=sx>0?Math.PI:0;g.add(new T.Mesh(hg,hm));sc.add(g);sa.push(g)}}
     // фалопиева тръба (дясна) с фимбрии и яйчник; лявата страна — опростено
     const OV=V(6.8,-1.3,0.9);const FB=V(9.15,-0.15,1.15);const tc=new T.CatmullRomCurve3([V(1.6,2.9,-0.3),V(2.1,2.9,-0.2),V(3.8,3.6,-0.3),V(6.0,3.3,0.2),V(8.0,2.4,0.8),V(9.3,1.0,1.2),FB]);
     const tubeM=MK.taper(T,tc,0.28,0.55,{seg:60,rad:14,mat:zMat(T,PAL.tube,{sc:1.2})});rest(tubeM.geometry);sc.add(tubeM);
-    for(let k=0;k<9;k++){const a=k/9*Math.PI*2,b=FB.clone(),c=V(FB.x+0.45*Math.cos(a),FB.y-0.35,FB.z+0.45*Math.sin(a)),d=V(FB.x-0.2+0.75*Math.cos(a+0.3),FB.y-0.95,FB.z+0.7*Math.sin(a+0.3));sc.add(MK.taper(T,new T.CatmullRomCurve3([b,c,d]),0.11,0.03,{seg:14,rad:6,color:0xe8a0a0}))}
+    /* инфундибулум: фуния, отворена към яйчника, с ресни (фимбрии) по ръба; при пика на LH се обръща към фоликула */
+    const inf=new T.Group();inf.position.copy(FB);sc.add(inf);
+    {const fp=[];for(let k=0;k<=12;k++){const u=k/12;fp.push(new T.Vector2(0.5+0.55*Math.pow(u,1.6),-u*0.9))}const fg=new T.LatheGeometry(fp,lo?16:28);const fu=tis(fg,PAL.tube,{sc:2});fu.material.side=T.DoubleSide;inf.add(fu);
+     const fr=[];for(let k=0;k<(lo?12:20);k++){const a=k/(lo?12:20)*Math.PI*2,r0=1.04,c=V(r0*Math.cos(a),-0.9,r0*Math.sin(a)),c2=V((r0+0.25)*Math.cos(a+0.1),-1.25-0.12*Math.sin(k*1.7),(r0+0.25)*Math.sin(a+0.1)),c3=V((r0+0.15)*Math.cos(a+0.25),-1.55-0.15*Math.cos(k*2.3),(r0+0.15)*Math.sin(a+0.25));
+       const m=MK.taper(T,new T.CatmullRomCurve3([c,c2,c3]),0.09,0.025,{seg:10,rad:5,color:0xe39a9a});inf.add(m);fr.push(m)}}
+    const infUp=V(0,1,0),infAim=V(0,0,0),infQ0=new T.Quaternion(),infQ1=new T.Quaternion();
     sc.add(MK.taper(T,new T.CatmullRomCurve3([V(-1.6,2.9,-0.3),V(-2.1,2.9,-0.2),V(-3.8,3.6,-0.3),V(-5.6,3.2,0),V(-6.6,2.0,0.4)]),0.28,0.5,{seg:30,rad:10,color:0xe6a3a0}));
     const FBL=V(-6.6,2.0,0.4);for(let k=0;k<7;k++){const a=k/7*Math.PI*2;sc.add(MK.taper(T,new T.CatmullRomCurve3([FBL,V(FBL.x-0.45*Math.cos(a),FBL.y-0.35,FBL.z+0.45*Math.sin(a)),V(FBL.x-0.2-0.7*Math.cos(a+0.3),FBL.y-0.95,FBL.z+0.7*Math.sin(a+0.3))]),0.1,0.03,{seg:12,rad:5,color:0xe8a0a0}))}
     const ovL=tis(new T.SphereGeometry(1,RS,Math.round(RS*0.7)),PAL.ova,{sc:2});ovL.scale.set(1.7,1.05,0.95);ovL.position.set(-6.8,-0.9,0.2);sc.add(ovL);
@@ -171,6 +182,7 @@ function ms3D(get){const W=document.createElement("div");W.className="card";W.st
     const eggPath=new T.CatmullRomCurve3([DF.clone().add(V(0.7,0.4,0.6)),V(9.0,-0.9,1.3),FB.clone(),V(9.3,1.0,1.2),V(8.0,2.4,0.8),V(6.0,3.3,0.2),V(3.8,3.6,-0.3),V(2.1,2.9,-0.2),V(1.2,2.75,-0.4),V(0.5,2.6,-0.5),V(0.3,2.7,-0.55)]);
     const blast=new T.Mesh(new T.SphereGeometry(0.22,20,14),new T.MeshPhysicalMaterial({color:LIN(T,0xf3d0d8),roughness:0.3,clearcoat:0.8,emissive:LIN(T,0xae3ec9),emissiveIntensity:0.15}));blast.position.set(0.3,2.75,-0.6);blast.visible=false;sc.add(blast);
     // частици: хормони и менструална кръв
+    const NFr=lo?10:18,frg=new T.InstancedMesh((()=>{const g=new T.IcosahedronGeometry(0.16,1),P=g.attributes.position,v=V(0,0,0);for(let i=0;i<P.count;i++){v.fromBufferAttribute(P,i);P.setXYZ(i,v.x*(1+0.4*Math.sin(v.y*20)),v.y*0.45,v.z*(1+0.3*Math.cos(v.x*17)))}g.computeVertexNormals();return g})(),MK.mat(T,0x9c2433,{roughness:0.55}),NFr);frg.count=0;sc.add(frg);const FM=new T.Matrix4(),FQ=new T.Quaternion(),FE=new T.Euler(),FS=V(1,1,1),FP=V(0,0,0);
     const fF=zFlow(T,sc,30,0x1c7ed6,0.11),fL=zFlow(T,sc,30,0x7048e8,0.11),fE=zFlow(T,sc,26,0xe64980,0.1),fP=zFlow(T,sc,26,0xd9480f,0.1),fH=zFlow(T,sc,16,0xae3ec9,0.07),fB=zFlow(T,sc,40,0xa61e2a,0.07);
     const cIn=new T.CatmullRomCurve3([V(6.6,6.5,1.4),V(6.4,3.0,1.9),V(6.6,0.6,2.0),OV.clone().add(V(0,0.3,1.0))]);
     const cOut=new T.CatmullRomCurve3([OV.clone().add(V(-1.4,-0.6,0.6)),V(5.2,-2.8,1.0),V(3.4,-1.5,0.6),V(1.8,0.4,0.2)]);
@@ -196,6 +208,10 @@ function ms3D(get){const W=document.createElement("div");W.className="card";W.st
       fE.set(cOut,t*0.22,Math.round(Z.cl(s.E2/11,0,26)),0.3);fP.set(cOut,t*0.22+0.5,Math.round(Z.cl(s.P4*1.6,0,26)),0.35);
       fH.set(cH,t*0.2,blast.visible?14:0,0.3);fB.set(cBl,t*0.35,s.shed>0?40:0,0.8);
       {const cf=window.__msCfg;if(cf){if(cf._sp==null)cf._sp=cf.speed;cf.speed=egg.visible&&!p.hcg?cf._sp*0.3:cf._sp}}
+      /* фунията се обръща към доминантния фоликул при пика на LH и остава така до улавяне на ооцита */
+      {const aim=(s.surge||0)>0.2||egg.visible&&!p.hcg&&age<0.8?1:0;infAim.copy(dom.visible?dom.position:clM.position).sub(FB).normalize().negate();infQ1.setFromUnitVectors(infUp,infAim);inf.quaternion.slerp(aim?infQ1:infQ0,0.06)}
+      /* менструация: отлепени фрагменти от функционалния слой падат към шийката */
+      if(s.shed>0){const n=Math.round(NFr*Z.cl(s.shed/4.5,0.2,1));for(let i=0;i<n;i++){const ph=((t*0.18+i/n)%1),x=Math.sin(i*2.3)*0.45*(1-ph),y=2.4-ph*7.2,z=-0.25+0.15*Math.cos(i*1.7);FP.set(x,y,z);FE.set(t*0.7+i,i*1.3,t*0.5);FQ.setFromEuler(FE);const k=0.7+0.5*((i*37)%10)/10;FS.set(k,k,k);FM.compose(FP,FQ,FS);frg.setMatrixAt(i,FM)}frg.count=n;frg.instanceMatrix.needsUpdate=true}else frg.count=0;
       const nph=(s.surge||0)>0.3||egg.visible?"ov":s.shed>0?"men":"all";if(nph!==ph&&t-phT>2){ph=nph;phT=t;if(ph==="ov")G.flyTo(7.6,-0.6,0.9,8,0.35,1.42);else if(ph==="men")G.flyTo(0.6,-0.3,0,11,0.05,1.5);else G.flyTo(ALL[0],ALL[1],ALL[2],ALL[3],0.25,1.42)}
       LB0[4][0]=T_(L("ендометриум","endometrium"))+" "+fmt(s.endo,1)+" mm";const lb=LB0.slice();
       if(dom.visible)lb.push([s.Fol>0.75?LBT.gr:s.Fol>0.25?LBT.dom:LBT.grow,P1.copy(dom.position).setY(dom.position.y+fr+0.3)]);
