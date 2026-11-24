@@ -8,7 +8,7 @@ const Z={
  arr(g,x1,y1,x2,y2,col,w,lab,o={}){if(w<0.25)return;g.globalAlpha=o.al||1;if(o.dash)g.setLineDash(o.dash);rArrow(g,x1,y1,x2,y2,col,Math.min(7,w));g.setLineDash([]);g.globalAlpha=1;if(lab)Z.T(g,(x1+x2)/2+(o.dx||0),(y1+y2)/2+(o.dy||-6),lab,{fs:10.5,c:col,w:700})},
  dots(g,pts,ph,col,n=4,r=3){let L=0;const sg=[];for(let i=1;i<pts.length;i++){const l=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);sg.push(l);L+=l}g.fillStyle=col;for(let k=0;k<n;k++){let d=((ph+k/n)%1+1)%1*L,i=0;while(i<sg.length-1&&d>sg[i]){d-=sg[i];i++}const f=d/(sg[i]||1);g.beginPath();g.arc(pts[i][0]+(pts[i+1][0]-pts[i][0])*f,pts[i][1]+(pts[i+1][1]-pts[i][1])*f,r,0,7);g.fill()}},
  sig:(x,k=1)=>1/(1+Math.exp(-k*x)),cl:(v,a,b)=>Math.max(a,Math.min(b,v))};
-const ZC={red:"#e03131",blue:"#1c7ed6",gold:"#f76707",vio:"#9c36b5",grn:"#1c7ed6",org:"#e8590c",teal:"#0c8599",gray:"#868e96",pink:"#c2566b"};
+const ZC={red:"#e03131",blue:"#1c7ed6",gold:"#f76707",vio:"#9c36b5",grn:"#495057",org:"#e8590c",teal:"#0c8599",gray:"#868e96",pink:"#c2566b"};
 function mkSim(main,c){const pl=c.plots||[],ev=c.ev||{};
   main.innerHTML=`<h2>${c.h2}</h2><p class="lead">${c.lead}</p>
   <div class="card" style="padding:10px"><div class="btns"><select id="zPre" style="width:auto;max-width:100%"></select>${Object.entries(ev).map(([k,v])=>`<button class="b" data-ev="${k}">${v.l}</button>`).join("")}${c.step?`<button class="b" id="zPl">⏸︎ Пауза</button>`:""}</div>
