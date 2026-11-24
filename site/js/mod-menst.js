@@ -13,17 +13,19 @@ const T_=x=>window.T?window.T(x):x,EN=window.__EN=window.__EN||{},L=(bg,en)=>{if
 /* ---------- модел ---------- */
 function msInit(){return {t:0,Fol:0.04,Lut:0,ageCL:-1,E2h:0,sT:-9,ovul:0,endo:2,cday:1,shed:0,BBT:36.5,cyc:[],p4m:0,e2m:0,ovDay:null,FSH:6,LH:5,E2:35,P4:0.4,InhA:4,InhB:37,atr:0}}
 function msHorm(s,p){const gn=p.gn/100,res=p.res/100,oc=p.oc?1:0,andr=p.andr/100;
+  const hCG=p.hcg&&s.ageCL>=8?Math.min(100000,5*Math.pow(2,(s.ageCL-8)/2)):0,hE=hCG>0?Z.cl(Math.log10(hCG/5)/4.3,0,1):0;   // mIU/mL; hE — относителен ефект
   const surge=Math.exp(-Math.pow((s.t-s.sT)/0.75,2));   // пикът на LH трае ≈ 36–48 h
   const E2=12+18*res+290*Math.pow(s.Fol,3)*res*(1-0.6*surge)+   // при пика на LH гранулозата се лутеинизира и E2 пада
-   125*s.Lut*(s.ageCL>=0?Math.sin(Math.PI*cl(s.ageCL/14,0,1))*0.6+0.4:1);
-  const P4=0.4+15*s.Lut+1.5*surge;   // лутеинизация: P4 започва да расте още преди овулация
+   125*s.Lut*(s.ageCL>=0?(p.hcg&&s.ageCL>7?1:Math.sin(Math.PI*cl(s.ageCL/14,0,1))*0.6+0.4):1);
+  const P4=0.4+15*s.Lut+1.5*surge+14*hE;   // бременност: hCG стимулира жълтото тяло → P4 25–30 ng/mL   // лутеинизация: P4 започва да расте още преди овулация
+  const E2p=E2+700*hE*hE;   // бременност: естрадиол от жълтото тяло, после плацентата
   const InhB=res*(12+70*s.Fol*(1-s.Fol)+25*cl(1-s.Fol*3,0,1))*(1-s.Lut),InhA=4+60*s.Lut;
-  const fbE=E2+oc*220,fbP=P4+oc*12;   // ОК: синтетичните естроген и прогестин добавят отрицателна обратна връзка
+  const fbE=E2p+oc*220,fbP=P4+oc*12;   // ОК: синтетичните естроген и прогестин добавят отрицателна обратна връзка
   const FSH=gn*(60/(1+Math.pow(fbE/30,1.2)+InhB/15+InhA/22+fbP/12))+gn*13*surge*(1-oc);
   const LH=Math.pow(gn,1.8)*(1+3.2*andr)*(40/(1+fbE/15+fbP/1.6))+Math.pow(gn,1.8)*25*cl(1-fbE/40,0,1)+gn*62*surge*(1-oc);   // PCOS: по-бързи пулсове на GnRH → LH ↑; без естрадиол (менопауза) LH расте
-  return {E2,P4,FSH,LH,InhA,InhB,surge}}
+  return {E2:E2p,P4,FSH,LH,InhA,InhB,surge,hCG}}
 function msStep(s,p,dt){const H=msHorm(s,p),res=p.res/100,andr=p.andr/100,cap=1-0.55*andr;
-  if(res>0.02&&s.Lut<0.2){const g=s.Fol<0.35?0.03*Math.max(0,H.FSH-4.5):0.13*(cap-s.Fol);s.Fol=cl(s.Fol+g*dt,0,1)}
+  if(H.hCG>0)s.Fol=Math.max(0,s.Fol-dt*0.08);else if(res>0.02&&s.Lut<0.2){const g=s.Fol<0.35?0.03*Math.max(0,H.FSH-4.5):0.13*(cap-s.Fol);s.Fol=cl(s.Fol+g*dt,0,1)}
   if(s.Fol>=cap-0.01&&!s.ovul){s.atr+=dt;if(s.atr>6){s.Fol=0.04;s.atr=0}}else s.atr=0;
   if(H.E2>200&&H.P4<1.5&&!p.oc)s.E2h+=dt*24;else if(H.E2<180)s.E2h=Math.max(0,s.E2h-dt*48);
   if(s.E2h>=40&&s.t-s.sT>5){s.sT=s.t+0.5;s.E2h=0}
@@ -34,8 +36,8 @@ function msStep(s,p,dt){const H=msHorm(s,p),res=p.res/100,andr=p.andr/100,cap=1-
   if(withdraw&&!(s.shed>0)){s.shed=4.5;if(s.t>3)s.cyc.push(s.cday);s.cday=0}
   if(s.shed>0){s.shed-=dt;s.endo=Math.max(1.2,s.endo-dt*2.2)}else s.endo=cl(s.endo+dt*0.0055*Math.max(0,H.E2-40)*(H.P4>3?0.3:1),1.2,14);
   s.cday+=dt;s.t+=dt;s.BBT+=((36.45+0.4*Math.min(1,H.P4/3))-s.BBT)*cl(dt*2,0,1);
-  Object.assign(s,{FSH:H.FSH,LH:H.LH,E2:H.E2,P4:H.P4,InhA:H.InhA,InhB:H.InhB,surge:H.surge})}
-const phase=(s,p)=>p&&p.hcg&&s.ageCL>9?L("бременност (hCG)","pregnancy (hCG)"):p&&p.oc?L("потиснат (контрацептив)","suppressed (contraceptive)"):p&&p.res<5?L("менопауза","menopause"):s.cday>45?L("ановулация, аменорея","anovulation, amenorrhoea"):s.shed>0?L("менструация","menstruation"):s.ageCL>=0&&s.Lut>0.2?L("лутеална (секреторна)","luteal (secretory)"):s.surge>0.3?L("пик на LH","LH surge"):L("фоликуларна (пролиферативна)","follicular (proliferative)");
+  Object.assign(s,{FSH:H.FSH,LH:H.LH,E2:H.E2,P4:H.P4,InhA:H.InhA,InhB:H.InhB,surge:H.surge,hCG:H.hCG})}
+const phase=(s,p)=>s.hCG>0?L("бременност (hCG)","pregnancy (hCG)"):p&&p.oc?L("потиснат (контрацептив)","suppressed (contraceptive)"):p&&p.res<5?L("менопауза","menopause"):s.cday>45?L("ановулация, аменорея","anovulation, amenorrhoea"):s.shed>0?L("менструация","menstruation"):s.ageCL>=0&&s.Lut>0.2?L("лутеална (секреторна)","luteal (secretory)"):s.surge>0.3?L("пик на LH","LH surge"):L("фоликуларна (пролиферативна)","follicular (proliferative)");
 
 /* ---------- схема ---------- */
 const C={fsh:"#1c7ed6",lh:"#7048e8",e2:"#e64980",p4:"#d9480f",inh:"#868e96",ink:"#343a40"};
@@ -47,11 +49,11 @@ function draw(g,p,R,t,dt,s){const css2=k=>css(k),mut=css2("--muted");if(!s)retur
   // яйчник
   const ox=330,oy=140;g.save();g.fillStyle="#f3d9de";g.strokeStyle="#c2566b";g.lineWidth=1.5;g.beginPath();g.ellipse(ox,oy,80,52,0,0,7);g.fill();g.stroke();
   for(let i=0;i<7;i++){const a=i*0.9+0.4,r=4+3*(p.res/100)*(i%3?1:1.3);if(p.res>5){g.fillStyle="rgba(255,255,255,.85)";g.strokeStyle="#e64980";g.beginPath();g.arc(ox-40+Math.cos(a)*34,oy+Math.sin(a)*28,r*(p.andr>40?1.4:1),0,7);g.fill();g.stroke()}}
-  if(s.Fol>0.08){const r=6+30*s.Fol;g.fillStyle="rgba(255,240,244,.95)";g.strokeStyle=C.e2;g.lineWidth=2;g.beginPath();g.arc(ox+18,oy-4,r,0,7);g.fill();g.stroke();g.fillStyle=C.e2;g.beginPath();g.arc(ox+18-r*0.45,oy-4+r*0.3,Math.max(2,r*0.16),0,7);g.fill()}
+  const folV=s.Fol>0.08&&!(s.ageCL>=0&&s.Lut>0.1);if(folV){const r=6+30*s.Fol;g.fillStyle="rgba(255,240,244,.95)";g.strokeStyle=C.e2;g.lineWidth=2;g.beginPath();g.arc(ox+18,oy-4,r,0,7);g.fill();g.stroke();g.fillStyle=C.e2;g.beginPath();g.arc(ox+18-r*0.45,oy-4+r*0.3,Math.max(2,r*0.16),0,7);g.fill()}
   if(s.Lut>0.03){g.globalAlpha=0.35+0.6*s.Lut;g.fillStyle=C.p4;g.beginPath();g.arc(ox+26,oy+8,10+16*s.Lut,0,7);g.fill();g.globalAlpha=1;T(ox+26,oy+42+16*s.Lut*0.2,L("жълто тяло","corpus luteum"),{fs:10.5,c:C.p4,w:700})}
   if(s.surge>0.3&&s.Fol>0.6){g.strokeStyle=C.lh;g.lineWidth=2;for(let k=0;k<6;k++){const a=k*1.05;g.beginPath();g.moveTo(ox+18+Math.cos(a)*38,oy-4+Math.sin(a)*38);g.lineTo(ox+18+Math.cos(a)*46,oy-4+Math.sin(a)*46);g.stroke()}}
   g.restore();T(ox,oy-60,L("Яйчник","Ovary"),{w:700,fs:12});
-  T(ox-60,oy+66,s.Fol>0.08?L("доминантен фоликул","dominant follicle"):"",{fs:10.5,c:C.e2,w:700});
+  T(ox-60,oy+66,folV?L("доминантен фоликул","dominant follicle"):"",{fs:10.5,c:C.e2,w:700});
   // матка — дебелина на ендометриума
   const ux=530,uy=110;g.save();g.fillStyle="#f6e3e6";g.strokeStyle="#c2566b";g.lineWidth=1.5;g.beginPath();g.moveTo(ux-55,uy-40);g.quadraticCurveTo(ux,uy-62,ux+55,uy-40);g.lineTo(ux+22,uy+50);g.lineTo(ux+10,uy+86);g.lineTo(ux-10,uy+86);g.lineTo(ux-22,uy+50);g.closePath();g.fill();g.stroke();
   const th=2+s.endo*1.6;g.strokeStyle=s.shed>0?"#c92a2a":"#e8a0a8";g.lineWidth=th;g.beginPath();g.moveTo(ux-38,uy-30);g.quadraticCurveTo(ux,uy-46,ux+38,uy-30);g.lineTo(ux+12,uy+44);g.lineTo(ux-12,uy+44);g.closePath();g.stroke();
@@ -68,12 +70,13 @@ function draw(g,p,R,t,dt,s){const css2=k=>css(k),mut=css2("--muted");if(!s)retur
   const pos=s.E2h>2||s.surge>0.2;
   Z.arr(g,300,86,196,46,pos?"#c92a2a":C.e2,w(s.E2/80),pos?L("E2 ⊕ (положителна)","E2 ⊕ (positive)"):L("E2, P4 ⊖","E2, P4 ⊖"),{dy:-8,dash:pos?null:[5,4]});
   Z.arr(g,282,184,196,160,C.inh,w((s.InhA+s.InhB)/40),L("инхибин ⊖","inhibin ⊖"),{dy:18,dash:[5,4]});
+  if(s.hCG>0){const w2=0.6+Math.log10(1+s.hCG)/1.2;Z.arr(g,480,176,410,182,"#ae3ec9",w2,"hCG",{dy:16});T(445,206,T_(L("бластоцист → hCG спасява жълтото тяло","blastocyst → hCG rescues the corpus luteum")),{fs:10,c:"#ae3ec9",w:700})}
   // лента на цикъла
   const cx0=40,cw=560,cy=300;Z.box(g,cx0,cy,cw,10,css2("--chip"),null,5);
   const d=cl(s.cday/28,0,1);[[0,5/28,"#e8a0a8"],[5/28,14/28,"#e64980"],[14/28,1,"#d9480f"]].forEach(([a,b,c2])=>Z.box(g,cx0+a*cw,cy,(b-a)*cw,10,c2,null,0,0,0.35));
   g.fillStyle=C.ink;g.beginPath();g.arc(cx0+d*cw,cy+5,6,0,7);g.fill();
   T(cx0+2.5/28*cw,cy+26,L("менструация","menstruation"),{fs:10,c:mut});T(cx0+9.5/28*cw,cy+26,L("фоликуларна фаза","follicular phase"),{fs:10,c:mut});T(cx0+21/28*cw,cy+26,L("лутеална фаза","luteal phase"),{fs:10,c:mut});
-  T(cx0+cw,cy-8,T_(L("ден от цикъла","cycle day"))+" "+Math.floor(s.cday+1),{a:"right",fs:11,w:700});
+  T(cx0+cw,cy-8,s.hCG>0?T_(L("бременност","pregnancy"))+" "+Math.floor(s.cday/7)+" "+T_(L("седм.","wk")):T_(L("ден от цикъла","cycle day"))+" "+Math.floor(s.cday+1),{a:"right",fs:11,w:700});
 }
 
 /* ---------- урок ---------- */
@@ -233,18 +236,18 @@ function view(main){let SS=null;const v3=ms3D(()=>({s:SS,p:main.__p||{gn:100,res
        {k:"hcg",label:L("Имплантация (hCG)","Implantation (hCG)"),min:0,max:1,step:1,value:0,show:v=>v?L("да","yes"):L("не","no"),hint:L("hCG поддържа жълтото тяло","hCG maintains the corpus luteum")}],
    pre:{norm:{n:L("Нормален цикъл","Normal cycle"),info:L("28-дневен цикъл: фоликуларна фаза, пик на LH, овулация, лутеална фаза и менструация. Гледай как естрадиолът първо потиска FSH, а после предизвиква пика на LH.","A 28-day cycle: follicular phase, LH surge, ovulation, luteal phase and menstruation. Watch estradiol first suppress FSH and then trigger the LH surge.")},
         oc:{n:L("Комбиниран контрацептив","Combined contraceptive"),set:{oc:1},info:L("Синтетичните естроген и прогестин потискат FSH и LH: няма доминантен фоликул, няма пик на LH и овулация; ендометриумът е тънък.","The synthetic estrogen and progestin suppress FSH and LH: no dominant follicle, no LH surge or ovulation; the endometrium is thin.")},
-        preg:{n:L("Ранна бременност (hCG)","Early pregnancy (hCG)"),set:{hcg:1},info:L("След овулацията имплантираният ембрион отделя hCG — жълтото тяло не регресира, прогестеронът остава висок и менструация не идва.","After ovulation the implanted embryo secretes hCG — the corpus luteum does not regress, progesterone stays high and menstruation does not come.")},
+        preg:{n:L("Ранна бременност (hCG)","Early pregnancy (hCG)"),set:{hcg:1},info:L("Оплождане в ампулата; бластоцистът се имплантира ≈ 6–8 дни след овулацията и започва да отделя hCG, който се удвоява на ≈ 2 дни (откриваем в кръвта около очакваната менструация). hCG поддържа жълтото тяло: прогестеронът и естрадиолът растат, FSH и LH са потиснати, ендометриумът става децидуа и менструация не идва. Към 7–9-ата седмица плацентата поема синтеза на прогестерон (не е моделирано).","Fertilisation in the ampulla; the blastocyst implants ≈ 6–8 days after ovulation and starts secreting hCG, which doubles every ≈ 2 days (detectable in blood around the expected period). hCG maintains the corpus luteum: progesterone and estradiol rise, FSH and LH are suppressed, the endometrium becomes decidua and no menstruation comes. By weeks 7–9 the placenta takes over progesterone synthesis (not modelled).")},
         pcos:{n:L("Синдром на поликистозните яйчници","Polycystic ovary syndrome"),set:{andr:70},info:L("Инсулинова резистентност и хиперандрогенизъм: по-бързите пулсове на GnRH (намалена чувствителност към прогестерона) вдигат LH над FSH (≈ 2:1), много малки фоликули спират растежа, естрадиолът не стига прага — ановулация, а ендометриумът е под естроген без прогестерон.","Insulin resistance and hyperandrogenism: faster GnRH pulses (reduced sensitivity to progesterone) raise LH above FSH (≈ 2:1), many small follicles stop growing, estradiol does not reach the threshold — anovulation, with the endometrium under estrogen without progesterone.")},
         hyp:{n:L("Хипоталамусна аменорея","Hypothalamic amenorrhoea"),set:{gn:30},info:L("Бавни пулсове на GnRH (стрес, ниско тегло, тежки тренировки): ниски FSH, LH и естрадиол, няма фоликулен растеж и менструация.","Slow GnRH pulses (stress, low weight, intense training): low FSH, LH and estradiol, no follicle growth and no menstruation.")},
         meno:{n:L("Менопауза","Menopause"),set:{res:0},info:L("Без фоликули няма естрадиол и инхибин — отрицателната обратна връзка изчезва и FSH и LH се покачват.","Without follicles there is no estradiol or inhibin — the negative feedback disappears and FSH and LH rise.")}},
    exp,init:()=>msInit(),
    step(s,p,dt){msStep(s,p,dt);SS=s;main.__p=p},
    rec:(s,p,t)=>[t,s.FSH,s.LH,s.E2,s.P4,s.endo],calc:(p,s)=>s,
-   stats:(p,R,s)=>s?[[L("Ден от цикъла","Cycle day"),Math.floor(s.cday+1)+""],[L("Фаза","Phase"),phase(s,p)],["FSH",fmt(s.FSH,1)+" IU/L"],["LH",fmt(s.LH,1)+" IU/L"],[L("Естрадиол","Estradiol"),fmt(s.E2,0)+" pg/mL"],[L("Прогестерон","Progesterone"),fmt(s.P4,1)+" ng/mL"],[L("Ендометриум","Endometrium"),fmt(s.endo,1)+" mm"],[L("Базална температура","Basal temperature"),fmt(s.BBT,2)+" °C"],[L("Последен цикъл","Last cycle"),s.cyc.length?fmt(s.cyc[s.cyc.length-1],0)+" "+L("дни","days"):"—"]]:[],
+   stats:(p,R,s)=>s?[s.hCG>0?[L("Гестационна възраст","Gestational age"),Math.floor(s.cday/7)+" "+T_(L("седм.","wk"))+" "+Math.floor(s.cday%7)+" "+T_(L("д.","d"))]:[L("Ден от цикъла","Cycle day"),Math.floor(s.cday+1)+""],["hCG",s.hCG>0?(s.hCG>=1000?fmt(s.hCG/1000,1)+" ×1000":fmt(s.hCG,0))+" mIU/mL":"—"],[L("Фаза","Phase"),phase(s,p)],["FSH",fmt(s.FSH,1)+" IU/L"],["LH",fmt(s.LH,1)+" IU/L"],[L("Естрадиол","Estradiol"),fmt(s.E2,0)+" pg/mL"],[L("Прогестерон","Progesterone"),fmt(s.P4,1)+" ng/mL"],[L("Ендометриум","Endometrium"),fmt(s.endo,1)+" mm"],[L("Базална температура","Basal temperature"),fmt(s.BBT,2)+" °C"],[L("Последен цикъл","Last cycle"),s.cyc.length?fmt(s.cyc[s.cyc.length-1],0)+" "+L("дни","days"):"—"]]:[],
    note:(p,R,s)=>!s?"":p.oc?L("<b>Контрацептив</b>: отрицателната обратна връзка е постоянна, FSH не стига прага за набиране и прогестинът блокира пика на LH.","<b>Contraceptive</b>: the negative feedback is constant, FSH does not reach the recruitment threshold and the progestin blocks the LH surge."):p.res<5?L("<b>Без фоликули</b> няма естрадиол и инхибин: FSH и LH са високи (менопауза).","<b>Without follicles</b> there is no estradiol or inhibin: FSH and LH are high (menopause)."):s.surge>0.3?L("<b>Пик на LH</b>: положителна обратна връзка от високия естрадиол; овулацията идва след ≈ 11 часа.","<b>LH surge</b>: positive feedback from high estradiol; ovulation follows after ≈ 11 hours."):s.E2h>2?L("Естрадиолът е над ≈ 200 pg/mL — ако остане така ≈ 40 часа, обратната връзка става <b>положителна</b>.","Estradiol is above ≈ 200 pg/mL — if it stays there ≈ 40 hours, the feedback becomes <b>positive</b>."):s.ageCL>=0&&p.hcg&&s.ageCL>9?L("<b>hCG</b> спасява жълтото тяло: прогестеронът остава висок, менструация няма.","<b>hCG</b> rescues the corpus luteum: progesterone stays high, no menstruation."):s.ageCL>=0?L("<b>Лутеална фаза</b>: прогестеронът (и инхибин A) потискат FSH и LH и правят ендометриума секреторен.","<b>Luteal phase</b>: progesterone (and inhibin A) suppress FSH and LH and make the endometrium secretory."):s.shed>0?L("<b>Менструация</b>: спадът на прогестерона отлепва функционалния слой; FSH се покачва и набира нови фоликули.","<b>Menstruation</b>: the fall of progesterone sheds the functional layer; FSH rises and recruits new follicles."):L("<b>Фоликуларна фаза</b>: FSH расте фоликула, естрадиолът и инхибин B потискат FSH (отрицателна обратна връзка).","<b>Follicular phase</b>: FSH grows the follicle, estradiol and inhibin B suppress FSH (negative feedback)."),
    legend:`<span><i style="background:${C.fsh}"></i>FSH</span><span><i style="background:${C.lh}"></i>LH</span><span><i style="background:${C.e2}"></i>${T_(L("естрадиол","estradiol"))}</span><span><i style="background:${C.p4}"></i>${T_(L("прогестерон ×10","progesterone ×10"))}</span>`,
    plots:[{f:(p,R,h)=>{const x=h.map(a=>a[0]),T=Math.max(56,Math.ceil((x[x.length-1]||0)/7)*7);return {xmin:T-56,xmax:T,ymin:0,ymax:70,xlabel:L("време, дни","time, days"),ylabel:"FSH, LH (IU/L)",series:[{x,y:h.map(a=>a[1]),color:C.fsh,width:2.2},{x,y:h.map(a=>a[2]),color:C.lh,width:2.2}]}}},
-          {f:(p,R,h)=>{const x=h.map(a=>a[0]),T=Math.max(56,Math.ceil((x[x.length-1]||0)/7)*7);return {xmin:T-56,xmax:T,ymin:0,ymax:300,xlabel:L("време, дни","time, days"),ylabel:L("E2 (pg/mL), P4 ×10 (ng/mL)","E2 (pg/mL), P4 ×10 (ng/mL)"),hlines:[{y:200,color:css("--grid"),label:L("праг ≈ 200","threshold ≈ 200")}],series:[{x,y:h.map(a=>a[3]),color:C.e2,width:2.2},{x,y:h.map(a=>a[4]*10),color:C.p4,width:2,dash:[5,3]}]}}}],
+          {f:(p,R,h)=>{const x=h.map(a=>a[0]),T=Math.max(56,Math.ceil((x[x.length-1]||0)/7)*7);return {xmin:T-56,xmax:T,ymin:0,ymax:Math.max(300,Math.ceil(Math.max(...h.map(a=>a[3]))/100)*100),xlabel:L("време, дни","time, days"),ylabel:L("E2 (pg/mL), P4 ×10 (ng/mL)","E2 (pg/mL), P4 ×10 (ng/mL)"),hlines:[{y:200,color:css("--grid"),label:L("праг ≈ 200","threshold ≈ 200")}],series:[{x,y:h.map(a=>a[3]),color:C.e2,width:2.2},{x,y:h.map(a=>a[4]*10),color:C.p4,width:2,dash:[5,3]}]}}}],
    draw};window.__msCfg=cfg;mkSim(main,cfg);
   /* 3D сцената е над 2D схемата */
   const card=main.querySelector(".card");card.parentNode.insertBefore(v3.el,card);(window.__cleanups=window.__cleanups||[]).push(v3.start())}
