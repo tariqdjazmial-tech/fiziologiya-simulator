@@ -1,0 +1,220 @@
+diff --git a/site/js/mod-erythro.js b/site/js/mod-erythro.js
+index 9a7df62..2da83b5 100644
+--- a/site/js/mod-erythro.js
++++ b/site/js/mod-erythro.js
+@@ -76,12 +76,12 @@ function er3D(get){const W=document.createElement("div");W.className="card";W.st
+   const DS=[L("Органите са истински модели (BodyParts3D) в реален размер и положение. Частиците показват посоката на сигналите и на желязото; пътищата са схематични (белодробният кръг е пропуснат), а плътността им следва модела. Главните места на хемопоезата при възрастен са тазът, гръдната кост и прешлените — проксималният фемур е показан за нагледност (костта е полупрозрачна: вътре — червен, а в диафизата мастен мозък).","The organs are real models (BodyParts3D) at true size and position. Particles show the direction of the signals and of iron; the routes are schematic (the pulmonary circuit is omitted) and their density follows the model. The main adult haematopoietic sites are the pelvis, sternum and vertebrae — the proximal femur is shown for illustration (the bone is translucent: red marrow inside, fatty marrow in the shaft)."),
+     L("Кора на бъбрека: две проксимални тубули, перитубулен капиляр и интерстициални фибробласти (REPC). При ниска доставка на O₂ HIF-2α не се разгражда и те секретират EPO (сиянието на ядрото ∝ хипоксията). При ХБЗ фибробластите стават миофибробласти и правят колаген — EPO остава нисък въпреки анемията. Плътността на EPO частиците е логаритмична.","Renal cortex: two proximal tubules, a peritubular capillary and interstitial fibroblasts (REPC). With low O₂ delivery HIF-2α escapes degradation and they secrete EPO (nuclear glow ∝ hypoxia). In CKD the fibroblasts become myofibroblasts and make collagen — EPO stays low despite the anaemia. EPO particle density is logarithmic."),
+     L("Еритробластен остров: централен макрофаг и еритробласти — проеритробласт (≈ 16 µm) → базофилен → полихроматофилен → ортохроматичен (≈ 9 µm); ядрото се изхвърля и се фагоцитира, а ретикулоцитът минава през стената на синусоида. Съзряването върви във времето на модела (≈ 6 дни); броят клетки ∝ продукцията, цветът на цитоплазмата ∝ хемоглобинизацията (TSAT); при дефицит на B12 — мегалобласти, част от които умират в мозъка.","Erythroblastic island: a central macrophage and erythroblasts — proerythroblast (≈ 16 µm) → basophilic → polychromatic → orthochromatic (≈ 9 µm); the nucleus is expelled and phagocytosed and the reticulocyte crosses the sinusoid wall. Maturation runs in model time (≈ 6 days); the cell number ∝ production, cytoplasm colour ∝ haemoglobinisation (TSAT); in B12 deficiency — megaloblasts, some of which die in the marrow."),
+-    L("Посткапилярна венула (Ø ≈ 22 µm, стената е срязана отпред). Еритроцитите са с формата на Evans–Fung (Ø 7,8 µm, ръб 2,6 µm, център 0,8 µm); обемът им ∝ MCV, бледостта ∝ насищането с желязо, тъмнината ∝ ниската SaO₂. Броят в кадъра = Hct × обема на съда / MCV (в малкия съд Hct ≈ 0,75 × системния — ефект на Fåhræus). Левкоцитът и тромбоцитите са до стената (маргинация). Скоростта е забавена; сфероцитите и фрагментите при хемолиза са илюстрация — видът им зависи от причината.","Post-capillary venule (Ø ≈ 22 µm, wall cut away at the front). Red cells have the Evans–Fung shape (Ø 7.8 µm, rim 2.6 µm, centre 0.8 µm); their volume ∝ MCV, pallor ∝ iron saturation, darkness ∝ low SaO₂. The number in view = Hct × vessel volume / MCV (in a small vessel Hct ≈ 0.75 × systemic — the Fåhræus effect). The leukocyte and platelets lie near the wall (margination). Flow is slowed down; spherocytes and fragments in haemolysis are illustrative — their type depends on the cause."),
++    L("Посткапилярна венула (Ø ≈ 22 µm, стената е срязана отпред). Еритроцитите са с формата на Evans–Fung (Ø 7,8 µm, ръб 2,6 µm, център 0,8 µm); обемът им ∝ MCV, бледостта ∝ насищането с желязо, тъмнината ∝ ниската SaO₂. Броят в кадъра = Hct × обема на съда / MCV (в малкия съд Hct ≈ 0,75 × системния — ефект на Fåhræus). Левкоцитът и тромбоцитите са до стената (маргинация). Скоростта е забавена, профилът е изгладен (тапообразен), а подреждането и ориентацията на клетките са опростени; сфероцитите и фрагментите при хемолиза са илюстрация — видът им зависи от причината.","Post-capillary venule (Ø ≈ 22 µm, wall cut away at the front). Red cells have the Evans–Fung shape (Ø 7.8 µm, rim 2.6 µm, centre 0.8 µm); their volume ∝ MCV, pallor ∝ iron saturation, darkness ∝ low SaO₂. The number in view = Hct × vessel volume / MCV (in a small vessel Hct ≈ 0.75 × systemic — the Fåhræus effect). The leukocyte and platelets lie near the wall (margination). Flow is slowed down, the profile is blunted (plug-like) and cell packing and orientation are simplified; spherocytes and fragments in haemolysis are illustrative — their type depends on the cause."),
+     L("Ентероцит на дуоденума (срязан): Dcytb редуцира Fe³⁺ → Fe²⁺, DMT1 го внася заедно с H⁺, феропортинът го изнася, хефестинът го окислява до Fe³⁺, а трансферинът го носи (две места за Fe; запълнените ∝ TSAT). Хепцидинът се свързва с феропортина и той се интернализира. Белтъците са опростени форми, уголемени над 100 пъти; феритинът е схематичен (губи се, когато ентероцитът се слющи след 2–3 дни).","Duodenal enterocyte (cut open): Dcytb reduces Fe³⁺ → Fe²⁺, DMT1 imports it with H⁺, ferroportin exports it, hephaestin oxidises it to Fe³⁺ and transferrin carries it (two Fe sites; filled ∝ TSAT). Hepcidin binds ferroportin, which is internalised. Proteins are simplified shapes enlarged more than 100-fold; ferritin is schematic (it is lost when the enterocyte is shed after 2–3 days)."),
+     L("Червена пулпа на слезката: старите и сфероцитните еритроцити не минават през процепите (~1 µm) към венозния синус и се фагоцитират. Хем-оксигеназата освобождава Fe²⁺, което излиза през феропортина към трансферина или остава като феритин. При възпаление хепцидинът блокира изхода: феритинът расте, а TSAT пада.","Splenic red pulp: senescent and spherocytic red cells cannot pass the ~1 µm slits into the venous sinus and are phagocytosed. Haem oxygenase releases Fe²⁺, which leaves through ferroportin to transferrin or stays as ferritin. In inflammation hepcidin blocks the exit: ferritin rises while TSAT falls.")];
+   const AC=[L("анатомично точни органи · схематични пътища","anatomically accurate organs · schematic routes"),L("образователно опростяване","educational simplification"),L("реални относителни размери на клетките; останалото — опростено","true relative cell sizes; the rest simplified"),L("форма и размер — анатомично точни; брой и вид — от модела","shape and size anatomically accurate; number and type from the model"),L("образователно опростяване; белтъците не са в мащаб (опростени)","educational simplification; proteins not to scale (simplified)"),L("образователно опростяване","educational simplification")];
+   const sw=(c,t)=>`<span><i style="background:${c}"></i>${T_(t)}</span>`;
+-  W.innerHTML=(typeof wrap3D==="function"?wrap3D("erW",ph0?460:540):`<div id="erW" style="position:relative;width:100%;height:500px;border-radius:6px;overflow:hidden"></div>`)+
++  W.innerHTML=(typeof wrap3D==="function"?wrap3D("erW",ph0?460:innerWidth>=1200?620:540):`<div id="erW" style="position:relative;width:100%;height:500px;border-radius:6px;overflow:hidden"></div>`)+
+    `<div class="btns" style="margin-top:8px;flex-wrap:wrap">${STN.map(([k,n],i)=>`<button class="b" data-st="${i}">${T_(n)}</button>`).join("")}<button class="b" id="erTour">${T_(L("▶ обиколка","▶ tour"))}</button></div>`+
+    `<div id="erNt" style="margin-top:6px;font-size:13px;line-height:1.45"></div>`+
+    `<div class="legend" style="margin-top:6px">${sw("#1c7ed6","EPO")}${sw("#7048e8",L("хепцидин","hepcidin"))}${sw("#7b2d26","Fe³⁺")}${sw("#a5532a","Fe²⁺")}${sw("#748ffc",L("трансферин","transferrin"))}${sw("#9a6f72",L("феритин","ferritin"))}${sw("#9a6f8a",L("ретикулоцит","reticulocyte"))}${sw("#862e9c",L("феропортин","ferroportin"))}<span style="opacity:.75">${T_(L("органи: BodyParts3D (DBCLS, CC BY-SA 2.1 JP); клетки и белтъци: опростени модели","organs: BodyParts3D (DBCLS, CC BY-SA 2.1 JP); cells and proteins: simplified models"))}</span></div>`;
+@@ -92,7 +92,7 @@ function er3D(get){const W=document.createElement("div");W.className="card";W.st
+    const stop=mk3DView("#erW",()=>{const wr=document.getElementById("erW"),G=make3D(wr,{r:23,th:0.25,phi:1.45,target:[-0.2,-2.3,0.6],min:1.5,max:260,hq:true,fov:38}),T=G.T,sc=G.scene;scn=sc;G.ren.localClippingEnabled=true;
+     G.cv.addEventListener("pointerdown",()=>{if(tour){tour=false;tb.classList.remove("primary")}});
+     const V=(x,y,z)=>new T.Vector3(x,y,z),C=h=>new T.Color(h).convertSRGBToLinear(),lerp=(a,b,u)=>a+(b-a)*u,sm=(a,b,x)=>{const u=cl((x-a)/(b-a),0,1);return u*u*(3-2*u)};
+-    const _m=new T.Matrix4(),_q=new T.Quaternion(),_q2=new T.Quaternion(),qI=new T.Quaternion(),_v=new T.Vector3(),_v2=new T.Vector3(),_s=new T.Vector3(),_c=new T.Color(),AX=V(0,0,1),AY=V(0,1,0),AXX=V(1,0,0);
++    const _m=new T.Matrix4(),_q=new T.Quaternion(),_q2=new T.Quaternion(),qI=new T.Quaternion(),_v=new T.Vector3(),_v2=new T.Vector3(),_s=new T.Vector3(),_c=new T.Color(),_cd=new T.Vector3(),AX=V(0,0,1),AY=V(0,1,0),AXX=V(1,0,0);
+     const hash=(i,k=0)=>{const x=Math.sin(i*127.1+k*311.7+k*k*1.37)*43758.5453;return x-Math.floor(x)};
+     const rest=g=>{g.setAttribute("rest",new T.BufferAttribute(g.attributes.position.array.slice(),3));return g};
+     const tis=(pal,o)=>{const m=zMat(T,pal,Object.assign({sc:0.6,cc:lo?0:0.4,bump:0.3},o));m.transparent=false;m.opacity=1;return m};
+@@ -119,10 +119,10 @@ function er3D(get){const W=document.createElement("div");W.className="card";W.st
+       g.computeVertexNormals();return g};
+     const gN=rbcGeo("n"),gS=rbcGeo("sph"),gF=rbcGeo("frag");
+     /* бледост по локалната дебелина (повече Hb там, където клетката е по-дебела); uK расте при хипохромия */
+-    const rbK={value:0.7},rbM=new T.MeshPhysicalMaterial({color:0xffffff,roughness:0.46,clearcoat:lo?0:0.25,clearcoatRoughness:0.5,emissive:C(0x3a0a10),emissiveIntensity:0.25});
+-    rbM.onBeforeCompile=sh=>{sh.uniforms.uK=rbK;sh.vertexShader=sh.vertexShader.replace("#include <common>","#include <common>\nattribute float thk;varying float vT;").replace("#include <begin_vertex>","#include <begin_vertex>\nvT=thk;");
+-      sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\nuniform float uK;varying float vT;").replace("#include <color_fragment>","#include <color_fragment>\nfloat hbA=smoothstep(0.02,uK,vT);diffuseColor.rgb=mix(mix(diffuseColor.rgb,vec3(0.92,0.64,0.65),0.62),diffuseColor.rgb,hbA);")};
+-    const cOx=C(0xb3262e),cDe=C(0x7d2240),cRet=C(0x9a6f8a),cRbc=new T.Color();
++    const rbK={value:0.7},rbH={value:0},rbM=new T.MeshPhysicalMaterial({color:0xffffff,roughness:0.6,clearcoat:0,emissive:C(0x3a0a10),emissiveIntensity:0.1});
++    rbM.onBeforeCompile=sh=>{sh.uniforms.uK=rbK;sh.uniforms.uH=rbH;sh.vertexShader=sh.vertexShader.replace("#include <common>","#include <common>\nattribute float thk;varying float vT;").replace("#include <begin_vertex>","#include <begin_vertex>\nvT=thk;");
++      sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\nuniform float uK,uH;varying float vT;").replace("#include <color_fragment>","#include <color_fragment>\nvec3 rbP=mix(diffuseColor.rgb,vec3(0.92,0.64,0.65),0.62);float hbA=smoothstep(0.02,uK,vT);diffuseColor.rgb=mix(diffuseColor.rgb,rbP,(0.25+0.45*uH)*(1.0-hbA)+0.3*uH*hbA);")};
++    const cOx=C(0xa3262b),cDe=C(0x7d2240),cRet=C(0x9a6f8a),cRbc=new T.Color();
+     const fpnG=blob(1,16,12,0.06,2),hepG=new T.SphereGeometry(0.42,10,8),tfG=(()=>{const a=new T.SphereGeometry(0.55,10,8),b=new T.SphereGeometry(0.55,10,8);a.translate(-0.42,0,0);b.translate(0.42,0,0);return mergeG([a,b])})(),feG=new T.SphereGeometry(0.3,8,6);
+     const fpnM=mat(0x862e9c,{roughness:0.45}),hepM=mat(0x7048e8,{emissive:C(0x7048e8),emissiveIntensity:0.35}),tfM=mat(0x748ffc,{roughness:0.4}),feM=mat(0x7b2d26,{emissive:C(0x7b2d26),emissiveIntensity:0.4}),ferM=mat(0x9a6f72,{roughness:0.55,flatShading:true});
+     /* феропортин: свободните (k < nFree) изнасят желязо; останалите са свързани с хепцидин и се интернализират (навътре, по-малки) */
+@@ -147,7 +147,7 @@ function er3D(get){const W=document.createElement("div");W.className="card";W.st
+       ld("bd_heart.txt",tis([[0.62,0.2,0.2],[0.5,0.14,0.15],[0.7,0.28,0.26]],{sc:0.5}));
+       const aoM=mat(0xa61e1e,{roughness:0.4});ld("bd_aorta.txt",aoM);ld("bd_ivc.txt",mat(0x4a5aa8,{roughness:0.4}));
+       /* кост: полупрозрачна кортикалис; вътрешните стени се рисуват като костен мозък — червен в таза и проксималния фемур, бледорозов (мастен) в диафизата */
+-      const boneM=mat(0xe6e0e6,{roughness:0.5,transparent:true,opacity:0.42,depthWrite:false,side:T.FrontSide}),marM=new T.MeshStandardMaterial({vertexColors:true,side:T.BackSide,roughness:0.75});
++      const clipF=new T.Plane(V(0,1,0),9),boneM=mat(0xe6e0e6,{roughness:0.5,transparent:true,opacity:0.42,depthWrite:false,side:T.FrontSide,clippingPlanes:[clipF]}),marM=new T.MeshStandardMaterial({vertexColors:true,side:T.BackSide,roughness:0.75,clippingPlanes:[clipF]});
+       const cRed=C(0x9e2a3a),cFat=C(0xcfa9b0),marrow=(geo,f)=>{const g2=geo.clone(),P=g2.attributes.position,col=new Float32Array(P.count*3);for(let i=0;i<P.count;i++){_c.copy(cFat).lerp(cRed,f(P.getY(i)));col[3*i]=_c.r;col[3*i+1]=_c.g;col[3*i+2]=_c.b}g2.setAttribute("color",new T.BufferAttribute(col,3));g.add(new T.Mesh(g2,marM))};
+       ld("bd_hipR.txt",boneM,(o,geo)=>{o.renderOrder=3;marrow(geo,()=>1)});ld("bd_femR.txt",boneM,(o,geo)=>{o.renderOrder=3;marrow(geo,y=>sm(-7.8,-6.2,y))});
+       /* пътища (средните линии на долната куха вена и аортата са от срезове на мрежите; останалото е схематично) */
+@@ -157,11 +157,12 @@ function er3D(get){const W=document.createElement("div");W.className="card";W.st
+       const cEPO=CR([[-1.15,-0.95,0.32],[-0.75,-0.95,0.75],...IVC.slice(1),...HRT,...AO,...ILI]),cFe=CR([[-0.2,-1.1,1.55],[-0.35,-0.45,1.3],[-0.65,0.35,1.2],[-0.5,1.3,1.15],...IVC.slice(4),...HRT,...AO,...ILI]),
+         cRt=CR([[-1.6,-6.2,0.4],[-1.45,-4.8,0.5],[-0.9,-4.0,1.1],[-0.35,-3.3,1.2],...IVC,...HRT]),cOld=CR([...AOc,[0.6,0.6,0.85],[1.1,0.45,0.85],[1.55,0.2,0.75]]),
+         cHep=CR([[-0.9,0.7,1.35],[-0.5,1.5,1.15],...IVC.slice(4),...HRT,...AOc,[0.05,0.0,1.15],[-0.15,-0.7,1.45]]);
+-      const fE=zFlow(T,g,16,0x1c7ed6,0.1),fF=zFlow(T,g,24,0xa5532a,0.09),fR=zFlow(T,g,18,0x9a6f8a,0.1),fO=zFlow(T,g,18,0x7d2240,0.1),fH=zFlow(T,g,18,0x7048e8,0.09);
++      const fE=zFlow(T,g,16,0x1c7ed6,0.1),fF=zFlow(T,g,24,0xa5532a,0.09);fF.mt.emissiveIntensity=0.25;const fR=zFlow(T,g,18,0x9a6f8a,0.1),fO=zFlow(T,g,18,0x7d2240,0.1),fH=zFlow(T,g,18,0x7048e8,0.09);
+       const cPale=C(0xc98a8a),cRedB=C(0xa61e1e);
+       const lab=[[T_(L("бъбрек → EPO","kidney → EPO")),V(-1.75,-1.3,0.4),1],[T_(L("черен дроб → хепцидин","liver → hepcidin")),V(-1.9,1.5,1.6),1],[T_(L("дуоденум: резорбция на Fe","duodenum: Fe absorption")),V(-0.5,-2.1,1.9),1],
+-        [T_(L("слезка: рециклиране на Fe","spleen: Fe recycling")),V(2.2,0.9,0.8),1],[T_(L("таз: червен костен мозък","pelvis: red marrow")),V(-2.3,-3.6,0.5),1],[T_(L("проксимален фемур","proximal femur")),V(-2.4,-7.0,0.5),0],[T_(L("сърце","heart")),V(0.9,3.2,1.9),0],[T_(L("аорта / долна куха вена","aorta / inferior vena cava")),V(0.8,-2.2,1.4),0]];
+-      return {g,tg:V(-0.3,-1.6,0.6),r:18.5,th:0.25,phi:1.45,sb:[2,"10 cm"],lab,
++        [T_(L("слезка: рециклиране на Fe","spleen: Fe recycling")),V(2.2,0.9,0.8),1],[T_(L("таз: червен костен мозък","pelvis: red marrow")),V(-2.3,-3.6,0.5),1],[T_(L("проксимален фемур","proximal femur")),V(-2.4,-7.0,0.5),0],[T_(L("сърце","heart")),V(0.9,3.2,1.9),0],[T_(L("аорта / долна куха вена","aorta / inferior vena cava")),V(1.0,-0.4,1.4),0]];
++      if(ph)lab.forEach(e=>{e[1].x=e[1].x<0?Math.min(e[1].x,-3.2):Math.max(e[1].x,3.2)});
++      return {g,tg:V(-0.3,-1.2,0.6),r:15.5,th:0.25,phi:1.45,sb:[2,"10 cm"],lab,
+         live(F,s){return "EPO "+fmt(s.EPO,s.EPO<100?1:0)+" mU/mL · Hb "+fmt(F.HbM,1)+" g/dL · "+T_(L("хепцидин","hepcidin"))+" ×"+fmt(s.Hep,2)+" · "+T_(L("резорбция","absorption"))+" "+fmt(F.Abs,1)+" · "+T_(L("рециклиране","recycling"))+" "+fmt(F.RelM,0)+" mg/"+T_(L("ден","day"))},
+         upd(dt,t,F,s,p){aoM.color.copy(cPale).lerp(cRedB,cl((F.HbM-6)/10,0,1));
+           fE.set(cEPO,t*0.035,epoN(s.EPO)+2,0.05);fF.set(cFe,t*0.03,Math.round(cl(F.Abs*6,0,24)),0.05);fR.set(cRt,t*0.04,Math.round(cl(F.retPct*4,0,18)),0.05);
+@@ -169,14 +170,14 @@ function er3D(get){const W=document.createElement("div");W.className="card";W.st
+     /* ================= S1: бъбречна кора (µm) ================= */
+     SN.push(function(){const g=new T.Group(),NC=lo?11:13,NZ=lo?6:8,LZ=80,dz=LZ/NZ,rI=9.5,rO=26,dA=2*Math.PI/NC,TX=31,NCe=2*NC*NZ;
+       const wg=new T.BoxGeometry(1,1,1,lo?3:5,lo?3:4,lo?2:4),P=wg.attributes.position;
+-      for(let i=0;i<P.count;i++){const bx=P.getX(i),by=P.getY(i),bz=P.getZ(i),e=Math.pow(Math.abs(2*by),6),th=bx*dA*0.92*(1-0.14*e),r=rI+(by+0.5)*(rO-rI)+(by>0.49?1.1*(1-4*bx*bx)*(1-4*bz*bz):0);P.setXYZ(i,r*Math.cos(th),r*Math.sin(th),bz*dz*0.93*(1-0.1*e))}
++      for(let i=0;i<P.count;i++){const bx=P.getX(i),by=P.getY(i),bz=P.getZ(i),e=Math.pow(Math.abs(2*by),6),th=-bx*dA*0.985*(1-0.14*e),r=rI+(by+0.5)*(rO-rI)+(by>0.49?1.1*(1-4*bx*bx)*(1-4*bz*bz):0);P.setXYZ(i,r*Math.cos(th),r*Math.sin(th),bz*dz*0.985*(1-0.1*e))}
+       wg.computeVertexNormals();
+-      const imC=imesh(wg,mat(0xffffff,{roughness:0.62,clearcoat:0}),NCe,g),imN=imesh(new T.SphereGeometry(2.3,12,9),mat(0xffffff,{roughness:0.45}),NCe,g),cC=C(0xd99aa6),cNu=C(0x6a5a96);
++      const imC=imesh(wg,mat(0xffffff,{roughness:0.62,clearcoat:0}),NCe,g),imN=imesh(new T.SphereGeometry(2.3,12,9),mat(0xffffff,{roughness:0.7,clearcoat:0}),NCe,g),cC=C(0xd99aa6),cNu=C(0x6a5a96);
+       for(let i=0;i<NCe;i++){_c.copy(cC).multiplyScalar(0.9+0.16*hash(i,1));imC.setColorAt(i,_c);imN.setColorAt(i,cNu)}
+       const bbM=tis([[0.78,0.5,0.58],[0.62,0.36,0.45],[0.86,0.62,0.68]],{sc:3,bump:0.7}),bb=[-TX,TX].map(x=>{const gg=rest(new T.CylinderGeometry(rI,rI,LZ,36,1,true).rotateX(Math.PI/2)),o=new T.Mesh(gg,bbM);o.position.x=x;g.add(o);return o});
+       const bmM=ghost(0xe3b8c0,0.16),bm=[-TX,TX].map(x=>{const o=new T.Mesh(new T.CylinderGeometry(rO+1.4,rO+1.4,LZ,48,1,true).rotateX(Math.PI/2),bmM);o.position.x=x;g.add(o);return o});
+       let lastKS=-1;const layout=kS=>{let k=0;for(let j=0;j<2;j++){const cx=j?TX:-TX;for(let kz=0;kz<NZ;kz++)for(let kc=0;kc<NC;kc++,k++){const th=kc*dA+(kz%2)*dA*0.5+j*0.7,z=-LZ/2+(kz+0.5)*dz;
+-          _q.setFromAxisAngle(AX,th);put(imC,k,cx,0,z,_q,kS,kS,1);put(imN,k,cx+Math.cos(th)*17.6*kS,Math.sin(th)*17.6*kS,z,qI,kS,kS*1.1,1.3)}}fin(imC,NCe);fin(imN,NCe);
++          _q.setFromAxisAngle(AX,th);put(imC,k,cx,0,z,_q,kS,kS,1);{const tn=th+(hash(k,2)-0.5)*0.12,rn=(20.6+(hash(k,3)-0.5)*1.2)*kS;put(imN,k,cx+Math.cos(tn)*rn,Math.sin(tn)*rn,z+(hash(k,4)-0.5)*1.6,qI,kS,kS*1.1,1.3)}}}fin(imC,NCe);fin(imN,NCe);
+         bb.forEach(o=>o.scale.set(kS,kS,1));bm.forEach(o=>o.scale.set(kS,kS,1))};
+       const cap=new T.Mesh(new T.CylinderGeometry(4.6,4.6,LZ+14,28,1,true).rotateX(Math.PI/2),ghost(0xe8a7ae,0.3));cap.position.y=-5;g.add(cap);
+       const NRB=14,imR=imesh(gN,rbM,NRB,g),qT=new T.Quaternion().setFromAxisAngle(AXX,0.25);
+@@ -188,7 +189,7 @@ function er3D(get){const W=document.createElement("div");W.className="card";W.st
+         den.forEach(pts=>{const o=MK.taper(T,new T.CatmullRomCurve3(pts),0.85,0.2,{seg:14,rad:6,mat:m});o.renderOrder=2;g.add(o)});
+         return {m,nm,fl:zFlow(T,g,14,0x1c7ed6,0.6),cur:CR([[0,13.5,z],[0,7,z+1.5],[0,-1,z+3],[0,-5,z+8],[0,-5,z+18],[0,-5,LZ/2+8]])}});
+       const NCo=44,imK=imesh(new T.CylinderGeometry(0.28,0.28,12,5,1),mat(0x9a8f96,{roughness:0.8,clearcoat:0}),NCo,g);
+-      {let k=0,tr=0;while(k<NCo&&tr<4000){tr++;const x=(hash(tr,11)-0.5)*14,y=-14+hash(tr,12)*38,z=(hash(tr,13)-0.5)*76;if(Math.hypot(x,y+5)<5.6||Math.hypot(x+TX,y)<27.6||Math.hypot(x-TX,y)<27.6||Math.abs(y-13.5)<3.5&&RZ.some(zz=>Math.abs(z-zz)<5))continue;
++      {let k=0,tr=0;while(k<NCo&&tr<4000){tr++;const x=(hash(tr,11)-0.5)*8,y=-14+hash(tr,12)*24,z=(hash(tr,13)-0.5)*76;if(Math.hypot(x,y+5)<5.6||Math.hypot(x+TX,y)<27.6||Math.hypot(x-TX,y)<27.6||Math.abs(y-13.5)<3.5&&RZ.some(zz=>Math.abs(z-zz)<5))continue;
+         _q.setFromEuler(new T.Euler(Math.PI/2+(hash(tr,14)-0.5)*1.2,(hash(tr,15)-0.5)*1.2,0));put(imK,k,x,y,z,_q,1);k++}}
+       const cAct=C(0xb7a3c9),cIn=C(0x8f8a94);let nAct=3;
+       const lab=[[T_(L("проксимален тубул","proximal tubule")),V(-TX,29,LZ/2),1],[T_(L("четков ръб","brush border")),V(-TX,-11,LZ/2+2),0],[T_(L("перитубулен капиляр","peritubular capillary")),V(0,-12,LZ/2+4),1],
+@@ -206,27 +207,31 @@ function er3D(get){const W=document.createElement("div");W.className="card";W.st
+       const macM=mat(0xc99aa3,{roughness:0.6}),mac=new T.Mesh(blob(RM,lo?36:56,lo?24:40,0.12,1.8),macM);g.add(mac);
+       const dirs=[];for(let k=0;k<8;k++){const a=k/8*2*Math.PI+0.2;dirs.push(V(Math.cos(a),0.18*Math.sin(3*a),Math.sin(a)).normalize())}for(let k=0;k<4;k++){const a=k/4*2*Math.PI+0.6;dirs.push(V(Math.cos(a)*0.62,0.78,Math.sin(a)*0.62).normalize())}
+       const RANK=[0,6,2,8,1,7,3,9,4,10,5,11],qd=dirs.map(d=>new T.Quaternion().setFromUnitVectors(AX,d));
+-      const imE=imesh(blob(1,lo?18:26,lo?12:18,0.05,2),mat(0xffffff,{roughness:0.5,transparent:true,opacity:0.6,depthWrite:false}),NS,g),imU=imesh(blob(1,16,12,0.09,3),mat(0xffffff,{roughness:0.4}),NS,g),imRt=imesh(gN,rbM,NS,g);
+-      const cB0=C(0x4f5fa8),cB1=C(0x8f6f9a),cHb=C(0xb3262e),cDie=C(0x4a3a48),cN0=C(0x7a68b0),cN1=C(0x2f2550),PH=new Float32Array(NS),OC=new Float32Array(NS);for(let k=0;k<NS;k++)PH[k]=hash(k,21)*TM;
++      /* рамене на макрофага, обгръщащи еритробластите (опростено) */
++      dirs.forEach((d,k)=>{const sd=V(0,1,0).cross(d);if(sd.lengthSq()<0.01)sd.set(1,0,0);sd.normalize();const c=d.clone().multiplyScalar(RM+6.2);(lo?[1]:[1,-1]).forEach(sg=>{const pts=[d.clone().multiplyScalar(RM*0.92)];
++        for(let j=0;j<=5;j++){const f=0.25+j*0.3;pts.push(c.clone().addScaledVector(d,-6.9*Math.cos(f)).addScaledVector(sd,sg*6.9*Math.sin(f)).addScaledVector(V(0,1,0),(k%2?0.8:-0.8)*j*0.3))}
++        g.add(MK.taper(T,new T.CatmullRomCurve3(pts),1.3,0.35,{seg:16,rad:6,mat:macM}))})});
++      const imE=imesh(blob(1,lo?18:26,lo?12:18,0.05,2),mat(0xffffff,{roughness:0.65,clearcoat:0}),NS,g),imU=imesh(blob(1,16,12,0.09,3),mat(0xffffff,{roughness:0.4}),NS,g),imRt=imesh(gN,rbM,NS,g);
++      const cB0=C(0x6a6fa0),cB1=C(0x8f6f9a),cHb=C(0xb3262e),cDie=C(0x4a3a48),cN0=C(0x7a68b0),cN1=C(0x2f2550),PH=new Float32Array(NS),OC=new Float32Array(NS);for(let k=0;k<NS;k++)PH[k]=hash(k,21)*TM;
+       const sin=new T.Mesh(new T.CylinderGeometry(9.6,9.6,110,36,1,true).rotateZ(Math.PI/2),ghost(0xeab3ba,0.34));sin.position.y=SY;g.add(sin);
+       const NSR=10,imS=imesh(gN,rbM,NSR,g),AXr=[];for(let i=0;i<NSR;i++)AXr.push(V(hash(i,31)-0.5,hash(i,32)-0.5,hash(i,33)-0.5).normalize());
+       const cEp=CR([[-25,SY,0],[-22,SY+9,3],[-16,-10,8],[-9,-2,13],[-4,4,14]]),cTf=CR([[25,SY,0],[22,SY+9,3],[16,-9,9],[9,0,13]]),fE=zFlow(T,g,14,0x1c7ed6,0.6),fT=zFlow(T,g,16,0x748ffc,0.7);
+       const lP=V(0,0,0),lO=V(0,0,0),lR=V(0,0,0),tPro=T_(L("проеритробласт","proerythroblast")),tMeg=T_(L("мегалобласт","megaloblast")),
+-        lab=[[tPro,lP,1],[T_(L("ортохроматичен еритробласт","orthochromatic erythroblast")),lO,1],[T_(L("ретикулоцит → синусоид","reticulocyte → sinusoid")),lR,1],[T_(L("централен макрофаг","central macrophage")),V(-3,-RM*0.75,RM*0.8),1],[T_(L("синусоид","sinusoid")),V(-42,SY,11),1]];
++        lab=[[tPro,lP,1],[T_(L("ортохроматичен еритробласт","orthochromatic erythroblast")),lO,0],[T_(L("ретикулоцит → синусоид","reticulocyte → sinusoid")),lR,0],[T_(L("централен макрофаг","central macrophage")),V(-3,-RM*0.75,RM*0.8),1],[T_(L("синусоид","sinusoid")),V(-42,SY,11),1]];
+       let ret0=-1;
+       return {g,tg:V(0,-5,0),r:100,th:0.25,phi:1.3,sb:[10,"10 µm"],lab,
+         live(F,s){return T_(L("продукция","production"))+" ×"+fmt(F.Pcom/P_.J0,1)+" · "+T_(L("ефективна","effective"))+" "+fmt(F.fB*100,0)+" % · TSAT "+fmt(F.TSAT,0)+" % · EPO "+fmt(s.EPO,s.EPO<100?1:0)+" mU/mL · "+T_(L("ретикулоцити","reticulocytes"))+" "+fmt(F.retPct,1)+" %"},
+         upd(dt,t,F,s,p){const nA=Math.round(cl(8+5*Math.log2(Math.max(0.05,F.Pcom/P_.J0)),3,NS)),meg=cl(1-F.fB,0,1),fe=cl(F.fFe,0.12,1),mcv=Math.cbrt(s.MCV/90);
+-          let ne=0,nu=0,nr=0,aMin=9,aMax=-1;ret0=-1;lab[0][0]=meg>0.3?tMeg:tPro;
++          let ne=0,nu=0,nr=0,aMin=9,aMax=-1;lP.x=lO.x=-500;ret0=-1;lab[0][0]=meg>0.3?tMeg:tPro;
+           for(let k=0;k<NS;k++){OC[k]+=((RANK[k]<nA?1:0)-OC[k])*Math.min(1,dt*0.8);const oc=OC[k];if(oc<0.02)continue;const d=dirs[k],tt=s.t+PH[k],cyc=Math.floor(tt/TM),a=tt/TM-cyc;
+             const die=hash(k,cyc)<meg*0.8,dd=die?sm(0.55,0.78,a):0;
+             let rc=(8-3.6*sm(0,0.9,a))*(1+0.22*meg);if(a>0.5)rc*=lerp(1,0.86+0.14*fe,sm(0.5,0.9,a));
+             const gr=sm(0,0.06,a)*oc*(1-dd),e=sm(0.86,0.95,a),q2=sm(0.95,1,a),cen=RM+rc*0.92;
+             if(a<0.95&&gr>0.01){_c.copy(cB0).lerp(cB1,sm(0.25,0.6,a)).lerp(cHb,sm(0.3,0.9,a)*fe).lerp(cDie,dd);imE.setColorAt(ne,_c);
+               _v.copy(d).multiplyScalar(cen);_s.set(rc*gr,rc*gr,rc*gr*(1+0.25*e));_m.compose(_v,qd[k],_s);imE.setMatrixAt(ne++,_m);
+-              if(a<aMin&&!die){aMin=a;lP.copy(d).multiplyScalar(cen+rc+1)}if(a>aMax&&a<0.93&&!die){aMax=a;lO.copy(d).multiplyScalar(cen+rc+1)}}
++              const dd=d.dot(_cd);if(Math.abs(dd)<0.6&&!die&&(a<aMin||a>aMax&&a<0.93)){const L_=a<aMin?(aMin=a,lP):(aMax=a,lO);L_.copy(d).addScaledVector(_cd,-dd).normalize().multiplyScalar(rc+2).addScaledVector(d,cen)}}
+             const nf=lerp(0.78,0.42,sm(0.1,0.85,a*(1-0.45*meg)));
+-            if(gr>0.01||q2>0&&q2<1&&!die){const nr0=rc*nf*(1-0.7*q2)*(a>=0.95?oc:gr);_v.copy(d).multiplyScalar(lerp(cen-rc*0.55*e,RM*0.7,q2));_c.copy(cN0).lerp(cN1,sm(0.4,0.9,a*(1-0.5*meg)));imU.setColorAt(nu,_c);_s.setScalar(Math.max(0.01,nr0));_m.compose(_v,qI,_s);imU.setMatrixAt(nu++,_m)}
++            if(gr>0.01||q2>0&&q2<1&&!die){const nr0=rc*nf*(1-0.7*q2)*(a>=0.95?oc:gr);_v.copy(d).multiplyScalar(lerp(cen+rc*(1.04-nf)*(1-e)-rc*0.55*e,RM*0.7,q2));_c.copy(cN0).lerp(cN1,sm(0.4,0.9,a*(1-0.5*meg)));imU.setColorAt(nu,_c);_s.setScalar(Math.max(0.01,nr0));_m.compose(_v,qI,_s);imU.setMatrixAt(nu++,_m)}
+             const ca=a>=0.95?cyc:cyc-1,rp=((a-0.95+1)%1)/0.3;
+             if(rp<1&&hash(k,ca)>=meg&&oc>0.3){const x0=d.x*(RM+4.6),y0=d.y*(RM+4.6),z0=d.z*(RM+4.6),x3=Math.min(52,x0+30);let sq=0;
+               if(rp<0.45){const u=sm(0,1,rp/0.45);_v.set(lerp(x0,x0,u),lerp(y0,SY+10.5,u),lerp(z0,z0*0.3,u))}else if(rp<0.6){const u=(rp-0.45)/0.15;sq=Math.sin(u*Math.PI);_v.set(x0,lerp(SY+10.5,SY,u),lerp(z0*0.3,z0*0.15,u))}else{const u=(rp-0.6)/0.4;_v.set(lerp(x0,x3,u),SY+2*Math.sin(u*3+k),z0*0.15)}
+@@ -242,11 +247,12 @@ function er3D(get){const W=document.createElement("div");W.className="card";W.st
+       g.add(new T.Mesh(wallG(Rv+0.6,0.92*Math.PI,2.08*Math.PI,60,40),tis([[0.9,0.66,0.68],[0.8,0.52,0.56],[0.95,0.76,0.77]],{sc:0.35,bump:0.35})));
+       const NEn=14,imEn=imesh(new T.SphereGeometry(1,14,10),mat(0xffffff,{roughness:0.45}),NEn,g),cEn=C(0x8f7aa8);
+       for(let k=0;k<NEn;k++){const a=(1.08+0.84*hash(k,51))*Math.PI,x=-LV/2+LV*(k+hash(k,52))/NEn;_v2.set(0,-Math.cos(a),-Math.sin(a));_q.setFromUnitVectors(AX,_v2);put(imEn,k,x,(Rv+0.3)*Math.cos(a),(Rv+0.3)*Math.sin(a),_q,4.5,1.8,0.9);imEn.setColorAt(k,cEn)}fin(imEn,NEn);
+-      /* места на клетките: случайни в сечението, с минимално разстояние 5 µm (периодично по оста) */
++      /* места на клетките: центровете са до Rv−3,4 µm (дискът не опира стената; броят се смята за лумен без 1 µm безклетъчен слой);
++         дисковете са ориентирани с нормала почти по оста → разстояние ≥ 3,4 µm по оста и ≥ 7 µm напречно (сплеснат елипсоид), периодично по оста */
+       const X0=new Float32Array(NM),Y0=new Float32Array(NM),Z0=new Float32Array(NM),VS=new Float32Array(NM),RT=new Float32Array(NM),AXc=[],Q0=[];
+-      for(let i=0,tr=0;i<NM;i++){let x,y,z,ok=false;for(let k=0;k<40&&!ok;k++){tr++;const rr=(Rv-3.2)*Math.sqrt(hash(tr,61)),a=hash(tr,62)*6.2832;x=(hash(tr,63)-0.5)*LV;y=rr*Math.cos(a);z=rr*Math.sin(a);ok=true;
+-          for(let j=0;j<i;j++){let dx=Math.abs(x-X0[j]);dx=Math.min(dx,LV-dx);if(dx*dx+(y-Y0[j])**2+(z-Z0[j])**2<25){ok=false;break}}}
+-        X0[i]=x;Y0[i]=y;Z0[i]=z;const rn=Math.hypot(y,z)/(Rv-3.2);VS[i]=7*(1-0.35*rn*rn);RT[i]=0.3+0.6*hash(i,64);AXc.push(V(hash(i,65)-0.5,hash(i,66)-0.5,hash(i,67)-0.5).normalize());Q0.push(new T.Quaternion().setFromEuler(new T.Euler(hash(i,68)*6,hash(i,69)*6,0)))}
++      for(let i=0,tr=0;i<NM;i++){let bx=0,by=0,bz=0,bq=-1;for(let k=0;k<70&&bq<1;k++){tr++;const rr=(Rv-3.4)*Math.sqrt(hash(tr,61)),a=hash(tr,62)*6.2832,x=(hash(tr,63)-0.5)*LV,y=rr*Math.cos(a),z=rr*Math.sin(a);let q=9;
++          for(let j=0;j<i;j++){let dx=Math.abs(x-X0[j]);dx=Math.min(dx,LV-dx);const m=dx*dx/11.6+((y-Y0[j])**2+(z-Z0[j])**2)/49;if(m<q)q=m}if(q>bq){bq=q;bx=x;by=y;bz=z}}
++        X0[i]=bx;Y0[i]=by;Z0[i]=bz;VS[i]=6;RT[i]=0.3+0.5*hash(i,64);AXc.push(V(hash(i,65)-0.5,hash(i,66)-0.5,hash(i,67)-0.5).normalize());Q0.push(new T.Quaternion().setFromUnitVectors(AX,V(1,(hash(i,68)-0.5)*0.5,(hash(i,69)-0.5)*0.5).normalize()))}
+       const imN=imesh(gN,rbM,NM,g),imSp=imesh(gS,rbM,Math.round(NM*0.3),g),imFr=imesh(gF,rbM,Math.round(NM*0.1),g),cSp=C(0x9e1f2a);
+       const neu=new T.Group();g.add(neu);neu.add(new T.Mesh(blob(6,lo?24:36,lo?16:24,0.05,4),ghost(0xe6dbe8,0.5,{side:T.FrontSide,roughness:0.7})));
+       const imL=imesh(blob(1,14,10,0.1,2),mat(0x5c4a8a,{roughness:0.45}),6,neu);
+@@ -258,8 +264,8 @@ function er3D(get){const W=document.createElement("div");W.className="card";W.st
+       return {g,tg:V(0,0,0),r:62,th:-0.35,phi:1.35,sb:[10,"10 µm"],lab,
+         live(F,s){return "Hct "+fmt(F.Hct*100,0)+" % · MCV "+fmt(s.MCV,0)+" fL · "+T_(L("ретикулоцити","reticulocytes"))+" "+fmt(F.retPct,1)+" % · SaO₂ "+fmt(F.SaO2*100,0)+" % · "+T_(L("клетки в кадъра","cells in view"))+" "+nVis},
+         upd(dt,t,F,s,p){const mcv=Math.cbrt(s.MCV/90),N=Math.min(NM,Math.round(0.75*F.Hct*Math.PI*(Rv-1)*(Rv-1)*LV/s.MCV)),fR=cl(F.retPct/100,0,0.3),hem=cl((70-p.life)/50,0,1),fS=0.25*hem,fF=0.06*hem,meg=cl(1-F.fB,0,1);nVis=N;
+-          rbK.value=cl(0.7+1.4*(s.hypo||0),0.7,2.0);cRbc.copy(cOx).lerp(cDe,cl((0.97-F.SaO2)/0.35,0,1));let nn=0,ns=0,nf=0,gotR=false,gotS=false;
+-          for(let i=0;i<N;i++){const x=wrapX(X0[i]+VS[i]*t),u=hash(i,7);_q.setFromAxisAngle(AXc[i],RT[i]*t);_q2.copy(Q0[i]).multiply(_q);_v.set(x,Y0[i],Z0[i]);
++          cRbc.copy(cOx).lerp(cDe,cl((0.97-F.SaO2)/0.35,0,1));let nn=0,ns=0,nf=0,gotR=false,gotS=false;
++          for(let i=0;i<N;i++){const x=wrapX(X0[i]+VS[i]*t),u=hash(i,7);_q.setFromAxisAngle(AXc[i],0.18*Math.sin(RT[i]*t+i));_q2.copy(Q0[i]).multiply(_q);_v.set(x,Y0[i],Z0[i]);
+             if(u<fR){_s.setScalar(1.07*mcv);_m.compose(_v,_q2,_s);imN.setMatrixAt(nn,_m);imN.setColorAt(nn++,cRet);if(!gotR&&Z0[i]>0&&x>-30&&x<30){gotR=true;lR.set(x,Y0[i]+5,Z0[i])}}
+             else if(u<fR+fS){_s.setScalar(mcv);_m.compose(_v,_q2,_s);imSp.setMatrixAt(ns,_m);imSp.setColorAt(ns++,cSp);if(!gotS&&x>-30&&x<30){gotS=true;lS.set(x,Y0[i]-5,Z0[i])}}
+             else if(u<fR+fS+fF){_s.setScalar(mcv);_m.compose(_v,_q2,_s);imFr.setMatrixAt(nf,_m);imFr.setColorAt(nf++,cRbc)}
+@@ -286,12 +292,12 @@ function er3D(get){const W=document.createElement("div");W.className="card";W.st
+       const FP=mkFPN(g,[V(-0.9,-HY,0.4),V(0.9,-HY,0.4),V(-2.6,-HY,0.4),V(2.6,-HY,0.4)],V(0,-1,0));
+       const cL=CR([[1.6,24,0.6],[1.8,19,0.8],[1.6,HY+1.7,0.6]]),cA=CR([[1.6,HY+1.3,0.6],[0,HY+1.8,0.7],[-1.6,HY+1.4,0.6],[-1.6,HY-1.4,0.7],[-1.2,4,0.9],[-0.6,-5,0.9],[-0.9,-HY+1.6,0.7],[-0.9,-HY+0.3,0.6]]),
+         cS=CR([[-1.6,HY-1.4,0.7],[-0.4,9,1.0],[1.4,6,1.0]]),cO=CR([[-0.9,-HY-1.5,0.6],[-1.4,-16,0.7],[-0.5,-18.5,0.6],[1,CY,0.5]]),cH=CR([[-28,CY+1,0],[28,CY-1,0]]);
+-      const fL=zFlow(T,g,24,0x7b2d26,0.42),fA=zFlow(T,g,24,0xa5532a,0.42),fS=zFlow(T,g,14,0xa5532a,0.42),fO=zFlow(T,g,24,0x7b2d26,0.42),fH=zFlow(T,g,14,0x7048e8,0.42);
++      const fL=zFlow(T,g,24,0x7b2d26,0.42),fA=zFlow(T,g,24,0xa5532a,0.42),fS=zFlow(T,g,14,0xa5532a,0.42),fO=zFlow(T,g,24,0x7b2d26,0.42);[fL,fA,fS,fO].forEach(f=>{f.mt.emissiveIntensity=0.25});const fH=zFlow(T,g,14,0x7048e8,0.42);
+       const NFr=16,imFr=imesh(new T.IcosahedronGeometry(0.75,1),ferM,NFr,g);for(let i=0;i<NFr;i++){const a=hash(i,81)*6.28,r=0.8+2.2*Math.sqrt(hash(i,82));put(imFr,i,1.8+r*Math.cos(a),5.5+r*Math.sin(a)*1.3,0.2+1.4*hash(i,83),qI,1)}
+       const TF=mkTf(g,lo?8:12,(u,o,i)=>o.set(-26+52*u,CY+2.2*Math.sin(i*2.1),2.2*Math.cos(i*1.3))),NRc=6,qX=new T.Quaternion().setFromUnitVectors(AX,AXX),imR=imesh(gN,rbM,NRc,g);
+       let nFree=4;
+-      const lab=[[T_(L("лумен: Fe³⁺ от храната","lumen: dietary Fe³⁺")),V(1.6,25,0.6),1],[T_(L("Dcytb: Fe³⁺ → Fe²⁺","Dcytb: Fe³⁺ → Fe²⁺")),V(5.2,HY+2.2,0.6),0],[T_(L("DMT1 (Fe²⁺ + H⁺)","DMT1 (Fe²⁺ + H⁺)")),V(-5.4,HY+2,0.6),1],[T_(L("феритин (запас)","ferritin (store)")),V(5.6,6,1),1],
+-        [T_(L("феропортин","ferroportin")),V(-6,-HY+1,0.6),1],[T_(L("хепцидин","hepcidin")),V(6,-HY-2.4,0.6),1],[T_(L("хефестин","hephaestin")),V(-4.5,-HY-3,0.5),0],[T_(L("капиляр: трансферин","capillary: transferrin")),V(-15,CY-6,0),1],[T_(L("ентероцит (срязан)","enterocyte (cut open)")),V(-16,4,4.5),0]];
++      const lab=[[T_(L("лумен: Fe³⁺ от храната","lumen: dietary Fe³⁺")),V(1.6,25,0.6),1],[T_(L("Dcytb: Fe³⁺ → Fe²⁺","Dcytb: Fe³⁺ → Fe²⁺")),V(3,HY+4.5,0.6),0],[T_(L("DMT1 (Fe²⁺ + H⁺)","DMT1 (Fe²⁺ + H⁺)")),V(-3,HY+4.5,0.6),1],[T_(L("феритин (запас)","ferritin (store)")),V(5.6,6,1),1],
++        [T_(L("феропортин","ferroportin")),V(-6,-HY+1,0.6),1],[T_(L("хепцидин","hepcidin")),V(6,-HY-2.4,0.6),1],[T_(L("хефестин","hephaestin")),V(-1.75,-HY-2.6,0.6),0],[T_(L("капиляр: трансферин","capillary: transferrin")),V(-15,CY-6,0),1],[T_(L("ентероцит (срязан)","enterocyte (cut open)")),V(-16,4,4.5),0]];
+       return {g,tg:V(0,-1,0),r:72,th:0.3,phi:1.42,sb:[10,"10 µm"],lab,
+         live(F,s){return T_(L("резорбция","absorption"))+" "+fmt(F.Abs,1)+" mg/"+T_(L("ден","day"))+" · "+T_(L("хепцидин","hepcidin"))+" ×"+fmt(s.Hep,2)+" · "+T_(L("свободен феропортин","free ferroportin"))+" "+nFree+"/4 · TSAT "+fmt(F.TSAT,0)+" %"},
+         upd(dt,t,F,s,p){FP.upd(dt,F.fFP);nFree=FP.nFree;const imp=F.Abs/Math.max(0.05,F.fFP)*Math.max(1,F.fFP),ret=Math.max(0,imp-F.Abs),nO=nFree?Math.round(cl(F.Abs*5,0,24)):0;
+@@ -300,7 +306,7 @@ function er3D(get){const W=document.createElement("div");W.className="card";W.st
+           for(let i=0;i<NRc;i++){_q.setFromAxisAngle(AXX,0.4*Math.sin(t*0.5+i));_q.multiply(qX);put(imR,i,((i/NRc+t*0.04)%1)*52-26,CY+0.3*Math.sin(i*1.9),-0.3*Math.cos(i*1.1),_q,0.85*Math.cbrt(s.MCV/90));imR.setColorAt(i,cRbc)}fin(imR,NRc)}}});
+     /* ================= S5: червена пулпа на слезката (µm) ================= */
+     SN.push(function(){const g=new T.Group(),RM=13,SX=30,SR=11,SL=72,NSt=lo?12:16;
+-      const macM=mat(0xd8b4b8,{transparent:true,opacity:0.5,depthWrite:false,roughness:0.55}),mac=new T.Mesh(blob(RM,lo?36:52,lo?24:36,0.13,1.5),macM);mac.renderOrder=3;g.add(mac);
++      const macM=mat(0xe3bcc0,{transparent:true,opacity:0.35,depthWrite:false,roughness:0.55,emissive:C(0xe3bcc0),emissiveIntensity:0.12}),mac=new T.Mesh(blob(RM,lo?36:52,lo?24:36,0.13,1.5),macM);mac.renderOrder=3;g.add(mac);
+       const mnu=new T.Mesh(blob(1,20,14,0.1,2),mat(0x5c4a8a,{roughness:0.45}));mnu.scale.set(4.5,3,3.2);mnu.position.set(-5,3,-3);g.add(mnu);
+       const plM=mat(0x8f2a3a,{roughness:0.5}),pl=new T.Mesh(new T.SphereGeometry(3.2,20,14),plM);pl.position.set(1,-3,2);g.add(pl);
+       const imSt=imesh(new T.CylinderGeometry(1.1,1.1,SL,10,1),mat(0xffffff,{roughness:0.55}),NSt,g),cSt=C(0xd9a6b0);let k=0;
+@@ -309,7 +315,7 @@ function er3D(get){const W=document.createElement("div");W.className="card";W.st
+       const NP=8,imP=imesh(gN,rbM,NP,g),imSp=imesh(gS,rbM,4,g),imO=imesh(gS,rbM,1,g),cOld=C(0x7d2240),cSp=C(0x9e1f2a),cPl0=C(0x8f2a3a),cPl1=C(0x6b3a2e);
+       const FPp=[-1.5,1.5,-4.5,4.5].map(y=>V(Math.sqrt(RM*RM-y*y-4)*1.02,y,2)),FP=mkFPN(g,FPp,V(1,0,0)),xF=FPp[0].x;
+       const cM=CR([[1,-3,2],[6,-2.6,2.6],[10,-1.8,2.3],[xF-0.6,-1.5,2]]),cX=CR([[xF+1.4,-1.5,2],[16,-1.5,1],[19,-1.2,0],[23,-3,0.5],[28,-8,1]]),cHp=CR([[SX-3,36,2],[SX-2,-36,2]]);
+-      const fM=zFlow(T,g,22,0xa5532a,0.42),fX=zFlow(T,g,22,0x7b2d26,0.42),fH=zFlow(T,g,14,0x7048e8,0.42);
++      const fM=zFlow(T,g,22,0xa5532a,0.42),fX=zFlow(T,g,22,0x7b2d26,0.42);fM.mt.emissiveIntensity=fX.mt.emissiveIntensity=0.25;const fH=zFlow(T,g,14,0x7048e8,0.42);
+       const NFr=24,imFr=imesh(new T.IcosahedronGeometry(0.75,1),ferM,NFr,g);for(let i=0;i<NFr;i++){const a=hash(i,91)*6.28,b=Math.acos(2*hash(i,92)-1),r=3+5.5*Math.cbrt(hash(i,93));put(imFr,i,-1.5+r*Math.sin(b)*Math.cos(a),-1+r*Math.cos(b),2+r*Math.sin(b)*Math.sin(a)*0.8,qI,1)}
+       const TF=mkTf(g,lo?8:12,(u,o,i)=>o.set(SX+1+5*(hash(i,95)-0.5)*2,34-68*u,4*(hash(i,96)-0.5)*2));
+       const lO=V(0,0,0),lab=[[T_(L("макрофаг на червената пулпа","red-pulp macrophage")),V(-7,RM+3,0),1],[T_(L("фаголизозома → HRG1 → HO-1: хем → Fe²⁺","phagolysosome → HRG1 → HO-1: haem → Fe²⁺")),V(1,-3,6.5),1],[T_(L("феритин","ferritin")),V(-7,-5,7),1],
+@@ -331,7 +337,7 @@ function er3D(get){const W=document.createElement("div");W.className="card";W.st
+     /* ---------- станции, камера, мащаб, бележка ---------- */
+     const ST=new Array(SN.length).fill(null),LO=[];let cur=-1,lastPre=null,tp=performance.now()/1000,lastPx=-1,ntT=0,ntS="";
+     const sb=document.createElement("div");sb.style.cssText="position:absolute;left:12px;bottom:10px;pointer-events:none;font-size:11px;font-weight:600;color:var(--ink);display:flex;flex-direction:column;gap:3px;align-items:flex-start";
+-    sb.innerHTML='<div style="height:3px;border-radius:2px;background:var(--ink);opacity:.75;width:40px"></div><span></span>';wr.appendChild(sb);const sbBar=sb.firstChild,sbTx=sb.lastChild,tanF=Math.tan(19*Math.PI/180);
++    sb.style.color="#fff";sb.style.textShadow="0 0 3px #000,0 1px 2px #000";sb.innerHTML='<div style="height:3px;border-radius:2px;background:#fff;box-shadow:0 0 3px rgba(0,0,0,.85);width:40px"></div><span></span>';wr.appendChild(sb);const sbBar=sb.firstChild,sbTx=sb.lastChild,tanF=Math.tan(19*Math.PI/180);
+     const activate=i=>{if(!ST[i]){ST[i]=SN[i]();sc.add(ST[i].g)}ST.forEach((S,k)=>{if(S)S.g.visible=k===i});cur=i;const S=ST[i];G.flyTo(S.tg.x,S.tg.y,S.tg.z,S.r,S.th,S.phi);sbTx.textContent=S.sb[1];lastPx=-1;ntS="";ntT=1;
+       chips.forEach((b,k)=>b.classList.toggle("primary",k===i))};
+     const ctx={G,g:G};
+@@ -340,12 +346,12 @@ function er3D(get){const W=document.createElement("div");W.className="card";W.st
+       if(tour){tourT+=dt;if(tourT>7){tourT=0;want=((cur<0?0:cur)+1)%SN.length}}
+       if(want<0)want=0;if(want!==cur)activate(want);
+       if(!s){G.render([]);return}
+-      const F=erFlux(s,p),S=ST[cur];S.upd(dt,now,F,s,p);
++      const F=erFlux(s,p),S=ST[cur],phN=G.cv.clientWidth<600;rbH.value=cl(s.hypo||0,0,1);rbK.value=cl(0.7+1.4*(s.hypo||0),0.7,2.0);_cd.copy(G.cam.position).sub(S.tg).normalize();S.upd(dt,now,F,s,p);
+       const d=G.cam.position.distanceTo(S.tg),px=S.sb[0]/(2*d*tanF)*G.cv.clientHeight;if(Math.abs(px-lastPx)>0.5){lastPx=px;sbBar.style.width=Math.round(px)+"px"}
+       ntT+=dt;if(ntT>0.4){ntT=0;const h="<b>"+T_(STN[cur][1])+"</b> — "+T_(DS[cur])+" <span style=\"opacity:.75\">["+T_(AC[cur])+"]</span><br><span style=\"color:var(--muted)\">"+S.live(F,s,p)+"</span>";if(h!==ntS){ntS=h;nt.innerHTML=h}}
+-      const lb=S.cur||S.lab;LO.length=0;for(let i=0;i<lb.length;i++){const e=lb[i];if(e[1].x>-400&&(!ph||e[2]))LO.push(e)}G.render(LO)};
++      const lb=S.cur||S.lab;LO.length=0;for(let i=0;i<lb.length;i++){const e=lb[i];if(e[1].x>-400&&(!phN||e[2]))LO.push(e)}G.render(LO)};
+     return ctx},ctx=>ctx.frame());
+-   return ()=>{stop();if(scn)scn.traverse(o=>{if(o.geometry)o.geometry.dispose();const m=o.material;if(m)(Array.isArray(m)?m:[m]).forEach(x=>x.dispose())})}}}}
++   return ()=>{if(scn)scn.traverse(o=>{if(o.geometry)o.geometry.dispose();const m=o.material;if(m)(Array.isArray(m)?m:[m]).forEach(x=>x.dispose())});scn=null;stop()}}}}
+ 
+ /* ---------- урок ---------- */
+ const P_b=(b,e)=>"<p>"+L(b,e)+"</p>",LI=a=>"<ul>"+a.map(([b,e])=>"<li>"+L(b,e)+"</li>").join("")+"</ul>",OL=a=>"<ol>"+a.map(([b,e])=>"<li>"+L(b,e)+"</li>").join("")+"</ol>";
