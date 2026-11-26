@@ -7,7 +7,7 @@
    mv_open, av_open, phase, EDV, ESV, SW, LVSP, AVgrad, RF и p:{HR, Ees, V0, A, k, Rav, Rmr}.
    3D само записва последния завършен цикъл от getState() и го пуска забавено за всеки етап (прозорец по phase).
    SEC3D.cardio.mount(wrap, getState) → stop: заменя wrap с поетапен изглед (stageViewer) на същото място.
-   SEC3D.cardio.stage — същият изглед като cfg за zRegister({stage}) (чете window.__S.cardio / __M.cardio). */
+   Без getState (само за тест): чете window.__S.cardio / __M.cardio, иначе MOCK(). */
 (function () {
   "use strict";
   const ID = "cardio";
@@ -46,31 +46,39 @@
     title: L("Сърдечен цикъл в 3D: лявото сърце", "Cardiac cycle in 3D: the left heart"),
     intro: L("Разрез по дългата ос на ЛК (модел HuBMAP HRA, истински мащаб). Частиците са маркери на кръвта (≈3 mL всяка), не еритроцити. Всяка фаза се пуска забавено от последния цикъл на модела.",
       "Long-axis cut through the LV (HuBMAP HRA model, true scale). The particles are blood markers (≈3 mL each), not red cells. Each phase is replayed in slow motion from the model's last cycle."),
+    introS: L("Разрез по дългата ос на ЛК (опростен процедурен модел: ЛК, ЛП и аорта като гладки тела). Частиците са маркери на кръвта (≈3 mL всяка), не еритроцити. Всяка фаза се пуска забавено от последния цикъл на модела.",
+      "Long-axis cut through the LV (simplified procedural model: LV, LA and aorta as smooth bodies). The particles are blood markers (≈3 mL each), not red cells. Each phase is replayed in slow motion from the model's last cycle."),
     mA: L("Фазите", "The phases"), mB: L("Криви и клапи", "Curves and valves"), cA: L("Един удар", "One beat"), cB: L("Wiggers, PV, патология", "Wiggers, PV, pathology"),
     lv: L("ЛК", "LV"), la: L("ЛП", "LA"), ao: L("Аорта", "Aorta"), mvl: L("Митрална клапа", "Mitral valve"), avl: L("Аортна клапа", "Aortic valve"), pvl: L("Бел. вени", "Pulm. veins"),
-    pLV: L("P ЛК # mmHg", "LV P # mmHg"), pAO: L("P ао # mmHg", "Ao P # mmHg"), pLA: L("P ЛП # mmHg", "LA P # mmHg"), qMV: L("Q митр. # mL/s", "Q mitral # mL/s"), qAV: L("Q аорт. # mL/s", "Q aortic # mL/s"),
+    pLV: L("P ЛК # mmHg", "LV P # mmHg"), pAO: L("P ао # mmHg", "Aortic P # mmHg"), pLA: L("P ЛП # mmHg", "LA P # mmHg"), qMV: L("Q митр. # mL/s", "Q mitral # mL/s"), qAV: L("Q аорт. # mL/s", "Q aortic # mL/s"),
     grad: L("градиент # mmHg", "gradient # mmHg"), rf: L("регург. # %", "regurg. # %"), back: L("обратна струя", "backflow jet"),
     slow: L("забавено ×# · t = # s", "slowed ×# · t = # s"), live: L("на живо · t = # s", "live · t = # s"), rec: L("запис на цикъла…", "recording the cycle…"),
     hint: L("избери пресет „Аортна стеноза“ или „Митрална регургитация“", "choose the “Aortic stenosis” or “Mitral regurgitation” preset"),
     phase: L("Фаза #", "Phase #"), sPh: L("Фаза", "Phase"), sV: L("Обем ЛК", "LV volume"), sP: L("P ЛК / аорта", "LV / aortic P"), sPla: L("P ЛП", "LA P"), sQ: L("Q митр. / аорт.", "Q mitral / aortic"),
     sSV: L("Ударен обем", "Stroke volume"), sSW: L("Ударна работа", "Stroke work"), sEF: L("EF", "EF"), sGr: L("Градиент ЛК–аорта", "LV–aorta gradient"), sRF: L("Регургитантна фракция", "Regurgitant fraction"),
-    wT: L("Wiggers: ЛК, аорта, ЛП", "Wiggers: LV, aorta, LA"), pvT: L("PV примка на ЛК", "LV PV loop"), Vlv: L("V ЛК", "LV V"), Plv: L("P ЛК", "LV P"), Pao: L("P ао", "Ao P"), Pla: L("P ЛП", "LA P"),
+    wT: L("Wiggers: ЛК, аорта, ЛП", "Wiggers: LV, aorta, LA"), pvT: L("PV примка на ЛК", "LV PV loop"), Vlv: L("V ЛК", "LV V"), Plv: L("P ЛК", "LV P"), Pao: L("P ао", "Aortic P"), Pla: L("P ЛП", "LA P"),
     vax: L("обем ЛК, mL", "LV volume, mL"), pax: L("P ЛК, mmHg", "LV P, mmHg"), sv: L("SV = # mL", "SV = # mL"), sw: L("SW = # J", "SW = # J"), vw: L("v-вълна", "v wave"), aw: L("a-вълна", "a wave"),
     gr: L("градиент", "gradient"), prev: L("преди", "before")
   };
   const PH = ["", L("изоволумично съкращение", "isovolumic contraction"), L("бързо изтласкване", "rapid ejection"), L("бавно изтласкване", "reduced ejection"),
     L("изоволумична релаксация", "isovolumic relaxation"), L("бързо пълнене", "rapid filling"), L("диастаза", "diastasis"), L("предсърдна систола", "atrial systole")];
-  const LEG = [[C.red, L("кръв, P ЛК", "blood, LV P")], [C.pink, L("регургитация", "regurgitation")], [C.vio, L("ЛП, P ЛП", "LA, LA P"), "box"], [C.blue, L("аорта, P ао", "aorta, Ao P"), "box"],
-    [C.teal, L("обем ЛК (контур)", "LV volume (contour)")], [C.gray, L("клапи, ESPVR", "valves, ESPVR"), "box"], [C.org, L("бел. вени, EDPVR", "pulm. veins, EDPVR"), "box"]];
-  LEG.forEach(([c, bg, sh]) => { const i = `<i class="${sh || "dot"}" style="background:${c}"></i>`; EN[i + bg] = i + EN[bg]; });   // i18n превежда целия <span>
+  // легенда: само цветовете, които са в сцената (по изглед; розовото — само при регургитация)
+  const LG = {
+    red: [C.red, L("кръв, P ЛК", "blood, LV P")], pink: [C.pink, L("регургитация", "regurgitation")], vio: [C.vio, L("ЛП, P ЛП", "LA, LA P"), "box"],
+    gA: [C.g2, L("аорта, бел. вени", "aorta, pulm. veins"), "box"], gB: [C.g2, L("аорта, EDPVR", "aorta, EDPVR"), "box"], valA: [C.gray, L("клапи", "valves"), "box"], valB: [C.gray, L("клапи, ESPVR", "valves, ESPVR"), "box"],
+    teal: [C.teal, L("обем ЛК (контур)", "LV volume (contour)")], tealB: [C.teal, L("V ЛК", "LV V")], blue: [C.blue, L("P аорта", "aortic P")]
+  };
+  const legFor = (mech, mr) => (mech === "curves" ? [LG.red, LG.blue, LG.vio, LG.tealB, LG.valB, LG.gB] : [LG.red, LG.vio, LG.gA, LG.valA, LG.teal]).concat(mr ? [LG.pink] : []);
+  const LEG = legFor("cyc", false);
+  Object.keys(LG).forEach(k => { const [c, bg, sh] = LG[k], i = `<i class="${sh || "dot"}" style="background:${c}"></i>`; EN[i + bg] = i + EN[bg]; });   // i18n превежда целия <span>
   // етапите — от spec.json (t, short, badge, d)
   const SD = [
     ["Бързо и бавно пълнене", "Rapid and slow filling", "Пълнене", "Filling", "1",
       "Налягането в ЛК пада под това в ЛП и <b>митралната клапа се отваря</b>. През първата трета на диастолата кръвта нахлува бързо, после притокът почти спира (диастаза). Аортната клапа е затворена, а аортата се свива и поддържа налягането.",
       "LV pressure falls below LA pressure and <b>the mitral valve opens</b>. In the first third of diastole blood rushes in, then inflow almost stops (diastasis). The aortic valve is closed, and the aorta recoils and maintains the pressure."],
     ["Предсърдна систола", "Atrial systole", "Предсърдие", "Atrium", "2",
-      "В края на диастолата ЛП се съкращава (a-вълна, 7–8 mmHg) и довършва пълненето. Добавя около 20% от ударния обем — ЛК достига крайния диастолен обем (≈120 mL).",
-      "At the end of diastole the LA contracts (a wave, 7–8 mmHg) and completes filling. It adds about 20% of the stroke volume — the LV reaches its end-diastolic volume (≈120 mL)."],
+      "В края на диастолата ЛП се съкращава (a-вълна, 7–8 mmHg) и довършва пълненето. Добавя около 20% от пълненето на камерата — ЛК достига крайния диастолен обем (≈120 mL).",
+      "At the end of diastole the LA contracts (a wave, 7–8 mmHg) and completes filling. It adds about 20% of ventricular filling — the LV reaches its end-diastolic volume (≈120 mL)."],
     ["Изоволумично съкращение", "Isovolumic contraction", "Изоволумно", "Isovolumic", "3",
       "Камерата започва да се съкращава и <b>митралната клапа се затваря</b> (първи тон). И двете клапи са затворени: обемът не се променя, а налягането в ЛК бързо расте до ≈80 mmHg.",
       "The ventricle begins to contract and <b>the mitral valve closes</b> (first heart sound). Both valves are closed: the volume does not change, while LV pressure rises rapidly to ≈80 mmHg."],
@@ -169,11 +177,12 @@
   // ---------- cfg за stageViewer ----------
   function mkCfg(H, id, h) {
     return {
-      id, title: TX.title, intro: TX.intro, h: h || 460, dur: 5,
-      cam: { r: 8.2, th: 0.12, phi: 1.42, target: [-0.38, 0.72, 0], min: 2.5, max: 22, fov: 38 },
+      id, title: TX.title, intro: (typeof MK !== "undefined" && MK.real === false) ? TX.introS : TX.intro, h: h || 460, dur: 5,
+      cam: { r: 8.4, th: 0.12, phi: 1.42, target: [-0.42, 0.75, 0], min: 2.5, max: 22, fov: 38 },
       foc: {
-        cyc: [[-0.5, 0.2, 0, 4.9, 0.2, 1.42], [-0.95, 0.7, -0.1, 4.7, -0.12, 1.38], [0.15, -0.2, 0, 5.4, 0.22, 1.48], [-0.45, 1.05, -0.05, 4.9, 0.1, 1.38], [0.05, -0.05, 0, 5.6, 0.25, 1.48]],
-        curves: [[-3.3, 0.72, 0, 9.2, 0.1, 1.45], [-3.3, 0.72, 0, 9.2, 0.1, 1.45], [-3.3, 0.6, 0, 9.2, 0.1, 1.45]]
+        // целият ляв сектор (кутия ≈3,6 × 4,3 ед.) винаги в кадър с ≥10% отстъп; етапът само леко измества/завърта
+        cyc: [[-0.5, 0.65, 0, 8.2, 0.2, 1.42], [-0.6, 0.85, 0, 8.2, -0.1, 1.4], [-0.3, 0.6, 0, 8.2, 0.22, 1.46], [-0.45, 0.9, 0, 8.2, 0.1, 1.4], [-0.3, 0.65, 0, 8.2, 0.25, 1.46]],
+        curves: [[-3.3, 0.72, 0, 8.0, 0.1, 1.45], [-3.3, 0.72, 0, 8.0, 0.1, 1.45], [-3.3, 0.72, 0, 8.0, 0.1, 1.45]]
       },
       legend: LEG,
       mechs: [{ key: "cyc", label: TX.mA, center: TX.cA, stages: STG.slice(0, 5) }, { key: "curves", label: TX.mB, center: TX.cB, stages: STG.slice(5) }],
@@ -215,15 +224,15 @@
       m.onBeforeCompile = s => { s.fragmentShader = s.fragmentShader.replace("#include <dithering_fragment>", "#include <dithering_fragment>\n if(!gl_FrontFacing) gl_FragColor.rgb *= 0.5;"); }; return m; };
     M.lv = tissue(C.red); M.lv.color.multiplyScalar(0.62); M.lv.emissive = LIN(T, C.red); M.lv.emissiveIntensity = 0.04;
     M.la = tissue(C.vio); M.la.color.multiplyScalar(0.78); M.la.emissive = LIN(T, C.vio); M.la.emissiveIntensity = 0.03;
-    M.ao = tissue(C.blue, { roughness: 0.45 }); M.pv = tissue(C.org);
+    M.ao = tissue(C.g2, { roughness: 0.45 }); M.ao.color.multiplyScalar(1.5); M.pv = M.ao;
     M.valve = new T.MeshPhysicalMaterial({ color: LIN(T, C.gray), roughness: 0.6, clearcoat: 0.2, side: T.DoubleSide, clippingPlanes: [ctx.clip], transparent: true, opacity: 0.96 });
     M.valve.color.multiplyScalar(1.7); M.valve.emissive = LIN(T, C.gray); M.valve.emissiveIntensity = 0.25;
     M.chord = new T.LineBasicMaterial({ color: LIN(T, C.gray), clippingPlanes: [ctx.clip] });
     M.blood = new T.MeshStandardMaterial({ color: LIN(T, C.dark), roughness: 0.4, transparent: true, opacity: 0.3, depthWrite: false, side: T.DoubleSide, clippingPlanes: [ctx.clip] });
     M.cont = new T.MeshBasicMaterial({ color: LIN(T, C.teal) });
     M.part = new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4, metalness: 0 });
-    M.part.onBeforeCompile = s => { s.fragmentShader = s.fragmentShader.replace("#include <emissivemap_fragment>", "#include <emissivemap_fragment>\n#ifdef USE_COLOR\n totalEmissiveRadiance += vColor * 0.55;\n#endif"); };
-    ctx.col = { red: LIN(T, C.red), dark: LIN(T, C.dark), pink: LIN(T, C.pink), vio: LIN(T, C.vio), c: new T.Color(), lv: new T.Color(), la: new T.Color(), ao: new T.Color() };
+    M.part.onBeforeCompile = s => { s.fragmentShader = s.fragmentShader.replace("#include <emissivemap_fragment>", "#include <emissivemap_fragment>\n#ifdef USE_COLOR\n totalEmissiveRadiance += vColor * 0.3;\n#endif"); };
+    ctx.col = { gry: LIN(T, C.gray), red: LIN(T, C.red), dark: LIN(T, C.dark), pink: LIN(T, C.pink), vio: LIN(T, C.vio), c: new T.Color(), lv: new T.Color(), la: new T.Color(), ao: new T.Color() };
     ctx.grp = { lv: [], la: [], ao: [] }; ctx.simple = [];
     buildSimple(ctx, T, sc);
     buildValves(ctx, T, sc);
@@ -400,7 +409,7 @@
       da: new Float32Array(n), db: new Float32Array(n), dc: new Float32Array(n), oo: new Float32Array(n), vi: new Int8Array(n), pk: new Float32Array(n), sc: new Float32Array(n), out: new Int8Array(n), ph: new Float32Array(n) };
     ctx.vPer = ctx.low ? 3.4 : 2.8; ctx.seed = 12345;
     for (let i = 0; i < n; i++) P.ph[i] = (i * 2.399) % 6.283;
-    const im = new T.InstancedMesh(new T.IcosahedronGeometry(0.05, ctx.low ? 0 : 1), ctx.M.part, n); im.frustumCulled = false;
+    const im = new T.InstancedMesh(new T.SphereGeometry(0.036, ctx.low ? 8 : 12, ctx.low ? 6 : 8), ctx.M.part, n); im.frustumCulled = false;
     im.instanceMatrix.setUsage(T.DynamicDrawUsage);
     im.count = n; const c0 = new T.Color(1, 1, 1); for (let i = 0; i < n; i++) im.setColorAt(i, c0); im.count = 0;   // setColorAt заделя по count
     sc.add(im); ctx.im = im; ctx.mtx = new T.Matrix4();
@@ -459,12 +468,14 @@
     const vMV = clamp(Math.abs(Qm) / (4 * om) / 3.7, 3, 40), vAV = clamp(Qa / (3 * oa) / 3.7, 3, 60), vMR = clamp(Math.abs(Qm) / 0.4 / 3.7, 6, 60), vPV = clamp(num(S.Q_pv, 90) / 6 / 3.7, 2, 20);
     const o = ctx.tv, m = ctx.tv2, e = ctx.tv3, { mvD, avD, e1M, nA, f1 } = ctx;
     const im = ctx.im, M4 = ctx.mtx, col = ctx.col; let j = 0;
+    const still = S.mv_open < 0.5 && S.av_open < 0.5 && Math.abs(Qm) < 1;   // изоволумични фази: кръвта в ЛК стои
     const pLV = 0.45 + 0.55 * clamp(S.P_lv / 120, 0, 1), pLA = 0.5, pAO = 0.45 + 0.55 * clamp(S.P_ao / 120, 0, 1);
-    col.lv.copy(col.dark).lerp(col.red, pLV); col.la.copy(col.dark).lerp(col.red, pLA); col.ao.copy(col.dark).lerp(col.red, pAO);
+    col.lv.copy(col.dark).lerp(col.red, pLV).lerp(col.gry, 0.18); col.la.copy(col.dark).lerp(col.red, pLA).lerp(col.gry, 0.18); col.ao.copy(col.dark).lerp(col.red, pAO).lerp(col.gry, 0.18);
     for (let i = 0; i < P.n; i++) {
       const k = P.k[i]; if (k === K.FREE) continue;
       P.ph[i] += sim * 1.3;
-      if (k === K.LV) { P.a[i] = clamp(P.a[i] + Math.sin(P.ph[i] * 1.7) * sim * 0.12, 0.05, 0.95); P.c[i] = clamp(P.c[i] + Math.cos(P.ph[i]) * sim * 0.4, 0.1, 3.04); posLV(ctx, P.a[i], P.b[i], P.c[i], o); }
+      if (k === K.LV && still) posLV(ctx, P.a[i], P.b[i], P.c[i], o);
+      else if (k === K.LV) { P.a[i] = clamp(P.a[i] + Math.sin(P.ph[i] * 1.7) * sim * 0.12, 0.05, 0.95); P.c[i] = clamp(P.c[i] + Math.cos(P.ph[i]) * sim * 0.4, 0.1, 3.04); posLV(ctx, P.a[i], P.b[i], P.c[i], o); }
       else if (k === K.LA) { P.a[i] = clamp(P.a[i] + Math.sin(P.ph[i] * 1.3) * sim * 0.1, 0.03, 0.95); P.c[i] = clamp(P.c[i] + Math.cos(P.ph[i]) * sim * 0.4, 0.1, 3.04); posLA(ctx, P.a[i], P.b[i], P.c[i], o); }
       else if (k === K.AO || k === K.AOX) {
         P.a[i] += sim * (0.12 + Math.max(0, Qa) / 900) * (k === K.AOX ? 3 : 1);
@@ -649,7 +660,7 @@
     const Ees = num(p.Ees, 2.8), V0 = num(p.V0, 10), Ap = num(p.A, 0.6), kk = num(p.k, 0.024);
     // EDPVR (#e8590c) и ESPVR (#868e96), пунктир
     g.setLineDash([6 * k, 4 * k]); g.lineWidth = 1.8 * k;
-    g.strokeStyle = C.org; g.beginPath(); for (let v = V0, n = 0; v <= vmax; v += 2, n++) { const q = Ap * (Math.exp(kk * (v - V0)) - 1); n ? g.lineTo(X(v), Y(q)) : g.moveTo(X(v), Y(q)); if (q > pmax) break; } g.stroke();
+    g.strokeStyle = C.g2; g.lineWidth = 2.4 * k; g.beginPath(); for (let v = V0, n = 0; v <= vmax; v += 2, n++) { const q = Ap * (Math.exp(kk * (v - V0)) - 1); n ? g.lineTo(X(v), Y(q)) : g.moveTo(X(v), Y(q)); if (q > pmax) break; } g.stroke();
     g.strokeStyle = "#adb5bd"; g.beginPath(); g.moveTo(X(V0), Y(0)); g.lineTo(X(V0 + pmax / Ees), Y(pmax)); g.stroke(); g.setLineDash([]);
     // предишната примка (сиво), за сравнение след смяна на параметрите
     if (ctx.ghost.ok) { g.strokeStyle = "rgba(173,181,189,0.55)"; g.lineWidth = 1.6 * k; g.beginPath(); for (let b = 0; b <= NB; b++) { const i = b % NB, x = X(ctx.ghost.V[i]), y = Y(ctx.ghost.P[i]); b ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke(); }
@@ -664,7 +675,7 @@
     // надписи
     g.font = FONT(k, 10.5, 700); g.textAlign = "left";
     const vE = Math.min(vmax * 0.92, V0 + pmax * 0.82 / Ees); g.fillStyle = "#ced4da"; g.fillText("ESPVR", X(vE) + 5 * k, Y(Ees * (vE - V0)) + 4 * k);
-    let vD = V0; while (vD < vmax * 0.95 && Ap * (Math.exp(kk * (vD - V0)) - 1) < pmax * 0.3) vD += 2; g.fillStyle = "#ff8f5a"; g.textAlign = "right"; g.fillText("EDPVR", X(vD) - 4 * k, Y(Ap * (Math.exp(kk * (vD - V0)) - 1)) - 4 * k);
+    let vD = V0; while (vD < vmax * 0.95 && Ap * (Math.exp(kk * (vD - V0)) - 1) < pmax * 0.3) vD += 2; g.fillStyle = "#adb5bd"; g.textAlign = "right"; g.fillText("EDPVR", X(vD) - 4 * k, Y(Ap * (Math.exp(kk * (vD - V0)) - 1)) - 4 * k);
     g.fillStyle = "#74c0fc"; g.textAlign = "left"; g.fillText("Ea", X(vmx) + 4 * k, Y(10) );
     if (ctx.ghost.ok) { g.fillStyle = "#adb5bd"; g.font = FONT(k, 10, 600); g.fillText(TT(TX.prev), X(ctx.ghost.V[0]) + 5 * k, Y(ctx.ghost.P[0]) + 14 * k); }
     // SV (ширина) и SW (площ)
@@ -677,8 +688,8 @@
   function camFix(ctx, stg) {
     const cv = ctx.G.cv, asp = (cv.clientWidth || 1) / (cv.clientHeight || 1), port = asp < 1.15, key = stg + (port ? "p" : "l");
     if (ctx.camKey === key) return; ctx.camKey = key; if (stg < 5) return;
-    const r = port ? 6.8 : 7.6, rk = asp < 1.3 ? Math.pow(1.3 / asp, 0.8) : 1, hh = r * rk * Math.tan(19 * Math.PI / 180), hw = hh * asp;
-    let x = stg === 7 ? -0.55 : -0.4, y = stg === 7 ? 0.5 : 0.72; if (port) y += 0.42 * hh; else x -= 0.5 * hw;
+    const r = port ? 9.4 : 8.0, rk = asp < 1.3 ? Math.pow(1.3 / asp, 0.8) : 1, hh = r * rk * Math.tan(19 * Math.PI / 180), hw = hh * asp;
+    let x = -0.42, y = 0.75; if (port) y += 0.5 * hh; else x -= 0.5 * hw;
     ctx.G.flyTo(x, y, 0, r, 0.12, 1.44);
   }
 
@@ -695,29 +706,36 @@
     hud(ctx, stg, S);
     camFix(ctx, stg);
     labels(ctx, stg, S);
+    legend(ctx, S);
     if (ctx.vm && ctx.frame % 6 === 0) {
       ctx.vm.style.display = "block";
       const t = S.ok ? fill(TT(TX.slow), fx(S.slow, S.slow < 10 ? 1 : 0), fx(S.tau, 2)) : ctx.play.ok ? fill(TT(TX.live), fx(S.tau, 2)) : TT(TX.rec);
       if (ctx.vm.textContent !== t) ctx.vm.textContent = t;
     }
   }
+  // ≤4 етикета на етап, 12,5 px, поставени в празното място до структурата (без застъпване)
+  const LBL = s => `<span style="font-size:12.5px">${s}</span>`;
   function labels(ctx, stg, S) {
     const out = ctx.labOut, lp = ctx.lp; out.length = 0; let n = 0;
-    const put = (t, x, y, z) => { if (n >= 6) return; const q = lp[n++]; q[0] = t; q[1].set(x, y, z); out.push(q); };
-    const { A, ax, Lv, sL, mvD, avD } = ctx, cx = A.x + ax.x * Lv * sL * 0.45, cy = A.y + ax.y * Lv * sL * 0.45;
-    const L_ = s => TT(s);
-    if (stg === 6) { put(L_(TX.lv), cx, cy, -0.3); return; }
-    put(L_(TX.lv), cx, cy, -0.3); put(L_(TX.la), -1.2, 1.12, -0.25);
-    if (stg !== 1) put(L_(TX.ao), -0.62, 2.55, -0.9);
-    if (stg <= 2 || stg === 4 || stg === 7) put(L_(TX.mvl), mvD.x - 0.05, mvD.y - 0.28, -0.05);
-    if (stg >= 2 && stg !== 5 && stg !== 6) put(L_(TX.avl), avD.x + 0.42, avD.y + 0.1, -0.05);
-    if (stg === 1) put(L_(TX.pvl), -0.9, 1.25, -1.0);
-    // една стойност по темата на етапа
-    if (stg === 0) put(fill(L_(TX.qMV), fx(Math.max(0, S.Q_mv), 0)), mvD.x + 0.75, mvD.y - 0.55, -0.05);
-    else if (stg === 1) put(fill(L_(TX.pLA), fx(S.P_la, 1)), -1.6, 0.55, -0.2);
-    else if (stg === 2 || stg === 4) put(fill(L_(TX.pLV), fx(S.P_lv, 0)), cx + 0.2, cy - 0.45, -0.3);
-    else if (stg === 3) put(fill(L_(TX.pAO), fx(S.P_ao, 0)), -0.15, 1.75, -0.1);
-    else if (stg === 7 && S.Q_mv < -1) put(TT(TX.back), mvD.x - 0.6, mvD.y + 0.35, -0.1);
+    const put = (t, x, y, z) => { if (n >= 4) return; const q = lp[n++]; q[0] = LBL(t); q[1].set(x, y, z); out.push(q); };
+    const { A, ax, Lv, sL } = ctx, lx = A.x + ax.x * Lv * sL * 0.3 + 0.35, ly = A.y + ax.y * Lv * sL * 0.3 + 0.25;
+    const LVt = () => put(TT(TX.lv), lx, ly, -0.3), LAt = () => put(TT(TX.la), -1.15, 1.15, -0.25), AOt = () => put(TT(TX.ao), 0.15, 2.35, -0.2);
+    const MVt = () => put(TT(TX.mvl), -1.45, -0.25, 0), AVt = () => put(TT(TX.avl), 0.45, 1.25, 0), VAL = (t) => put(t, -0.25, -1.35, 0);
+    if (stg === 0) { LAt(); MVt(); LVt(); VAL(fill(TT(TX.qMV), fx(Math.max(0, S.Q_mv), 0))); }
+    else if (stg === 1) { LAt(); put(TT(TX.pvl), -1.25, 1.75, -1.0); LVt(); put(fill(TT(TX.pLA), fx(S.P_la, 1)), -1.45, -0.25, 0); }
+    else if (stg === 2) { MVt(); AVt(); LVt(); VAL(fill(TT(TX.pLV), fx(S.P_lv, 0))); }
+    else if (stg === 3) { AVt(); AOt(); LVt(); put(fill(TT(TX.pAO), fx(S.P_ao, 0)), 0.3, 1.8, -0.1); }
+    else if (stg === 4) { AVt(); MVt(); LVt(); VAL(fill(TT(TX.pLV), fx(S.P_lv, 0))); }
+    else if (stg === 5) { LVt(); LAt(); AOt(); }
+    else if (stg === 6) LVt();
+    else { AVt(); MVt(); LAt(); if (S.Q_mv < -1) put(TT(TX.back), -1.6, 0.45, 0); else LVt(); }
+  }
+  // легенда по изгледа: розово само при регургитация (p.Rmr < 1e3)
+  function legend(ctx, S) {
+    const mech = (ctx.st && ctx.st.mech) || "cyc", mr = num(S.p && S.p.Rmr, 1e9) < 1e3, key = mech + (mr ? 1 : 0);
+    if (ctx.legKey === key) return; ctx.legKey = key;
+    const el = ctx.G.cv.closest(".stage-card"), lg = el && el.querySelector(".legend"); if (!lg) return;
+    lg.innerHTML = legFor(mech, mr).map(([c, l, sh]) => `<span><i class="${sh || "dot"}" style="background:${c}"></i>${TT(l)}</span>`).join("");
   }
   function stats(ctx, i) {
     const S = ctx.S; if (!S || S.V_lv == null) return [];
@@ -742,7 +760,6 @@
 
   // ---------- регистрация ----------
   Object.assign(window.__EN = window.__EN || {}, EN);
-  const SHARED = { get: null, dead: false, ctx: null };
   (window.SEC3D = window.SEC3D || {})[ID] = {
     MOCK,
     mount(wrap, getState) {
@@ -753,7 +770,6 @@
       let sv = null; try { sv = stageViewer(par, mkCfg(H, id, hpx), next); } catch (e) { console.error(e); }
       return () => { H.dead = true; dispose(H.ctx); if (sv && sv.card && sv.card.parentNode) sv.card.remove(); };
     },
-    cfg: (getState, id, h) => mkCfg({ get: typeof getState === "function" ? getState : null, dead: false, ctx: null }, id || "stg" + ID, h),
-    stage: mkCfg(SHARED, "stgCardio", 460)
+    _ctx: null
   };
 })();
