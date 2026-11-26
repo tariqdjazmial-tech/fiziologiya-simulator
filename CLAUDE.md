@@ -71,7 +71,8 @@
 
 ## Публикуване
 - `git commit` с attribution редовете, после `git push -u origin claude/beautiful-gates-8tw82o`.
-- Артефакт: `site/index.html` + променените `js/…` и модели. **Никога не публикувай `js/config.js`.** Кой артефакт е целта: виж HANDOFF.md; при съмнение питай потребителя.
+- Артефакт: **https://claude.ai/artifact/EpkssS9vo7pMhXrxjdJwi2** (тестовата версия, споделена с линк). Публикуваш `site/index.html` + променените `js/…` (вкл. `js/sections/…`) и модели. **Никога не публикувай `js/config.js`.** Старият `LQLiL1MqYJRMaS1EJF9A9c` (9d1fe3b8…, 12.11) не се обновява.
+- Codex в облачна сесия: `npm i -g @openai/codex`, после `codex login --device-auth` (потребителят потвърждава с код). Входът живее само в контейнера.
 
 ## Правила за дизайн
 <!-- Съставени от ui-ux-designer. Токените са измерени в браузъра (getComputedStyle, 11.2026); числата с „≈норма“ са препоръки, не са сверени с всички теми. -->
