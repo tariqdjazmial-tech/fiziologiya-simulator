@@ -24,18 +24,19 @@
     Rpv: 0.03,     // mmHg·s/mL, белодробни вени → ЛП
     Ela_min: 0.15, Ela_max: 0.3, // mmHg/mL, еластанс на ЛП
     V0_la: 4,      // mL
-    PR: 0.16,      // s, предсърдното активиране започва PR преди камерното
-    Tas: 0.11,     // s, полупродължителност на предсърдната систола
+    PR: 0.10,      // s, механично закъснение: предсърдното съкращение започва PR преди камерното (електричният PR ≈ 0,16 s; механиката изостава)
+    Tas: 0.08,     // s, полупродължителност на предсърдната систола
     Pven: 5        // mmHg, налягане на изтичане на системния кръг
   };
-  const fresh = () => ({ Vmax: -1e9, Vmin: 1e9, Pmax: -1e9, Pmin: 1e9, Plvmax: -1e9, Plamax: -1e9, sumP: 0, sumPla: 0, n: 0, qr: 0, qf: 0, sw: 0 });
+  const fresh = () => ({ Vmax: -1e9, Vmin: 1e9, Pmax: -1e9, Pmin: 1e9, Plvmax: -1e9, Plamax: -1e9, sumP: 0, sumPla: 0, n: 0, qr: 0, qf: 0, sw: 0, Pes: 0 });
   // нормиране и момент на пика на еластанса за дадена честота
   function norm(s, p) { const T = 60 / p.HR; let em = 0, tp = 0; for (let t = 0; t < T; t += 1e-4) { const a = act(t, T); if (a > em) { em = a; tp = t; } } s.em = em; s.tpk = tp; s.HR = p.HR; }
   const W = {}; // работен обект (без заемане на памет във всяка стъпка)
   function inst(s, p, o) {
     const T = 60 / p.HR, e = act(s.tc, T) / s.em, Pd = p.A * (Math.exp(p.k * (s.V_lv - p.V0)) - 1);
     const P_lv = e * p.Ees * (s.V_lv - p.V0) + (1 - e) * Pd;
-    const x = ((s.tc - (T - p.PR)) % T + T) % T, ea = x < 2 * p.Tas ? Math.pow(Math.sin(Math.PI * x / (2 * p.Tas)), 2) : 0;
+    const PR = Math.min(p.PR, 0.2 * T), Tas = Math.min(p.Tas, 0.13 * T); // при тахикардия AV закъснението и предсърдната систола се скъсяват
+    const x = ((s.tc - (T - PR)) % T + T) % T, ea = x < 2 * Tas ? Math.pow(Math.sin(Math.PI * x / (2 * Tas)), 2) : 0;
     const P_la = (p.Ela_min + (p.Ela_max - p.Ela_min) * ea) * (s.V_la - p.V0_la);
     o.T = T; o.e_lv = e; o.e_la = ea; o.P_lv = P_lv; o.P_la = P_la;
     o.Q_pv = (p.Pv - P_la) / p.Rpv;
@@ -45,15 +46,15 @@
     o.mv_open = P_la > P_lv ? 1 : 0; o.av_open = P_lv > s.P_ao ? 1 : 0;
     // фаза 1–7 (Guyton гл. 9); s.ej = имало е изтласкване в този цикъл, s.red = вече е бавно изтласкване
     let ph;
-    if (o.av_open) ph = s.red || (o.Q_av - o.Q_out <= 0 && s.tc - s.tAO > 0.02) ? 3 : 2;
+    if (o.av_open) ph = !s.av0 || s.tc - s.tAO < s.ejT / 3 ? 2 : 3; // бързо = първата трета на изтласкването (Guyton гл. 9)
     else if (o.mv_open) ph = ea > 0 ? 7 : (!s.mv0 || s.tc - s.tMO < (T - s.tMO) / 3 ? 5 : 6);
-    else ph = !s.ej || s.tc > T - p.PR ? 1 : 4;
+    else ph = s.ej ? 4 : 1; // затворени клапи: след изтласкване = релаксация, след пълнене = съкращение
     o.phase = ph;
     return o;
   }
   const M = {
     params0: () => Object.assign({}, P0),
-    init(p) { const s = { tc: 0, V_lv: 120, V_la: 50, P_ao: 85, tMO: 0, mv0: 1, tAO: 0, av0: 0, ej: 0, red: 0, em: 1, tpk: 0.3, HR: 0, c: fresh(), sum: {} }; norm(s, p); return s; },
+    init(p) { const s = { tc: 0, V_lv: 120, V_la: 50, P_ao: 85, tMO: 0, mv0: 1, tAO: 0, av0: 0, ej: 0, ejT: 0.27, em: 1, tpk: 0.3, HR: 0, c: fresh(), sum: {} }; norm(s, p); return s; },
     step(s, p, dt) {
       if (!(dt > 0)) return s;
       if (s.HR !== p.HR) norm(s, p);
@@ -63,16 +64,17 @@
       if (i.P_lv > c.Plvmax) c.Plvmax = i.P_lv; if (i.P_la > c.Plamax) c.Plamax = i.P_la;
       c.sumP += s.P_ao; c.sumPla += i.P_la; c.n++;
       if (i.Q_mv < 0) c.qr -= i.Q_mv * dt; c.qf += i.Q_av * dt; c.sw -= i.P_lv * dV;
-      if (i.mv_open && !s.mv0) s.tMO = s.tc; s.mv0 = i.mv_open;
-      if (i.av_open && !s.av0) { s.tAO = s.tc; s.red = 0; } s.av0 = i.av_open;
-      if (i.av_open) { s.ej = 1; if (i.phase === 3) s.red = 1; }
+      if (i.mv_open && !s.mv0) { s.tMO = s.tc; s.ej = 0; } s.mv0 = i.mv_open;
+      if (i.av_open && !s.av0) s.tAO = s.tc;
+      if (!i.av_open && s.av0) { s.ejT = ((s.tc - s.tAO) % i.T + i.T) % i.T; c.Pes = i.P_lv; } s.av0 = i.av_open;
+      if (i.av_open) s.ej = 1;
       s.V_lv += dV; s.V_la += dt * (i.Q_pv - i.Q_mv); s.P_ao += dt * (i.Q_av - i.Q_out) / p.C; s.tc += dt;
       if (s.tc >= i.T) {
-        s.tc %= i.T; s.tMO = 0; s.ej = 0; s.red = 0;
+        s.tc %= i.T; s.tMO = 0; s.tAO -= i.T;
         const SV = c.Vmax - c.Vmin;
         s.sum = { EDV: c.Vmax, ESV: c.Vmin, SV, SVf: c.qf, RSV: c.qr, RF: c.qr / SV, EF: SV / c.Vmax, CO: c.qf * p.HR / 1000,
           SBP: c.Pmax, DBP: c.Pmin, PP: c.Pmax - c.Pmin, MAP: c.sumP / c.n, LVSP: c.Plvmax, LVEDP: i.P_lv,
-          AVgrad: c.Plvmax - c.Pmax, Pla_max: c.Plamax, Pla_mean: c.sumPla / c.n, SW: c.sw, Ea: c.Plvmax / SV };
+          AVgrad: c.Plvmax - c.Pmax, Pla_max: c.Plamax, Pla_mean: c.sumPla / c.n, SW: c.sw, Ea: (c.Pes || c.Plvmax) / SV, Pes: c.Pes };
         s.c = fresh();
       }
       return s;
@@ -84,7 +86,7 @@
 
   const T_ = x => (window.T ? window.T(x) : x), EN = (window.__EN = window.__EN || {}), L = (bg, en) => { if (en) EN[bg] = en; return bg; };
   const f = (v, d) => (Number.isFinite(v) ? (typeof fmt === "function" ? fmt(v, d) : v.toFixed(d)) : "—");
-  const ZCc = (typeof ZC !== "undefined" ? ZC : { red: "#e03131", blue: "#1c7ed6", vio: "#9c36b5", teal: "#0c8599", gray: "#868e96", org: "#e8590c", pink: "#c2566b" });
+  const ZCc = (typeof ZC !== "undefined" ? ZC : { grn: "#495057", red: "#e03131", blue: "#1c7ed6", vio: "#9c36b5", teal: "#0c8599", gray: "#868e96", org: "#e8590c", pink: "#c2566b" });
 
   // ---------- СЪСТОЯНИЕ ----------
   const S = (window.__S = window.__S || {})[ID] = { p: M.params0(), s: null };
@@ -94,8 +96,8 @@
     norm: { n: L("Норма", "Normal"), set: {}, info: L("Покой, 72/min: EDV ≈ 120 mL, ESV ≈ 50 mL, ударен обем ≈ 70 mL, EF ≈ 0,58, аорта 120/80 mmHg, дебит ≈ 5 L/min (Guyton, гл. 9).", "Rest, 72/min: EDV ≈ 120 mL, ESV ≈ 50 mL, stroke volume ≈ 70 mL, EF ≈ 0.58, aorta 120/80 mmHg, output ≈ 5 L/min (Guyton, ch. 9).") },
     htn: { n: L("Хипертония (↑следнатоварване)", "Hypertension (↑afterload)"), set: { R: 1.8, C: 0.8 }, info: L("Периферното съпротивление е ↑ и аортата е по-скована. Камерата изтласква срещу ≈ 160 mmHg: изтласкването спира по-рано по ESPVR, ESV ↑ и ударният обем ↓.", "Peripheral resistance is ↑ and the aorta is stiffer. The ventricle ejects against ≈ 160 mmHg: ejection stops earlier on the ESPVR, ESV ↑ and stroke volume ↓.") },
     symp: { n: L("Симпатикус (↑контрактилитет)", "Sympathetic drive (↑contractility)"), set: { Ees: 4.2, HR: 90 }, info: L("Норадреналин през β1 рецепторите: ESPVR е по-стръмна (Ees 2,8 → 4,2 mmHg/mL) и честотата е 90/min. Камерата се изпразва по-пълно: ESV ↓, EF ↑, дебитът ↑.", "Noradrenaline via β1 receptors: the ESPVR is steeper (Ees 2.8 → 4.2 mmHg/mL) and the rate is 90/min. The ventricle empties more completely: ESV ↓, EF ↑, output ↑.") },
-    as: { n: L("Аортна стеноза", "Aortic stenosis"), set: { Rav: 0.3 }, info: L("Аортният отвор е стеснен. За да мине кръвта, налягането в ЛК трябва да е много над аортното: трансвалвуларен градиент ≈ 75 mmHg, LVSP ≈ 180 mmHg. Хронично: концентрична хипертрофия.", "The aortic orifice is narrowed. For blood to pass, LV pressure must be far above aortic pressure: transvalvular gradient ≈ 75 mmHg, LVSP ≈ 180 mmHg. Chronically: concentric hypertrophy.") },
-    mr: { n: L("Митрална регургитация", "Mitral regurgitation"), set: { Rmr: 0.4 }, info: L("Митралната клапа не се затваря плътно. В систолата около половината от кръвта се връща в ЛП: ЛП се раздува (v-вълна), EF изглежда висока, но дебитът напред пада. Няма изоволумични фази.", "The mitral valve does not close tightly. In systole about half of the blood flows back into the LA: the LA distends (v wave), EF looks high, but forward output falls. There are no isovolumic phases.") }
+    as: { n: L("Аортна стеноза", "Aortic stenosis"), set: { Rav: 0.3 }, info: L("Аортният отвор е стеснен. За да мине кръвта, налягането в ЛК трябва да е много над аортното: градиент пик-пик ≈ 75 mmHg (тежка АС; ехо критерий: среден градиент ≥ 40 mmHg), LVSP ≈ 180 mmHg. Хронично: концентрична хипертрофия.", "The aortic orifice is narrowed. For blood to pass, LV pressure must be far above aortic pressure: peak-to-peak gradient ≈ 75 mmHg (severe AS; echo criterion: mean gradient ≥ 40 mmHg), LVSP ≈ 180 mmHg. Chronically: concentric hypertrophy.") },
+    mr: { n: L("Митрална регургитация", "Mitral regurgitation"), set: { Rmr: 0.4 }, info: L("Митралната клапа не се затваря плътно. В систолата около половината от кръвта се връща в ЛП: ЛП се раздува (v-вълна), EF изглежда висока, но дебитът напред и аортното налягане (≈ 80/50 mmHg) падат. Няма изоволумични фази. В модела налягането в белодробните вени е фиксирано, затова v-вълната е малка; при остра тежка МР тя е много по-висока и се развива белодробен застой.", "The mitral valve does not close tightly. In systole about half of the blood flows back into the LA: the LA distends (v wave), EF looks high, but forward output and aortic pressure (≈ 80/50 mmHg) fall. There are no isovolumic phases. In the model pulmonary venous pressure is fixed, so the v wave is small; in acute severe MR it is much higher and pulmonary congestion develops.") }
   };
   const PH = [null,
     L("Изоволумично съкращение", "Isovolumic contraction"), L("Бързо изтласкване", "Rapid ejection"), L("Бавно изтласкване", "Reduced ejection"),
@@ -162,7 +164,7 @@
       const vx = [], es = [], ed = []; for (let v = P.V0; v <= 220; v += 5) { vx.push(v); es.push(P.Ees * (v - P.V0)); ed.push(P.A * (Math.exp(P.k * (v - P.V0)) - 1)); }
       const ser = [];
       if (ref && ref.x.length) ser.push({ x: ref.x, y: ref.y, color: ZCc.gray, width: 1.4, dash: [3, 3] });
-      ser.push({ x: vx, y: es, color: ZCc.gray, width: 1.6, dash: [6, 4] }, { x: vx, y: ed, color: ZCc.org, width: 1.6, dash: [6, 4] },
+      ser.push({ x: vx, y: es, color: ZCc.gray, width: 1.6, dash: [6, 4] }, { x: vx, y: ed, color: ZCc.grn || "#495057", width: 1.6, dash: [6, 4] },
         { x: [ESV, EDV], y: [LVSP, 0], color: ZCc.blue, width: 1.2, dash: [2, 3] }, { x: lp.x, y: lp.y, color: ZCc.red, width: 2.4 },
         { x: [s.V_lv - 1.5, s.V_lv + 1.5], y: [inst(s, P, {}).P_lv, inst(s, P, {}).P_lv], color: css("--ink", "#1D1D1F"), width: 7 });
       return { xmin: 0, xmax: 220, ymin: 0, ymax: Math.max(160, Math.ceil((LVSP + 20) / 20) * 20), xlabel: L("обем ЛК, mL", "LV volume, mL"), ylabel: L("P ЛК, mmHg", "LV P, mmHg"), series: ser };
@@ -180,7 +182,7 @@
   const exp = [
     { q: L("Вдигни налягането на пълнене Pv до 16 mmHg (↑преднатоварване). Какво става с ударния обем и крайно-систолния обем?", "Raise the filling pressure Pv to 16 mmHg (↑preload). What happens to stroke volume and end-systolic volume?"),
       opts: [L("SV ↑, ESV се променя малко", "SV ↑, ESV changes little"), L("SV ↓, ESV ↑", "SV ↓, ESV ↑"), L("SV не се променя", "SV does not change")], a: 0, set: { pre: "norm", sl: { Pv: 16 } },
-      expl: L("Франк–Старлинг: EDV расте (≈120 → ≈150 mL), ESV почти не се мени (≈52 → ≈62), затова SV расте (≈71 → ≈90 mL). Примката се разширява надясно.", "Frank–Starling: EDV rises (≈120 → ≈150 mL), ESV barely changes (≈52 → ≈62), so SV rises (≈71 → ≈90 mL). The loop widens to the right.") },
+      expl: L("Франк–Старлинг: EDV расте (≈120 → ≈150 mL). ESV расте малко (≈52 → ≈62 mL), защото по-високото аортно налягане спира изтласкването малко по-рано, но SV расте много повече (≈71 → ≈90 mL). Примката се разширява надясно.", "Frank–Starling: EDV rises (≈120 → ≈150 mL). ESV rises a little (≈52 → ≈62 mL), because the higher aortic pressure stops ejection slightly earlier, but SV rises much more (≈71 → ≈90 mL). The loop widens to the right.") },
     { q: L("Включи „Хипертония“. Как се променя PV примката?", "Select “Hypertension”. How does the PV loop change?"),
       opts: [L("По-висока и по-тясна: ESV ↑, SV ↓", "Taller and narrower: ESV ↑, SV ↓"), L("По-ниска и по-широка", "Lower and wider"), L("Само се измества наляво", "It only shifts to the left")], a: 0, set: { pre: "htn" },
       expl: L("Камерата изтласква срещу ≈160 mmHg. Изтласкването свършва по-рано по ESPVR: ESV ≈67 mL, SV ≈60 mL, EF ≈0,47.", "The ventricle ejects against ≈160 mmHg. Ejection ends earlier on the ESPVR: ESV ≈67 mL, SV ≈60 mL, EF ≈0.47.") },
@@ -196,11 +198,12 @@
   ];
 
   function view(main) {
+    B.i = 0; B.n = 0; ref = null; // ново влизане: без примка от предишното посещение
     const DTM = 1e-4; let lastPre = null, tsim = 0, nextRec = 0;
     const full = (p) => { const pr = PRE[p.pre] || PRE.norm, o = S.full && S.full.__k === p.pre ? S.full : Object.assign(M.params0(), pr.set, { __k: p.pre }); for (const d of SL) o[d.k] = p[d.k]; return (S.full = o); };
     const cfg = {
       key: ID, h2: L("Сърдечен цикъл и PV примка", "Cardiac cycle and PV loop"),
-      lead: L("Лявата камера, предсърдието и аортата през един удар: налягания, обем, клапи и фази (Guyton, гл. 9). Графиките вървят два пъти по-бавно, а етапите в 3D — още по-бавно. Плъзгачите менят преднатоварването, контрактилитета и следнатоварването.", "The left ventricle, atrium and aorta through one beat: pressures, volume, valves and phases (Guyton, ch. 9). The graphs run at half speed and the 3D stages even slower. The sliders change preload, contractility and afterload."),
+      lead: L("Графиките вървят два пъти по-бавно, а етапите в 3D — още по-бавно.", "The graphs run at half speed and the 3D stages even slower."),
       ch: 340, cw: 640, speed: 0.5, dtmax: DTM,
       sl: SL, pre: PRE, exp,
       init: (p) => { bufReset(); const s = M.init(full(p)); S.s = s; tsim = 0; nextRec = 0; return s; },
@@ -221,7 +224,7 @@
         return a;
       },
       note: (p, R, s) => { if (!s) return ""; const P = S.full || S.p, ph = inst(s, P, {}).phase; return P.Rmr < 1e6 && (ph === 1 || ph === 4) ? PHN_MR[ph] : PHN[ph]; },
-      legend: `<span><i style="background:${ZCc.red}"></i>${T_(L("налягане в ЛК", "LV pressure"))}</span><span><i style="background:${ZCc.blue}"></i>${T_(L("аорта", "aorta"))}</span><span><i style="background:${ZCc.vio}"></i>${T_(L("ляво предсърдие", "left atrium"))}</span><span><i style="background:${ZCc.teal}"></i>${T_(L("обем ЛК", "LV volume"))}</span><span><i style="background:${ZCc.gray}"></i>ESPVR</span><span><i style="background:${ZCc.org}"></i>EDPVR</span>`,
+      legend: `<span><i style="background:${ZCc.red}"></i>${T_(L("налягане в ЛК", "LV pressure"))}</span><span><i style="background:${ZCc.blue}"></i>${T_(L("аорта", "aorta"))}</span><span><i style="background:${ZCc.vio}"></i>${T_(L("ляво предсърдие", "left atrium"))}</span><span><i style="background:${ZCc.teal}"></i>${T_(L("обем ЛК", "LV volume"))}</span><span><i style="background:${ZCc.gray}"></i>ESPVR</span><span><i style="background:${ZCc.grn || "#495057"}"></i>EDPVR</span>`,
       plots, draw
     };
     mkSim(main, cfg);
@@ -242,8 +245,8 @@
       { h: L("Цел", "Goal"), html: "<p>" + L("Да проследиш един сърдечен цикъл в лявото сърце по Wiggers диаграмата и PV примката: кога се отварят и затварят клапите, как се сменят фазите и защо ударният обем зависи от преднатоварването, контрактилитета и следнатоварването.", "To follow one cardiac cycle of the left heart on the Wiggers diagram and the PV loop: when the valves open and close, how the phases follow each other, and why stroke volume depends on preload, contractility and afterload.") + "</p>" },
       { h: L("Норма", "Normal values"), html: "<p>" + L("При 72/min цикълът трае 0,83 s; систолата е ≈ 0,3 s, а диастолата ≈ 0,5 s. Крайният диастолен обем (EDV) е 110–120 mL, крайният систолен (ESV) — 40–50 mL, ударният обем ≈ 70 mL, а фракцията на изтласкване ≈ 0,6. Налягането в аортата е 120/80 mmHg, в ЛК — 120/0–8 mmHg, а в ЛП 0–10 mmHg (a-вълна ≈ 7–8 mmHg). Сърдечният дебит е ≈ 5 L/min.", "At 72/min the cycle lasts 0.83 s; systole is ≈ 0.3 s and diastole ≈ 0.5 s. End-diastolic volume (EDV) is 110–120 mL, end-systolic volume (ESV) 40–50 mL, stroke volume ≈ 70 mL and ejection fraction ≈ 0.6. Aortic pressure is 120/80 mmHg, LV 120/0–8 mmHg and LA 0–10 mmHg (a wave ≈ 7–8 mmHg). Cardiac output is ≈ 5 L/min.") + "</p>" },
       { h: L("Механизъм: фазите", "Mechanism: the phases"), html: "<p>" + L("Клапите се движат пасивно по градиента на налягането. <b>Изоволумично съкращение</b>: камерата се съкращава, митралната клапа се затваря (I тон), аортната още е затворена — налягането расте без промяна на обема. <b>Изтласкване</b>: когато P<sub>ЛК</sub> надмине ≈ 80 mmHg, аортната клапа се отваря; ≈ 70% от кръвта излиза в първата трета (бързо), останалото — бавно. <b>Изоволумична релаксация</b>: аортната клапа се затваря (II тон, инцизура), налягането пада при постоянен обем. <b>Пълнене</b>: щом P<sub>ЛК</sub> падне под P<sub>ЛП</sub>, митралната клапа се отваря; бързо пълнене, диастаза и накрая предсърдна систола, която добавя ≈ 20%.", "The valves move passively along the pressure gradient. <b>Isovolumic contraction</b>: the ventricle contracts, the mitral valve closes (first sound) and the aortic valve is still closed — pressure rises without a change in volume. <b>Ejection</b>: when P<sub>LV</sub> exceeds ≈ 80 mmHg the aortic valve opens; ≈ 70% of the blood leaves in the first third (rapid), the rest slowly. <b>Isovolumic relaxation</b>: the aortic valve closes (second sound, incisura) and pressure falls at constant volume. <b>Filling</b>: as soon as P<sub>LV</sub> drops below P<sub>LA</sub> the mitral valve opens; rapid filling, diastasis and finally atrial systole, which adds ≈ 20%.") + "</p>" + "<p>" + L("<b>PV примка</b>: налягането в ЛК спрямо обема описва затворена крива. Ширината ѝ е ударният обем, площта — ударната работа. Горният ляв ъгъл (краят на систолата) лежи на <b>ESPVR</b>, P = E<sub>es</sub>·(V − V<sub>0</sub>); долният ръб следва пасивната <b>EDPVR</b>.", "<b>PV loop</b>: LV pressure plotted against volume forms a closed curve. Its width is the stroke volume and its area the stroke work. The upper-left corner (end of systole) lies on the <b>ESPVR</b>, P = E<sub>es</sub>·(V − V<sub>0</sub>); the lower edge follows the passive <b>EDPVR</b>.") + "</p>" },
-      { h: L("Регулация", "Regulation"), html: "<p>" + L("<b>Преднатоварване</b> (закон на Франк–Старлинг): по-голямото пълнене разтяга саркомерите и камерата изтласква повече — примката се разширява надясно, ESV почти не се мени. <b>Контрактилитет</b>: симпатикусът (норадреналин през β1) прави ESPVR по-стръмна — ESV ↓, EF ↑. <b>Следнатоварване</b>: по-високото аортно налягане спира изтласкването по-рано по същата ESPVR — ESV ↑, SV ↓. <b>Честота</b>: тахикардията скъсява главно диастолата, затова над ≈ 150–180/min пълненето и ударният обем падат.", "<b>Preload</b> (Frank–Starling law): greater filling stretches the sarcomeres and the ventricle ejects more — the loop widens to the right while ESV barely changes. <b>Contractility</b>: sympathetic drive (noradrenaline via β1) steepens the ESPVR — ESV ↓, EF ↑. <b>Afterload</b>: a higher aortic pressure stops ejection earlier on the same ESPVR — ESV ↑, SV ↓. <b>Rate</b>: tachycardia mainly shortens diastole, so above ≈ 150–180/min filling and stroke volume fall.") + "</p>" },
-      { h: L("Клиника", "Clinical relevance"), html: "<p>" + L("<b>Аортна стеноза</b>: стесненият отвор изисква голям градиент между ЛК и аортата; хронично води до концентрична хипертрофия, стенокардия и синкоп при усилие. <b>Митрална регургитация</b>: част от ударния обем се връща в ЛП — v-вълна, разширено ЛП, нормална или висока EF при намален дебит напред. <b>Систолна недостатъчност</b>: ниска Ees, ESV ↑, EF &lt; 0,40. <b>Скована аорта</b> с възрастта: по-малък комплайънс, по-голямо пулсово налягане (изолирана систолна хипертония).", "<b>Aortic stenosis</b>: the narrowed orifice requires a large LV–aorta gradient; chronically it causes concentric hypertrophy, angina and exertional syncope. <b>Mitral regurgitation</b>: part of the stroke volume flows back into the LA — v wave, dilated LA, normal or high EF with reduced forward output. <b>Systolic failure</b>: low Ees, ESV ↑, EF &lt; 0.40. <b>Stiff aorta</b> with age: lower compliance, wider pulse pressure (isolated systolic hypertension).") + "</p>" }
+      { h: L("Регулация", "Regulation"), html: "<p>" + L("<b>Преднатоварване</b> (закон на Франк–Старлинг): по-голямото пълнене разтяга саркомерите и камерата изтласква повече — примката се разширява надясно, ESV почти не се мени. <b>Контрактилитет</b>: симпатикусът (норадреналин през β1) прави ESPVR по-стръмна — ESV ↓, EF ↑. <b>Следнатоварване</b>: по-високото аортно налягане спира изтласкването по-рано по същата ESPVR — ESV ↑, SV ↓. <b>Честота</b>: тахикардията скъсява главно диастолата, затова ударният обем намалява постепенно с честотата. Над ≈ 120–150/min (без симпатикус; в модела ≈ 120/min) пада и сърдечният дебит.", "<b>Preload</b> (Frank–Starling law): greater filling stretches the sarcomeres and the ventricle ejects more — the loop widens to the right while ESV barely changes. <b>Contractility</b>: sympathetic drive (noradrenaline via β1) steepens the ESPVR — ESV ↓, EF ↑. <b>Afterload</b>: a higher aortic pressure stops ejection earlier on the same ESPVR — ESV ↑, SV ↓. <b>Rate</b>: tachycardia mainly shortens diastole, so stroke volume falls gradually with rate. Above ≈ 120–150/min (without sympathetic drive; ≈ 120/min in the model) cardiac output falls too.") + "</p>" },
+      { h: L("Клиника", "Clinical relevance"), html: "<p>" + L("<b>Аортна стеноза</b>: стесненият отвор изисква голям градиент между ЛК и аортата; хронично води до концентрична хипертрофия, стенокардия и синкоп при усилие. <b>Митрална регургитация</b>: част от ударния обем се връща в ЛП — v-вълна, разширено ЛП, нормална или висока EF при намален дебит напред. <b>Систолна недостатъчност</b>: ниска Ees, ESV ↑, EF ≤ 0,40 (0,41–0,49 — леко намалена). <b>Скована аорта</b> с възрастта: по-малък комплайънс, по-голямо пулсово налягане (изолирана систолна хипертония).", "<b>Aortic stenosis</b>: the narrowed orifice requires a large LV–aorta gradient; chronically it causes concentric hypertrophy, angina and exertional syncope. <b>Mitral regurgitation</b>: part of the stroke volume flows back into the LA — v wave, dilated LA, normal or high EF with reduced forward output. <b>Systolic failure</b>: low Ees, ESV ↑, EF ≤ 0.40 (0.41–0.49 — mildly reduced). <b>Stiff aorta</b> with age: lower compliance, wider pulse pressure (isolated systolic hypertension).") + "</p>" }
     ],
     key: [
       L("Клапите се отварят и затварят пасивно, по градиента на налягането.", "The valves open and close passively, along the pressure gradient."),
@@ -258,7 +261,7 @@
   const Q = (q, qe, opts, a, expl, ex) => ({ q: L(q, qe), opts: opts.map(o => L(o[0], o[1])), a, expl: L(expl, ex) });
   const tests = [
     Q("Нормалният краен диастолен обем на лявата камера (Guyton) е около:", "The normal end-diastolic volume of the left ventricle (Guyton) is about:", [["40–50 mL", "40–50 mL"], ["70 mL", "70 mL"], ["110–120 mL", "110–120 mL"], ["250 mL", "250 mL"]], 2, "EDV ≈ 110–120 mL, ESV ≈ 40–50 mL, ударният обем ≈ 70 mL.", "EDV ≈ 110–120 mL, ESV ≈ 40–50 mL, stroke volume ≈ 70 mL."),
-    Q("Фракцията на изтласкване при EDV 120 mL и ESV 50 mL е:", "The ejection fraction with EDV 120 mL and ESV 50 mL is:", [["≈0,30", "≈0.30"], ["≈0,42", "≈0.42"], ["≈0,58", "≈0.58"], ["≈0,85", "≈0.85"]], 2, "EF = (EDV − ESV)/EDV = 70/120 ≈ 0,58 (≈60%). Под ≈0,40 е систолна дисфункция.", "EF = (EDV − ESV)/EDV = 70/120 ≈ 0.58 (≈60%). Below ≈0.40 is systolic dysfunction."),
+    Q("Фракцията на изтласкване при EDV 120 mL и ESV 50 mL е:", "The ejection fraction with EDV 120 mL and ESV 50 mL is:", [["≈0,30", "≈0.30"], ["≈0,42", "≈0.42"], ["≈0,58", "≈0.58"], ["≈0,85", "≈0.85"]], 2, "EF = (EDV − ESV)/EDV = 70/120 ≈ 0,58 (≈60%). ≤ 0,40 е систолна недостатъчност с намалена EF (ESC 2021).", "EF = (EDV − ESV)/EDV = 70/120 ≈ 0.58 (≈60%). ≤ 0.40 is heart failure with reduced EF (ESC 2021)."),
     Q("По време на изоволумичното съкращение:", "During isovolumic contraction:", [["Аортната клапа е отворена и обемът намалява", "The aortic valve is open and volume decreases"], ["Двете клапи са затворени, налягането расте, обемът е постоянен", "Both valves are closed, pressure rises, volume is constant"], ["Митралната клапа е отворена", "The mitral valve is open"], ["Налягането в ЛК пада", "LV pressure falls"]], 1, "Митралната клапа вече е затворена, а аортната още не е отворена, защото P_ЛК < P_аорта (≈80 mmHg).", "The mitral valve is already closed and the aortic valve not yet open, because P_LV < P_aorta (≈80 mmHg)."),
     Q("Аортната клапа се отваря, когато налягането в ЛК надмине:", "The aortic valve opens when LV pressure exceeds:", [["≈8 mmHg", "≈8 mmHg"], ["≈80 mmHg (диастолното аортно)", "≈80 mmHg (aortic diastolic)"], ["≈120 mmHg", "≈120 mmHg"], ["≈25 mmHg", "≈25 mmHg"]], 1, "Клапите се движат пасивно по градиента. Аортната се отваря, щом P_ЛК &gt; P_аорта, което в края на диастолата е ≈80 mmHg.", "The valves move passively along the gradient. The aortic valve opens once P_LV &gt; P_aorta, which at the end of diastole is ≈80 mmHg."),
     Q("Митралната клапа се отваря:", "The mitral valve opens:", [["В началото на систолата", "At the start of systole"], ["В края на изоволумичната релаксация, когато P_ЛК падне под P_ЛП", "At the end of isovolumic relaxation, when P_LV falls below P_LA"], ["По време на изтласкването", "During ejection"], ["В края на предсърдната систола", "At the end of atrial systole"]], 1, "Отварянето ѝ бележи началото на бързото пълнене.", "Its opening marks the start of rapid filling."),
@@ -276,7 +279,7 @@
   // ---------- РЕЧНИК ----------
   const G = (t, te, re, d, de) => ({ t: L(t, te), re, d: L(d, de) });
   const gl = [
-    G("Изоволумично съкращение", "Isovolumic contraction", "изоволум[а-я]* съкращени[ея]", "Начало на систолата: двете клапи са затворени, налягането в камерата расте, обемът е постоянен (0,02–0,03 s).", "Start of systole: both valves are closed, ventricular pressure rises and volume is constant (0.02–0.03 s)."),
+    G("Изоволумично съкращение", "Isovolumic contraction", "изоволум[а-я]* съкращени[ея]", "Начало на систолата: двете клапи са затворени, налягането в камерата расте, обемът е постоянен (Guyton: 0,02–0,03 s; в модела ≈ 0,1 s).", "Start of systole: both valves are closed, ventricular pressure rises and volume is constant (Guyton: 0.02–0.03 s; ≈ 0.1 s in the model)."),
     G("Краен диастолен обем (EDV)", "End-diastolic volume (EDV)", "кра[ейн][а-я]*[ -]диастол[а-я]* обем[а-я]*|EDV", "Обемът на камерата в края на пълненето, ≈110–120 mL. Мярка за преднатоварването.", "Ventricular volume at the end of filling, ≈110–120 mL. A measure of preload."),
     G("Краен систолен обем (ESV)", "End-systolic volume (ESV)", "кра[ейн][а-я]*[ -]систол[а-я]* обем[а-я]*|ESV", "Обемът, останал в камерата след изтласкването, ≈40–50 mL.", "The volume left in the ventricle after ejection, ≈40–50 mL."),
     G("Фракция на изтласкване", "Ejection fraction", "фракци[яи]т?[а-я]* на изтласкване|EF\\b", "SV/EDV, нормално ≈0,55–0,65. Индекс на систолната функция.", "SV/EDV, normally ≈0.55–0.65. An index of systolic function."),
