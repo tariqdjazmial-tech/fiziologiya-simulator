@@ -174,6 +174,7 @@
     return [((bs * dtb - m) % T + T) % T, len + 2 * m];
   }
 
+  const FOC_CYC = [[-0.5, 0.65, 0, 8.2, 0.2, 1.42], [-0.6, 0.85, 0, 8.2, -0.1, 1.4], [-0.3, 0.6, 0, 8.2, 0.22, 1.46], [-0.45, 0.9, 0, 8.2, 0.1, 1.4], [-0.3, 0.65, 0, 8.2, 0.25, 1.46]];
   // ---------- cfg за stageViewer ----------
   function mkCfg(H, id, h) {
     return {
@@ -181,7 +182,7 @@
       cam: { r: 8.4, th: 0.12, phi: 1.42, target: [-0.42, 0.75, 0], min: 2.5, max: 22, fov: 38 },
       foc: {
         // целият ляв сектор (кутия ≈3,6 × 4,3 ед.) винаги в кадър с ≥10% отстъп; етапът само леко измества/завърта
-        cyc: [[-0.5, 0.65, 0, 8.2, 0.2, 1.42], [-0.6, 0.85, 0, 8.2, -0.1, 1.4], [-0.3, 0.6, 0, 8.2, 0.22, 1.46], [-0.45, 0.9, 0, 8.2, 0.1, 1.4], [-0.3, 0.65, 0, 8.2, 0.25, 1.46]],
+        cyc: FOC_CYC,
         curves: [[-3.3, 0.72, 0, 8.0, 0.1, 1.45], [-3.3, 0.72, 0, 8.0, 0.1, 1.45], [-3.3, 0.72, 0, 8.0, 0.1, 1.45]]
       },
       legend: LEG,
@@ -610,7 +611,7 @@
     let pmx = 0, vmn = 1e9, vmx = 0; for (let b = 0; b < NB; b++) { pmx = Math.max(pmx, f.P_lv[b], f.P_ao[b]); vmn = Math.min(vmn, f.V_lv[b]); vmx = Math.max(vmx, f.V_lv[b]); }
     const pmax = Math.ceil(Math.max(140, pmx * 1.08) / 20) * 20, vlo = Math.max(0, Math.floor(vmn / 20) * 20 - 10), vhi = Math.ceil(vmx / 20) * 20 + 10;
     const X = b => x0 + b / NB * (x1 - x0), YP = p => yP0 - p / pmax * (yP0 - yP1), YV = v => yV0 - (v - vlo) / (vhi - vlo) * (yV0 - yV1);
-    g.fillStyle = "#e9ecef"; g.font = FONT(k, 12.5, 600); g.textAlign = "left"; g.textBaseline = "alphabetic"; g.fillText(TT(TX.wT), 12 * k, 20 * k);
+    g.fillStyle = "#e9ecef"; g.font = FONT(k, 12.5, 600); g.textAlign = "left"; g.textBaseline = "alphabetic"; if (W / k > 520) g.fillText(TT(TX.wT), 12 * k, 20 * k);
     // фазови ленти (сиви тонове) с номерата 1–7
     let b0 = 0, alt = 0;
     for (let b = 1; b <= NB; b++) { const ph = Math.round(f.phase[b0]); if (b === NB || Math.round(f.phase[b]) !== ph) { g.fillStyle = alt ? "rgba(73,80,87,0.30)" : "rgba(134,142,150,0.13)"; g.fillRect(X(b0), yTop, X(b) - X(b0), yV0 - yTop);
@@ -677,7 +678,7 @@
     const vE = Math.min(vmax * 0.92, V0 + pmax * 0.82 / Ees); g.fillStyle = "#ced4da"; g.fillText("ESPVR", X(vE) + 5 * k, Y(Ees * (vE - V0)) + 4 * k);
     let vD = V0; while (vD < vmax * 0.95 && Ap * (Math.exp(kk * (vD - V0)) - 1) < pmax * 0.3) vD += 2; g.fillStyle = "#adb5bd"; g.textAlign = "right"; g.fillText("EDPVR", X(vD) - 4 * k, Y(Ap * (Math.exp(kk * (vD - V0)) - 1)) - 4 * k);
     g.fillStyle = "#74c0fc"; g.textAlign = "left"; g.fillText("Ea", X(vmx) + 4 * k, Y(10) );
-    if (ctx.ghost.ok) { g.fillStyle = "#adb5bd"; g.font = FONT(k, 10, 600); g.fillText(TT(TX.prev), X(ctx.ghost.V[0]) + 5 * k, Y(ctx.ghost.P[0]) + 14 * k); }
+    if (ctx.ghost.ok) { g.fillStyle = "#adb5bd"; g.font = FONT(k, 10, 600); let gm = 0; for (let b = 1; b < NB; b++) if (ctx.ghost.P[b] > ctx.ghost.P[gm]) gm = b; g.textAlign = "center"; g.fillText(TT(TX.prev), X(ctx.ghost.V[gm]), Y(ctx.ghost.P[gm]) - 8 * k); }
     // SV (ширина) и SW (площ)
     const yb = Y(0) - 10 * k; g.strokeStyle = "#f1f3f5"; g.lineWidth = 1.2 * k; g.beginPath(); g.moveTo(X(vmn), yb); g.lineTo(X(vmx), yb); g.moveTo(X(vmn), yb - 4 * k); g.lineTo(X(vmn), yb + 4 * k); g.moveTo(X(vmx), yb - 4 * k); g.lineTo(X(vmx), yb + 4 * k); g.stroke();
     g.fillStyle = "#f1f3f5"; g.textAlign = "center"; g.font = FONT(k, 10.5, 700); g.fillText(fill(TT(TX.sv), fx(vmx - vmn, 0)), (X(vmn) + X(vmx)) / 2, yb - 7 * k);
@@ -687,7 +688,8 @@
   // ---------- камера за етапите с HUD (сърцето в свободната половина) ----------
   function camFix(ctx, stg) {
     const cv = ctx.G.cv, asp = (cv.clientWidth || 1) / (cv.clientHeight || 1), port = asp < 1.15, key = stg + (port ? "p" : "l");
-    if (ctx.camKey === key) return; ctx.camKey = key; if (stg < 5) return;
+    if (ctx.camKey === key) return; ctx.camKey = key;
+    if (stg < 5) { if (port) { const f = FOC_CYC[stg]; ctx.G.flyTo(f[0], f[1], f[2], f[3] * 0.74, f[4], f[5]); } return; }   // телефон: по-тесен кадър → по-близо, обектът пак е цял
     const r = port ? 9.4 : 8.0, rk = asp < 1.3 ? Math.pow(1.3 / asp, 0.8) : 1, hh = r * rk * Math.tan(19 * Math.PI / 180), hw = hh * asp;
     let x = -0.42, y = 0.75; if (port) y += 0.5 * hh; else x -= 0.5 * hw;
     ctx.G.flyTo(x, y, 0, r, 0.12, 1.44);
