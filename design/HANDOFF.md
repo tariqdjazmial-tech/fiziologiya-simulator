@@ -20,7 +20,7 @@
 - `site/js/sys2.js` — клетъчни сцени „стъпка по стъпка“ (`zCellStg`, `ZK`), храносмилане, обмяна, ендокринна и нервна система, `Z_BOOK`.
 - `site/js/blood-renal.js`, `blood-3d.js`, `resp-renal-3d.js` — кръв, бъбреци, дишане.
 - Нови файлове от тази работа: `bpsim.js` (измерване на АН по Коротков), `barostage.js` (поетапен барорефлекс в 3D), `theory-cv.js` и `theory-rest.js` (допълнителна теория — зареждат се **след** `sys2.js`/`figs2.js`, иначе `Z_BOOK` ги презаписва), `glass.js` (стъклени бутони), `mobile.js` (телефон).
-- Нов `<script>` в `index.html` → добави го и в `build.py`.
+- Нов `<script>`: не пипай index.html — нова или надградена тема отива в `site/js/sections/` (вж. CLAUDE.md). `build.py` вече не работи; източникът е `site/`.
 - 3D модели: `site/m/*.txt` (органи, BodyParts3D), `site/m/mol/*.txt` (белтъци от PDB). Компактен формат base64: `<II nv,nf><6f min,size>`, uint16 позиции, uint32 индекси, по желание uint8 RGB.
 - Инструменти в `design/tools/`: `pdbsurf.py` (молекулна повърхност, ориентирана към мембраната; env `SIG ISO TGT H FLIP BELT`), `instsurf.py` (малки модели за InstancedMesh), `gjsurf.py`, `bp3d.py`, `bp3d_gi.py`. PDB/mmCIF се теглят от files.rcsb.org; BodyParts3D STL — от клонирано репо (`git checkout HEAD -- <файл>`).
 

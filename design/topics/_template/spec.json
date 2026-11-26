@@ -1,0 +1,50 @@
+{
+  "id": "_template",
+  "title": "Пасивна мембрана: RC верига",
+  "upgrade": false,
+  "syllabus": { "sec": "I", "after": "ghk", "t": "Пасивна мембрана: времева константа" },
+  "sources": ["Guyton & Hall, 14 изд., гл. 5", "Boron & Boulpaep, 3 изд., гл. 7"],
+  "state": [
+    { "name": "V", "unit": "mV", "normal": -70, "range": [-120, 60], "desc": "мембранен потенциал" }
+  ],
+  "derived": [
+    { "name": "tau", "unit": "ms", "expr": "Rm*Cm", "desc": "времева константа" }
+  ],
+  "params": [
+    { "name": "Vrest", "unit": "mV", "normal": -70, "min": -90, "max": -50, "src": "Guyton гл. 5" },
+    { "name": "Rm", "unit": "MΩ", "normal": 20, "min": 5, "max": 100, "src": "учебна стойност за малка клетка" },
+    { "name": "Cm", "unit": "nF", "normal": 0.5, "min": 0.1, "max": 2, "src": "1 µF/cm² × площ" },
+    { "name": "I", "unit": "nA", "normal": 0, "min": -1, "max": 1, "src": "стимул" }
+  ],
+  "equations": [
+    { "name": "мембрана", "expr": "dV/dt = (Vrest − V)/(Rm·Cm) + I/Cm", "src": "Boron гл. 7", "note": "ms, mV, nA, nF, MΩ" }
+  ],
+  "run": { "dt": 0.05, "t": 200, "steady": true, "tol": 1e-4 },
+  "presets": [
+    { "key": "norm", "label": "Покой", "set": {} },
+    { "key": "dep", "label": "Деполяризиращ ток 0,5 nA", "set": { "I": 0.5 } }
+  ],
+  "cases": [
+    { "name": "покой", "preset": "norm", "expect": { "V": [-70.5, -69.5], "tau": [9.9, 10.1] } },
+    { "name": "ток 0,5 nA → ΔV = I·Rm = +10 mV", "preset": "dep", "expect": { "V": [-60.5, -59.5] } },
+    { "name": "Rm ×2 → τ ×2", "set": { "Rm": 40 }, "expect": { "tau": [19.9, 20.1] } }
+  ],
+  "stages": [
+    { "t": "Покой: зарядите по мембраната", "d": "…", "visual": "катиони отвън, аниони отвътре; плътност ∝ |V|", "vars": ["V"] },
+    { "t": "Токът зарежда кондензатора", "d": "…", "visual": "частици през електрода; Vm цвят по vcolor", "vars": ["V", "I"] },
+    { "t": "Ново равновесие: V = Vrest + I·Rm", "d": "…", "visual": "поток през каналите = поток от електрода", "vars": ["V"] }
+  ],
+  "visual_map": [
+    { "var": "V", "to": "цвят на мембраната (vcolor) и брой заряди по двете страни" },
+    { "var": "I", "to": "скорост на частиците от електрода" }
+  ],
+  "questions": [
+    { "q": "…", "opts": ["…", "…", "…", "…"], "a": 1, "expl": "…" }
+  ],
+  "experiments": [
+    { "q": "…", "opts": ["…", "…", "…"], "a": 0, "set": { "pre": "dep" }, "expl": "…" }
+  ],
+  "terms": [
+    { "t": "Времева константа", "re": "времев[а-я]* константа", "d": "…" }
+  ]
+}
