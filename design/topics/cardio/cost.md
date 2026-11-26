@@ -9,14 +9,14 @@
 ## Codex
 | # | Стъпка | Команда | Бележка |
 |---|---|---|---|
-| — | 0 | `npm i -g @openai/codex` (v0.172.0), `codex login --device-auth` | Мрежата блокираше `auth.openai.com`. Добавени са хостове в средата PhysioNova: auth.openai.com, chatgpt.com, api.openai.com |
+| — | 0 | `npm i -g @openai/codex` (v0.172.0), `codex login --device-auth` | Мрежата блокираше `auth.openai.com`. Добавени са хостове в средата PhysioNova: auth.openai.com, chatgpt.com, api.openai.com. Изисква и „device code login“ в настройките за сигурност на ChatGPT. 3 опита за код; входът мина (`Logged in using ChatGPT`) |
 
 Токените на Codex не се броят в Claude.
 
 ## Главна сесия
 | Стъпка | Ходове | Оценка на контекста | Бележка |
 |---|---|---|---|
-| 0 | ~6 | ~45 хил. (О; почти всичко е системният промпт и списъците с инструменти) | вход в Codex |
+| 0 | ~14 | ~55 хил. (О; почти всичко е системният промпт и списъците с инструменти) | вход в Codex |
 
 ## Сума
 (попълва се в края)
