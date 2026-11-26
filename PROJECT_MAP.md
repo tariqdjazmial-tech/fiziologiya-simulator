@@ -6,7 +6,7 @@
 ## Обобщение
 
 - Теми в SYLLABUS: **46**, готови: **46**, раздели: **12**
-- Въпроси (TESTS, по браузъра): **469**; експерименти: **251**; термини в речника (GL): **476**; превод en.js: **17435** записа
+- Въпроси (TESTS, по браузъра): **471**; експерименти: **250**; термини в речника (GL): **484**; превод en.js: **17709** записа
 - Проверка в браузъра: без грешки в конзолата при зареждане
 - index.html: 1.6 MB, 7793 реда; код ≈ 1.4 MB (≈432.3k токена); останалото са шрифтове (редове 9–12) и base64 3D данни.
 
@@ -62,6 +62,8 @@
 | 44 | 7791 | `js/mobile.js` | 4 KB | телефони |
 | 45 | 7791 | `js/glass.js` | 4 KB | стъклени бутони |
 | 46 | 7791 | `js/sections/index.js` | 3 KB | ЗАРЕЖДАЧ: js/sections/*.js по списъка PHYS_SECTIONS, след всичко останало; zSection, SEC3D |
+| 47 | (sections) | `js/sections/cardio-3d.js` | 77 KB |  |
+| 48 | (sections) | `js/sections/cardio.js` | 53 KB |  |
 
 ## Теми
 
@@ -103,7 +105,7 @@
 | id | Тема | Изглед (файл:редове, размер) | Етапи | 3D | Тест | Експ. | Теория |
 |---|---|---|---|---|---|---|---|
 | `heart3d` | Сърце: 3D модел и движение | `viewHeartSwitch` index.html:2449–2449 (107 B, ≈0.0k)<br><sub>рег.: index.html:7716 (map)</sub> | — | make3D, mk3DView, MarchingCubes, GLB/вградени данни | 11 · index.html:2313–2321 `TESTS_HA` | 8 · index.html:2307–2312 `EXP_HA.concat(EXP_HR)` | index.html:7113–7135 |
-| `cardio` | Сърдечен цикъл и PV примка | `viewCardio` index.html:610–662 (7 KB, ≈2.0k)<br><sub>рег.: index.html:7716 (map)</sub> | — | THREE директно | 12 · index.html:5444–5456 | 6 · index.html:596–609 `EXP_CARDIO` | index.html:7136–7161 |
+| `cardio` | Сърдечен цикъл и PV примка | `viewCardio` index.html:610–662 (7 KB, ≈2.0k)<br><sub>рег.: index.html:7716 (map)</sub> | — | THREE директно | 14 · index.html:5444–5456 | 5 · index.html:596–609 `EXP_CARDIO` | index.html:7136–7161 |
 | `cardap` | Акционни потенциали на кардиомиоцити, автоматия | `viewCardiacAP` index.html:3012–3179 (24 KB, ≈6.9k)<br>+ обвивка js/sys2.js:2349 (+STG_MYOCH)<br><sub>рег.: index.html:7716 (map)</sub> | `STG_MYOCH` js/sys2.js:1279–1308 | stageViewer (етапи), make3D, mk3DView, MK.*, R3.*, MarchingCubes, GLB/вградени данни | 12 · index.html:5667–5680 `TESTS_CAP` | 9 · index.html:3001–3011 `EXP_CAP` | index.html:7162–7183 |
 | `ecg` | ЕКГ: 12 отвеждания, ритми и патологии | `viewECG` index.html:2837–2942 (16 KB, ≈4.6k)<br><sub>рег.: index.html:7716 (map)</sub> | — | make3D, mk3DView, R3.*, MarchingCubes, GLB/вградени данни | 12 · index.html:2823–2836 `TESTS_ECG` | 7 · index.html:2814–2822 `EXP_ECG` | index.html:7184–7208 |
 | `hemo` | Хемодинамика: Поазьой, съпротивление, Guyton | `viewHemo` index.html:3299–3467 (28 KB, ≈8.1k)<br><sub>рег.: index.html:7716 (map)</sub> | — | make3D, mk3DView, R3.*, MarchingCubes, GLB/вградени данни | 12 · index.html:5708–5721 `TESTS_HEMO` | 9 · index.html:3288–3298 `EXP_HEMO` | index.html:7209–7234 |
