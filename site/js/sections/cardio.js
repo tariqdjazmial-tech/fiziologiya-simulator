@@ -8,7 +8,7 @@
 
   // ---------- МОДЕЛ (чист JS, без DOM) ----------
   // нормиран еластанс на ЛК (двоен Hill; Stergiopulos 1996), Tmax = 0,2 + 0,15·T s
-  function act(tc, T) { const tn = tc / (0.2 + 0.15 * T), a = Math.pow(tn / 0.7, 1.9), b = Math.pow(tn / 1.17, 21.9); return (a / (1 + a)) / (1 + b); }
+  function act(tc, T) { const tn = Math.max(0, tc) / (0.2 + 0.15 * T), a = Math.pow(tn / 0.7, 1.9), b = Math.pow(tn / 1.17, 21.9); return (a / (1 + a)) / (1 + b); }
   const P0 = {
     HR: 72,        // /min
     Pv: 9.5,       // mmHg, налягане в белодробните вени (преднатоварване)
@@ -55,6 +55,7 @@
     params0: () => Object.assign({}, P0),
     init(p) { const s = { tc: 0, V_lv: 120, V_la: 50, P_ao: 85, tMO: 0, mv0: 1, tAO: 0, av0: 0, ej: 0, red: 0, em: 1, tpk: 0.3, HR: 0, c: fresh(), sum: {} }; norm(s, p); return s; },
     step(s, p, dt) {
+      if (!(dt > 0)) return s;
       if (s.HR !== p.HR) norm(s, p);
       const i = inst(s, p, W), c = s.c, dV = dt * (i.Q_mv - i.Q_av);
       if (s.V_lv > c.Vmax) c.Vmax = s.V_lv; if (s.V_lv < c.Vmin) c.Vmin = s.V_lv;
@@ -199,11 +200,12 @@
     const full = (p) => { const pr = PRE[p.pre] || PRE.norm, o = S.full && S.full.__k === p.pre ? S.full : Object.assign(M.params0(), pr.set, { __k: p.pre }); for (const d of SL) o[d.k] = p[d.k]; return (S.full = o); };
     const cfg = {
       key: ID, h2: L("Сърдечен цикъл и PV примка", "Cardiac cycle and PV loop"),
-      lead: L("Лявата камера, предсърдието и аортата през един удар: налягания, обем, клапи и фази (Guyton, гл. 9). Времето е забавено два пъти. Плъзгачите менят преднатоварването, контрактилитета и следнатоварването.", "The left ventricle, atrium and aorta through one beat: pressures, volume, valves and phases (Guyton, ch. 9). Time is slowed down twofold. The sliders change preload, contractility and afterload."),
+      lead: L("Лявата камера, предсърдието и аортата през един удар: налягания, обем, клапи и фази (Guyton, гл. 9). Графиките вървят два пъти по-бавно, а етапите в 3D — още по-бавно. Плъзгачите менят преднатоварването, контрактилитета и следнатоварването.", "The left ventricle, atrium and aorta through one beat: pressures, volume, valves and phases (Guyton, ch. 9). The graphs run at half speed and the 3D stages even slower. The sliders change preload, contractility and afterload."),
       ch: 340, cw: 640, speed: 0.5, dtmax: DTM,
       sl: SL, pre: PRE, exp,
       init: (p) => { bufReset(); const s = M.init(full(p)); S.s = s; tsim = 0; nextRec = 0; return s; },
       step(s, p, dt) {
+        if (!(dt > 0)) return; // първият кадър на rLoop понякога дава dt ≤ 0
         const P = full(p); S.p = P; M.step(s, P, dt); tsim += dt;
         if (tsim >= nextRec) { nextRec = tsim + 0.003; bufPush(tsim, s, inst(s, P, W)); }
       },

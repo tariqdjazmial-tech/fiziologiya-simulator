@@ -9,7 +9,7 @@
      js/sections/<id>.js:     zSection(id,{sec,t,after}) (само за НОВА тема) + zRegister(id,{name,view,book,tests,exp,gl,stage,en,enRe})
    За тестове: window.__SECTIONS_EXTRA=[…] зарежда допълнителни файлове; window.__sectionsReady (Promise) се изпълнява, когато всички файлове са заредени. */
 window.PHYS_SECTIONS = [
-  // "cardio-3d", "cardio",
+  "cardio-3d", "cardio",
 ].concat(window.__SECTIONS_EXTRA || []); // __SECTIONS_EXTRA: само за тест (addInitScript), преди темата да се включи за всички
 (function () {
   "use strict";

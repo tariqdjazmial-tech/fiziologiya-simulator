@@ -62,6 +62,7 @@
     L("изоволумична релаксация", "isovolumic relaxation"), L("бързо пълнене", "rapid filling"), L("диастаза", "diastasis"), L("предсърдна систола", "atrial systole")];
   const LEG = [[C.red, L("кръв, P ЛК", "blood, LV P")], [C.pink, L("регургитация", "regurgitation")], [C.vio, L("ЛП, P ЛП", "LA, LA P"), "box"], [C.blue, L("аорта, P ао", "aorta, Ao P"), "box"],
     [C.teal, L("обем ЛК (контур)", "LV volume (contour)")], [C.gray, L("клапи, ESPVR", "valves, ESPVR"), "box"], [C.org, L("бел. вени, EDPVR", "pulm. veins, EDPVR"), "box"]];
+  LEG.forEach(([c, bg, sh]) => { const i = `<i class="${sh || "dot"}" style="background:${c}"></i>`; EN[i + bg] = i + EN[bg]; });   // i18n превежда целия <span>
   // етапите — от spec.json (t, short, badge, d)
   const SD = [
     ["Бързо и бавно пълнене", "Rapid and slow filling", "Пълнене", "Filling", "1",
@@ -187,7 +188,7 @@
   function build(G, T, ctx, H) {
     H.ctx = ctx; ctx.H = H; if (window.SEC3D && SEC3D[ID]) SEC3D[ID]._ctx = ctx; ctx.get = () => (H.get ? H.get() : defGet());
     (window.__cleanups = window.__cleanups || []).push(() => dispose(ctx));
-    if (window.MK) { try { MK.usedView = typeof curView !== "undefined" ? curView : location.hash; } catch (e) { /* без превключвател */ } }
+    if (typeof MK !== "undefined") { try { MK.usedView = typeof curView !== "undefined" ? curView : location.hash; } catch (e) { /* без превключвател */ } }
     const low = LOW(), sc = G.scene, V3 = a => new T.Vector3(a[0], a[1], a[2]);
     G.ren.localClippingEnabled = true; G.ren.toneMappingExposure = 1.08;
     ctx.low = low; ctx.rec = mkBuf(); ctx.play = mkBuf(); ctx.ghost = { V: new Float32Array(NB), P: new Float32Array(NB), ok: false }; ctx.lastTc = -1; ctx.sig = null;
@@ -213,10 +214,10 @@
     const tissue = (hex, o) => { const m = new T.MeshPhysicalMaterial(Object.assign({ color: LIN(T, hex), roughness: 0.52, metalness: 0, clearcoat: 0.35, clearcoatRoughness: 0.4, side: T.DoubleSide, clippingPlanes: [ctx.clip] }, o || {}));
       m.onBeforeCompile = s => { s.fragmentShader = s.fragmentShader.replace("#include <dithering_fragment>", "#include <dithering_fragment>\n if(!gl_FrontFacing) gl_FragColor.rgb *= 0.5;"); }; return m; };
     M.lv = tissue(C.red); M.lv.color.multiplyScalar(0.62); M.lv.emissive = LIN(T, C.red); M.lv.emissiveIntensity = 0.04;
-    M.la = tissue(C.vio); M.la.emissive = LIN(T, C.vio); M.la.emissiveIntensity = 0.03;
+    M.la = tissue(C.vio); M.la.color.multiplyScalar(0.78); M.la.emissive = LIN(T, C.vio); M.la.emissiveIntensity = 0.03;
     M.ao = tissue(C.blue, { roughness: 0.45 }); M.pv = tissue(C.org);
     M.valve = new T.MeshPhysicalMaterial({ color: LIN(T, C.gray), roughness: 0.6, clearcoat: 0.2, side: T.DoubleSide, clippingPlanes: [ctx.clip], transparent: true, opacity: 0.96 });
-    M.valve.color.multiplyScalar(1.35);
+    M.valve.color.multiplyScalar(1.7); M.valve.emissive = LIN(T, C.gray); M.valve.emissiveIntensity = 0.25;
     M.chord = new T.LineBasicMaterial({ color: LIN(T, C.gray), clippingPlanes: [ctx.clip] });
     M.blood = new T.MeshStandardMaterial({ color: LIN(T, C.dark), roughness: 0.4, transparent: true, opacity: 0.3, depthWrite: false, side: T.DoubleSide, clippingPlanes: [ctx.clip] });
     M.cont = new T.MeshBasicMaterial({ color: LIN(T, C.teal) });
@@ -231,7 +232,7 @@
     buildHUD(ctx, T, G);
     // етикети (предварително заделени двойки)
     ctx.lp = []; for (let i = 0; i < 6; i++) ctx.lp.push(["", new T.Vector3()]); ctx.labOut = [];
-    const REAL = !(window.MK && MK.real === false);
+    const REAL = !(typeof MK !== "undefined" && MK.real === false);
     if (REAL) loadHRA(ctx, T, sc).catch(e => { if (!ctx.dead) console.warn("cardio-3d: HRA модел — остава опростеният", e && e.message); });
   }
 
@@ -375,7 +376,7 @@
       const Lf = ph > -1.13 && ph < 1.13 ? mA : mP, a = Lf.g.attributes.position.array; let f = (ph - Lf.a0) / (Lf.a1 - Lf.a0); f = clamp(Math.round(f * Lf.nu), 0, Lf.nu);
       const o = (f * (Lf.ns + 1) + Lf.ns) * 3, x = a[o], y = a[o + 1], z = a[o + 2];
       const s = Math.sin(ph), d0 = ctx.papD[0], d1 = ctx.papD[1], pick = ((d0.x - mvD.x) * e2M.x + (d0.y - mvD.y) * e2M.y + (d0.z - mvD.z) * e2M.z) * s >= ((d1.x - mvD.x) * e2M.x + (d1.y - mvD.y) * e2M.y + (d1.z - mvD.z) * e2M.z) * s ? d0 : d1;
-      ca.set([x, y, z, pick.x, pick.y, pick.z], k * 6);
+      const q = k * 6; ca[q] = x; ca[q + 1] = y; ca[q + 2] = z; ca[q + 3] = pick.x; ca[q + 4] = pick.y; ca[q + 5] = pick.z;
     });
     ctx.chord.geometry.attributes.position.needsUpdate = true;
   }
@@ -416,7 +417,7 @@
   function spawnPool(ctx, i, kind) { const P = ctx.P; P.k[i] = kind; P.out[i] = 0; P.pk[i] = 0;
     if (kind === K.LV) { P.a[i] = 0.08 + 0.85 * rnd(ctx); P.b[i] = Math.sqrt(rnd(ctx)); P.c[i] = 0.15 + 2.84 * rnd(ctx); }
     else if (kind === K.LA) { P.a[i] = 0.05 + 0.85 * rnd(ctx); P.b[i] = Math.sqrt(rnd(ctx)); P.c[i] = 0.15 + 2.84 * rnd(ctx); }
-    else { P.a[i] = 0.04 + 0.7 * rnd(ctx); P.b[i] = Math.sqrt(rnd(ctx)); P.c[i] = 6.283 * rnd(ctx); } }
+    else { P.a[i] = 0.04 + 0.5 * rnd(ctx); P.b[i] = Math.sqrt(rnd(ctx)); P.c[i] = 6.283 * rnd(ctx); } }
   function freeSlot(ctx) { const P = ctx.P; for (let i = 0; i < P.n; i++) if (P.k[i] === K.FREE) return i; return -1; }
   function snapParticles(ctx, S) {
     const P = ctx.P; P.k.fill(0);
@@ -449,7 +450,7 @@
       else if (d < -2) for (let k = 0; k < Math.min(-d - 2, 2); k++) { const i = pick(ctx, K.LV, true); if (i >= 0) P.out[i] = 1; }
     }
     d = nLA - cLA;
-    if (d > 0) for (let k = 0; k < Math.min(d, 3); k++) { const i = freeSlot(ctx); if (i < 0) break; P.k[i] = K.PVI; P.vi[i] = (ctx.frame + k) % 4; P.t[i] = 0; P.sc[i] = 0; P.out[i] = 0; P.pk[i] = 0; P.da[i] = 0.4 + 0.55 * rnd(ctx); P.db[i] = Math.sqrt(rnd(ctx)); P.dc[i] = 0.2 + 2.7 * rnd(ctx); }
+    if (d > 0) for (let k = 0; k < Math.min(d, 3); k++) { const i = freeSlot(ctx); if (i < 0) break; P.k[i] = K.PVI; P.vi[i] = 2 + ((ctx.frame + k) & 1); /* вените зад разреза */ P.t[i] = 0; P.sc[i] = 0; P.out[i] = 0; P.pk[i] = 0; P.da[i] = 0.4 + 0.55 * rnd(ctx); P.db[i] = Math.sqrt(rnd(ctx)); P.dc[i] = 0.2 + 2.7 * rnd(ctx); }
     else if (d < -2) { const i = pick(ctx, K.LA, false); if (i >= 0) P.out[i] = 1; }
     d = nAO - cAO;
     if (d < 0) for (let k = 0; k < Math.min(-d, 3); k++) { const i = pick(ctx, K.AO, true); if (i < 0) break; P.k[i] = K.AOX; }
@@ -467,8 +468,8 @@
       else if (k === K.LA) { P.a[i] = clamp(P.a[i] + Math.sin(P.ph[i] * 1.3) * sim * 0.1, 0.03, 0.95); P.c[i] = clamp(P.c[i] + Math.cos(P.ph[i]) * sim * 0.4, 0.1, 3.04); posLA(ctx, P.a[i], P.b[i], P.c[i], o); }
       else if (k === K.AO || k === K.AOX) {
         P.a[i] += sim * (0.12 + Math.max(0, Qa) / 900) * (k === K.AOX ? 3 : 1);
-        if (k === K.AO && P.a[i] > 0.8) P.a[i] = 0.8;
-        if (k === K.AOX && P.a[i] >= 1) P.out[i] = 1;
+        if (k === K.AO && P.a[i] > 0.55) P.a[i] = 0.55;
+        if (k === K.AOX && P.a[i] >= 0.72) P.out[i] = 1;
         posAO(ctx, P.a[i], P.b[i], P.c[i], o);
       } else {
         // струя: квадратична Безие S → (през отвора M) → D
@@ -615,9 +616,10 @@
     const line = (arr, Y, col, w) => { g.strokeStyle = col; g.lineWidth = w * k; g.lineJoin = "round"; g.beginPath(); for (let b = 0; b < NB; b++) { const x = X(b), y = Y(arr[b]); b ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke(); };
     line(f.P_la, YP, C.vio, 2); line(f.P_ao, YP, C.blue, 2.2); line(f.P_lv, YP, C.red, 2.4); line(f.V_lv, YV, C.teal, 2.2);
     // клапни събития: MC, AO, AC, MO
-    g.font = FONT(k, 9.5, 700); g.textAlign = "center";
+    g.font = FONT(k, 9.5, 700); g.textAlign = "center"; let done = "";
     for (let b = 0; b < NB; b++) { const pb = (b + NB - 1) % NB, mo = f.mv_open[b] > 0.5, mo0 = f.mv_open[pb] > 0.5, ao = f.av_open[b] > 0.5, ao0 = f.av_open[pb] > 0.5;
-      const ev = mo && !mo0 ? "MO" : !mo && mo0 ? "MC" : ao && !ao0 ? "AO" : !ao && ao0 ? "AC" : null; if (!ev) continue;
+      let ev = mo && !mo0 ? "MO" : !mo && mo0 ? "MC" : ao && !ao0 ? "AO" : !ao && ao0 ? "AC" : null; if (!ev) continue;
+      const fld = ev[0] === "M" ? f.mv_open : f.av_open, nv = ev[1] === "O" ? 1 : 0; for (let q = 1; q <= 4; q++) if ((fld[(b + q) % NB] > 0.5 ? 1 : 0) !== nv) { ev = null; break; } if (!ev || done.indexOf(ev) >= 0) continue; done += ev;   // по едно събитие на цикъл, без трептене около прехода
       const x = X(b), y = YP(ev[0] === "M" ? f.P_la[b] : f.P_ao[b]); g.fillStyle = "#f1f3f5"; g.beginPath(); g.arc(x, y, 3.2 * k, 0, 7); g.fill(); g.fillText(ev, x, y - 7 * k); }
     // надписи на кривите
     const lab = (t, y, col) => { g.fillStyle = col; g.font = FONT(k, 10.5, 700); g.textAlign = "left"; g.fillText(t, x1 + 4 * k, y); };
