@@ -6,7 +6,9 @@
   "scripts": {
     "cap:sync": "cap sync",
     "android": "cap sync android && cap open android",
-    "ios": "cap sync ios && cap open ios"
+    "ios": "cap sync ios && cap open ios",
+    "map": "node design/tools/map/runtime-probe.cjs design/tools/map/.runtime.json && node design/tools/map/gen-map.mjs --runtime design/tools/map/.runtime.json",
+    "map:static": "node design/tools/map/gen-map.mjs"
   },
   "dependencies": {
     "@capacitor/android": "8.6.2",
