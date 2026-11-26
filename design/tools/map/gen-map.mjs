@@ -100,9 +100,14 @@ for (const f of CODE_FILES) {
   if (isData(f)) continue;
   const t = SRC[f];
   const re = /(?:^|[\n;{}])\s*(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(|(?:^|[\n;])\s*(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?=[{\[(]|function|[\w$]+\s*=>|[\w$.]+\s*\()/g;
+  // области на IIFE на най-горно ниво: (function(){…})() / (()=>{…})() / {…} — имената вътре са локални
+  const LOC = []; { const rI = /(?:^|\n)\s*(?:\(\s*(?:function\s*\([^)]*\)|\([^)]*\)\s*=>)\s*\{|\{(?=\s*(?:const|let|function)\b))/g; let q;
+    while ((q = rI.exec(t))) { const b = q.index + q[0].lastIndexOf("{"); const e = matchClose(t, b); if (e > b) { LOC.push([b, e]); rI.lastIndex = e; } } }
+  const local = i => LOC.some(([b, e]) => i > b && i < e);
   let m;
   while ((m = re.exec(t))) {
     const name = m[1] || m[2]; const s = m.index + m[0].indexOf(name);
+    if (local(s) || name.length < 2) continue;
     let e;
     if (m[1]) { const p = t.indexOf("(", s); const pe = matchClose(t, p); const b = t.indexOf("{", pe); e = matchClose(t, b); }
     else e = exprEnd(t, re.lastIndex);
@@ -111,6 +116,10 @@ for (const f of CODE_FILES) {
     const body = t.slice(s, e + 1);
     DEF[name] = { name, file: f, start: s, end: e, l0: lineAt(f, s), l1: lineAt(f, e), bytes: Buffer.byteLength(body), body };
   }
+  // window.X = … (глобално, дори вътре в IIFE)
+  const rW = /(?<![\w.])window\.([A-Za-z_$][\w$]{1,})\s*=\s*(?!=)(?=function|\(|[\w$]+\s*=>|\{)/g; let w;
+  while ((w = rW.exec(t))) { const name = w[1]; if (DEF[name]) continue; const e = exprEnd(t, rW.lastIndex); if (e < 0) continue; const body = t.slice(w.index, e + 1);
+    DEF[name] = { name, file: f, start: w.index, end: e, l0: lineAt(f, w.index), l1: lineAt(f, e), bytes: Buffer.byteLength(body), body }; }
 }
 
 // ---------- регистрации във VIEWS (по реда на зареждане) ----------
