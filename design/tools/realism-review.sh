@@ -12,13 +12,13 @@ CODEX="$(command -v codex || true)"
 [ -z "$CODEX" ] && { echo "CODEX_MISSING"; exit 3; }
 "$CODEX" login status >/dev/null 2>&1 || { echo "CODEX_NOT_LOGGED_IN"; exit 4; }
 mkdir -p "$OUT"
-IMGS=(-i "$REF/good_ecg_heart.png" -i "$REF/bad_cardio_v1.png")
+IMGS=(-i "$REF/good_ecg_heart.png" -i "$REF/bad_cardio_v1.png" -i "$REF/target_organs_infinytech.png")
 for f in "$REF"/good_*.png; do [ "$f" != "$REF/good_ecg_heart.png" ] && IMGS+=(-i "$f"); done
 NAMES=""; for f in "$@"; do IMGS+=(-i "$f"); NAMES="$NAMES $(basename "$f")"; done
 {
 cat <<EOF
 You are a senior 3D medical-visualization art director. Judge REALISM of WebGL scenes of a physiology teaching app.
-Attached images, in order: (1) GOOD reference good_ecg_heart.png, (2) BAD reference bad_cardio_v1.png, then any other good_*.png references, then the CANDIDATE screenshots:${NAMES}.
+Attached images, in order: (1) GOOD reference good_ecg_heart.png (score 7 = minimum pass), (2) BAD reference bad_cardio_v1.png, (3) TARGET target_organs_infinytech.png (score 10), then any other good_*.png references, then the CANDIDATE screenshots:${NAMES}.
 Use this rubric (Bulgarian, authoritative):
 
 EOF
